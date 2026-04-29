@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router';
+import { Toaster } from 'sonner';
 import { AuthProvider, useAuth } from '@/features/auth/context/AuthContext';
 import { DataProvider } from '@/shared/contexts/DataContext';
 import Login from '@/features/auth/pages/Login';
@@ -9,43 +10,54 @@ import ServicesPage from '@/features/services/pages/ServicesPage';
 import SalesPage from '@/features/sales/pages/SalesPage';
 import ReportsPage from '@/features/reports/pages/ReportsPage';
 import UsersPage from '@/features/users/pages/UsersPage';
-import type { View } from '@/shared/types';
+import NotFound from '@/features/common/NotFound';
+import type { Role } from '@/shared/types';
 
-function Dashboard() {
-  const [view, setView] = useState<View>('overview');
-
-  const renderPage = () => {
-    switch (view) {
-      case 'overview': return <Overview />;
-      case 'inventory': return <InventoryPage />;
-      case 'services': return <ServicesPage />;
-      case 'sales': return <SalesPage />;
-      case 'reports': return <ReportsPage />;
-      case 'users': return <UsersPage />;
-      default: return <Overview />;
-    }
-  };
-
-  return (
-    <DashboardLayout currentView={view} onNavigate={setView}>
-      {renderPage()}
-    </DashboardLayout>
-  );
+function RequireAuth() {
+  const { user } = useAuth();
+  const location = useLocation();
+  if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
+  return <Outlet />;
 }
 
-function AppRouter() {
+function RequireRole({ role }: { role: Role }) {
   const { user } = useAuth();
-  if (!user) return <Login />;
-  return <Dashboard />;
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role !== role) return <Navigate to="/" replace />;
+  return <Outlet />;
+}
+
+function LoginRoute() {
+  const { user } = useAuth();
+  if (user) return <Navigate to="/" replace />;
+  return <Login />;
 }
 
 function App() {
   return (
-    <AuthProvider>
-      <DataProvider>
-        <AppRouter />
-      </DataProvider>
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <DataProvider>
+          <Toaster position="top-right" richColors closeButton />
+          <Routes>
+            <Route path="/login" element={<LoginRoute />} />
+            <Route element={<RequireAuth />}>
+              <Route element={<DashboardLayout />}>
+                <Route index element={<Overview />} />
+                <Route path="inventory" element={<InventoryPage />} />
+                <Route path="services" element={<ServicesPage />} />
+                <Route path="sales" element={<SalesPage />} />
+                <Route path="reports" element={<ReportsPage />} />
+                <Route element={<RequireRole role="Admin" />}>
+                  <Route path="users" element={<UsersPage />} />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Route>
+            </Route>
+          </Routes>
+        </DataProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 

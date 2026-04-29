@@ -1,3 +1,5 @@
+export type Role = 'Admin' | 'Staff';
+
 export interface Part {
   id: string;
   name: string;
@@ -7,6 +9,12 @@ export interface Part {
   price: number;
   barcode: string;
   createdAt: string;
+}
+
+export interface ServiceType {
+  id: string;
+  name: string;
+  defaultLaborCost: number;
 }
 
 export interface ServiceRecord {
@@ -37,9 +45,25 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'Admin' | 'Staff';
+  role: Role;
   status: 'Active' | 'Inactive';
   lastActive: string;
+}
+
+export interface StoredUser extends User {
+  passwordHash: string;
+}
+
+export interface StockMovement {
+  id: string;
+  partId: string;
+  partName: string;
+  type: 'in' | 'out' | 'adjust';
+  qty: number;
+  reason: string;
+  userId: string;
+  userName: string;
+  timestamp: string;
 }
 
 export interface ActivityLog {

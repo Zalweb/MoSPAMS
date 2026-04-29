@@ -1,13 +1,19 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Plus, Trash2, Banknote, Smartphone, Receipt, Search } from 'lucide-react';
+import { Plus, Trash2, Banknote, Smartphone, Receipt, Search, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useData } from '@/shared/contexts/DataContext';
+import { inPeriod, type Period } from '@/shared/lib/period';
+import type { Transaction } from '@/shared/types';
 
 interface CartItem { partId: string; name: string; price: number; quantity: number }
+
+type PaymentFilter = 'All' | 'Cash' | 'GCash';
+
+const PERIOD_LABEL: Record<Period | 'all', string> = { daily: 'Today', weekly: 'This week', monthly: 'This month', yearly: 'This year', all: 'All time' };
 
 export default function Sales() {
   const { transactions, parts, services, addTransaction } = useData();
@@ -19,17 +25,26 @@ export default function Sales() {
   const [selectedService, setSelectedService] = useState('');
   const [serviceLabor, setServiceLabor] = useState(0);
 
-  const today = new Date().toISOString().split('T')[0];
-  const todaySales = transactions.filter(t => t.createdAt.startsWith(today));
-  const todayRevenue = todaySales.reduce((s, t) => s + t.total, 0);
-  const gcashTotal = todaySales.filter(t => t.paymentMethod === 'GCash').reduce((s, t) => s + t.total, 0);
-  const cashTotal = todaySales.filter(t => t.paymentMethod === 'Cash').reduce((s, t) => s + t.total, 0);
+  const [period, setPeriod] = useState<Period | 'all'>('daily');
+  const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>('All');
+
+  const filteredTx = useMemo(() => {
+    return transactions
+      .filter(t => period === 'all' || inPeriod(t.createdAt, period))
+      .filter(t => paymentFilter === 'All' || t.paymentMethod === paymentFilter);
+  }, [transactions, period, paymentFilter]);
+
+  const totalRevenue = filteredTx.reduce((s, t) => s + t.total, 0);
+  const cashTotal = filteredTx.filter(t => t.paymentMethod === 'Cash').reduce((s, t) => s + t.total, 0);
+  const gcashTotal = filteredTx.filter(t => t.paymentMethod === 'GCash').reduce((s, t) => s + t.total, 0);
 
   const pendingServices = services.filter(s => s.status !== 'Completed');
 
-  const addToCart = (part: typeof parts[0]) => {
+  const addToCart = (part: typeof parts[number]) => {
     const existing = cart.find(c => c.partId === part.id);
-    existing ? setCart(cart.map(c => c.partId === part.id ? { ...c, quantity: c.quantity + 1 } : c)) : setCart([...cart, { partId: part.id, name: part.name, price: part.price, quantity: 1 }]);
+    setCart(existing
+      ? cart.map(c => c.partId === part.id ? { ...c, quantity: c.quantity + 1 } : c)
+      : [...cart, { partId: part.id, name: part.name, price: part.price, quantity: 1 }]);
   };
   const removeFromCart = (partId: string) => setCart(cart.filter(c => c.partId !== partId));
   const updateQty = (partId: string, qty: number) => qty <= 0 ? removeFromCart(partId) : setCart(cart.map(c => c.partId === partId ? { ...c, quantity: qty } : c));
@@ -50,26 +65,40 @@ export default function Sales() {
     setModalOpen(false); setCart([]); setSelectedService(''); setServiceLabor(0); setPaymentMethod('Cash');
   };
 
-  const filteredParts = parts.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) && p.stock > 0);
-  const selectedTx = transactions.find(t => t.id === receiptTx);
+  const filteredParts = parts.filter(p => (p.name.toLowerCase().includes(search.toLowerCase()) || p.barcode.includes(search)) && p.stock > 0);
+  const selectedTx: Transaction | undefined = transactions.find(t => t.id === receiptTx);
 
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-7">
         <div>
           <h2 className="text-[22px] font-bold text-[#1C1917] tracking-tight">Sales</h2>
-          <p className="text-[13px] text-[#D6D3D1] mt-0.5">{transactions.length} transactions</p>
+          <p className="text-[13px] text-[#D6D3D1] mt-0.5">{transactions.length} transactions total</p>
         </div>
         <Button onClick={() => setModalOpen(true)} size="sm" className="h-9 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-white text-[12px] font-medium px-4">
           <Plus className="w-3.5 h-3.5 mr-1.5" /> New Transaction
         </Button>
       </div>
 
-      {/* Summary Cards */}
+      <div className="flex flex-wrap gap-1.5 mb-3">
+        {(['daily', 'weekly', 'monthly', 'yearly', 'all'] as const).map(p => (
+          <button key={p} onClick={() => setPeriod(p)} className={`px-3 py-[6px] rounded-full text-[12px] font-medium capitalize transition-all ${period === p ? 'bg-[#1C1917] text-white' : 'bg-white text-[#A8A29E] border border-[#F0EFED] hover:text-[#78716C]'}`}>
+            {PERIOD_LABEL[p]}
+          </button>
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-1.5 mb-5">
+        {(['All', 'Cash', 'GCash'] as PaymentFilter[]).map(p => (
+          <button key={p} onClick={() => setPaymentFilter(p)} className={`px-3 py-[6px] rounded-full text-[11px] font-medium transition-all ${paymentFilter === p ? 'bg-[#44403C] text-white' : 'bg-white text-[#A8A29E] border border-[#F0EFED]'}`}>
+            {p}
+          </button>
+        ))}
+      </div>
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         {[
-          { label: "Today's Revenue", value: `₱${todayRevenue.toLocaleString()}`, accent: 'bg-[#1C1917] text-white' },
-          { label: 'Transactions', value: todaySales.length.toString(), accent: 'bg-[#EFF6FF] text-[#3B82F6]' },
+          { label: `${PERIOD_LABEL[period]} Revenue`, value: `₱${totalRevenue.toLocaleString()}`, accent: 'bg-[#1C1917] text-white' },
+          { label: 'Transactions', value: filteredTx.length.toString(), accent: 'bg-[#EFF6FF] text-[#3B82F6]' },
           { label: 'Cash', value: `₱${cashTotal.toLocaleString()}`, accent: 'bg-[#ECFDF5] text-[#10B981]' },
           { label: 'GCash', value: `₱${gcashTotal.toLocaleString()}`, accent: 'bg-[#F5F3FF] text-[#8B5CF6]' },
         ].map((s, i) => (
@@ -80,14 +109,15 @@ export default function Sales() {
         ))}
       </div>
 
-      {/* Transactions */}
       <div className="bg-white rounded-2xl border border-[#F5F5F4] shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#F5F5F4]">
-          <h3 className="text-[13px] font-semibold text-[#1C1917]">Recent Transactions</h3>
+        <div className="px-5 py-4 border-b border-[#F5F5F4] flex items-center justify-between">
+          <h3 className="text-[13px] font-semibold text-[#1C1917]">Transactions ({filteredTx.length})</h3>
+          <span className="text-[11px] text-[#A8A29E]">{PERIOD_LABEL[period]}{paymentFilter !== 'All' && ` · ${paymentFilter}`}</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead><tr className="border-b border-[#F5F5F4]">
+              <th className="text-left px-5 py-3 text-[10px] font-semibold text-[#D6D3D1] uppercase">Date</th>
               <th className="text-left px-5 py-3 text-[10px] font-semibold text-[#D6D3D1] uppercase">Type</th>
               <th className="text-left px-5 py-3 text-[10px] font-semibold text-[#D6D3D1] uppercase">Items</th>
               <th className="text-left px-5 py-3 text-[10px] font-semibold text-[#D6D3D1] uppercase">Payment</th>
@@ -95,38 +125,40 @@ export default function Sales() {
               <th className="text-right px-5 py-3 text-[10px] font-semibold text-[#D6D3D1] uppercase"></th>
             </tr></thead>
             <tbody className="divide-y divide-[#FAFAF9]">
-              {transactions.slice().reverse().map(tx => (
+              {filteredTx.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(tx => (
                 <tr key={tx.id} className="hover:bg-[#FAFAF9]/60 transition-colors">
+                  <td className="px-5 py-3.5 text-[11px] text-[#A8A29E] tabular-nums whitespace-nowrap">{new Date(tx.createdAt).toLocaleDateString()} <span className="text-[#D6D3D1]">{new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></td>
                   <td className="px-5 py-3.5"><span className={`text-[10px] font-semibold px-2 py-[3px] rounded-full ${tx.type === 'service+parts' ? 'bg-[#F5F3FF] text-[#7C3AED]' : 'bg-[#EFF6FF] text-[#3B82F6]'}`}>{tx.type}</span></td>
-                  <td className="px-5 py-3.5 text-[12px] text-[#78716C] max-w-[200px] truncate">{tx.items.map(i => i.name).join(', ')}</td>
+                  <td className="px-5 py-3.5 text-[12px] text-[#78716C] max-w-[200px] truncate">{tx.items.map(i => i.name).join(', ') || '—'}</td>
                   <td className="px-5 py-3.5">
                     <span className="flex items-center gap-1 text-[12px] text-[#78716C]">
-                      {tx.paymentMethod === 'GCash' ? <Smartphone className="w-3 h-3 text-[#8B5CF6]"/> : <Banknote className="w-3 h-3 text-[#10B981]"/>}
+                      {tx.paymentMethod === 'GCash' ? <Smartphone className="w-3 h-3 text-[#8B5CF6]" /> : <Banknote className="w-3 h-3 text-[#10B981]" />}
                       {tx.paymentMethod}
                     </span>
                   </td>
                   <td className="px-5 py-3.5 text-right text-[13px] font-semibold text-[#44403C] tabular-nums">₱{tx.total.toLocaleString()}</td>
                   <td className="px-5 py-3.5 text-right">
-                    <button onClick={() => setReceiptTx(tx.id)} className="p-1.5 rounded-lg hover:bg-[#F5F5F4] text-[#D6D3D1] hover:text-[#78716C] transition-colors"><Receipt className="w-3.5 h-3.5"/></button>
+                    <button onClick={() => setReceiptTx(tx.id)} className="p-1.5 rounded-lg hover:bg-[#F5F5F4] text-[#D6D3D1] hover:text-[#78716C] transition-colors"><Receipt className="w-3.5 h-3.5" /></button>
                   </td>
                 </tr>
               ))}
+              {filteredTx.length === 0 && (
+                <tr><td colSpan={6} className="px-5 py-12 text-center text-[12px] text-[#D6D3D1]">No transactions for this filter</td></tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* New Transaction Modal */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className="sm:max-w-2xl rounded-[20px] border-[#F0EFED] p-6 max-h-[90vh] overflow-y-auto">
           <DialogHeader className="pb-1"><DialogTitle className="text-[15px] font-semibold">New Transaction</DialogTitle></DialogHeader>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-3">
-            {/* Left */}
             <div>
-              <Label className="text-[11px] font-medium text-[#78716C]">Search Parts</Label>
+              <Label className="text-[11px] font-medium text-[#78716C]">Search Parts (or scan barcode)</Label>
               <div className="relative mt-1.5 mb-3">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#D6D3D1]" />
-                <Input value={search} onChange={e => setSearch(e.target.value)} className="pl-9 h-9 rounded-xl border-[#E7E5E4] text-[13px] focus:border-[#C4C0BC] focus:ring-0" placeholder="Search..." />
+                <Input autoFocus value={search} onChange={e => setSearch(e.target.value)} className="pl-9 h-9 rounded-xl border-[#E7E5E4] text-[13px]" placeholder="Search…" />
               </div>
               <div className="space-y-1 max-h-56 overflow-y-auto pr-1">
                 {filteredParts.map(part => (
@@ -139,14 +171,13 @@ export default function Sales() {
               </div>
               <div className="mt-4 pt-4 border-t border-[#F5F5F4]">
                 <Label className="text-[11px] font-medium text-[#78716C]">Link Service (optional)</Label>
-                <select value={selectedService} onChange={e => { setSelectedService(e.target.value); const s = services.find(sv => sv.id === e.target.value); if (s) setServiceLabor(s.laborCost); else setServiceLabor(0); }} className="w-full mt-1.5 h-9 px-3 rounded-xl border border-[#E7E5E4] text-[13px] bg-white focus:outline-none focus:border-[#C4C0BC]">
+                <select value={selectedService} onChange={e => { setSelectedService(e.target.value); const s = services.find(sv => sv.id === e.target.value); if (s) setServiceLabor(s.laborCost); else setServiceLabor(0); }} className="w-full mt-1.5 h-9 px-3 rounded-xl border border-[#E7E5E4] text-[13px] bg-white">
                   <option value="">No service</option>
                   {pendingServices.map(s => <option key={s.id} value={s.id}>{s.customerName} — {s.serviceType}</option>)}
                 </select>
               </div>
             </div>
 
-            {/* Right — Cart */}
             <div className="bg-[#FAFAF9] rounded-2xl p-4">
               <h4 className="text-[13px] font-semibold text-[#1C1917] mb-3">Cart</h4>
               <AnimatePresence>
@@ -178,8 +209,8 @@ export default function Sales() {
 
               <div className="mt-4 pt-4 border-t border-[#E7E5E4]">
                 <div className="flex gap-2 mb-4">
-                  <button onClick={() => setPaymentMethod('Cash')} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-[12px] font-medium transition-all ${paymentMethod === 'Cash' ? 'bg-[#059669] text-white' : 'bg-white text-[#78716C] border border-[#E7E5E4]'}`}><Banknote className="w-3.5 h-3.5"/>Cash</button>
-                  <button onClick={() => setPaymentMethod('GCash')} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-[12px] font-medium transition-all ${paymentMethod === 'GCash' ? 'bg-[#2563EB] text-white' : 'bg-white text-[#78716C] border border-[#E7E5E4]'}`}><Smartphone className="w-3.5 h-3.5"/>GCash</button>
+                  <button onClick={() => setPaymentMethod('Cash')} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-[12px] font-medium transition-all ${paymentMethod === 'Cash' ? 'bg-[#059669] text-white' : 'bg-white text-[#78716C] border border-[#E7E5E4]'}`}><Banknote className="w-3.5 h-3.5" />Cash</button>
+                  <button onClick={() => setPaymentMethod('GCash')} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-[12px] font-medium transition-all ${paymentMethod === 'GCash' ? 'bg-[#2563EB] text-white' : 'bg-white text-[#78716C] border border-[#E7E5E4]'}`}><Smartphone className="w-3.5 h-3.5" />GCash</button>
                 </div>
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-[13px] text-[#A8A29E]">Total</span>
@@ -192,10 +223,14 @@ export default function Sales() {
         </DialogContent>
       </Dialog>
 
-      {/* Receipt Modal */}
       <Dialog open={!!receiptTx} onOpenChange={() => setReceiptTx(null)}>
         <DialogContent className="sm:max-w-sm rounded-[20px] border-[#F0EFED] p-6">
-          <DialogHeader><DialogTitle className="text-[15px] font-semibold text-center">Receipt</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle className="text-[15px] font-semibold text-center flex items-center justify-center gap-2">
+              Receipt
+              <button onClick={() => window.print()} className="p-1 rounded hover:bg-[#F5F5F4] text-[#A8A29E]" title="Print"><Printer className="w-3.5 h-3.5" /></button>
+            </DialogTitle>
+          </DialogHeader>
           {selectedTx && (
             <div className="space-y-3 mt-1">
               <div className="text-center border-b border-dashed border-[#E7E5E4] pb-3">
@@ -209,7 +244,7 @@ export default function Sales() {
               {selectedTx.serviceLaborCost && <div className="flex justify-between text-[12px] font-medium text-[#7C3AED]"><span>Service Labor</span><span className="tabular-nums">₱{selectedTx.serviceLaborCost.toLocaleString()}</span></div>}
               <div className="border-t border-dashed border-[#E7E5E4] pt-3">
                 <div className="flex justify-between text-[14px] font-bold text-[#1C1917]"><span>Total</span><span className="tabular-nums">₱{selectedTx.total.toLocaleString()}</span></div>
-                <div className="flex justify-between text-[11px] text-[#A8A29E] mt-1"><span>Payment</span><span className="flex items-center gap-1">{selectedTx.paymentMethod === 'GCash' ? <Smartphone className="w-3 h-3"/> : <Banknote className="w-3 h-3"/>}{selectedTx.paymentMethod}</span></div>
+                <div className="flex justify-between text-[11px] text-[#A8A29E] mt-1"><span>Payment</span><span className="flex items-center gap-1">{selectedTx.paymentMethod === 'GCash' ? <Smartphone className="w-3 h-3" /> : <Banknote className="w-3 h-3" />}{selectedTx.paymentMethod}</span></div>
               </div>
             </div>
           )}
