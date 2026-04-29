@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
-import type { Part, ServiceRecord, Transaction, ActivityLog } from '@/shared/types';
+import { toast } from 'sonner';
+import type { Part, ServiceRecord, Transaction, ActivityLog, ServiceType, StockMovement, StoredUser, User } from '@/shared/types';
 import { useAuth } from '@/features/auth/context/AuthContext';
+import { hashPassword } from '@/shared/lib/hash';
 
 const DEMO_PARTS: Part[] = [
   { id: 'p1', name: 'Brake Pad Set - Honda', category: 'Braking', stock: 15, minStock: 5, price: 850, barcode: 'BRK-HND-001', createdAt: '2026-04-01T10:00:00Z' },
@@ -37,18 +39,38 @@ const DEMO_LOGS: ActivityLog[] = [
   { id: 'l5', user: 'Staff User', action: 'Updated service #s2 status to Ongoing', timestamp: '2026-04-22T10:30:00Z' },
 ];
 
+const DEMO_SERVICE_TYPES: ServiceType[] = [
+  { id: 'st1', name: 'Oil Change', defaultLaborCost: 350 },
+  { id: 'st2', name: 'Brake Repair', defaultLaborCost: 500 },
+  { id: 'st3', name: 'Full Tune-up', defaultLaborCost: 800 },
+  { id: 'st4', name: 'Chain Replacement', defaultLaborCost: 450 },
+  { id: 'st5', name: 'Electrical Check', defaultLaborCost: 400 },
+  { id: 'st6', name: 'Engine Overhaul', defaultLaborCost: 2000 },
+];
+
 interface DataContextType {
   parts: Part[];
   services: ServiceRecord[];
   transactions: Transaction[];
   logs: ActivityLog[];
+  serviceTypes: ServiceType[];
+  stockMovements: StockMovement[];
+  users: User[];
   addPart: (part: Omit<Part, 'id' | 'createdAt'>) => void;
   updatePart: (id: string, part: Partial<Part>) => void;
   deletePart: (id: string) => void;
+  recordStockMovement: (partId: string, type: 'in' | 'out' | 'adjust', qty: number, reason: string) => void;
   addService: (service: Omit<ServiceRecord, 'id' | 'createdAt'>) => void;
   updateService: (id: string, service: Partial<ServiceRecord>) => void;
   deleteService: (id: string) => void;
   addTransaction: (tx: Omit<Transaction, 'id' | 'createdAt'>) => void;
+  addServiceType: (st: Omit<ServiceType, 'id'>) => void;
+  updateServiceType: (id: string, st: Partial<ServiceType>) => void;
+  deleteServiceType: (id: string) => void;
+  addUser: (input: { name: string; email: string; role: 'Admin' | 'Staff'; password: string }) => Promise<void>;
+  updateUser: (id: string, patch: Partial<Omit<StoredUser, 'passwordHash'>> & { password?: string }) => Promise<void>;
+  setUserStatus: (id: string, status: 'Active' | 'Inactive') => void;
+  deleteUser: (id: string) => void;
 }
 
 function loadData<T>(key: string, fallback: T): T {
@@ -57,15 +79,43 @@ function loadData<T>(key: string, fallback: T): T {
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
+const KEYS = {
+  parts: 'mospams_parts',
+  services: 'mospams_services',
+  transactions: 'mospams_transactions',
+  logs: 'mospams_logs',
+  serviceTypes: 'mospams_service_types',
+  stockMovements: 'mospams_stock_movements',
+  users: 'mospams_users',
+};
+
+function toPublic(u: StoredUser): User {
+  const { passwordHash: _passwordHash, ...rest } = u;
+  void _passwordHash;
+  return rest;
+}
+
 export function DataProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const userRef = useRef(user);
   useEffect(() => { userRef.current = user; }, [user]);
 
-  const [parts, setParts] = useState<Part[]>(() => loadData('mospams_parts', DEMO_PARTS));
-  const [services, setServices] = useState<ServiceRecord[]>(() => loadData('mospams_services', DEMO_SERVICES));
-  const [transactions, setTransactions] = useState<Transaction[]>(() => loadData('mospams_transactions', DEMO_TRANSACTIONS));
-  const [logs, setLogs] = useState<ActivityLog[]>(() => loadData('mospams_logs', DEMO_LOGS));
+  const [parts, setParts] = useState<Part[]>(() => loadData(KEYS.parts, DEMO_PARTS));
+  const [services, setServices] = useState<ServiceRecord[]>(() => loadData(KEYS.services, DEMO_SERVICES));
+  const [transactions, setTransactions] = useState<Transaction[]>(() => loadData(KEYS.transactions, DEMO_TRANSACTIONS));
+  const [logs, setLogs] = useState<ActivityLog[]>(() => loadData(KEYS.logs, DEMO_LOGS));
+  const [serviceTypes, setServiceTypes] = useState<ServiceType[]>(() => loadData(KEYS.serviceTypes, DEMO_SERVICE_TYPES));
+  const [stockMovements, setStockMovements] = useState<StockMovement[]>(() => loadData(KEYS.stockMovements, []));
+  const [storedUsers, setStoredUsers] = useState<StoredUser[]>(() => loadData<StoredUser[]>(KEYS.users, []));
+
+  // Sync storedUsers when AuthProvider seeds them
+  useEffect(() => {
+    const handler = () => setStoredUsers(loadData<StoredUser[]>(KEYS.users, []));
+    window.addEventListener('storage', handler);
+    // poll once on mount in case seed lands after this provider mounted
+    const t = setTimeout(handler, 50);
+    return () => { window.removeEventListener('storage', handler); clearTimeout(t); };
+  }, []);
 
   const persist = useCallback((key: string, data: unknown) => {
     localStorage.setItem(key, JSON.stringify(data));
@@ -74,63 +124,204 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const addLogAction = useCallback((action: string) => {
     const u = userRef.current;
     if (!u) return;
-    const newLog: ActivityLog = { id: `l${Date.now()}`, user: u.name, action, timestamp: new Date().toISOString() };
-    setLogs(prev => { const next = [newLog, ...prev]; persist('mospams_logs', next); return next; });
+    const newLog: ActivityLog = { id: `l${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, user: u.name, action, timestamp: new Date().toISOString() };
+    setLogs(prev => { const next = [newLog, ...prev]; persist(KEYS.logs, next); return next; });
+  }, [persist]);
+
+  const recordMovement = useCallback((mov: Omit<StockMovement, 'id' | 'timestamp' | 'userId' | 'userName'>) => {
+    const u = userRef.current;
+    const newMov: StockMovement = {
+      ...mov,
+      id: `m${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      timestamp: new Date().toISOString(),
+      userId: u?.id ?? 'system',
+      userName: u?.name ?? 'System',
+    };
+    setStockMovements(prev => { const next = [newMov, ...prev]; persist(KEYS.stockMovements, next); return next; });
   }, [persist]);
 
   const addPart = useCallback((part: Omit<Part, 'id' | 'createdAt'>) => {
     const newPart: Part = { ...part, id: `p${Date.now()}`, createdAt: new Date().toISOString() };
-    setParts(prev => { const next = [...prev, newPart]; persist('mospams_parts', next); return next; });
+    setParts(prev => { const next = [...prev, newPart]; persist(KEYS.parts, next); return next; });
+    if (newPart.stock > 0) {
+      recordMovement({ partId: newPart.id, partName: newPart.name, type: 'in', qty: newPart.stock, reason: 'Initial stock' });
+    }
     addLogAction(`Added new part: ${part.name}`);
-  }, [persist, addLogAction]);
+    toast.success(`Part added: ${part.name}`);
+  }, [persist, addLogAction, recordMovement]);
 
   const updatePart = useCallback((id: string, part: Partial<Part>) => {
-    setParts(prev => { const next = prev.map(p => p.id === id ? { ...p, ...part } : p); persist('mospams_parts', next); return next; });
+    setParts(prev => {
+      const before = prev.find(p => p.id === id);
+      const next = prev.map(p => p.id === id ? { ...p, ...part } : p);
+      persist(KEYS.parts, next);
+      const after = next.find(p => p.id === id);
+      if (before && after && typeof part.stock === 'number' && before.stock !== after.stock) {
+        const delta = after.stock - before.stock;
+        recordMovement({
+          partId: id, partName: after.name,
+          type: delta > 0 ? 'in' : 'adjust',
+          qty: Math.abs(delta),
+          reason: 'Manual update',
+        });
+      }
+      return next;
+    });
     addLogAction(`Updated part: ${part.name || id}`);
-  }, [persist, addLogAction]);
+    toast.success('Part updated');
+  }, [persist, addLogAction, recordMovement]);
 
   const deletePart = useCallback((id: string) => {
     setParts(prev => {
       const name = prev.find(p => p.id === id)?.name || id;
       const next = prev.filter(p => p.id !== id);
-      persist('mospams_parts', next);
+      persist(KEYS.parts, next);
       addLogAction(`Deleted part: ${name}`);
+      toast.success(`Deleted ${name}`);
       return next;
     });
   }, [persist, addLogAction]);
 
+  const recordStockMovement = useCallback((partId: string, type: 'in' | 'out' | 'adjust', qty: number, reason: string) => {
+    setParts(prev => {
+      const target = prev.find(p => p.id === partId);
+      if (!target) return prev;
+      const delta = type === 'in' ? qty : type === 'out' ? -qty : qty;
+      const newStock = type === 'adjust' ? qty : Math.max(0, target.stock + delta);
+      const next = prev.map(p => p.id === partId ? { ...p, stock: newStock } : p);
+      persist(KEYS.parts, next);
+      recordMovement({ partId, partName: target.name, type, qty: type === 'adjust' ? Math.abs(qty - target.stock) : qty, reason });
+      addLogAction(`Stock ${type} for ${target.name}: ${type === 'adjust' ? `set to ${qty}` : `${qty}`} — ${reason}`);
+      toast.success(`Stock ${type === 'in' ? 'received' : type === 'out' ? 'issued' : 'adjusted'} for ${target.name}`);
+      return next;
+    });
+  }, [persist, addLogAction, recordMovement]);
+
   const addService = useCallback((service: Omit<ServiceRecord, 'id' | 'createdAt'>) => {
     const newService: ServiceRecord = { ...service, id: `s${Date.now()}`, createdAt: new Date().toISOString() };
-    setServices(prev => { const next = [...prev, newService]; persist('mospams_services', next); return next; });
+    setServices(prev => { const next = [...prev, newService]; persist(KEYS.services, next); return next; });
     addLogAction(`Created service record for ${service.customerName}`);
+    toast.success(`Service created for ${service.customerName}`);
   }, [persist, addLogAction]);
 
   const updateService = useCallback((id: string, service: Partial<ServiceRecord>) => {
     setServices(prev => {
       const next = prev.map(s => s.id === id ? { ...s, ...service, ...(service.status === 'Completed' && s.status !== 'Completed' ? { completedAt: new Date().toISOString() } : {}) } : s);
-      persist('mospams_services', next);
+      persist(KEYS.services, next);
       return next;
     });
-    if (service.status) addLogAction(`Updated service #${id} status to ${service.status}`);
+    if (service.status) {
+      addLogAction(`Updated service #${id} status to ${service.status}`);
+      toast.success(`Service marked ${service.status}`);
+    } else {
+      addLogAction(`Updated service #${id}`);
+    }
   }, [persist, addLogAction]);
 
   const deleteService = useCallback((id: string) => {
-    setServices(prev => { const next = prev.filter(s => s.id !== id); persist('mospams_services', next); return next; });
+    setServices(prev => { const next = prev.filter(s => s.id !== id); persist(KEYS.services, next); return next; });
     addLogAction(`Deleted service record #${id}`);
+    toast.success('Service record deleted');
   }, [persist, addLogAction]);
 
   const addTransaction = useCallback((tx: Omit<Transaction, 'id' | 'createdAt'>) => {
     const newTx: Transaction = { ...tx, id: `t${Date.now()}`, createdAt: new Date().toISOString() };
     setParts(prev => {
-      const next = prev.map(p => { const item = tx.items.find(i => i.partId === p.id); return item ? { ...p, stock: Math.max(0, p.stock - item.quantity) } : p; });
-      persist('mospams_parts', next); return next;
+      const next = prev.map(p => {
+        const item = tx.items.find(i => i.partId === p.id);
+        if (!item) return p;
+        const newStock = Math.max(0, p.stock - item.quantity);
+        recordMovement({ partId: p.id, partName: p.name, type: 'out', qty: item.quantity, reason: `Sale ${newTx.id}` });
+        return { ...p, stock: newStock };
+      });
+      persist(KEYS.parts, next); return next;
     });
-    setTransactions(prev => { const next = [...prev, newTx]; persist('mospams_transactions', next); return next; });
+    setTransactions(prev => { const next = [...prev, newTx]; persist(KEYS.transactions, next); return next; });
     addLogAction(`Recorded ${tx.type} transaction (#${newTx.id}) — ₱${tx.total.toLocaleString()}`);
-  }, [persist, addLogAction]);
+    toast.success(`Sale recorded — ₱${tx.total.toLocaleString()}`);
+  }, [persist, addLogAction, recordMovement]);
+
+  const addServiceType = useCallback((st: Omit<ServiceType, 'id'>) => {
+    const next = [...serviceTypes, { ...st, id: `st${Date.now()}` }];
+    setServiceTypes(next); persist(KEYS.serviceTypes, next);
+    addLogAction(`Added service type: ${st.name}`);
+    toast.success(`Service type added: ${st.name}`);
+  }, [serviceTypes, persist, addLogAction]);
+
+  const updateServiceType = useCallback((id: string, st: Partial<ServiceType>) => {
+    const next = serviceTypes.map(s => s.id === id ? { ...s, ...st } : s);
+    setServiceTypes(next); persist(KEYS.serviceTypes, next);
+    addLogAction(`Updated service type #${id}`);
+    toast.success('Service type updated');
+  }, [serviceTypes, persist, addLogAction]);
+
+  const deleteServiceType = useCallback((id: string) => {
+    const next = serviceTypes.filter(s => s.id !== id);
+    setServiceTypes(next); persist(KEYS.serviceTypes, next);
+    addLogAction(`Deleted service type #${id}`);
+    toast.success('Service type removed');
+  }, [serviceTypes, persist, addLogAction]);
+
+  const persistUsers = useCallback((next: StoredUser[]) => {
+    setStoredUsers(next);
+    persist(KEYS.users, next);
+  }, [persist]);
+
+  const addUser = useCallback(async ({ name, email, role, password }: { name: string; email: string; role: 'Admin' | 'Staff'; password: string }) => {
+    const exists = storedUsers.some(u => u.email.toLowerCase() === email.toLowerCase());
+    if (exists) { toast.error('A user with that email already exists'); return; }
+    const passwordHash = await hashPassword(password);
+    const newUser: StoredUser = {
+      id: `u${Date.now()}`, name, email, role, status: 'Active',
+      lastActive: new Date().toISOString(), passwordHash,
+    };
+    persistUsers([...storedUsers, newUser]);
+    addLogAction(`Created user ${name} (${role})`);
+    toast.success(`User ${name} created`);
+  }, [storedUsers, persistUsers, addLogAction]);
+
+  const updateUser = useCallback(async (id: string, patch: Partial<Omit<StoredUser, 'passwordHash'>> & { password?: string }) => {
+    const newHash = patch.password ? await hashPassword(patch.password) : undefined;
+    const next = await Promise.all(storedUsers.map(async u => {
+      if (u.id !== id) return u;
+      const { password: _password, ...rest } = patch;
+      void _password;
+      return { ...u, ...rest, ...(newHash ? { passwordHash: newHash } : {}) };
+    }));
+    persistUsers(next);
+    addLogAction(`Updated user #${id}`);
+    toast.success('User updated');
+  }, [storedUsers, persistUsers, addLogAction]);
+
+  const setUserStatus = useCallback((id: string, status: 'Active' | 'Inactive') => {
+    const next = storedUsers.map(u => u.id === id ? { ...u, status } : u);
+    persistUsers(next);
+    addLogAction(`Set user #${id} status to ${status}`);
+    toast.success(`User ${status === 'Active' ? 'enabled' : 'disabled'}`);
+  }, [storedUsers, persistUsers, addLogAction]);
+
+  const deleteUser = useCallback((id: string) => {
+    const target = storedUsers.find(u => u.id === id);
+    if (!target) return;
+    if (userRef.current?.id === id) {
+      toast.error('You cannot delete your own account');
+      return;
+    }
+    persistUsers(storedUsers.filter(u => u.id !== id));
+    addLogAction(`Deleted user ${target.name}`);
+    toast.success(`User ${target.name} deleted`);
+  }, [storedUsers, persistUsers, addLogAction]);
 
   return (
-    <DataContext.Provider value={{ parts, services, transactions, logs, addPart, updatePart, deletePart, addService, updateService, deleteService, addTransaction }}>
+    <DataContext.Provider value={{
+      parts, services, transactions, logs, serviceTypes, stockMovements,
+      users: storedUsers.map(toPublic),
+      addPart, updatePart, deletePart, recordStockMovement,
+      addService, updateService, deleteService,
+      addTransaction,
+      addServiceType, updateServiceType, deleteServiceType,
+      addUser, updateUser, setUserStatus, deleteUser,
+    }}>
       {children}
     </DataContext.Provider>
   );

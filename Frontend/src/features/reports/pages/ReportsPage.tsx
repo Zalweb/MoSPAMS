@@ -1,28 +1,33 @@
-import { useState, useMemo } from 'react';
-import { TrendingUp, Package, Wrench } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { TrendingUp, Package, Wrench, Download } from 'lucide-react';
 import { useData } from '@/shared/contexts/DataContext';
+import { inPeriod, type Period } from '@/shared/lib/period';
+import { downloadCSV, toCSV } from '@/shared/lib/csv';
 
 type ReportType = 'sales' | 'inventory' | 'services';
-type Period = 'daily' | 'weekly' | 'monthly';
+
+const PERIOD_LABEL: Record<Period, string> = { daily: 'Today', weekly: 'This week', monthly: 'This month', yearly: 'This year' };
 
 export default function Reports() {
   const { parts, services, transactions } = useData();
   const [reportType, setReportType] = useState<ReportType>('sales');
   const [period, setPeriod] = useState<Period>('daily');
 
-  const periodMs = period === 'daily' ? 86400000 : period === 'weekly' ? 604800000 : 2592000000;
-  const cutoff = new Date(Date.now() - periodMs).toISOString();
+  const filteredTx = transactions.filter(t => inPeriod(t.createdAt, period));
+  const filteredServices = services.filter(s => inPeriod(s.createdAt, period));
 
-  const filteredTx = transactions.filter(t => t.createdAt >= cutoff);
+  const partsRevenue = filteredTx.reduce((s, t) => s + t.items.reduce((a, i) => a + i.price * i.quantity, 0), 0);
+  const laborRevenueTx = filteredTx.reduce((s, t) => s + (t.serviceLaborCost || 0), 0);
   const totalRevenue = filteredTx.reduce((s, t) => s + t.total, 0);
   const cashTotal = filteredTx.filter(t => t.paymentMethod === 'Cash').reduce((s, t) => s + t.total, 0);
   const gcashTotal = filteredTx.filter(t => t.paymentMethod === 'GCash').reduce((s, t) => s + t.total, 0);
+  const laborInvoiced = filteredServices.reduce((s, svc) => s + svc.laborCost, 0);
 
   const serviceTypeBreakdown = useMemo(() => {
     const map: Record<string, number> = {};
-    services.filter(s => s.createdAt >= cutoff).forEach(s => { map[s.serviceType] = (map[s.serviceType] || 0) + 1; });
+    filteredServices.forEach(s => { map[s.serviceType] = (map[s.serviceType] || 0) + 1; });
     return Object.entries(map).sort((a, b) => b[1] - a[1]);
-  }, [services, cutoff]);
+  }, [filteredServices]);
 
   const partsUsed = useMemo(() => {
     const map: Record<string, { name: string; count: number; revenue: number }> = {};
@@ -46,15 +51,83 @@ export default function Reports() {
     { key: 'services' as const, label: 'Service Report', icon: Wrench },
   ];
 
+  const exportSalesCSV = () => {
+    const rows = filteredTx.map(t => ({
+      id: t.id,
+      date: new Date(t.createdAt).toISOString(),
+      type: t.type,
+      items: t.items.map(i => `${i.name} x${i.quantity}`).join('; '),
+      partsRevenue: t.items.reduce((s, i) => s + i.price * i.quantity, 0),
+      laborCost: t.serviceLaborCost || 0,
+      paymentMethod: t.paymentMethod,
+      total: t.total,
+    }));
+    downloadCSV(`sales-${period}-${new Date().toISOString().slice(0, 10)}.csv`, toCSV(rows, [
+      { key: 'id', label: 'Transaction' },
+      { key: 'date', label: 'Date' },
+      { key: 'type', label: 'Type' },
+      { key: 'items', label: 'Items' },
+      { key: 'partsRevenue', label: 'Parts Revenue (₱)' },
+      { key: 'laborCost', label: 'Labor (₱)' },
+      { key: 'paymentMethod', label: 'Payment' },
+      { key: 'total', label: 'Total (₱)' },
+    ]));
+  };
+
+  const exportInventoryCSV = () => {
+    downloadCSV(`inventory-${new Date().toISOString().slice(0, 10)}.csv`, toCSV(parts, [
+      { key: 'id', label: 'ID' },
+      { key: 'name', label: 'Name' },
+      { key: 'category', label: 'Category' },
+      { key: 'stock', label: 'Stock' },
+      { key: 'minStock', label: 'Min Stock' },
+      { key: 'price', label: 'Price (₱)' },
+      { key: 'barcode', label: 'Barcode' },
+    ]));
+  };
+
+  const exportServicesCSV = () => {
+    const rows = filteredServices.map(s => ({
+      id: s.id,
+      customerName: s.customerName,
+      motorcycleModel: s.motorcycleModel,
+      serviceType: s.serviceType,
+      laborCost: s.laborCost,
+      status: s.status,
+      createdAt: s.createdAt,
+      completedAt: s.completedAt || '',
+    }));
+    downloadCSV(`services-${period}-${new Date().toISOString().slice(0, 10)}.csv`, toCSV(rows, [
+      { key: 'id', label: 'ID' },
+      { key: 'customerName', label: 'Customer' },
+      { key: 'motorcycleModel', label: 'Motorcycle' },
+      { key: 'serviceType', label: 'Service' },
+      { key: 'laborCost', label: 'Labor (₱)' },
+      { key: 'status', label: 'Status' },
+      { key: 'createdAt', label: 'Created' },
+      { key: 'completedAt', label: 'Completed' },
+    ]));
+  };
+
+  const onExport = () => {
+    if (reportType === 'sales') exportSalesCSV();
+    else if (reportType === 'inventory') exportInventoryCSV();
+    else exportServicesCSV();
+  };
+
   return (
     <div>
-      <div className="mb-7">
-        <h2 className="text-[22px] font-bold text-[#1C1917] tracking-tight">Reports & Analytics</h2>
-        <p className="text-[13px] text-[#D6D3D1] mt-0.5">Track your shop's performance</p>
+      <div className="mb-7 flex items-end justify-between gap-3">
+        <div>
+          <h2 className="text-[22px] font-bold text-[#1C1917] tracking-tight">Reports & Analytics</h2>
+          <p className="text-[13px] text-[#D6D3D1] mt-0.5">Track your shop's performance — {PERIOD_LABEL[period]}</p>
+        </div>
+        <button onClick={onExport} className="inline-flex items-center gap-1.5 h-9 px-4 rounded-xl bg-white border border-[#E7E5E4] text-[12px] font-medium text-[#44403C] hover:bg-[#F5F5F4]">
+          <Download className="w-3.5 h-3.5" /> Export CSV
+        </button>
       </div>
 
-      {/* Report Tabs */}
-      <div className="flex gap-2 mb-5">
+      <div className="flex gap-2 mb-5 flex-wrap">
         {tabs.map(r => (
           <button key={r.key} onClick={() => setReportType(r.key)} className={`flex items-center gap-2 px-4 py-[9px] rounded-xl text-[12px] font-medium transition-all ${reportType === r.key ? 'bg-[#1C1917] text-white shadow-sm' : 'bg-white text-[#A8A29E] border border-[#F0EFED] hover:border-[#E7E5E4] hover:text-[#78716C]'}`}>
             <r.icon className="w-3.5 h-3.5" strokeWidth={1.5} />
@@ -63,14 +136,12 @@ export default function Reports() {
         ))}
       </div>
 
-      {/* Period */}
-      <div className="flex gap-1 mb-6">
-        {(['daily', 'weekly', 'monthly'] as Period[]).map(p => (
+      <div className="flex gap-1 mb-6 flex-wrap">
+        {(['daily', 'weekly', 'monthly', 'yearly'] as Period[]).map(p => (
           <button key={p} onClick={() => setPeriod(p)} className={`px-3 py-[6px] rounded-full text-[12px] font-medium capitalize transition-all ${period === p ? 'bg-[#F5F5F4] text-[#44403C]' : 'text-[#D6D3D1] hover:text-[#A8A29E]'}`}>{p}</button>
         ))}
       </div>
 
-      {/* Sales Report */}
       {reportType === 'sales' && (
         <div className="space-y-4">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -85,6 +156,19 @@ export default function Reports() {
                 <p className={`text-xl font-bold mt-1 tracking-tight ${i === 0 ? 'text-white' : 'text-[#1C1917]'}`}>{s.value}</p>
               </div>
             ))}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div className="p-5 bg-white rounded-2xl border border-[#F5F5F4]">
+              <p className="text-[11px] text-[#A8A29E]">Parts Revenue</p>
+              <p className="text-xl font-bold text-[#1C1917] mt-1 tracking-tight">₱{partsRevenue.toLocaleString()}</p>
+              <p className="text-[10px] text-[#D6D3D1] mt-1">From {filteredTx.reduce((s, t) => s + t.items.length, 0)} line items</p>
+            </div>
+            <div className="p-5 bg-white rounded-2xl border border-[#F5F5F4]">
+              <p className="text-[11px] text-[#A8A29E]">Labor Revenue (paid)</p>
+              <p className="text-xl font-bold text-[#1C1917] mt-1 tracking-tight">₱{laborRevenueTx.toLocaleString()}</p>
+              <p className="text-[10px] text-[#D6D3D1] mt-1">Across linked service+parts transactions</p>
+            </div>
           </div>
 
           <div className="bg-white rounded-2xl border border-[#F5F5F4] p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
@@ -106,7 +190,6 @@ export default function Reports() {
         </div>
       )}
 
-      {/* Inventory Report */}
       {reportType === 'inventory' && (
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-3">
@@ -157,7 +240,6 @@ export default function Reports() {
         </div>
       )}
 
-      {/* Service Report */}
       {reportType === 'services' && (
         <div className="space-y-4">
           <div className="bg-white rounded-2xl border border-[#F5F5F4] p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
@@ -191,15 +273,19 @@ export default function Reports() {
           </div>
 
           <div className="bg-white rounded-2xl border border-[#F5F5F4] p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-            <h3 className="text-[13px] font-semibold text-[#1C1917] mb-4">Income Summary</h3>
-            <div className="grid grid-cols-2 gap-3">
+            <h3 className="text-[13px] font-semibold text-[#1C1917] mb-4">Income Summary ({PERIOD_LABEL[period]})</h3>
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
               <div className="p-4 bg-[#FAFAF9] rounded-xl">
-                <p className="text-[11px] text-[#A8A29E]">Total Labor Income</p>
-                <p className="text-xl font-bold text-[#1C1917] mt-1 tracking-tight">₱{services.filter(s => s.createdAt >= cutoff).reduce((s, svc) => s + svc.laborCost, 0).toLocaleString()}</p>
+                <p className="text-[11px] text-[#A8A29E]">Parts Revenue</p>
+                <p className="text-xl font-bold text-[#1C1917] mt-1 tracking-tight">₱{partsRevenue.toLocaleString()}</p>
               </div>
               <div className="p-4 bg-[#FAFAF9] rounded-xl">
-                <p className="text-[11px] text-[#A8A29E]">Transaction Revenue</p>
-                <p className="text-xl font-bold text-[#1C1917] mt-1 tracking-tight">₱{totalRevenue.toLocaleString()}</p>
+                <p className="text-[11px] text-[#A8A29E]">Labor Revenue (paid)</p>
+                <p className="text-xl font-bold text-[#1C1917] mt-1 tracking-tight">₱{laborRevenueTx.toLocaleString()}</p>
+              </div>
+              <div className="p-4 bg-[#FAFAF9] rounded-xl">
+                <p className="text-[11px] text-[#A8A29E]">Labor Invoiced</p>
+                <p className="text-xl font-bold text-[#1C1917] mt-1 tracking-tight">₱{laborInvoiced.toLocaleString()}</p>
               </div>
             </div>
           </div>
