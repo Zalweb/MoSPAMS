@@ -35,6 +35,7 @@ return [
         ],
     ],
 
+    // Token-only verification via tokeninfo endpoint — no Socialite, no client_secret needed.
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
     ],
