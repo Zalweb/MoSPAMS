@@ -38,33 +38,39 @@ class RoleRequestController extends Controller
             return response()->json(['message' => 'Request already resolved.'], 422);
         }
 
-        $user = $roleRequest->user;
-        $roleName = $roleRequest->requestedRole?->role_name;
+        DB::transaction(function () use ($roleRequest) {
+            $user     = $roleRequest->user;
+            $roleName = $roleRequest->requestedRole?->role_name;
 
-        $user->update(['role_id_fk' => $roleRequest->requested_role_id_fk]);
+            $user->update(['role_id_fk' => $roleRequest->requested_role_id_fk]);
 
-        if ($roleName === 'Mechanic') {
-            $mechanicStatusId = DB::table('mechanic_statuses')
-                ->where('status_code', 'ACTIVE')
-                ->value('mechanic_status_id');
+            if ($roleName === 'Mechanic') {
+                $mechanicStatusId = DB::table('mechanic_statuses')
+                    ->where('status_code', 'ACTIVE')
+                    ->value('mechanic_status_id');
 
-            Mechanic::firstOrCreate(
-                ['user_id_fk' => $user->user_id],
-                [
-                    'full_name'             => $user->full_name,
-                    'email'                 => $user->email ?? $user->username,
-                    'mechanic_status_id_fk' => $mechanicStatusId,
-                ]
-            );
-        }
+                if (!$mechanicStatusId) {
+                    throw new \RuntimeException('Mechanic status configuration is missing.');
+                }
 
-        $roleRequest->update([
-            'status'         => 'approved',
-            'reviewed_by_fk' => auth()->id(),
-            'reviewed_at'    => now(),
-        ]);
+                Mechanic::firstOrCreate(
+                    ['user_id_fk' => $user->user_id],
+                    [
+                        'full_name'             => $user->full_name,
+                        'email'                 => $user->email ?? $user->username,
+                        'mechanic_status_id_fk' => $mechanicStatusId,
+                    ]
+                );
+            }
 
-        $this->log(auth()->id(), "Approved role request #{$roleRequest->id} for user {$user->user_id}", 'role_requests', $roleRequest->id);
+            $roleRequest->update([
+                'status'         => 'approved',
+                'reviewed_by_fk' => auth()->id(),
+                'reviewed_at'    => now(),
+            ]);
+
+            $this->log(auth()->id(), "Approved role request #{$roleRequest->id} for user {$user->user_id}", 'role_requests', $roleRequest->id);
+        });
 
         return response()->json(['message' => 'Request approved.']);
     }
