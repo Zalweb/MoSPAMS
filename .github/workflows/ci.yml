@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+    branches:
+      - master
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend / Laravel
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, pdo_sqlite, sqlite3, fileinfo, openssl
+          coverage: none
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: Backend/vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('Backend/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Run backend tests
+        env:
+          APP_ENV: testing
+          APP_KEY: base64:WJj5p1xO7cvW+ZuQeN1qj6qN2jTt+S8wqM2Y7tQH1rY=
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"
+          CACHE_STORE: array
+          SESSION_DRIVER: array
+          QUEUE_CONNECTION: sync
+          GOOGLE_CLIENT_ID: test-client-id
+        run: php artisan test
+
+  frontend:
+    name: Frontend / React Vite
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: Frontend/package-lock.json
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Typecheck and build frontend
+        env:
+          VITE_API_BASE_URL: http://127.0.0.1:8001
+          VITE_GOOGLE_CLIENT_ID: test-client-id
+        run: npm run build
