@@ -12,6 +12,13 @@ class MospamsApiTest extends TestCase
 
     protected bool $seed = true;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->seed();
+    }
+
     public function test_admin_can_login_and_read_core_data(): void
     {
         $token = $this->login('admin@mospams.com');

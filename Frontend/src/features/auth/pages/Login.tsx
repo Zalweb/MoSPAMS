@@ -1,21 +1,31 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { LayoutGrid, AlertCircle, ArrowRight } from 'lucide-react';
+import { GoogleLogin, type CredentialResponse } from '@react-oauth/google';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/features/auth/context/AuthContext';
+import GoogleSignUpModal from '@/features/auth/components/GoogleSignUpModal';
+import type { GoogleData } from '@/shared/types';
 
 interface LocationState { from?: { pathname?: string } }
 
 export default function Login() {
-  const { login, ready } = useAuth();
+  const { login, googleLogin, ready } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail]         = useState('');
+  const [password, setPassword]   = useState('');
+  const [error, setError]         = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [signUpOpen, setSignUpOpen] = useState(false);
+  const [googleData, setGoogleData] = useState<GoogleData | null>(null);
+
+  const dest = () => {
+    const state = location.state as LocationState | null;
+    return state?.from?.pathname && state.from.pathname !== '/login' ? state.from.pathname : '/';
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,9 +37,18 @@ export default function Login() {
       setError('Invalid email or password.');
       return;
     }
-    const state = location.state as LocationState | null;
-    const dest = state?.from?.pathname && state.from.pathname !== '/login' ? state.from.pathname : '/';
-    navigate(dest, { replace: true });
+    navigate(dest(), { replace: true });
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+    if (!credentialResponse.credential) return;
+    const result = await googleLogin(credentialResponse.credential);
+    if (result.needsRegistration) {
+      setGoogleData(result.googleData);
+      setSignUpOpen(true);
+    } else {
+      navigate(dest(), { replace: true });
+    }
   };
 
   return (
@@ -53,6 +72,23 @@ export default function Login() {
 
         <div className="bg-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.03)] border border-[#F5F5F4]">
           <h2 className="text-[15px] font-semibold text-[#1C1917] mb-5">Sign In</h2>
+
+          <div className="mb-4 flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setError('Google sign-in failed. Please try again.')}
+              useOneTap={false}
+              shape="rectangular"
+              theme="outline"
+              size="large"
+              width="320"
+              text="continue_with"
+            />
+          </div>
+
+          <div className="flex items-center py-3 text-xs text-neutral-400 uppercase before:me-6 before:flex-[1_1_0%] before:border-t before:border-neutral-200 after:ms-6 after:flex-[1_1_0%] after:border-t after:border-neutral-200">
+            Or
+          </div>
 
           {error && (
             <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50/80 text-red-600 text-[12px] mb-4 border border-red-100/50">
@@ -97,6 +133,15 @@ export default function Login() {
           </form>
         </div>
       </div>
+
+      {googleData && (
+        <GoogleSignUpModal
+          open={signUpOpen}
+          googleData={googleData}
+          onClose={() => { setSignUpOpen(false); setGoogleData(null); }}
+          onSuccess={() => { setSignUpOpen(false); navigate(dest(), { replace: true }); }}
+        />
+      )}
     </div>
   );
 }

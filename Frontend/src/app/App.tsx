@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Toaster } from 'sonner';
 import { AuthProvider, useAuth } from '@/features/auth/context/AuthContext';
 import { DataProvider } from '@/shared/contexts/DataContext';
@@ -10,6 +11,7 @@ import ServicesPage from '@/features/services/pages/ServicesPage';
 import SalesPage from '@/features/sales/pages/SalesPage';
 import ReportsPage from '@/features/reports/pages/ReportsPage';
 import UsersPage from '@/features/users/pages/UsersPage';
+import ApprovalsPage from '@/features/users/pages/ApprovalsPage';
 import NotFound from '@/features/common/NotFound';
 import type { Role } from '@/shared/types';
 
@@ -35,29 +37,32 @@ function LoginRoute() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <DataProvider>
-          <Toaster position="top-right" richColors closeButton />
-          <Routes>
-            <Route path="/login" element={<LoginRoute />} />
-            <Route element={<RequireAuth />}>
-              <Route element={<DashboardLayout />}>
-                <Route index element={<Overview />} />
-                <Route path="inventory" element={<InventoryPage />} />
-                <Route path="services" element={<ServicesPage />} />
-                <Route path="sales" element={<SalesPage />} />
-                <Route path="reports" element={<ReportsPage />} />
-                <Route element={<RequireRole role="Admin" />}>
-                  <Route path="users" element={<UsersPage />} />
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ''}>
+      <BrowserRouter>
+        <AuthProvider>
+          <DataProvider>
+            <Toaster position="top-right" richColors closeButton />
+            <Routes>
+              <Route path="/login" element={<LoginRoute />} />
+              <Route element={<RequireAuth />}>
+                <Route element={<DashboardLayout />}>
+                  <Route index element={<Overview />} />
+                  <Route path="inventory" element={<InventoryPage />} />
+                  <Route path="services" element={<ServicesPage />} />
+                  <Route path="sales" element={<SalesPage />} />
+                  <Route path="reports" element={<ReportsPage />} />
+                  <Route element={<RequireRole role="Admin" />}>
+                    <Route path="users" element={<UsersPage />} />
+                    <Route path="approvals" element={<ApprovalsPage />} />
+                  </Route>
+                  <Route path="*" element={<NotFound />} />
                 </Route>
-                <Route path="*" element={<NotFound />} />
               </Route>
-            </Route>
-          </Routes>
-        </DataProvider>
-      </AuthProvider>
-    </BrowserRouter>
+            </Routes>
+          </DataProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </GoogleOAuthProvider>
   );
 }
 

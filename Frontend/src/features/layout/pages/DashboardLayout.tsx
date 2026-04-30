@@ -3,7 +3,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Package, Wrench, ShoppingCart,
-  BarChart3, Shield, LogOut, Menu, X, Bell,
+  BarChart3, Shield, LogOut, Menu, X, Bell, ClipboardCheck,
 } from 'lucide-react';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { useData } from '@/shared/contexts/DataContext';
@@ -16,6 +16,7 @@ const navItems: { label: string; to: string; icon: typeof LayoutDashboard; end?:
   { label: 'Sales', to: '/sales', icon: ShoppingCart },
   { label: 'Reports', to: '/reports', icon: BarChart3 },
   { label: 'Users', to: '/users', icon: Shield },
+  { label: 'Approvals', to: '/approvals', icon: ClipboardCheck },
 ];
 
 export default function DashboardLayout() {

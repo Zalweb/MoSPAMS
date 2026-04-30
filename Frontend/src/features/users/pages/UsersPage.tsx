@@ -1,15 +1,16 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Shield, UserCheck, Clock, Activity, Plus, Pencil, Trash2, Power } from 'lucide-react';
+import { Shield, UserCheck, Clock, Activity, Plus, Pencil, Trash2, Power, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useData } from '@/shared/contexts/DataContext';
 import { useAuth } from '@/features/auth/context/AuthContext';
-import type { User } from '@/shared/types';
+import { apiGet, apiMutation } from '@/shared/lib/api';
+import type { RoleRequest, User } from '@/shared/types';
 
 const newUserSchema = z.object({
   name: z.string().min(2, 'Required'),
@@ -34,6 +35,8 @@ export default function Users() {
   const [editing, setEditing] = useState<User | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<User | null>(null);
   const [logFilter, setLogFilter] = useState<{ user: string; query: string }>({ user: 'All', query: '' });
+  const [pendingRequests, setPendingRequests] = useState<RoleRequest[]>([]);
+  const [tab, setTab] = useState<'users' | 'requests'>('users');
 
   const addForm = useForm<NewUserForm>({ resolver: zodResolver(newUserSchema), defaultValues: { name: '', email: '', role: 'Staff', password: '' } });
   const editForm = useForm<EditUserForm>({ resolver: zodResolver(editUserSchema) });
@@ -44,6 +47,27 @@ export default function Users() {
   const filteredLogs = useMemo(() => {
     return logs.filter(l => (logFilter.user === 'All' || l.user === logFilter.user) && (!logFilter.query || l.action.toLowerCase().includes(logFilter.query.toLowerCase())));
   }, [logs, logFilter]);
+
+  const fetchPendingRequests = useCallback(async () => {
+    try {
+      const data = await apiGet<{ data: RoleRequest[] }>('/api/role-requests?status=pending');
+      setPendingRequests(data.data);
+    } catch {
+      // Keep the Users page usable if the approvals endpoint is temporarily unavailable.
+    }
+  }, []);
+
+  useEffect(() => { void fetchPendingRequests(); }, [fetchPendingRequests]);
+
+  const handleApprove = async (id: number) => {
+    await apiMutation(`/api/role-requests/${id}/approve`, 'PATCH');
+    setPendingRequests(prev => prev.filter(r => r.id !== id));
+  };
+
+  const handleDeny = async (id: number) => {
+    await apiMutation(`/api/role-requests/${id}/deny`, 'PATCH');
+    setPendingRequests(prev => prev.filter(r => r.id !== id));
+  };
 
   const openAdd = () => { setEditing(null); addForm.reset({ name: '', email: '', role: 'Staff', password: '' }); setModalOpen(true); };
   const openEdit = (u: User) => { setEditing(u); editForm.reset({ name: u.name, email: u.email, role: u.role, password: '' }); setModalOpen(true); };
@@ -70,6 +94,36 @@ export default function Users() {
         </Button>
       </div>
 
+      <div className="flex gap-1 mb-6 border-b border-[#F5F5F4]">
+        <button
+          onClick={() => setTab('users')}
+          className={`px-4 py-2 text-[13px] font-medium border-b-2 transition-colors ${
+            tab === 'users'
+              ? 'border-[#1C1917] text-[#1C1917]'
+              : 'border-transparent text-[#A8A29E] hover:text-[#78716C]'
+          }`}
+        >
+          All Users
+        </button>
+        <button
+          onClick={() => setTab('requests')}
+          className={`px-4 py-2 text-[13px] font-medium border-b-2 transition-colors flex items-center gap-1.5 ${
+            tab === 'requests'
+              ? 'border-[#1C1917] text-[#1C1917]'
+              : 'border-transparent text-[#A8A29E] hover:text-[#78716C]'
+          }`}
+        >
+          Pending Requests
+          {pendingRequests.length > 0 && (
+            <span className="inline-flex items-center rounded-full bg-yellow-400 px-1.5 py-0.5 text-[10px] font-bold text-neutral-800">
+              {pendingRequests.length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {tab === 'users' && (
+        <>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
         {[
           { title: 'Administrators', desc: 'Full system access', count: adminCount, icon: Shield, accent: 'bg-[#1C1917] text-white' },
@@ -187,6 +241,62 @@ export default function Users() {
           {filteredLogs.length === 0 && <p className="text-[12px] text-[#D6D3D1] text-center py-8">No entries match this filter</p>}
         </div>
       </div>
+
+        </>
+      )}
+
+      {tab === 'requests' && (
+        <div className="bg-white rounded-2xl border border-[#F5F5F4] shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
+          {pendingRequests.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 gap-3">
+              <Clock className="w-10 h-10 text-[#D6D3D1]" strokeWidth={1} />
+              <p className="text-[13px] text-[#A8A29E]">No pending role requests</p>
+            </div>
+          ) : (
+            <table className="w-full text-[13px]">
+              <thead>
+                <tr className="border-b border-[#F5F5F4] bg-[#FAFAF9]">
+                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-[#A8A29E] uppercase tracking-wide">User</th>
+                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-[#A8A29E] uppercase tracking-wide">Email</th>
+                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-[#A8A29E] uppercase tracking-wide">Requested Role</th>
+                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-[#A8A29E] uppercase tracking-wide">Date</th>
+                  <th className="px-5 py-3" />
+                </tr>
+              </thead>
+              <tbody>
+                {pendingRequests.map((req) => (
+                  <tr key={req.id} className="border-b border-[#F5F5F4] last:border-0 hover:bg-[#FAFAF9] transition-colors">
+                    <td className="px-5 py-3.5 font-medium text-[#1C1917]">{req.user_name}</td>
+                    <td className="px-5 py-3.5 text-[#78716C]">{req.user_email}</td>
+                    <td className="px-5 py-3.5">
+                      <span className="inline-flex items-center rounded-full bg-neutral-100 px-2.5 py-1 text-[11px] font-semibold text-neutral-700">
+                        {req.requested_role}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5 text-[#A8A29E]">{new Date(req.created_at).toLocaleDateString()}</td>
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-2 justify-end">
+                        <button
+                          onClick={() => handleApprove(req.id)}
+                          className="inline-flex items-center gap-1 rounded-lg bg-yellow-400 px-3 py-1.5 text-[11px] font-bold text-neutral-800 hover:bg-yellow-500 transition-colors"
+                        >
+                          <CheckCircle className="w-3 h-3" /> Approve
+                        </button>
+                        <button
+                          onClick={() => handleDeny(req.id)}
+                          className="inline-flex items-center gap-1 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-[11px] font-medium text-neutral-600 hover:bg-neutral-50 transition-colors"
+                        >
+                          <XCircle className="w-3 h-3" /> Deny
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className="sm:max-w-md rounded-[20px] border-[#F0EFED] p-6">
