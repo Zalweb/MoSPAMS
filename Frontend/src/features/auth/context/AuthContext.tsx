@@ -1,10 +1,19 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import type { User } from '@/shared/types';
+import type { User, GoogleData } from '@/shared/types';
 import { apiMutation, setAuthToken } from '@/shared/lib/api';
 
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
+  googleLogin: (credential: string) => Promise<{ needsRegistration: true; googleData: GoogleData } | { needsRegistration: false }>;
+  googleRegister: (payload: {
+    google_id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    password: string;
+    requested_role: 'customer' | 'staff' | 'mechanic';
+  }) => Promise<boolean>;
   logout: () => void;
   ready: boolean;
 }
@@ -12,6 +21,12 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface LoginResponse { token: string; user: User }
+interface GoogleLoginResponse {
+  needs_registration?: true;
+  google_data?: GoogleData;
+  token?: string;
+  user?: User;
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -29,6 +44,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const googleLogin = useCallback(async (credential: string) => {
+    try {
+      const response = await apiMutation<GoogleLoginResponse>('/api/auth/google', 'POST', { credential });
+      if (response.needs_registration && response.google_data) {
+        return { needsRegistration: true as const, googleData: response.google_data };
+      }
+      if (response.token && response.user) {
+        setAuthToken(response.token);
+        setUser(response.user);
+      }
+      return { needsRegistration: false as const };
+    } catch {
+      return { needsRegistration: false as const };
+    }
+  }, []);
+
+  const googleRegister = useCallback(async (payload: {
+    google_id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    password: string;
+    requested_role: 'customer' | 'staff' | 'mechanic';
+  }) => {
+    try {
+      const response = await apiMutation<LoginResponse>('/api/auth/google/register', 'POST', payload);
+      setAuthToken(response.token);
+      setUser(response.user);
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await apiMutation('/api/logout', 'POST');
@@ -40,7 +89,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout: () => { void logout(); }, ready: true }}>
+    <AuthContext.Provider value={{
+      user,
+      login,
+      googleLogin,
+      googleRegister,
+      logout: () => { void logout(); },
+      ready: true,
+    }}>
       {children}
     </AuthContext.Provider>
   );
