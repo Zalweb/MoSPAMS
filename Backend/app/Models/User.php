@@ -25,6 +25,7 @@ class User extends Authenticatable
 
     protected $hidden = [
         'password_hash',
+        'google_id',
     ];
 
     public function role()
