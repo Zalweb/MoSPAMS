@@ -74,3 +74,19 @@ export interface ActivityLog {
 }
 
 export type View = 'login' | 'overview' | 'inventory' | 'services' | 'sales' | 'reports' | 'users';
+
+export interface RoleRequest {
+  id: number;
+  user_id: string;
+  user_name: string;
+  user_email: string;
+  requested_role: 'Staff' | 'Mechanic';
+  status: 'pending' | 'approved' | 'denied';
+  created_at: string;
+}
+
+export interface GoogleData {
+  google_id: string;
+  name: string;
+  email: string;
+}
