@@ -21,7 +21,10 @@ class AuthController extends Controller
 
         $user = User::query()
             ->with(['role', 'status'])
-            ->where('username', $credentials['email'])
+            ->where(function ($q) use ($credentials) {
+                $q->where('username', $credentials['email'])
+                  ->orWhere('email', $credentials['email']);
+            })
             ->first();
 
         if (! $user || ! Hash::check($credentials['password'], $user->password_hash)) {
