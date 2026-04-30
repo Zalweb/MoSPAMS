@@ -27,8 +27,10 @@ class GoogleAuthController extends Controller
         }
 
         $user = User::with(['role', 'status'])
-            ->where('google_id', $payload['sub'])
-            ->orWhere('email', $payload['email'])
+            ->where(function ($q) use ($payload) {
+                $q->where('google_id', $payload['sub'])
+                  ->orWhere('email', $payload['email']);
+            })
             ->first();
 
         if (!$user) {
@@ -65,34 +67,38 @@ class GoogleAuthController extends Controller
             'requested_role' => ['required', 'in:customer,staff,mechanic'],
         ]);
 
-        $customerRole  = Role::where('role_name', 'Customer')->first();
-        $activeStatus  = UserStatus::where('status_code', 'ACTIVE')->first();
+        $customerRole  = Role::where('role_name', 'Customer')->firstOrFail();
+        $activeStatus  = UserStatus::where('status_code', 'ACTIVE')->firstOrFail();
 
-        $user = User::create([
-            'role_id_fk'        => $customerRole->role_id,
-            'full_name'         => $data['name'],
-            'username'          => $data['email'],
-            'email'             => $data['email'],
-            'google_id'         => $data['google_id'],
-            'password_hash'     => Hash::make($data['password']),
-            'user_status_id_fk' => $activeStatus->user_status_id,
-        ]);
-
-        Customer::create([
-            'user_id_fk' => $user->user_id,
-            'full_name'  => $data['name'],
-            'email'      => $data['email'],
-            'phone'      => $data['phone'] ?? null,
-        ]);
-
-        if (in_array($data['requested_role'], ['staff', 'mechanic'])) {
-            $requestedRole = Role::where('role_name', ucfirst($data['requested_role']))->first();
-            RoleRequest::create([
-                'user_id_fk'           => $user->user_id,
-                'requested_role_id_fk' => $requestedRole->role_id,
-                'status'               => 'pending',
+        $user = DB::transaction(function () use ($data, $customerRole, $activeStatus) {
+            $user = User::create([
+                'role_id_fk'        => $customerRole->role_id,
+                'full_name'         => $data['name'],
+                'username'          => $data['email'],
+                'email'             => $data['email'],
+                'google_id'         => $data['google_id'],
+                'password_hash'     => Hash::make($data['password']),
+                'user_status_id_fk' => $activeStatus->user_status_id,
             ]);
-        }
+
+            Customer::create([
+                'user_id_fk' => $user->user_id,
+                'full_name'  => $data['name'],
+                'email'      => $data['email'],
+                'phone'      => $data['phone'] ?? null,
+            ]);
+
+            if (in_array($data['requested_role'], ['staff', 'mechanic'])) {
+                $requestedRole = Role::where('role_name', ucfirst($data['requested_role']))->firstOrFail();
+                RoleRequest::create([
+                    'user_id_fk'           => $user->user_id,
+                    'requested_role_id_fk' => $requestedRole->role_id,
+                    'status'               => 'pending',
+                ]);
+            }
+
+            return $user;
+        });
 
         $this->log($user->user_id, 'Registered via Google', 'users', $user->user_id);
 
