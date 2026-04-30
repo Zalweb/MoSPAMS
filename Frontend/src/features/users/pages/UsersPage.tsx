@@ -14,13 +14,13 @@ import type { User } from '@/shared/types';
 const newUserSchema = z.object({
   name: z.string().min(2, 'Required'),
   email: z.string().email(),
-  role: z.enum(['Admin', 'Staff']),
+  role: z.enum(['Admin', 'Staff', 'Mechanic', 'Customer']),
   password: z.string().min(6, 'Min 6 characters'),
 });
 const editUserSchema = z.object({
   name: z.string().min(2, 'Required'),
   email: z.string().email(),
-  role: z.enum(['Admin', 'Staff']),
+  role: z.enum(['Admin', 'Staff', 'Mechanic', 'Customer']),
   password: z.string().optional(),
 });
 type NewUserForm = z.infer<typeof newUserSchema>;
@@ -206,6 +206,8 @@ export default function Users() {
                 <select {...editForm.register('role')} className="w-full mt-1.5 h-9 px-3 rounded-xl border border-[#E7E5E4] text-[13px] bg-white">
                   <option value="Admin">Admin</option>
                   <option value="Staff">Staff</option>
+                  <option value="Mechanic">Mechanic</option>
+                  <option value="Customer">Customer</option>
                 </select>
               </div>
               <div>
@@ -234,6 +236,8 @@ export default function Users() {
                 <select {...addForm.register('role')} className="w-full mt-1.5 h-9 px-3 rounded-xl border border-[#E7E5E4] text-[13px] bg-white">
                   <option value="Staff">Staff</option>
                   <option value="Admin">Admin</option>
+                  <option value="Mechanic">Mechanic</option>
+                  <option value="Customer">Customer</option>
                 </select>
               </div>
               <div>

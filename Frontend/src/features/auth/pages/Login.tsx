@@ -12,8 +12,8 @@ export default function Login() {
   const { login, ready } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [email, setEmail] = useState('admin@mospams.com');
-  const [password, setPassword] = useState('password');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -21,10 +21,10 @@ export default function Login() {
     e.preventDefault();
     setError('');
     setSubmitting(true);
-    const ok = await login(email, password);
+    const ok = await login(email.trim().toLowerCase(), password.trim());
     setSubmitting(false);
     if (!ok) {
-      setError('Invalid credentials. Try admin@mospams.com / staff@mospams.com with password "password".');
+      setError('Invalid email or password.');
       return;
     }
     const state = location.state as LocationState | null;
@@ -69,7 +69,9 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="h-10 rounded-xl border-[#E7E5E4] bg-[#FAFAF9]/50 text-[13px] text-[#1C1917] placeholder:text-[#D6D3D1] focus:border-[#C4C0BC] focus:ring-0 focus:bg-white transition-all"
-                placeholder="admin@mospams.com"
+                placeholder="you@example.com"
+                autoComplete="email"
+                required
               />
             </div>
             <div>
@@ -79,7 +81,9 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="h-10 rounded-xl border-[#E7E5E4] bg-[#FAFAF9]/50 text-[13px] text-[#1C1917] placeholder:text-[#D6D3D1] focus:border-[#C4C0BC] focus:ring-0 focus:bg-white transition-all"
-                placeholder="password"
+                placeholder="Enter your password"
+                autoComplete="current-password"
+                required
               />
             </div>
             <Button
@@ -87,18 +91,10 @@ export default function Login() {
               disabled={submitting || !ready}
               className="w-full h-10 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-white text-[13px] font-medium transition-all hover:shadow-lg hover:shadow-stone-900/10 mt-1 disabled:opacity-50"
             >
-              {submitting ? 'Signing in…' : 'Sign In'}
+              {submitting ? 'Signing in...' : 'Sign In'}
               <ArrowRight className="w-3.5 h-3.5 ml-1.5 opacity-60" />
             </Button>
           </form>
-
-          <div className="mt-5 pt-4 border-t border-[#F5F5F4]">
-            <p className="text-[11px] text-[#D6D3D1] text-center font-medium tracking-wide uppercase">Demo Credentials</p>
-            <div className="mt-2.5 space-y-1 text-[11px] text-[#A8A29E] text-center">
-              <p><span className="font-semibold text-[#78716C]">Admin</span> admin@mospams.com / password</p>
-              <p><span className="font-semibold text-[#78716C]">Staff</span> staff@mospams.com / password</p>
-            </div>
-          </div>
         </div>
       </div>
     </div>
