@@ -136,7 +136,6 @@ export default function CustomerDashboard() {
           ) : (
             recentServices.map(service => {
               const style = STATUS_STYLES[service.status];
-              const StatusIcon = style.icon;
               return (
                 <div key={service.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-[#FAFAF9]/50 transition-colors">
                   <div className="min-w-0">

@@ -3,7 +3,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Toaster } from 'sonner';
 import { AuthProvider, useAuth } from '@/features/auth/context/AuthContext';
 import { DataProvider } from '@/shared/contexts/DataContext';
-import Login from '@/features/auth/pages/Login';
+
 import LandingPage from '@/features/landing/LandingPage';
 import DashboardLayout from '@/features/layout/pages/DashboardLayout';
 import Overview from '@/features/dashboard/pages/Overview';
@@ -23,20 +23,20 @@ import type { Role } from '@/shared/types';
 function RequireAuth() {
   const { user } = useAuth();
   const location = useLocation();
-  if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
+  if (!user) return <Navigate to="/?login=true" state={{ from: location }} replace />;
   return <Outlet />;
 }
 
 function RequireRole({ role }: { role: Role }) {
   const { user } = useAuth();
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/?login=true" replace />;
   if (user.role !== role) return <Navigate to="/dashboard" replace />;
   return <Outlet />;
 }
 
 function RequireCustomer() {
   const { user } = useAuth();
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/?login=true" replace />;
   if (user.role !== 'Customer') return <Navigate to="/dashboard" replace />;
   return <Outlet />;
 }
@@ -44,7 +44,7 @@ function RequireCustomer() {
 function LoginRoute() {
   const { user } = useAuth();
   if (user) return <Navigate to="/dashboard" replace />;
-  return <Login />;
+  return <Navigate to="/?login=true" replace />;
 }
 
 function App() {

@@ -1,0 +1,22 @@
+# Ignore Google OAuth client secret files
+client_secret_*.json
+*.json.bak
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+.env
+.env.local
+
+# Laravel / PHP
+vendor/
+.env
+.phpunit.result.cache
+storage/*.key
+Homestead.json
+Homestead.yaml
+
+# General
+.DS_Store
+Thumbs.db

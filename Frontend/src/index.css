@@ -39,7 +39,7 @@
   }
 
   body {
-    @apply bg-[#FAFAF9] text-[#1C1917] antialiased;
+    @apply bg-black text-zinc-300 antialiased;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 

@@ -60,13 +60,13 @@ export function can(role: Role | undefined, module: Module, action: Action): boo
 }
 
 export const NAV_ACCESS: Record<string, Role[]> = {
-  '/': ['Admin', 'Staff'],
-  '/inventory': ['Admin', 'Staff'],
-  '/services': ['Admin', 'Staff'],
-  '/sales': ['Admin', 'Staff'],
-  '/reports': ['Admin', 'Staff'],
-  '/users': ['Admin'],
-  '/approvals': ['Admin'],
+  '/dashboard': ['Admin', 'Staff'],
+  '/dashboard/inventory': ['Admin', 'Staff'],
+  '/dashboard/services': ['Admin', 'Staff'],
+  '/dashboard/sales': ['Admin', 'Staff'],
+  '/dashboard/reports': ['Admin', 'Staff'],
+  '/dashboard/users': ['Admin'],
+  '/dashboard/approvals': ['Admin'],
   '/customer': ['Customer'],
   '/customer/book': ['Customer'],
   '/customer/history': ['Customer'],

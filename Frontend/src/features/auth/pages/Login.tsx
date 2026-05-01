@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { LayoutGrid, AlertCircle, ArrowRight } from 'lucide-react';
 import { GoogleLogin, type CredentialResponse } from '@react-oauth/google';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import GoogleSignUpModal from '@/features/auth/components/GoogleSignUpModal';
 import type { GoogleData } from '@/shared/types';
@@ -19,6 +17,7 @@ export default function Login() {
   const [password, setPassword]   = useState('');
   const [error, setError]         = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [signUpOpen, setSignUpOpen] = useState(false);
   const [googleData, setGoogleData] = useState<GoogleData | null>(null);
 
@@ -30,6 +29,8 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    if (!email.trim()) { setError('Please enter your email or phone.'); return; }
+    if (!password) { setError('Please enter your password.'); return; }
     setSubmitting(true);
     const ok = await login(email.trim().toLowerCase(), password.trim());
     setSubmitting(false);
@@ -52,28 +53,83 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FAFAF9] relative">
-      <div
-        className="absolute inset-0 opacity-[0.015]"
-        style={{
-          backgroundImage: `radial-gradient(circle, #1C1917 1px, transparent 1px)`,
-          backgroundSize: '24px 24px',
-        }}
-      />
-
-      <div className="w-full max-w-[360px] px-4 relative z-10">
-        <div className="text-center mb-10">
-          <div className="w-11 h-11 rounded-[14px] bg-[#1C1917] flex items-center justify-center mx-auto mb-4 shadow-md">
-            <LayoutGrid className="w-[18px] h-[18px] text-white" strokeWidth={2} />
+    <div className="min-h-screen flex items-center justify-center bg-[#FAFAF9]">
+      <div className="w-full max-w-[360px] px-4">
+        <div className="bg-white rounded-[20px] border border-[#F5F5F4] shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.03)] p-8">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-[22px] font-semibold text-[#1C1917] mb-2">Welcome</h1>
+            <p className="text-sm text-[#A8A29E]">We are happy to have you back!</p>
           </div>
-          <h1 className="text-[22px] font-bold text-[#1C1917] tracking-tight leading-none">MoSPAMS</h1>
-          <p className="text-[13px] text-[#A8A29E] mt-1.5 font-normal">Motorcycle Service & Parts Management</p>
-        </div>
 
-        <div className="bg-white rounded-[20px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.03)] border border-[#F5F5F4]">
-          <h2 className="text-[15px] font-semibold text-[#1C1917] mb-5">Sign In</h2>
+          {error && (
+            <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50/80 text-red-600 text-[12px] mb-4 border border-red-100/50">
+              <span>{error}</span>
+            </div>
+          )}
 
-          <div className="mb-4 flex justify-center">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Email Input */}
+            <div>
+              <Input
+                type="text"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email or phone"
+                className="h-[42px] rounded-xl border-[#E7E5E4] bg-[#FAFAF9]/50 text-[13px] text-[#1C1917] placeholder:text-[#D6D3D1] focus:border-[#C4C0BC] focus:ring-0 focus:bg-white transition-all"
+                autoComplete="email"
+                required
+              />
+            </div>
+
+            {/* Password Input */}
+            <div>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                className="h-[42px] rounded-xl border-[#E7E5E4] bg-[#FAFAF9]/50 text-[13px] text-[#1C1917] placeholder:text-[#D6D3D1] focus:border-[#C4C0BC] focus:ring-0 focus:bg-white transition-all"
+                autoComplete="current-password"
+                required
+              />
+            </div>
+
+            {/* Options Row */}
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded border-[#E7E5E4] text-[#1C1917] focus:ring-[#C4C0BC]"
+                />
+                <span className="text-sm text-[#78716C]">Remember me</span>
+              </label>
+              <a href="#" className="text-sm text-[#1C1917] hover:text-[#292524] font-medium">
+                Forgot password?
+              </a>
+            </div>
+
+            {/* Sign In Button */}
+            <Button
+              type="submit"
+              disabled={submitting || !ready}
+              className="w-full h-[42px] rounded-xl bg-[#1C1917] hover:bg-[#292524] text-white text-sm font-medium transition-all disabled:opacity-50"
+            >
+              {submitting ? 'Signing in...' : 'Sign In'}
+            </Button>
+          </form>
+
+          {/* Divider */}
+          <div className="flex items-center my-6">
+            <div className="flex-1 border-t border-[#E7E5E4]"></div>
+            <span className="px-4 text-sm text-[#A8A29E]">Or</span>
+            <div className="flex-1 border-t border-[#E7E5E4]"></div>
+          </div>
+
+          {/* Google Sign In Button */}
+          <div className="flex justify-center">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={() => setError('Google sign-in failed. Please try again.')}
@@ -82,55 +138,19 @@ export default function Login() {
               theme="outline"
               size="large"
               width="320"
-              text="continue_with"
+              text="signin_with"
             />
           </div>
 
-          <div className="flex items-center py-3 text-xs text-neutral-400 uppercase before:me-6 before:flex-[1_1_0%] before:border-t before:border-neutral-200 after:ms-6 after:flex-[1_1_0%] after:border-t after:border-neutral-200">
-            Or
+          {/* Footer */}
+          <div className="text-center mt-6">
+            <p className="text-sm text-[#78716C]">
+              Don't have account{' '}
+              <a href="#" className="text-[#1C1917] hover:text-[#292524] font-medium">
+                Sign up
+              </a>
+            </p>
           </div>
-
-          {error && (
-            <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50/80 text-red-600 text-[12px] mb-4 border border-red-100/50">
-              <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label className="text-[12px] font-medium text-[#78716C] mb-1.5 block">Email</Label>
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="h-10 rounded-xl border-[#E7E5E4] bg-[#FAFAF9]/50 text-[13px] text-[#1C1917] placeholder:text-[#D6D3D1] focus:border-[#C4C0BC] focus:ring-0 focus:bg-white transition-all"
-                placeholder="you@example.com"
-                autoComplete="email"
-                required
-              />
-            </div>
-            <div>
-              <Label className="text-[12px] font-medium text-[#78716C] mb-1.5 block">Password</Label>
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="h-10 rounded-xl border-[#E7E5E4] bg-[#FAFAF9]/50 text-[13px] text-[#1C1917] placeholder:text-[#D6D3D1] focus:border-[#C4C0BC] focus:ring-0 focus:bg-white transition-all"
-                placeholder="Enter your password"
-                autoComplete="current-password"
-                required
-              />
-            </div>
-            <Button
-              type="submit"
-              disabled={submitting || !ready}
-              className="w-full h-10 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-white text-[13px] font-medium transition-all hover:shadow-lg hover:shadow-stone-900/10 mt-1 disabled:opacity-50"
-            >
-              {submitting ? 'Signing in...' : 'Sign In'}
-              <ArrowRight className="w-3.5 h-3.5 ml-1.5 opacity-60" />
-            </Button>
-          </form>
         </div>
       </div>
 

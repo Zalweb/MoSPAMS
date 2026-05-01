@@ -47,21 +47,6 @@ services:
       - mospams-network
     command: sh -c "php artisan migrate --force && php -S 0.0.0.0:8001 -t public"
 
-  frontend:
-    build:
-      context: ./Frontend
-      dockerfile: Dockerfile
-    container_name: mospams-frontend
-    restart: unless-stopped
-    ports:
-      - "5173:5173"
-    environment:
-      VITE_API_BASE_URL: http://backend:8001
-    depends_on:
-      - backend
-    networks:
-      - mospams-network
-
 volumes:
   mospams_mysql_data:
 
