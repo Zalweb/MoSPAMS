@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\MospamsController;
 use App\Http\Controllers\Api\RoleRequestController;
@@ -51,4 +52,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/role-requests', [RoleRequestController::class, 'index'])->middleware('role:Admin');
     Route::patch('/role-requests/{roleRequest}/approve', [RoleRequestController::class, 'approve'])->middleware('role:Admin');
     Route::patch('/role-requests/{roleRequest}/deny', [RoleRequestController::class, 'deny'])->middleware('role:Admin');
+
+    // Customer routes
+    Route::get('/customer/services', [CustomerController::class, 'services']);
+    Route::post('/customer/services', [CustomerController::class, 'createService']);
+    Route::get('/customer/payments', [CustomerController::class, 'payments']);
 });
