@@ -4,19 +4,25 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Package, Wrench, ShoppingCart,
   BarChart3, Shield, LogOut, Menu, X, Bell, ClipboardCheck,
+  Home, Calendar, CreditCard,
 } from 'lucide-react';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { useData } from '@/shared/contexts/DataContext';
 import { NAV_ACCESS } from '@/shared/lib/permissions';
 
 const navItems: { label: string; to: string; icon: typeof LayoutDashboard; end?: boolean }[] = [
-  { label: 'Dashboard', to: '/', icon: LayoutDashboard, end: true },
-  { label: 'Inventory', to: '/inventory', icon: Package },
-  { label: 'Services', to: '/services', icon: Wrench },
-  { label: 'Sales', to: '/sales', icon: ShoppingCart },
-  { label: 'Reports', to: '/reports', icon: BarChart3 },
-  { label: 'Users', to: '/users', icon: Shield },
-  { label: 'Approvals', to: '/approvals', icon: ClipboardCheck },
+  { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard, end: true },
+  { label: 'Inventory', to: '/dashboard/inventory', icon: Package },
+  { label: 'Services', to: '/dashboard/services', icon: Wrench },
+  { label: 'Sales', to: '/dashboard/sales', icon: ShoppingCart },
+  { label: 'Reports', to: '/dashboard/reports', icon: BarChart3 },
+  { label: 'Users', to: '/dashboard/users', icon: Shield },
+  { label: 'Approvals', to: '/dashboard/approvals', icon: ClipboardCheck },
+  // Customer navigation
+  { label: 'Home', to: '/dashboard/customer', icon: Home, end: true },
+  { label: 'Book', to: '/dashboard/customer/book', icon: Calendar },
+  { label: 'History', to: '/dashboard/customer/history', icon: Wrench },
+  { label: 'Payments', to: '/dashboard/customer/payments', icon: CreditCard },
 ];
 
 export default function DashboardLayout() {
@@ -30,8 +36,8 @@ export default function DashboardLayout() {
   const lowStock = parts.filter(p => p.stock <= p.minStock);
   const visibleNav = navItems.filter(item => (NAV_ACCESS[item.to] ?? []).includes(user!.role));
 
-  const currentLabel = navItems.find(n => n.end ? location.pathname === n.to : location.pathname.startsWith(n.to) && n.to !== '/')?.label
-    ?? (location.pathname === '/' ? 'Dashboard' : '');
+  const currentLabel = navItems.find(n => n.end ? location.pathname === n.to : location.pathname.startsWith(n.to) && n.to !== '/dashboard')?.label
+    ?? (location.pathname === '/dashboard' ? 'Dashboard' : '');
 
   const handleLogout = () => { logout(); navigate('/login', { replace: true }); };
 
@@ -144,7 +150,7 @@ export default function DashboardLayout() {
                   </div>
                   {lowStock.length > 0 && (
                     <button
-                      onClick={() => { setBellOpen(false); navigate('/inventory'); }}
+                      onClick={() => { setBellOpen(false); navigate('/dashboard/inventory'); }}
                       className="w-full px-4 py-2.5 text-[11px] font-medium text-[#3B82F6] hover:bg-[#FAFAF9] border-t border-[#F5F5F4]"
                     >
                       View Inventory →
