@@ -31,7 +31,7 @@ class AuthController extends Controller
             throw ValidationException::withMessages(['email' => 'Invalid credentials.']);
         }
 
-        if ($user->status?->status_code !== 'ACTIVE') {
+        if ($user->status?->status_code !== 'active') {
             throw ValidationException::withMessages(['email' => 'This account is inactive.']);
         }
 
@@ -62,7 +62,8 @@ class AuthController extends Controller
         return [
             'id' => (string) $user->user_id,
             'name' => $user->full_name,
-            'email' => $user->username,
+            'username' => $user->username,
+            'email' => $user->email,
             'role' => $user->role?->role_name,
             'status' => $user->status?->status_name,
             'lastActive' => optional($user->updated_at)->toISOString(),
