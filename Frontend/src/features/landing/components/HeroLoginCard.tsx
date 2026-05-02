@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { GoogleLogin, type CredentialResponse } from '@react-oauth/google';
 import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import GoogleSignUpModal from '@/features/auth/components/GoogleSignUpModal';
+import GoogleLoginButton from '@/features/auth/components/GoogleLoginButton';
 import type { GoogleData } from '@/shared/types';
+import type { CredentialResponse } from '@react-oauth/google';
 
 interface HeroLoginCardProps {
   onBack: () => void;
@@ -49,10 +50,10 @@ export default function HeroLoginCard({ onBack }: HeroLoginCardProps) {
       return;
     }
     setSubmitting(true);
-    const ok = await login(email.trim().toLowerCase(), password.trim());
+    const result = await login(email.trim().toLowerCase(), password.trim());
     setSubmitting(false);
-    if (!ok) {
-      setError('Invalid email or password.');
+    if (!result.success) {
+      setError(result.error || 'Invalid email or password.');
       return;
     }
     navigate(dest(), { replace: true });
@@ -154,15 +155,9 @@ export default function HeroLoginCard({ onBack }: HeroLoginCardProps) {
       </div>
 
       <div className="flex justify-center">
-        <GoogleLogin
+        <GoogleLoginButton
           onSuccess={handleGoogleSuccess}
           onError={() => setError('Google sign-in failed. Please try again.')}
-          useOneTap={false}
-          shape="rectangular"
-          theme="outline"
-          size="large"
-          width="320"
-          text="signin_with"
         />
       </div>
 

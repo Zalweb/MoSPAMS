@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { GoogleLogin, type CredentialResponse } from '@react-oauth/google';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import GoogleSignUpModal from '@/features/auth/components/GoogleSignUpModal';
+import GoogleLoginButton from '@/features/auth/components/GoogleLoginButton';
 import type { GoogleData } from '@/shared/types';
 
 interface LocationState { from?: { pathname?: string } }
@@ -32,10 +32,10 @@ export default function Login() {
     if (!email.trim()) { setError('Please enter your email or phone.'); return; }
     if (!password) { setError('Please enter your password.'); return; }
     setSubmitting(true);
-    const ok = await login(email.trim().toLowerCase(), password.trim());
+    const result = await login(email.trim().toLowerCase(), password.trim());
     setSubmitting(false);
-    if (!ok) {
-      setError('Invalid email or password.');
+    if (!result.success) {
+      setError(result.error || 'Invalid email or password.');
       return;
     }
     navigate(dest(), { replace: true });
@@ -130,15 +130,9 @@ export default function Login() {
 
           {/* Google Sign In Button */}
           <div className="flex justify-center">
-            <GoogleLogin
+            <GoogleLoginButton
               onSuccess={handleGoogleSuccess}
               onError={() => setError('Google sign-in failed. Please try again.')}
-              useOneTap={false}
-              shape="rectangular"
-              theme="outline"
-              size="large"
-              width="320"
-              text="signin_with"
             />
           </div>
 

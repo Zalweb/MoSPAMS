@@ -4,7 +4,7 @@ import { apiMutation, setAuthToken } from '@/shared/lib/api';
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   googleLogin: (credential: string) => Promise<{ needsRegistration: true; googleData: GoogleData } | { needsRegistration: false }>;
   googleRegister: (payload: {
     google_id: string;
@@ -36,11 +36,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await apiMutation<LoginResponse>('/api/login', 'POST', { email, password });
       setAuthToken(response.token);
       setUser(response.user);
-      return true;
-    } catch {
+      return { success: true };
+    } catch (error) {
       setAuthToken(null);
       setUser(null);
-      return false;
+      const errorMessage = error instanceof Error ? error.message : 'Login failed';
+      if (errorMessage.includes('Failed to fetch') || errorMessage.includes('ERR_CONNECTION_REFUSED') || errorMessage.includes('NetworkError')) {
+        return { success: false, error: 'Internal Server Error. Please check your connection.' };
+      }
+      return { success: false, error: errorMessage };
     }
   }, []);
 

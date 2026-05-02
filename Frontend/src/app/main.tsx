@@ -6,6 +6,9 @@ import '@fontsource/inter/600.css'
 import '@fontsource/inter/700.css'
 import '../index.css'
 import App from './App.tsx'
+import { registerSW } from '@/shared/lib/serviceWorker'
+
+registerSW()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
