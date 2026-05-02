@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router';
+import { useState } from 'react';
 import LandingNavbar from './components/LandingNavbar';
 import HeroSection from './components/HeroSection';
 import FeaturesSection from './components/FeaturesSection';
@@ -11,14 +10,6 @@ import LandingFooter from './components/LandingFooter';
 
 export default function LandingPage() {
   const [showLogin, setShowLogin] = useState(false);
-  const location = useLocation();
-
-  useEffect(() => {
-    if (location.search.includes('login=true') || location.hash === '#login') {
-      setShowLogin(true);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, [location]);
 
   return (
     <div className="min-h-screen bg-black overflow-x-clip selection:bg-zinc-800 selection:text-white">

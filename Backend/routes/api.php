@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/auth/google', [GoogleAuthController::class, 'googleLogin']);
 Route::post('/auth/google/register', [GoogleAuthController::class, 'googleRegister']);
+Route::get('/stats', [MospamsController::class, 'publicStats']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);

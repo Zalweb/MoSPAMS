@@ -23,6 +23,103 @@ class MospamsController extends Controller
         return response()->json(['data' => $parts]);
     }
 
+    public function publicStats(): JsonResponse
+    {
+        $totalJobsCompleted = DB::table('service_jobs')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->where('service_job_statuses.status_code', 'COMPLETED')
+            ->count();
+
+        $totalCustomers = DB::table('customers')->count();
+        $totalRevenue = (float) DB::table('sales')->sum('net_amount');
+
+        $totalParts = DB::table('parts')
+            ->join('part_statuses', 'part_statuses.part_status_id', '=', 'parts.part_status_id_fk')
+            ->where('part_statuses.status_code', 'ACTIVE')
+            ->count();
+
+        $activeServices = DB::table('service_jobs')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->whereIn('service_job_statuses.status_code', ['PENDING', 'ONGOING'])
+            ->count();
+
+        $start = now()->subDays(29)->startOfDay();
+        $end = now()->endOfDay();
+
+        $revenueRows = DB::table('sales')
+            ->selectRaw('DATE(sale_date) as day, SUM(net_amount) as amount')
+            ->whereBetween('sale_date', [$start, $end])
+            ->groupByRaw('DATE(sale_date)')
+            ->pluck('amount', 'day');
+
+        $jobRows = DB::table('service_jobs')
+            ->selectRaw('DATE(job_date) as day, COUNT(*) as count')
+            ->whereBetween('job_date', [$start->toDateString(), $end->toDateString()])
+            ->groupByRaw('DATE(job_date)')
+            ->pluck('count', 'day');
+
+        $revenueByDay = [];
+        $jobsByDay = [];
+        for ($i = 29; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $revenueByDay[] = ['date' => $date, 'amount' => (float) ($revenueRows[$date] ?? 0)];
+            $jobsByDay[] = ['date' => $date, 'count' => (int) ($jobRows[$date] ?? 0)];
+        }
+
+        $statusRows = DB::table('service_jobs')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->selectRaw('LOWER(service_job_statuses.status_code) as code, COUNT(*) as count')
+            ->groupByRaw('LOWER(service_job_statuses.status_code)')
+            ->pluck('count', 'code');
+
+        $serviceStatus = [
+            'pending' => (int) ($statusRows['pending'] ?? 0),
+            'ongoing' => (int) ($statusRows['ongoing'] ?? 0),
+            'completed' => (int) ($statusRows['completed'] ?? 0),
+        ];
+
+        $paymentRows = DB::table('payments')
+            ->selectRaw('LOWER(payment_method) as method, SUM(amount_paid) as total')
+            ->groupByRaw('LOWER(payment_method)')
+            ->pluck('total', 'method');
+
+        $paymentMethods = [
+            'cash' => (float) ($paymentRows['cash'] ?? 0),
+            'gcash' => (float) ($paymentRows['gcash'] ?? 0),
+        ];
+
+        $topServiceTypes = DB::table('service_job_items')
+            ->join('service_types', 'service_types.service_type_id', '=', 'service_job_items.service_type_id_fk')
+            ->selectRaw('service_types.service_name as name, COUNT(*) as count, SUM(service_job_items.labor_cost) as revenue')
+            ->groupBy('service_types.service_name')
+            ->orderByDesc('count')
+            ->limit(5)
+            ->get()
+            ->map(fn ($row) => [
+                'name' => $row->name,
+                'count' => (int) $row->count,
+                'revenue' => (float) $row->revenue,
+            ])
+            ->values();
+
+        return response()->json([
+            'summary' => [
+                'total_jobs_completed' => $totalJobsCompleted,
+                'total_customers' => $totalCustomers,
+                'total_revenue' => $totalRevenue,
+                'total_parts' => $totalParts,
+                'active_services' => $activeServices,
+            ],
+            'charts' => [
+                'revenue_by_day' => $revenueByDay,
+                'jobs_by_day' => $jobsByDay,
+                'service_status' => $serviceStatus,
+                'payment_methods' => $paymentMethods,
+                'top_service_types' => $topServiceTypes,
+            ],
+        ]);
+    }
+
     public function storePart(Request $request): JsonResponse
     {
         $data = $request->validate([

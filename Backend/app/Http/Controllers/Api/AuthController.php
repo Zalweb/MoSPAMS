@@ -35,7 +35,6 @@ class AuthController extends Controller
             throw ValidationException::withMessages(['email' => 'This account is inactive.']);
         }
 
-        $user->forceFill(['updated_at' => now()])->save();
         $this->log($user->user_id, 'Logged in to the system', 'users', $user->user_id);
 
         return response()->json([

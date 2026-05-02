@@ -143,7 +143,7 @@ export default function HeroLoginCard({ onBack }: HeroLoginCardProps) {
           disabled={submitting || !ready}
           className="w-full h-11 rounded-xl bg-black hover:bg-zinc-800 text-white text-sm font-semibold transition-all duration-200 disabled:opacity-50"
         >
-          {submitting ? 'Signing in...' : 'Sign In'}
+          {submitting ? 'Logging...' : 'Log In'}
         </Button>
       </form>
 

@@ -17,26 +17,29 @@ import CustomerDashboard from '@/features/customers/pages/CustomerDashboard';
 import BookService from '@/features/customers/pages/BookService';
 import ServiceHistory from '@/features/customers/pages/ServiceHistory';
 import Payments from '@/features/customers/pages/Payments';
+import RolesPage from '@/features/roles/pages/RolesPage';
+import ActivityLogsPage from '@/features/activity-logs/pages/ActivityLogsPage';
+import SettingsPage from '@/features/settings/pages/SettingsPage';
 import NotFound from '@/features/common/NotFound';
 import type { Role } from '@/shared/types';
 
 function RequireAuth() {
   const { user } = useAuth();
   const location = useLocation();
-  if (!user) return <Navigate to="/?login=true" state={{ from: location }} replace />;
+  if (!user) return <Navigate to="/" state={{ from: location }} replace />;
   return <Outlet />;
 }
 
 function RequireRole({ role }: { role: Role }) {
   const { user } = useAuth();
-  if (!user) return <Navigate to="/?login=true" replace />;
+  if (!user) return <Navigate to="/" replace />;
   if (user.role !== role) return <Navigate to="/dashboard" replace />;
   return <Outlet />;
 }
 
 function RequireCustomer() {
   const { user } = useAuth();
-  if (!user) return <Navigate to="/?login=true" replace />;
+  if (!user) return <Navigate to="/" replace />;
   if (user.role !== 'Customer') return <Navigate to="/dashboard" replace />;
   return <Outlet />;
 }
@@ -44,7 +47,7 @@ function RequireCustomer() {
 function LoginRoute() {
   const { user } = useAuth();
   if (user) return <Navigate to="/dashboard" replace />;
-  return <Navigate to="/?login=true" replace />;
+  return <Navigate to="/" replace />;
 }
 
 function App() {
@@ -67,6 +70,9 @@ function App() {
                   <Route element={<RequireRole role="Admin" />}>
                     <Route path="users" element={<UsersPage />} />
                     <Route path="approvals" element={<ApprovalsPage />} />
+                    <Route path="roles" element={<RolesPage />} />
+                    <Route path="activity-logs" element={<ActivityLogsPage />} />
+                    <Route path="settings" element={<SettingsPage />} />
                   </Route>
                   <Route element={<RequireCustomer />}>
                     <Route path="customer" element={<CustomerDashboard />} />

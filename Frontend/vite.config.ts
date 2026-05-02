@@ -9,6 +9,8 @@ export default defineConfig({
   plugins: [inspectAttr(), react()],
   server: {
     port: 3000,
+    host: true,
+    allowedHosts: ['.ngrok-free.dev', '.ngrok.dev', '.ngrok.io'],
   },
   resolve: {
     alias: [

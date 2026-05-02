@@ -79,13 +79,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
+    setAuthToken(null);
+    setUser(null);
     try {
       await apiMutation('/api/logout', 'POST');
     } catch {
-      // A failed logout request should still clear this browser session.
+      // ignore — local session already cleared above
     }
-    setAuthToken(null);
-    setUser(null);
   }, []);
 
   return (
