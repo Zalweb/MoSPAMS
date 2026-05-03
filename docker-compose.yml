@@ -27,7 +27,7 @@ services:
     container_name: mospams-backend
     restart: unless-stopped
     ports:
-      - "8001:8001"
+      - "9000:8000"
     environment:
       APP_ENV: local
       APP_DEBUG: "true"
@@ -40,15 +40,17 @@ services:
       DB_PASSWORD: mospams
     volumes:
       - ./Backend:/app
+      - backend_vendor:/app/vendor
     depends_on:
       db:
         condition: service_healthy
     networks:
       - mospams-network
-    command: sh -c "php artisan migrate --force && php -S 0.0.0.0:8001 -t public"
+    command: sh -c "composer install --no-interaction && php artisan migrate:fresh --seed && php artisan serve --host=0.0.0.0 --port=8000"
 
 volumes:
   mospams_mysql_data:
+  backend_vendor:
 
 networks:
   mospams-network:

@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { motion } from 'framer-motion';
-import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Bike, Loader2 } from 'lucide-react';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import GoogleSignUpModal from '@/features/auth/components/GoogleSignUpModal';
 import GoogleLoginButton from '@/features/auth/components/GoogleLoginButton';
@@ -72,102 +70,170 @@ export default function HeroLoginCard({ onBack }: HeroLoginCardProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="w-full max-w-md bg-white rounded-2xl border border-violet-100 shadow-[0_8px_30px_rgb(124,58,237,0.12)] p-6 sm:p-8 relative"
+      initial={{ opacity: 0, scale: 0.95, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95, y: -20 }}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+      className="w-full max-w-md bg-zinc-900/80 backdrop-blur-xl rounded-2xl border border-zinc-800 shadow-2xl shadow-black/50 p-6 sm:p-8 relative overflow-hidden"
     >
+      {/* Subtle gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+
       {/* Back Button */}
-      <button
+      <motion.button
         onClick={onBack}
-        className="absolute top-6 left-6 flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-black transition-colors"
+        className="absolute top-6 right-6 flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-white transition-colors"
+        whileHover={{ x: -4 }}
+        whileTap={{ scale: 0.95 }}
       >
         <ArrowLeft className="w-3.5 h-3.5" />
-        Back to overview
-      </button>
+        Back
+      </motion.button>
 
-      {/* Header */}
-      <div className="text-center mb-8 mt-8">
-        <h2 className="text-2xl font-bold text-black mb-2">Welcome</h2>
-        <p className="text-sm text-zinc-500">We are happy to have you back!</p>
-      </div>
-
-      {error && (
-        <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 text-red-600 text-xs mb-5 border border-red-100">
-          <span>{error}</span>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <Input
-            type="text"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email or phone"
-            className="h-11 rounded-xl border-zinc-200 bg-white text-sm text-black placeholder:text-zinc-400 focus:border-black focus:ring-4 focus:ring-black/5 focus:bg-white transition-all"
-            autoComplete="email"
-            required
-          />
-        </div>
-
-        <div>
-          <Input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            className="h-11 rounded-xl border-zinc-200 bg-white text-sm text-black placeholder:text-zinc-400 focus:border-black focus:ring-4 focus:ring-black/5 focus:bg-white transition-all"
-            autoComplete="current-password"
-            required
-          />
-        </div>
-
-        <div className="flex items-center justify-between pt-1 pb-2">
-          <label className="flex items-center gap-2 cursor-pointer group">
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              className="w-4 h-4 rounded border-zinc-300 text-black focus:ring-black focus:ring-offset-0"
-            />
-            <span className="text-sm text-zinc-500 group-hover:text-zinc-700 transition-colors">Remember me</span>
-          </label>
-          <a href="#" className="text-sm text-black hover:text-black font-medium transition-colors">
-            Forgot password?
-          </a>
-        </div>
-
-        <Button
-          type="submit"
-          disabled={submitting || !ready}
-          className="w-full h-11 rounded-xl bg-black hover:bg-zinc-800 text-white text-sm font-semibold transition-all duration-200 disabled:opacity-50"
+      {/* Content */}
+      <div className="relative z-10">
+        {/* Logo */}
+        <motion.div
+          className="flex justify-center mb-6"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
         >
-          {submitting ? 'Logging...' : 'Log In'}
-        </Button>
-      </form>
+          <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center">
+            <Bike className="w-6 h-6 text-white" />
+          </div>
+        </motion.div>
 
-      <div className="flex items-center my-6">
-        <div className="flex-1 border-t border-gray-100"></div>
-        <span className="px-4 text-xs font-medium text-gray-400 uppercase tracking-wider">Or</span>
-        <div className="flex-1 border-t border-gray-100"></div>
-      </div>
+        {/* Header */}
+        <motion.div
+          className="text-center mb-8"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+        >
+          <h2 className="text-2xl font-bold text-white mb-2">Welcome back</h2>
+          <p className="text-sm text-zinc-400">Sign in to your MoSPAMS account</p>
+        </motion.div>
 
-      <div className="flex justify-center">
-        <GoogleLoginButton
-          onSuccess={handleGoogleSuccess}
-          onError={() => setError('Google sign-in failed. Please try again.')}
-        />
-      </div>
+        {error && (
+          <motion.div
+            className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs mb-5"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <span>{error}</span>
+          </motion.div>
+        )}
 
-      <div className="text-center mt-6">
-        <p className="text-sm text-gray-500">
-          Don't have account?{' '}
-          <a href="#" className="text-violet-600 hover:text-violet-700 font-medium transition-colors">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <input
+              type="text"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email or phone"
+              className="w-full h-11 px-4 rounded-xl bg-zinc-800/50 border border-zinc-700/50 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-white/10 transition-all"
+              autoComplete="email"
+              required
+            />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.25 }}
+          >
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              className="w-full h-11 px-4 rounded-xl bg-zinc-800/50 border border-zinc-700/50 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-white/10 transition-all"
+              autoComplete="current-password"
+              required
+            />
+          </motion.div>
+
+          <motion.div
+            className="flex items-center justify-between pt-1 pb-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <label className="flex items-center gap-2 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 rounded border-zinc-600 bg-zinc-800 text-white focus:ring-white/20 focus:ring-offset-0"
+              />
+              <span className="text-sm text-zinc-400 group-hover:text-zinc-300 transition-colors">Remember me</span>
+            </label>
+            <a href="#" className="text-sm text-zinc-400 hover:text-white font-medium transition-colors">
+              Forgot password?
+            </a>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+          >
+            <button
+              type="submit"
+              disabled={submitting || !ready}
+              className="w-full h-11 rounded-xl bg-white hover:bg-zinc-200 text-black text-sm font-semibold transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                'Sign In'
+              )}
+            </button>
+          </motion.div>
+        </form>
+
+        <motion.div
+          className="flex items-center my-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+        >
+          <div className="flex-1 border-t border-zinc-700/50"></div>
+          <span className="px-4 text-xs font-medium text-zinc-500 uppercase tracking-wider">Or</span>
+          <div className="flex-1 border-t border-zinc-700/50"></div>
+        </motion.div>
+
+        <motion.div
+          className="flex justify-center"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+        >
+          <GoogleLoginButton
+            onSuccess={handleGoogleSuccess}
+            onError={() => setError('Google sign-in failed. Please try again.')}
+          />
+        </motion.div>
+
+        <motion.p
+          className="text-center mt-6 text-sm text-zinc-500"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          Don't have an account?{' '}
+          <a href="#" className="text-white hover:text-zinc-300 font-medium transition-colors">
             Sign up
           </a>
-        </p>
+        </motion.p>
       </div>
 
       {googleData && (

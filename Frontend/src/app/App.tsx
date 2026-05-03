@@ -7,6 +7,7 @@ import { defaultRouteForUser, normalizeRole } from '@/shared/lib/roles';
 
 import LandingPage from '@/features/landing/LandingPage';
 import ShopRegistrationPage from '@/features/registration/pages/ShopRegistrationPage';
+import Login from '@/features/auth/pages/Login';
 import DashboardLayout from '@/features/layout/pages/DashboardLayout';
 import Overview from '@/features/dashboard/pages/Overview';
 import InventoryPage from '@/features/inventory/pages/InventoryPage';
@@ -80,9 +81,7 @@ function RequireActiveShop() {
 }
 
 function LoginRoute() {
-  const { user } = useAuth();
-  if (user) return <Navigate to={defaultRouteForUser(user)} replace />;
-  return <Navigate to="/" replace />;
+  return <Login />;
 }
 
 function App() {
