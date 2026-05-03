@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Package, Wrench, ShoppingCart,
   BarChart3, Shield, LogOut, Menu, X, Bell, ClipboardCheck,
-  Home, Calendar, CreditCard, Users, ScrollText, Settings,
+  Home, Calendar, CreditCard, Users, ScrollText, Settings, Bike,
 } from 'lucide-react';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { useData } from '@/shared/contexts/DataContext';
@@ -48,155 +48,220 @@ export default function DashboardLayout() {
   const handleLogout = () => { logout(); navigate('/', { replace: true }); };
 
   return (
-    <div className="min-h-screen bg-[#FAFAF9] flex font-sans">
+    <div className="min-h-screen bg-black flex font-sans">
       <AnimatePresence>
         {sidebarOpen && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/10 z-40 lg:hidden backdrop-blur-[2px]"
+            className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm"
             onClick={() => setSidebarOpen(false)}
           />
         )}
       </AnimatePresence>
 
+      {/* Sidebar */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 z-50 h-screen bg-white border-r border-[#F0EFED] flex flex-col w-[220px] shrink-0 transition-transform duration-300 ease-out ${
+        className={`fixed lg:sticky top-0 left-0 z-50 h-screen bg-zinc-900 border-r border-zinc-800 flex flex-col w-[260px] shrink-0 transition-transform duration-300 ease-out ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
-        <div className="flex items-center gap-2.5 px-5 h-[60px] border-b border-[#F0EFED]">
-          <div className="w-7 h-7 rounded-[9px] bg-[#1C1917] flex items-center justify-center">
-            <LayoutDashboard className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
-          </div>
+        {/* Logo */}
+        <div className="flex items-center gap-3 px-5 h-[64px] border-b border-zinc-800">
+          <motion.div
+            className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-lg"
+            whileHover={{ rotate: 10 }}
+            transition={{ type: 'spring', stiffness: 400 }}
+          >
+            <Bike className="w-5 h-5 text-black" />
+          </motion.div>
           <div>
-            <span className="text-[13px] font-bold text-[#1C1917] tracking-tight leading-none">MoSPAMS</span>
-            <span className="block text-[9px] text-[#D6D3D1] font-medium leading-none mt-0.5">
+            <span className="text-sm font-bold text-white tracking-tight leading-none">
+              Mo<span className="text-zinc-500">SPAMS</span>
+            </span>
+            <span className="block text-[10px] text-zinc-600 font-medium leading-none mt-1">
               {user?.shopName ? user.shopName.toUpperCase() : 'MANAGEMENT'}
             </span>
           </div>
-          <button className="ml-auto lg:hidden p-1 text-[#D6D3D1] hover:text-[#78716C]" onClick={() => setSidebarOpen(false)}>
-            <X className="w-4 h-4" />
+          <button
+            className="ml-auto lg:hidden p-2 text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-          {visibleNav.map(item => (
-            <NavLink
+        {/* Navigation */}
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+          {visibleNav.map((item, index) => (
+            <motion.div
               key={item.to}
-              to={item.to}
-              end={item.end}
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `w-full flex items-center gap-2.5 px-3 py-[9px] rounded-xl text-[13px] font-medium transition-all duration-200 ${
-                isActive
-                  ? 'bg-[#1C1917] text-white shadow-sm'
-                  : 'text-[#A8A29E] hover:text-[#44403C] hover:bg-[#F5F5F4]'
-              }`}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.03 }}
             >
-              <item.icon className="w-[15px] h-[15px]" strokeWidth={1.5} />
-              <span>{item.label}</span>
-            </NavLink>
+              <NavLink
+                to={item.to}
+                end={item.end}
+                onClick={() => setSidebarOpen(false)}
+                className={({ isActive }) => `w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  isActive
+                    ? 'bg-white text-black shadow-lg shadow-black/20'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+                }`}
+              >
+                <item.icon className="w-[18px] h-[18px]" strokeWidth={1.5} />
+                <span>{item.label}</span>
+              </NavLink>
+            </motion.div>
           ))}
         </nav>
 
+        {/* Bottom section */}
+        <div className="px-3 py-4 border-t border-zinc-800">
+          <motion.button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200"
+            whileHover={{ x: 4 }}
+          >
+            <LogOut className="w-[18px] h-[18px]" strokeWidth={1.5} />
+            <span>Sign Out</span>
+          </motion.button>
+        </div>
       </aside>
 
+      {/* Main Content */}
       <main className="flex-1 min-w-0 min-h-screen">
-        <div className="flex items-center gap-3 px-4 lg:px-8 h-[52px] bg-white border-b border-[#F0EFED] sticky top-0 z-30">
-          <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-1.5 -ml-1 rounded-lg hover:bg-[#F5F5F4] text-[#A8A29E]">
-            <Menu className="w-[18px] h-[18px]" />
-          </button>
-          <span className="text-[14px] font-semibold text-[#1C1917] tracking-tight">{currentLabel}</span>
+        {/* Header */}
+        <div className="sticky top-0 z-30 bg-black/80 backdrop-blur-xl border-b border-zinc-800/50">
+          <div className="flex items-center gap-4 px-6 h-[64px]">
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-2 -ml-2 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
 
-          <div className="ml-auto flex items-center gap-1">
-            {/* Bell */}
-            <div className="relative">
-              <button
-                onClick={() => { setBellOpen(o => !o); setProfileOpen(false); }}
-                className="relative p-2 rounded-lg hover:bg-[#F5F5F4] text-[#78716C]"
-                aria-label="Low stock alerts"
-              >
-                <Bell className="w-4 h-4" strokeWidth={1.75} />
-                {lowStock.length > 0 && (
-                  <span className="absolute top-1 right-1 min-w-[14px] h-[14px] px-1 rounded-full bg-[#EF4444] text-white text-[9px] font-bold flex items-center justify-center">
-                    {lowStock.length}
-                  </span>
-                )}
-              </button>
-              {bellOpen && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setBellOpen(false)} />
-                  <div className="absolute right-0 top-full mt-2 w-[280px] bg-white rounded-2xl border border-[#F0EFED] shadow-xl z-50 overflow-hidden">
-                    <div className="px-4 py-3 border-b border-[#F5F5F4] flex items-center justify-between">
-                      <p className="text-[12px] font-semibold text-[#1C1917]">Low Stock Alerts</p>
-                      <span className="text-[10px] text-[#A8A29E]">{lowStock.length} items</span>
-                    </div>
-                    <div className="max-h-72 overflow-y-auto divide-y divide-[#FAFAF9]">
-                      {lowStock.length === 0 && <p className="text-[12px] text-[#A8A29E] text-center py-6">All stock healthy</p>}
-                      {lowStock.map(p => (
-                        <div key={p.id} className="px-4 py-2.5 flex items-center justify-between">
-                          <div className="min-w-0">
-                            <p className="text-[12px] font-medium text-[#44403C] truncate">{p.name}</p>
-                            <p className="text-[10px] text-[#D6D3D1]">{p.category}</p>
-                          </div>
-                          <span className={`text-[12px] font-bold ${p.stock === 0 ? 'text-[#EF4444]' : 'text-[#F59E0B]'}`}>
-                            {p.stock} / {p.minStock}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                    {lowStock.length > 0 && (
-                      <button
-                        onClick={() => { setBellOpen(false); navigate('/dashboard/inventory'); }}
-                        className="w-full px-4 py-2.5 text-[11px] font-medium text-[#3B82F6] hover:bg-[#FAFAF9] border-t border-[#F5F5F4]"
-                      >
-                        View Inventory →
-                      </button>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
+            {/* Page title */}
+            <h1 className="text-base font-semibold text-white tracking-tight">{currentLabel}</h1>
 
-            {/* Divider */}
-            <div className="w-px h-5 bg-[#F0EFED] mx-1" />
+            {/* Right side actions */}
+            <div className="ml-auto flex items-center gap-2">
+              {/* Bell / Notifications */}
+              <div className="relative">
+                <motion.button
+                  onClick={() => { setBellOpen(o => !o); setProfileOpen(false); }}
+                  className="relative p-2.5 rounded-xl hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  aria-label="Notifications"
+                >
+                  <Bell className="w-5 h-5" strokeWidth={1.5} />
+                  {lowStock.length > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                      {lowStock.length}
+                    </span>
+                  )}
+                </motion.button>
 
-            {/* Profile */}
-            <div className="relative">
-              <button
-                onClick={() => { setProfileOpen(o => !o); setBellOpen(false); }}
-                className="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-xl hover:bg-[#F5F5F4] transition-all"
-              >
-                <div className="w-7 h-7 rounded-full bg-[#1C1917] flex items-center justify-center text-[11px] font-bold text-white">
-                  {user?.name.charAt(0)}
-                </div>
-                <div className="hidden sm:block text-left">
-                  <p className="text-[12px] font-semibold text-[#44403C] leading-none">{user?.name}</p>
-                  <p className="text-[10px] text-[#A8A29E] leading-none mt-0.5">{user?.role}</p>
-                </div>
-              </button>
-              {profileOpen && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
-                  <div className="absolute right-0 top-full mt-2 w-[200px] bg-white rounded-2xl border border-[#F0EFED] shadow-xl z-50 overflow-hidden">
-                    <div className="px-4 py-3 border-b border-[#F5F5F4]">
-                      <p className="text-[12px] font-semibold text-[#1C1917] truncate">{user?.name}</p>
-                      <p className="text-[10px] text-[#A8A29E] mt-0.5">{user?.role}</p>
-                    </div>
-                    <button
-                      onClick={() => { setProfileOpen(false); handleLogout(); }}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-medium text-[#A8A29E] hover:text-[#EF4444] hover:bg-red-50/50 transition-all"
+                {bellOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setBellOpen(false)} />
+                    <motion.div
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      className="absolute right-0 top-full mt-2 w-[320px] bg-zinc-900/95 backdrop-blur-xl rounded-2xl border border-zinc-800 shadow-2xl shadow-black/50 z-50 overflow-hidden"
                     >
-                      <LogOut className="w-[14px] h-[14px]" strokeWidth={1.5} />
-                      Sign Out
-                    </button>
+                      <div className="px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
+                        <p className="text-sm font-semibold text-white">Low Stock Alerts</p>
+                        <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded-full">{lowStock.length} items</span>
+                      </div>
+                      <div className="max-h-72 overflow-y-auto">
+                        {lowStock.length === 0 && (
+                          <div className="py-8 text-center">
+                            <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-green-500/10 flex items-center justify-center">
+                              <Package className="w-6 h-6 text-green-500" />
+                            </div>
+                            <p className="text-sm text-zinc-400">All stock levels are healthy</p>
+                          </div>
+                        )}
+                        {lowStock.map(p => (
+                          <div key={p.id} className="px-4 py-3 border-b border-zinc-800/50 hover:bg-zinc-800/30 transition-colors">
+                            <div className="flex items-center justify-between">
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium text-white truncate">{p.name}</p>
+                                <p className="text-xs text-zinc-500">{p.category}</p>
+                              </div>
+                              <span className={`text-sm font-bold ${p.stock === 0 ? 'text-red-400' : 'text-amber-400'}`}>
+                                {p.stock} left
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {lowStock.length > 0 && (
+                        <button
+                          onClick={() => { setBellOpen(false); navigate('/dashboard/inventory'); }}
+                          className="w-full px-4 py-3 text-sm font-medium text-blue-400 hover:bg-zinc-800/50 border-t border-zinc-800 transition-colors"
+                        >
+                          View Inventory →
+                        </button>
+                      )}
+                    </motion.div>
+                  </>
+                )}
+              </div>
+
+              {/* Divider */}
+              <div className="w-px h-6 bg-zinc-800" />
+
+              {/* Profile */}
+              <div className="relative">
+                <motion.button
+                  onClick={() => { setProfileOpen(o => !o); setBellOpen(false); }}
+                  className="flex items-center gap-3 pl-1 pr-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-all"
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <div className="w-8 h-8 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center text-sm font-bold text-white">
+                    {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
-                </>
-              )}
+                  <div className="hidden sm:block text-left">
+                    <p className="text-sm font-medium text-white leading-none">{user?.name}</p>
+                    <p className="text-xs text-zinc-500 leading-none mt-1">{user?.role}</p>
+                  </div>
+                </motion.button>
+
+                {profileOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
+                    <motion.div
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      className="absolute right-0 top-full mt-2 w-[220px] bg-zinc-900/95 backdrop-blur-xl rounded-2xl border border-zinc-800 shadow-2xl shadow-black/50 z-50 overflow-hidden"
+                    >
+                      <div className="px-4 py-3 border-b border-zinc-800">
+                        <p className="text-sm font-semibold text-white truncate">{user?.name}</p>
+                        <p className="text-xs text-zinc-500 mt-0.5">{user?.email}</p>
+                      </div>
+                      <button
+                        onClick={() => { setProfileOpen(false); handleLogout(); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                      >
+                        <LogOut className="w-[18px] h-[18px]" strokeWidth={1.5} />
+                        Sign Out
+                      </button>
+                    </motion.div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="p-5 md:p-8 lg:p-10 max-w-[1200px] mx-auto">
+        {/* Page content */}
+        <div className="p-6 lg:p-8">
           <Outlet />
         </div>
       </main>

@@ -13,7 +13,7 @@ import type { DayRevenue } from '@/shared/hooks/usePublicStats';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler, Tooltip);
 
-const CURRENCY_PREFIX = '\u20b1';
+const CURRENCY_PREFIX = '₱';
 
 interface Props {
   data: DayRevenue[];
@@ -28,13 +28,14 @@ export default function RevenueLineChart({ data, loading, error }: Props) {
       {
         label: 'Revenue',
         data: data.map((day) => day.amount),
-        borderColor: '#1C1917',
-        backgroundColor: 'rgba(28,25,23,0.08)',
+        borderColor: '#ffffff',
+        backgroundColor: 'rgba(255,255,255,0.08)',
         borderWidth: 2,
         pointRadius: 0,
-        pointHoverRadius: 4,
+        pointHoverRadius: 5,
+        pointBackgroundColor: '#ffffff',
         fill: true,
-        tension: 0.35,
+        tension: 0.4,
       },
     ],
   };
@@ -45,6 +46,13 @@ export default function RevenueLineChart({ data, loading, error }: Props) {
     plugins: {
       legend: { display: false },
       tooltip: {
+        backgroundColor: '#18181b',
+        titleColor: '#ffffff',
+        bodyColor: '#a1a1aa',
+        borderColor: '#27272a',
+        borderWidth: 1,
+        padding: 12,
+        cornerRadius: 8,
         callbacks: {
           label: (context: TooltipItem<'line'>) =>
             `${CURRENCY_PREFIX}${(context.parsed.y ?? 0).toLocaleString('en-PH')}`,
@@ -53,18 +61,18 @@ export default function RevenueLineChart({ data, loading, error }: Props) {
     },
     scales: {
       x: {
-        grid: { color: '#F5F5F4' },
+        grid: { color: 'rgba(255,255,255,0.05)' },
         ticks: {
-          color: '#A8A29E',
-          font: { size: 10 },
-          maxTicksLimit: 6,
+          color: '#71717a',
+          font: { size: 11 },
+          maxTicksLimit: 8,
         },
       },
       y: {
-        grid: { color: '#F5F5F4' },
+        grid: { color: 'rgba(255,255,255,0.05)' },
         ticks: {
-          color: '#A8A29E',
-          font: { size: 10 },
+          color: '#71717a',
+          font: { size: 11 },
           callback: (value) => `${CURRENCY_PREFIX}${Number(value).toLocaleString('en-PH')}`,
         },
       },
@@ -72,17 +80,23 @@ export default function RevenueLineChart({ data, loading, error }: Props) {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-[#F5F5F4] p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-      <p className="text-[13px] font-semibold text-[#1C1917] mb-4">Revenue - Last 30 Days</p>
-      <div className="h-48">
+    <div className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl p-6">
+      <div className="flex items-center justify-between mb-5">
+        <p className="text-sm font-semibold text-white">Revenue - Last 30 Days</p>
+        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+      </div>
+      <div className="h-56">
         {loading && (
           <div className="h-full flex items-center justify-center">
-            <div className="w-5 h-5 rounded-full border-2 border-[#E7E5E4] border-t-[#1C1917] animate-spin" />
+            <div className="w-8 h-8 rounded-full border-2 border-zinc-700 border-t-white animate-spin" />
           </div>
         )}
         {error && (
           <div className="h-full flex items-center justify-center">
-            <p className="text-[12px] text-[#A8A29E]">Could not load data</p>
+            <div className="text-center">
+              <p className="text-sm text-zinc-500">Could not load data</p>
+              <p className="text-xs text-zinc-600 mt-1">Please try again later</p>
+            </div>
           </div>
         )}
         {!loading && !error && <Line data={chartData} options={options} />}

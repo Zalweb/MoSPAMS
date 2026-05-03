@@ -18,9 +18,10 @@ export default function ServiceStatusDonut({ data, loading, error }: Props) {
     datasets: [
       {
         data: data ? [data.completed, data.ongoing, data.pending] : [0, 0, 0],
-        backgroundColor: ['#1C1917', '#78716C', '#D6D3D1'],
-        borderColor: '#ffffff',
+        backgroundColor: ['#22c55e', '#3b82f6', '#f59e0b'],
+        borderColor: '#18181b',
         borderWidth: 3,
+        hoverOffset: 4,
       },
     ],
   };
@@ -28,19 +29,28 @@ export default function ServiceStatusDonut({ data, loading, error }: Props) {
   const options: ChartOptions<'doughnut'> = {
     responsive: true,
     maintainAspectRatio: false,
-    cutout: '65%',
+    cutout: '70%',
     plugins: {
       legend: {
         position: 'bottom',
         labels: {
-          color: '#78716C',
+          color: '#a1a1aa',
           font: { size: 11 },
-          padding: 12,
-          boxWidth: 10,
-          boxHeight: 10,
+          padding: 16,
+          boxWidth: 12,
+          boxHeight: 12,
+          usePointStyle: true,
+          pointStyle: 'circle',
         },
       },
       tooltip: {
+        backgroundColor: '#18181b',
+        titleColor: '#ffffff',
+        bodyColor: '#a1a1aa',
+        borderColor: '#27272a',
+        borderWidth: 1,
+        padding: 12,
+        cornerRadius: 8,
         callbacks: {
           label: (context: TooltipItem<'doughnut'>) => ` ${context.label}: ${context.parsed}`,
         },
@@ -49,22 +59,22 @@ export default function ServiceStatusDonut({ data, loading, error }: Props) {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-[#F5F5F4] p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-      <p className="text-[13px] font-semibold text-[#1C1917] mb-4">Service Status</p>
-      <div className="h-48">
+    <div className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl p-6">
+      <p className="text-sm font-semibold text-white mb-5">Service Status</p>
+      <div className="h-52">
         {loading && (
           <div className="h-full flex items-center justify-center">
-            <div className="w-5 h-5 rounded-full border-2 border-[#E7E5E4] border-t-[#1C1917] animate-spin" />
+            <div className="w-8 h-8 rounded-full border-2 border-zinc-700 border-t-white animate-spin" />
           </div>
         )}
         {error && (
           <div className="h-full flex items-center justify-center">
-            <p className="text-[12px] text-[#A8A29E]">Could not load data</p>
+            <p className="text-sm text-zinc-500">Could not load data</p>
           </div>
         )}
         {!loading && !error && total === 0 && (
           <div className="h-full flex items-center justify-center">
-            <p className="text-[12px] text-[#A8A29E]">No service status data yet</p>
+            <p className="text-sm text-zinc-500">No service status data yet</p>
           </div>
         )}
         {!loading && !error && total > 0 && <Doughnut data={chartData} options={options} />}

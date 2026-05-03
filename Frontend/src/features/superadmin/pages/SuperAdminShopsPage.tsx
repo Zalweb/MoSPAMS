@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, Plus, Search, ShieldAlert, Wrench } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -128,11 +128,11 @@ export default function SuperAdminShopsPage() {
     <div>
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-7">
         <div>
-          <h2 className="text-[22px] font-bold text-[#1C1917] tracking-tight">Shop Management</h2>
-          <p className="text-[13px] text-[#A8A29E] mt-0.5">Provision, suspend, and monitor tenant shops</p>
+          <h2 className="text-[22px] font-bold text-white tracking-tight">Shop Management</h2>
+          <p className="text-[13px] text-zinc-400 mt-0.5">Provision, suspend, and monitor tenant shops</p>
         </div>
 
-        <Button onClick={() => setOpenCreate(true)} className="h-9 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-white text-[12px] font-medium px-4">
+        <Button onClick={() => setOpenCreate(true)} className="h-9 rounded-xl bg-white hover:bg-zinc-200 text-zinc-900 text-[12px] font-medium px-4">
           <Plus className="w-3.5 h-3.5 mr-1.5" /> Add New Shop
         </Button>
       </div>
@@ -144,54 +144,54 @@ export default function SuperAdminShopsPage() {
       </div>
 
       <div className="relative mb-5 max-w-md">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#D6D3D1]" />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
         <Input
           value={search}
           onChange={(event) => {
             void onSearch(event.target.value);
           }}
           placeholder="Search shops or owners..."
-          className="pl-9 h-9 rounded-xl border-[#E7E5E4] bg-white text-[13px]"
+          className="pl-9 h-9 rounded-xl border-zinc-800 bg-zinc-900 text-zinc-200 text-[13px] placeholder:text-zinc-600"
         />
       </div>
 
-      <div className="bg-white rounded-2xl border border-[#F5F5F4] overflow-x-auto">
+      <div className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl overflow-x-auto">
         <table className="w-full min-w-[860px]">
           <thead>
-            <tr className="border-b border-[#F5F5F4]">
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-[#A8A29E] uppercase">Shop</th>
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-[#A8A29E] uppercase">Owner / Applicant</th>
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-[#A8A29E] uppercase">Subscription</th>
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-[#A8A29E] uppercase">Status</th>
-              <th className="text-right px-4 py-3 text-[10px] font-semibold text-[#A8A29E] uppercase">Actions</th>
+            <tr className="border-b border-zinc-800">
+              <th className="text-left px-4 py-3 text-[10px] font-semibold text-zinc-500 uppercase">Shop</th>
+              <th className="text-left px-4 py-3 text-[10px] font-semibold text-zinc-500 uppercase">Owner / Applicant</th>
+              <th className="text-left px-4 py-3 text-[10px] font-semibold text-zinc-500 uppercase">Subscription</th>
+              <th className="text-left px-4 py-3 text-[10px] font-semibold text-zinc-500 uppercase">Status</th>
+              <th className="text-right px-4 py-3 text-[10px] font-semibold text-zinc-500 uppercase">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#FAFAF9]">
+          <tbody className="divide-y divide-zinc-800">
             {loading ? (
               <tr>
-                <td colSpan={5} className="px-4 py-10 text-center text-[12px] text-[#A8A29E]">Loading shops...</td>
+                <td colSpan={5} className="px-4 py-10 text-center text-[12px] text-zinc-500">Loading shops...</td>
               </tr>
             ) : shops.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-10 text-center text-[12px] text-[#A8A29E]">No shops found</td>
+                <td colSpan={5} className="px-4 py-10 text-center text-[12px] text-zinc-500">No shops found</td>
               </tr>
             ) : (
               shops.map((shop) => (
-                <tr key={shop.shopId}>
+                <tr key={shop.shopId} className="hover:bg-zinc-800/50 transition-colors">
                   <td className="px-4 py-3">
-                    <p className="text-[12px] font-semibold text-[#1C1917]">{shop.shopName}</p>
-                    <p className="text-[11px] text-[#A8A29E]">Registration: {shop.registration.status}</p>
+                    <p className="text-[12px] font-semibold text-zinc-200">{shop.shopName}</p>
+                    <p className="text-[11px] text-zinc-500">Registration: {shop.registration.status}</p>
                   </td>
-                  <td className="px-4 py-3 text-[12px] text-[#44403C]">
+                  <td className="px-4 py-3 text-[12px] text-zinc-400">
                     <p>{shop.owner.name ?? 'Unassigned'}</p>
                     {!shop.owner.name && shop.applicant.name ? (
-                      <p className="text-[11px] text-[#A8A29E]">Applicant: {shop.applicant.name} ({shop.applicant.email ?? 'No email'})</p>
+                      <p className="text-[11px] text-zinc-500">Applicant: {shop.applicant.name} ({shop.applicant.email ?? 'No email'})</p>
                     ) : null}
                     {shop.registration.status === 'REJECTED' && shop.registration.rejectionReason ? (
-                      <p className="text-[11px] text-[#B91C1C]">Rejected: {shop.registration.rejectionReason}</p>
+                      <p className="text-[11px] text-red-400">Rejected: {shop.registration.rejectionReason}</p>
                     ) : null}
                   </td>
-                  <td className="px-4 py-3 text-[12px] text-[#44403C]">
+                  <td className="px-4 py-3 text-[12px] text-zinc-400">
                     {shop.subscription ? `${shop.subscription.plan.planName} (${shop.subscription.status})` : 'No subscription'}
                   </td>
                   <td className="px-4 py-3">
@@ -201,21 +201,21 @@ export default function SuperAdminShopsPage() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="inline-flex items-center gap-2">
-                      <Button variant="outline" className="h-8 px-3 text-[11px]" onClick={() => void onOpenDiagnostics(shop.shopId)}>
+                      <Button variant="outline" className="h-8 px-3 text-[11px] border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700" onClick={() => void onOpenDiagnostics(shop.shopId)}>
                         Diagnostics
                       </Button>
                       {shop.registration.status === 'PENDING_APPROVAL' ? (
                         <>
                           <Button
                             variant="outline"
-                            className="h-8 px-3 text-[11px]"
+                            className="h-8 px-3 text-[11px] border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
                             onClick={() => void onApproveRegistration(shop)}
                           >
                             Approve
                           </Button>
                           <Button
                             variant="outline"
-                            className="h-8 px-3 text-[11px]"
+                            className="h-8 px-3 text-[11px] border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
                             onClick={() => void onRejectRegistration(shop)}
                           >
                             Reject
@@ -224,7 +224,7 @@ export default function SuperAdminShopsPage() {
                       ) : null}
                       <Button
                         variant="outline"
-                        className="h-8 px-3 text-[11px]"
+                        className="h-8 px-3 text-[11px] border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
                         onClick={() => void onToggleStatus(shop)}
                       >
                         {shop.statusCode === 'SUSPENDED' ? 'Activate' : 'Suspend'}
@@ -239,9 +239,9 @@ export default function SuperAdminShopsPage() {
       </div>
 
       <Dialog open={openCreate} onOpenChange={setOpenCreate}>
-        <DialogContent className="sm:max-w-lg rounded-[20px] border-[#F0EFED] p-6">
+        <DialogContent className="sm:max-w-lg rounded-[20px] border-zinc-800 bg-zinc-900 p-6">
           <DialogHeader>
-            <DialogTitle className="text-[15px] font-semibold">Provision New Shop</DialogTitle>
+            <DialogTitle className="text-[15px] font-semibold text-white">Provision New Shop</DialogTitle>
           </DialogHeader>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
@@ -254,10 +254,10 @@ export default function SuperAdminShopsPage() {
           </div>
 
           <div className="flex gap-2 pt-4">
-            <Button className="h-9 rounded-xl bg-[#1C1917] text-white text-[12px]" onClick={() => void onCreateShop()}>
+            <Button className="h-9 rounded-xl bg-white hover:bg-zinc-200 text-zinc-900 text-[12px]" onClick={() => void onCreateShop()}>
               Create Shop
             </Button>
-            <Button variant="outline" className="h-9 rounded-xl text-[12px]" onClick={() => setOpenCreate(false)}>
+            <Button variant="outline" className="h-9 rounded-xl text-[12px] border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700" onClick={() => setOpenCreate(false)}>
               Cancel
             </Button>
           </div>
@@ -265,23 +265,23 @@ export default function SuperAdminShopsPage() {
       </Dialog>
 
       <Dialog open={diagOpen} onOpenChange={setDiagOpen}>
-        <DialogContent className="sm:max-w-2xl rounded-[20px] border-[#F0EFED] p-6">
+        <DialogContent className="sm:max-w-2xl rounded-[20px] border-zinc-800 bg-zinc-900 p-6">
           <DialogHeader>
-            <DialogTitle className="text-[15px] font-semibold">Shop Diagnostics</DialogTitle>
+            <DialogTitle className="text-[15px] font-semibold text-white">Shop Diagnostics</DialogTitle>
           </DialogHeader>
 
           {!diag ? (
-            <p className="text-[12px] text-[#A8A29E]">Loading...</p>
+            <p className="text-[12px] text-zinc-500">Loading...</p>
           ) : (
             <div className="space-y-5">
               <div>
-                <p className="text-[13px] font-semibold text-[#1C1917]">{diag.shop.shopName}</p>
-                <p className="text-[12px] text-[#A8A29E]">Status: {diag.shop.statusCode}</p>
-                <p className="text-[12px] text-[#A8A29E]">Owner: {diag.owner?.name ?? 'Unassigned'}</p>
+                <p className="text-[13px] font-semibold text-zinc-200">{diag.shop.shopName}</p>
+                <p className="text-[12px] text-zinc-500">Status: {diag.shop.statusCode}</p>
+                <p className="text-[12px] text-zinc-500">Owner: {diag.owner?.name ?? 'Unassigned'}</p>
                 {diag.applicant.name ? (
-                  <p className="text-[12px] text-[#A8A29E]">Applicant: {diag.applicant.name} ({diag.applicant.email ?? 'No email'})</p>
+                  <p className="text-[12px] text-zinc-500">Applicant: {diag.applicant.name} ({diag.applicant.email ?? 'No email'})</p>
                 ) : null}
-                <p className="text-[12px] text-[#A8A29E]">Registration: {diag.registration.status}</p>
+                <p className="text-[12px] text-zinc-500">Registration: {diag.registration.status}</p>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -294,15 +294,15 @@ export default function SuperAdminShopsPage() {
               </div>
 
               <div>
-                <p className="text-[12px] font-semibold text-[#1C1917] mb-2">Recent Activity</p>
-                <div className="max-h-48 overflow-y-auto border border-[#F5F5F4] rounded-xl divide-y divide-[#FAFAF9]">
+                <p className="text-[12px] font-semibold text-zinc-200 mb-2">Recent Activity</p>
+                <div className="max-h-48 overflow-y-auto border border-zinc-800 rounded-xl divide-y divide-zinc-800">
                   {diag.recentLogs.length === 0 ? (
-                    <p className="px-3 py-4 text-[12px] text-[#A8A29E]">No activity yet.</p>
+                    <p className="px-3 py-4 text-[12px] text-zinc-500">No activity yet.</p>
                   ) : (
                     diag.recentLogs.map((log) => (
                       <div key={log.id} className="px-3 py-2.5">
-                        <p className="text-[11px] text-[#1C1917]">{log.action}</p>
-                        <p className="text-[10px] text-[#A8A29E]">{log.actorName ?? 'System'} · {log.loggedAt ? new Date(log.loggedAt).toLocaleString() : 'N/A'}</p>
+                        <p className="text-[11px] text-zinc-200">{log.action}</p>
+                        <p className="text-[10px] text-zinc-500">{log.actorName ?? 'System'} · {log.loggedAt ? new Date(log.loggedAt).toLocaleString() : 'N/A'}</p>
                       </div>
                     ))
                   )}
@@ -319,26 +319,26 @@ export default function SuperAdminShopsPage() {
 function statusTone(code: string) {
   switch (code) {
     case 'ACTIVE':
-      return 'bg-[#ECFDF5] text-[#059669]';
+      return 'bg-green-500/20 text-green-400';
     case 'SUSPENDED':
-      return 'bg-[#FEF2F2] text-[#DC2626]';
+      return 'bg-red-500/20 text-red-400';
     case 'PENDING':
-      return 'bg-[#FFFBEB] text-[#D97706]';
+      return 'bg-yellow-500/20 text-yellow-400';
     default:
-      return 'bg-[#F4F4F5] text-[#52525B]';
+      return 'bg-zinc-800 text-zinc-400';
   }
 }
 
 function Stat({ label, value, icon: Icon, tone }: { label: string; value: number; icon: typeof Wrench; tone: 'slate' | 'amber' | 'green' }) {
-  const bg = tone === 'amber' ? 'bg-[#FFFBEB] text-[#D97706]' : tone === 'green' ? 'bg-[#ECFDF5] text-[#059669]' : 'bg-[#F5F5F4] text-[#44403C]';
+  const bg = tone === 'amber' ? 'bg-yellow-500/20 text-yellow-400' : tone === 'green' ? 'bg-green-500/20 text-green-400' : 'bg-zinc-800 text-zinc-400';
 
   return (
-    <div className="bg-white rounded-2xl border border-[#F5F5F4] p-4">
+    <div className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl p-4">
       <div className={`w-8 h-8 rounded-[10px] ${bg} flex items-center justify-center mb-3`}>
         <Icon className="w-[14px] h-[14px]" strokeWidth={1.75} />
       </div>
-      <p className="text-[11px] text-[#A8A29E]">{label}</p>
-      <p className="text-[20px] font-bold text-[#1C1917]">{value}</p>
+      <p className="text-[11px] text-zinc-500">{label}</p>
+      <p className="text-[20px] font-bold text-white">{value}</p>
     </div>
   );
 }
@@ -346,17 +346,17 @@ function Stat({ label, value, icon: Icon, tone }: { label: string; value: number
 function Field({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
   return (
     <label className="block">
-      <span className="text-[11px] font-medium text-[#78716C]">{label}</span>
-      <Input value={value} onChange={(event) => onChange(event.target.value)} className="mt-1.5 h-9 rounded-xl border-[#E7E5E4] text-[13px]" />
+      <span className="text-[11px] font-medium text-zinc-400">{label}</span>
+      <Input value={value} onChange={(event) => onChange(event.target.value)} className="mt-1.5 h-9 rounded-xl border-zinc-700 bg-zinc-800 text-[13px] text-zinc-200 placeholder:text-zinc-600" />
     </label>
   );
 }
 
 function DiagMetric({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="bg-[#FAFAF9] rounded-xl px-3 py-2.5 border border-[#F5F5F4]">
-      <p className="text-[10px] text-[#A8A29E]">{label}</p>
-      <p className="text-[13px] font-semibold text-[#1C1917]">{value}</p>
+    <div className="bg-zinc-800/50 rounded-xl px-3 py-2.5 border border-zinc-800">
+      <p className="text-[10px] text-zinc-500">{label}</p>
+      <p className="text-[13px] font-semibold text-zinc-200">{value}</p>
     </div>
   );
 }

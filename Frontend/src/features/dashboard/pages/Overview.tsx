@@ -15,15 +15,15 @@ import TopServicesBar from '@/features/dashboard/components/TopServicesBar';
 import { useData } from '@/shared/contexts/DataContext';
 import { useAdminStats } from '@/shared/hooks/useAdminStats';
 
-const CURRENCY_PREFIX = '\u20b1';
+const CURRENCY_PREFIX = '₱';
 
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 16 },
+  initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
   transition: {
     delay,
-    duration: 0.45,
-    ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number],
+    duration: 0.5,
+    ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
   },
 });
 
@@ -45,28 +45,28 @@ export default function Overview() {
       label: 'Total Parts',
       value: parts.length.toString(),
       icon: Package,
-      accent: 'bg-[#EFF6FF] text-[#3B82F6]',
+      accent: 'bg-violet-500/10 text-violet-400 border border-violet-500/20',
       trend: `${lowStock.length} low stock`,
     },
     {
       label: "Today's Revenue",
       value: `${CURRENCY_PREFIX}${todayRevenue.toLocaleString()}`,
       icon: ShoppingCart,
-      accent: 'bg-[#ECFDF5] text-[#10B981]',
+      accent: 'bg-green-500/10 text-green-400 border border-green-500/20',
       trend: `${todaySales.length} transactions`,
     },
     {
       label: 'Pending Jobs',
       value: pendingServices.toString(),
       icon: Clock,
-      accent: 'bg-[#FFFBEB] text-[#F59E0B]',
+      accent: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
       trend: `${ongoingServices} ongoing`,
     },
     {
       label: 'Completed',
       value: completedServices.toString(),
       icon: CheckCircle2,
-      accent: 'bg-[#F5F3FF] text-[#8B5CF6]',
+      accent: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
       trend: 'this month',
     },
   ];
@@ -77,66 +77,83 @@ export default function Overview() {
   const topServices = statsData?.charts.top_service_types ?? [];
 
   return (
-    <div>
-      <motion.div {...fadeUp(0)} className="mb-8">
-        <h2 className="text-[22px] font-bold text-[#1C1917] tracking-tight">Dashboard</h2>
-        <p className="text-[13px] text-[#D6D3D1] mt-0.5">Overview of your shop's performance</p>
+    <div className="space-y-8">
+      {/* Header */}
+      <motion.div {...fadeUp(0)}>
+        <h2 className="text-2xl font-bold text-white tracking-tight">Dashboard</h2>
+        <p className="text-sm text-zinc-500 mt-1">Overview of your shop's performance</p>
       </motion.div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, index) => (
           <motion.div
             key={stat.label}
             {...fadeUp(index * 0.06 + 0.05)}
-            className="bg-white rounded-2xl p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)] border border-[#F5F5F4] hover:shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:border-[#E7E5E4] transition-all duration-300 group cursor-default"
+            className="group relative bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl p-5 hover:border-zinc-700 hover:bg-zinc-900/80 transition-all duration-300 cursor-default overflow-hidden"
+            whileHover={{ y: -2 }}
           >
-            <div className="flex items-center justify-between mb-3">
-              <div className={`w-8 h-8 rounded-[10px] ${stat.accent} flex items-center justify-center`}>
-                <stat.icon className="w-[14px] h-[14px]" strokeWidth={2} />
+            {/* Gradient overlay on hover */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-4">
+                <div className={`w-10 h-10 rounded-xl ${stat.accent} flex items-center justify-center`}>
+                  <stat.icon className="w-5 h-5" strokeWidth={1.5} />
+                </div>
+                <ArrowUpRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors" />
               </div>
-              <ArrowUpRight className="w-3.5 h-3.5 text-[#E7E5E4] group-hover:text-[#D6D3D1] transition-colors" />
+              <p className="text-2xl font-bold text-white tracking-tight leading-none">{stat.value}</p>
+              <p className="text-sm font-medium text-zinc-400 mt-1">{stat.label}</p>
+              <p className="text-xs text-zinc-600 mt-0.5">{stat.trend}</p>
             </div>
-            <p className="text-[22px] font-bold text-[#1C1917] tracking-tight leading-none">{stat.value}</p>
-            <p className="text-[12px] font-medium text-[#A8A29E] mt-1">{stat.label}</p>
-            <p className="text-[11px] text-[#D6D3D1] mt-0.5">{stat.trend}</p>
           </motion.div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* Two Column Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Low Stock Alert */}
         <motion.div
           {...fadeUp(0.3)}
-          className="bg-white rounded-2xl border border-[#F5F5F4] shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden"
+          className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl overflow-hidden"
         >
-          <div className="px-5 py-4 border-b border-[#F5F5F4] flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="w-3.5 h-3.5 text-[#F59E0B]" strokeWidth={2} />
-              <h3 className="text-[13px] font-semibold text-[#1C1917]">Low Stock</h3>
+          <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                <AlertTriangle className="w-4 h-4 text-amber-400" strokeWidth={2} />
+              </div>
+              <h3 className="text-sm font-semibold text-white">Low Stock Alerts</h3>
             </div>
             {lowStock.length > 0 && (
-              <span className="text-[10px] font-semibold text-[#F59E0B] bg-[#FFFBEB] px-2 py-[3px] rounded-full">
+              <span className="text-xs font-semibold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full">
                 {lowStock.length} items
               </span>
             )}
           </div>
-          <div className="divide-y divide-[#FAFAF9]">
+          <div className="divide-y divide-zinc-800/50">
             {lowStock.length === 0 ? (
-              <p className="text-[12px] text-[#D6D3D1] py-10 text-center">All stock levels are healthy</p>
+              <div className="py-10 text-center">
+                <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-green-500/10 flex items-center justify-center">
+                  <Package className="w-6 h-6 text-green-400" />
+                </div>
+                <p className="text-sm text-zinc-500">All stock levels are healthy</p>
+              </div>
             ) : (
               lowStock.map((part) => (
                 <div
                   key={part.id}
-                  className="flex items-center justify-between px-5 py-3.5 hover:bg-[#FAFAF9]/50 transition-colors"
+                  className="flex items-center justify-between px-5 py-4 hover:bg-zinc-800/30 transition-colors"
                 >
-                  <div>
-                    <p className="text-[13px] font-medium text-[#44403C]">{part.name}</p>
-                    <p className="text-[11px] text-[#D6D3D1]">{part.category}</p>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-white truncate">{part.name}</p>
+                    <p className="text-xs text-zinc-500">{part.category}</p>
                   </div>
-                  <div className="text-right">
-                    <p className={`text-[13px] font-bold ${part.stock === 0 ? 'text-[#EF4444]' : 'text-[#F59E0B]'}`}>
+                  <div className="text-right ml-4">
+                    <p className={`text-sm font-bold ${part.stock === 0 ? 'text-red-400' : 'text-amber-400'}`}>
                       {part.stock} left
                     </p>
-                    <p className="text-[10px] text-[#D6D3D1]">min {part.minStock}</p>
+                    <p className="text-xs text-zinc-600">min {part.minStock}</p>
                   </div>
                 </div>
               ))
@@ -144,69 +161,78 @@ export default function Overview() {
           </div>
         </motion.div>
 
+        {/* Recent Services */}
         <motion.div
           {...fadeUp(0.35)}
-          className="bg-white rounded-2xl border border-[#F5F5F4] shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden"
+          className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl overflow-hidden"
         >
-          <div className="px-5 py-4 border-b border-[#F5F5F4] flex items-center gap-2">
-            <Wrench className="w-3.5 h-3.5 text-[#A8A29E]" strokeWidth={2} />
-            <h3 className="text-[13px] font-semibold text-[#1C1917]">Recent Services</h3>
+          <div className="px-5 py-4 border-b border-zinc-800 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center">
+              <Wrench className="w-4 h-4 text-zinc-400" strokeWidth={2} />
+            </div>
+            <h3 className="text-sm font-semibold text-white">Recent Services</h3>
           </div>
-          <div className="divide-y divide-[#FAFAF9]">
+          <div className="divide-y divide-zinc-800/50">
             {services.slice(0, 5).map((service) => (
               <div
                 key={service.id}
-                className="flex items-center justify-between px-5 py-3.5 hover:bg-[#FAFAF9]/50 transition-colors"
+                className="flex items-center justify-between px-5 py-4 hover:bg-zinc-800/30 transition-colors"
               >
-                <div className="min-w-0">
-                  <p className="text-[13px] font-medium text-[#44403C] truncate">{service.customerName}</p>
-                  <p className="text-[11px] text-[#D6D3D1]">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-white truncate">{service.customerName}</p>
+                  <p className="text-xs text-zinc-500">
                     {service.motorcycleModel} - {service.serviceType}
                   </p>
                 </div>
-                <span className={`shrink-0 text-[10px] font-semibold px-2.5 py-[3px] rounded-full ml-3 ${
+                <span className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full ml-3 ${
                   service.status === 'Completed'
-                    ? 'bg-[#ECFDF5] text-[#059669]'
+                    ? 'bg-green-500/10 text-green-400'
                     : service.status === 'Ongoing'
-                      ? 'bg-[#EFF6FF] text-[#2563EB]'
-                      : 'bg-[#FFFBEB] text-[#D97706]'
-                }`}
-                >
+                      ? 'bg-blue-500/10 text-blue-400'
+                      : 'bg-amber-500/10 text-amber-400'
+                }`}>
                   {service.status}
                 </span>
               </div>
             ))}
           </div>
         </motion.div>
-
-        <motion.div
-          {...fadeUp(0.4)}
-          className="bg-white rounded-2xl border border-[#F5F5F4] shadow-[0_1px_2px_rgba(0,0,0,0.03)] p-5 lg:col-span-2"
-        >
-          <h3 className="text-[13px] font-semibold text-[#1C1917] mb-5">Service Pipeline</h3>
-          <div className="grid grid-cols-3 gap-4">
-            {[
-              { label: 'Pending', count: pendingServices, icon: Clock, color: 'bg-[#FFFBEB] text-[#D97706]' },
-              { label: 'Ongoing', count: ongoingServices, icon: Wrench, color: 'bg-[#EFF6FF] text-[#2563EB]' },
-              { label: 'Completed', count: completedServices, icon: CheckCircle2, color: 'bg-[#ECFDF5] text-[#059669]' },
-            ].map((item) => (
-              <div key={item.label} className={`flex items-center gap-3.5 p-4 rounded-2xl ${item.color} bg-opacity-30`}>
-                <item.icon className="w-5 h-5" strokeWidth={1.5} />
-                <div>
-                  <p className="text-[22px] font-bold text-[#1C1917] leading-none">{item.count}</p>
-                  <p className="text-[11px] font-medium opacity-60 mt-0.5">{item.label}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
       </div>
 
-      <motion.div {...fadeUp(0.45)} className="mt-8">
-        <h3 className="text-[13px] font-semibold text-[#1C1917] mb-4">Analytics</h3>
-        <div className="grid grid-cols-1 gap-4">
+      {/* Service Pipeline */}
+      <motion.div
+        {...fadeUp(0.4)}
+        className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl p-6"
+      >
+        <h3 className="text-sm font-semibold text-white mb-5">Service Pipeline</h3>
+        <div className="grid grid-cols-3 gap-4">
+          {[
+            { label: 'Pending', count: pendingServices, icon: Clock, color: 'bg-amber-500/10 text-amber-400 border border-amber-500/20' },
+            { label: 'Ongoing', count: ongoingServices, icon: Wrench, color: 'bg-blue-500/10 text-blue-400 border border-blue-500/20' },
+            { label: 'Completed', count: completedServices, icon: CheckCircle2, color: 'bg-green-500/10 text-green-400 border border-green-500/20' },
+          ].map((item) => (
+            <motion.div
+              key={item.label}
+              className={`flex items-center gap-4 p-4 rounded-xl ${item.color}`}
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: 'spring', stiffness: 400 }}
+            >
+              <item.icon className="w-6 h-6" strokeWidth={1.5} />
+              <div>
+                <p className="text-2xl font-bold text-white leading-none">{item.count}</p>
+                <p className="text-xs font-medium text-zinc-400 mt-1">{item.label}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Analytics Section */}
+      <motion.div {...fadeUp(0.45)}>
+        <h3 className="text-sm font-semibold text-white mb-5">Analytics</h3>
+        <div className="space-y-6">
           <RevenueLineChart data={revenueData} loading={statsLoading} error={statsError} />
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <ServiceStatusDonut data={statusData} loading={statsLoading} error={statsError} />
             <PaymentPieChart data={paymentData} loading={statsLoading} error={statsError} />
           </div>

@@ -31,38 +31,38 @@ export default function SuperAdminAuditLogsPage() {
   return (
     <div>
       <div className="mb-7">
-        <h2 className="text-[22px] font-bold text-[#1C1917] tracking-tight">Platform Audit Logs</h2>
-        <p className="text-[13px] text-[#A8A29E] mt-0.5">Global visibility of high-level platform actions</p>
+        <h2 className="text-[22px] font-bold text-white tracking-tight">Platform Audit Logs</h2>
+        <p className="text-[13px] text-zinc-400 mt-0.5">Global visibility of high-level platform actions</p>
       </div>
 
-      <div className="bg-white rounded-2xl border border-[#F5F5F4] overflow-x-auto">
+      <div className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl overflow-x-auto">
         <table className="w-full min-w-[900px]">
           <thead>
-            <tr className="border-b border-[#F5F5F4]">
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-[#A8A29E] uppercase">Time</th>
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-[#A8A29E] uppercase">Actor</th>
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-[#A8A29E] uppercase">Shop</th>
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-[#A8A29E] uppercase">Action</th>
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-[#A8A29E] uppercase">Resource</th>
+            <tr className="border-b border-zinc-800">
+              <th className="text-left px-4 py-3 text-[10px] font-semibold text-zinc-500 uppercase">Time</th>
+              <th className="text-left px-4 py-3 text-[10px] font-semibold text-zinc-500 uppercase">Actor</th>
+              <th className="text-left px-4 py-3 text-[10px] font-semibold text-zinc-500 uppercase">Shop</th>
+              <th className="text-left px-4 py-3 text-[10px] font-semibold text-zinc-500 uppercase">Action</th>
+              <th className="text-left px-4 py-3 text-[10px] font-semibold text-zinc-500 uppercase">Resource</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#FAFAF9]">
+          <tbody className="divide-y divide-zinc-800">
             {loading ? (
               <tr>
-                <td colSpan={5} className="px-4 py-10 text-center text-[12px] text-[#A8A29E]">Loading logs...</td>
+                <td colSpan={5} className="px-4 py-10 text-center text-[12px] text-zinc-500">Loading logs...</td>
               </tr>
             ) : logs.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-10 text-center text-[12px] text-[#A8A29E]">No logs found.</td>
+                <td colSpan={5} className="px-4 py-10 text-center text-[12px] text-zinc-500">No logs found.</td>
               </tr>
             ) : (
               logs.map((log) => (
-                <tr key={log.logId}>
-                  <td className="px-4 py-3 text-[12px] text-[#A8A29E]">{log.loggedAt ? new Date(log.loggedAt).toLocaleString() : 'N/A'}</td>
-                  <td className="px-4 py-3 text-[12px] text-[#1C1917]">{log.actorName ?? 'System'}</td>
-                  <td className="px-4 py-3 text-[12px] text-[#44403C]">{log.shopName ?? 'Platform'}</td>
-                  <td className="px-4 py-3 text-[12px] text-[#1C1917]">{log.action}</td>
-                  <td className="px-4 py-3 text-[12px] text-[#78716C]">{log.tableName ?? 'N/A'}#{log.recordId ?? '—'}</td>
+                <tr key={log.logId} className="hover:bg-zinc-800/50 transition-colors">
+                  <td className="px-4 py-3 text-[12px] text-zinc-500">{log.loggedAt ? new Date(log.loggedAt).toLocaleString() : 'N/A'}</td>
+                  <td className="px-4 py-3 text-[12px] text-zinc-200">{log.actorName ?? 'System'}</td>
+                  <td className="px-4 py-3 text-[12px] text-zinc-400">{log.shopName ?? 'Platform'}</td>
+                  <td className="px-4 py-3 text-[12px] text-zinc-200">{log.action}</td>
+                  <td className="px-4 py-3 text-[12px] text-zinc-500">{log.tableName ?? 'N/A'}#{log.recordId ?? 'â€”'}</td>
                 </tr>
               ))
             )}

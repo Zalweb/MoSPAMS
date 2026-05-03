@@ -15,6 +15,12 @@ type PaymentFilter = 'All' | 'Cash' | 'GCash';
 
 const PERIOD_LABEL: Record<Period | 'all', string> = { daily: 'Today', weekly: 'This week', monthly: 'This month', yearly: 'This year', all: 'All time' };
 
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
+});
+
 export default function Sales() {
   const { transactions, parts, services, addTransaction } = useData();
   const [modalOpen, setModalOpen] = useState(false);
@@ -69,154 +75,160 @@ export default function Sales() {
   const selectedTx: Transaction | undefined = transactions.find(t => t.id === receiptTx);
 
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-7">
+    <div className="space-y-6">
+      <motion.div {...fadeUp(0)} className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h2 className="text-[22px] font-bold text-[#1C1917] tracking-tight">Sales</h2>
-          <p className="text-[13px] text-[#D6D3D1] mt-0.5">{transactions.length} transactions total</p>
+          <h2 className="text-2xl font-bold text-white tracking-tight">Sales</h2>
+          <p className="text-sm text-zinc-500 mt-1">{transactions.length} transactions total</p>
         </div>
-        <Button onClick={() => setModalOpen(true)} size="sm" className="h-9 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-white text-[12px] font-medium px-4">
-          <Plus className="w-3.5 h-3.5 mr-1.5" /> New Transaction
+        <Button onClick={() => setModalOpen(true)} size="sm" className="h-10 rounded-xl bg-white hover:bg-zinc-200 text-black text-sm font-semibold px-5">
+          <Plus className="w-4 h-4 mr-2" /> New Transaction
         </Button>
-      </div>
+      </motion.div>
 
-      <div className="flex flex-wrap gap-1.5 mb-3">
+      <motion.div {...fadeUp(0.1)} className="flex flex-wrap gap-2">
         {(['daily', 'weekly', 'monthly', 'yearly', 'all'] as const).map(p => (
-          <button key={p} onClick={() => setPeriod(p)} className={`px-3 py-[6px] rounded-full text-[12px] font-medium capitalize transition-all ${period === p ? 'bg-[#1C1917] text-white' : 'bg-white text-[#A8A29E] border border-[#F0EFED] hover:text-[#78716C]'}`}>
+          <button key={p} onClick={() => setPeriod(p)} className={`px-4 py-2 rounded-xl text-sm font-medium capitalize transition-all ${period === p ? 'bg-white text-black' : 'bg-zinc-900/50 text-zinc-400 border border-zinc-800 hover:border-zinc-700 hover:text-white'}`}>
             {PERIOD_LABEL[p]}
           </button>
         ))}
-      </div>
-      <div className="flex flex-wrap gap-1.5 mb-5">
+      </motion.div>
+
+      <motion.div {...fadeUp(0.15)} className="flex flex-wrap gap-2">
         {(['All', 'Cash', 'GCash'] as PaymentFilter[]).map(p => (
-          <button key={p} onClick={() => setPaymentFilter(p)} className={`px-3 py-[6px] rounded-full text-[11px] font-medium transition-all ${paymentFilter === p ? 'bg-[#44403C] text-white' : 'bg-white text-[#A8A29E] border border-[#F0EFED]'}`}>
+          <button key={p} onClick={() => setPaymentFilter(p)} className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${paymentFilter === p ? 'bg-zinc-700 text-white' : 'bg-zinc-900/50 text-zinc-400 border border-zinc-800'}`}>
             {p}
           </button>
         ))}
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+      <motion.div {...fadeUp(0.2)} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: `${PERIOD_LABEL[period]} Revenue`, value: `₱${totalRevenue.toLocaleString()}`, accent: 'bg-[#1C1917] text-white' },
-          { label: 'Transactions', value: filteredTx.length.toString(), accent: 'bg-[#EFF6FF] text-[#3B82F6]' },
-          { label: 'Cash', value: `₱${cashTotal.toLocaleString()}`, accent: 'bg-[#ECFDF5] text-[#10B981]' },
-          { label: 'GCash', value: `₱${gcashTotal.toLocaleString()}`, accent: 'bg-[#F5F3FF] text-[#8B5CF6]' },
+          { label: `${PERIOD_LABEL[period]} Revenue`, value: `₱${totalRevenue.toLocaleString()}`, dark: true },
+          { label: 'Transactions', value: filteredTx.length.toString(), color: 'blue' },
+          { label: 'Cash', value: `₱${cashTotal.toLocaleString()}`, color: 'green' },
+          { label: 'GCash', value: `₱${gcashTotal.toLocaleString()}`, color: 'purple' },
         ].map((s, i) => (
-          <div key={s.label} className={`rounded-2xl p-4 ${i === 0 ? 'bg-[#1C1917] text-white' : s.accent.split(' ')[0]}`}>
-            <p className={`text-[11px] font-medium ${i === 0 ? 'text-[#A8A29E]' : 'text-[#A8A29E]'}`}>{s.label}</p>
-            <p className={`text-xl font-bold mt-1 tracking-tight ${i === 0 ? 'text-white' : 'text-[#1C1917]'}`}>{s.value}</p>
+          <div key={s.label} className={`rounded-2xl p-5 ${s.dark ? 'bg-zinc-900/50 border border-zinc-800' : s.color === 'blue' ? 'bg-blue-500/10 border border-blue-500/20' : s.color === 'green' ? 'bg-green-500/10 border border-green-500/20' : 'bg-violet-500/10 border border-violet-500/20'}`}>
+            <p className="text-xs font-medium text-zinc-400">{s.label}</p>
+            <p className="text-2xl font-bold text-white mt-1 tracking-tight">{s.value}</p>
           </div>
         ))}
-      </div>
+      </motion.div>
 
-      <div className="bg-white rounded-2xl border border-[#F5F5F4] shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#F5F5F4] flex items-center justify-between">
-          <h3 className="text-[13px] font-semibold text-[#1C1917]">Transactions ({filteredTx.length})</h3>
-          <span className="text-[11px] text-[#A8A29E]">{PERIOD_LABEL[period]}{paymentFilter !== 'All' && ` · ${paymentFilter}`}</span>
+      <motion.div {...fadeUp(0.25)} className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-white">Transactions ({filteredTx.length})</h3>
+          <span className="text-xs text-zinc-500">{PERIOD_LABEL[period]}{paymentFilter !== 'All' && ` · ${paymentFilter}`}</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead><tr className="border-b border-[#F5F5F4]">
-              <th className="text-left px-5 py-3 text-[10px] font-semibold text-[#D6D3D1] uppercase">Date</th>
-              <th className="text-left px-5 py-3 text-[10px] font-semibold text-[#D6D3D1] uppercase">Type</th>
-              <th className="text-left px-5 py-3 text-[10px] font-semibold text-[#D6D3D1] uppercase">Items</th>
-              <th className="text-left px-5 py-3 text-[10px] font-semibold text-[#D6D3D1] uppercase">Payment</th>
-              <th className="text-right px-5 py-3 text-[10px] font-semibold text-[#D6D3D1] uppercase">Total</th>
-              <th className="text-right px-5 py-3 text-[10px] font-semibold text-[#D6D3D1] uppercase"></th>
+            <thead><tr className="border-b border-zinc-800">
+              <th className="text-left px-5 py-4 text-xs font-semibold text-zinc-500 uppercase">Date</th>
+              <th className="text-left px-5 py-4 text-xs font-semibold text-zinc-500 uppercase">Type</th>
+              <th className="text-left px-5 py-4 text-xs font-semibold text-zinc-500 uppercase">Items</th>
+              <th className="text-left px-5 py-4 text-xs font-semibold text-zinc-500 uppercase">Payment</th>
+              <th className="text-right px-5 py-4 text-xs font-semibold text-zinc-500 uppercase">Total</th>
+              <th className="text-right px-5 py-4 text-xs font-semibold text-zinc-500 uppercase"></th>
             </tr></thead>
-            <tbody className="divide-y divide-[#FAFAF9]">
+            <tbody className="divide-y divide-zinc-800/50">
               {filteredTx.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(tx => (
-                <tr key={tx.id} className="hover:bg-[#FAFAF9]/60 transition-colors">
-                  <td className="px-5 py-3.5 text-[11px] text-[#A8A29E] tabular-nums whitespace-nowrap">{new Date(tx.createdAt).toLocaleDateString()} <span className="text-[#D6D3D1]">{new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></td>
-                  <td className="px-5 py-3.5"><span className={`text-[10px] font-semibold px-2 py-[3px] rounded-full ${tx.type === 'service+parts' ? 'bg-[#F5F3FF] text-[#7C3AED]' : 'bg-[#EFF6FF] text-[#3B82F6]'}`}>{tx.type}</span></td>
-                  <td className="px-5 py-3.5 text-[12px] text-[#78716C] max-w-[200px] truncate">{tx.items.map(i => i.name).join(', ') || '—'}</td>
-                  <td className="px-5 py-3.5">
-                    <span className="flex items-center gap-1 text-[12px] text-[#78716C]">
-                      {tx.paymentMethod === 'GCash' ? <Smartphone className="w-3 h-3 text-[#8B5CF6]" /> : <Banknote className="w-3 h-3 text-[#10B981]" />}
+                <tr key={tx.id} className="hover:bg-zinc-800/30 transition-colors">
+                  <td className="px-5 py-4 text-xs text-zinc-500 tabular-nums whitespace-nowrap">{new Date(tx.createdAt).toLocaleDateString()} <span className="text-zinc-600">{new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></td>
+                  <td className="px-5 py-4"><span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${tx.type === 'service+parts' ? 'bg-violet-500/10 text-violet-400' : 'bg-blue-500/10 text-blue-400'}`}>{tx.type}</span></td>
+                  <td className="px-5 py-4 text-sm text-zinc-400 max-w-[200px] truncate">{tx.items.map(i => i.name).join(', ') || '—'}</td>
+                  <td className="px-5 py-4">
+                    <span className="flex items-center gap-1.5 text-sm text-zinc-400">
+                      {tx.paymentMethod === 'GCash' ? <Smartphone className="w-4 h-4 text-violet-400" /> : <Banknote className="w-4 h-4 text-green-400" />}
                       {tx.paymentMethod}
                     </span>
                   </td>
-                  <td className="px-5 py-3.5 text-right text-[13px] font-semibold text-[#44403C] tabular-nums">₱{tx.total.toLocaleString()}</td>
-                  <td className="px-5 py-3.5 text-right">
-                    <button onClick={() => setReceiptTx(tx.id)} className="p-1.5 rounded-lg hover:bg-[#F5F5F4] text-[#D6D3D1] hover:text-[#78716C] transition-colors"><Receipt className="w-3.5 h-3.5" /></button>
+                  <td className="px-5 py-4 text-right text-sm font-semibold text-white tabular-nums">₱{tx.total.toLocaleString()}</td>
+                  <td className="px-5 py-4 text-right">
+                    <button onClick={() => setReceiptTx(tx.id)} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-white transition-colors"><Receipt className="w-4 h-4" /></button>
                   </td>
                 </tr>
               ))}
               {filteredTx.length === 0 && (
-                <tr><td colSpan={6} className="px-5 py-12 text-center text-[12px] text-[#D6D3D1]">No transactions for this filter</td></tr>
+                <tr><td colSpan={6} className="px-5 py-16 text-center text-sm text-zinc-500">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-zinc-800/50 flex items-center justify-center">
+                    <Receipt className="w-8 h-8 text-zinc-600" />
+                  </div>
+                  No transactions for this filter
+                </td></tr>
               )}
             </tbody>
           </table>
         </div>
-      </div>
+      </motion.div>
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="sm:max-w-2xl rounded-[20px] border-[#F0EFED] p-6 max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="pb-1"><DialogTitle className="text-[15px] font-semibold">New Transaction</DialogTitle></DialogHeader>
+        <DialogContent className="sm:max-w-2xl rounded-2xl border-zinc-800 bg-zinc-900 p-6 max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="pb-2"><DialogTitle className="text-base font-semibold text-white">New Transaction</DialogTitle></DialogHeader>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-3">
             <div>
-              <Label className="text-[11px] font-medium text-[#78716C]">Search Parts (or scan barcode)</Label>
+              <Label className="text-xs font-medium text-zinc-400">Search Parts (or scan barcode)</Label>
               <div className="relative mt-1.5 mb-3">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#D6D3D1]" />
-                <Input autoFocus value={search} onChange={e => setSearch(e.target.value)} className="pl-9 h-9 rounded-xl border-[#E7E5E4] text-[13px]" placeholder="Search…" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                <Input autoFocus value={search} onChange={e => setSearch(e.target.value)} className="pl-11 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white placeholder:text-zinc-500 focus:border-zinc-600" placeholder="Search…" />
               </div>
               <div className="space-y-1 max-h-56 overflow-y-auto pr-1">
                 {filteredParts.map(part => (
-                  <button key={part.id} onClick={() => addToCart(part)} className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-[#FAFAF9] border border-transparent hover:border-[#F5F5F4] transition-all text-left group">
-                    <div><p className="text-[12px] font-medium text-[#44403C]">{part.name}</p><p className="text-[10px] text-[#D6D3D1]">{part.category} — {part.stock} in stock</p></div>
-                    <div className="flex items-center gap-2"><span className="text-[12px] font-semibold text-[#78716C]">₱{part.price.toLocaleString()}</span><Plus className="w-3.5 h-3.5 text-[#D6D3D1] group-hover:text-[#78716C]" /></div>
+                  <button key={part.id} onClick={() => addToCart(part)} className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-zinc-800/50 border border-transparent hover:border-zinc-700 transition-all text-left group">
+                    <div><p className="text-sm font-medium text-white">{part.name}</p><p className="text-xs text-zinc-500">{part.category} — {part.stock} in stock</p></div>
+                    <div className="flex items-center gap-2"><span className="text-sm font-semibold text-zinc-400">₱{part.price.toLocaleString()}</span><Plus className="w-4 h-4 text-zinc-500 group-hover:text-white" /></div>
                   </button>
                 ))}
-                {filteredParts.length === 0 && <p className="text-[12px] text-[#D6D3D1] text-center py-6">No parts available</p>}
+                {filteredParts.length === 0 && <p className="text-sm text-zinc-500 text-center py-8">No parts available</p>}
               </div>
-              <div className="mt-4 pt-4 border-t border-[#F5F5F4]">
-                <Label className="text-[11px] font-medium text-[#78716C]">Link Service (optional)</Label>
-                <select value={selectedService} onChange={e => { setSelectedService(e.target.value); const s = services.find(sv => sv.id === e.target.value); if (s) setServiceLabor(s.laborCost); else setServiceLabor(0); }} className="w-full mt-1.5 h-9 px-3 rounded-xl border border-[#E7E5E4] text-[13px] bg-white">
+              <div className="mt-4 pt-4 border-t border-zinc-800">
+                <Label className="text-xs font-medium text-zinc-400">Link Service (optional)</Label>
+                <select value={selectedService} onChange={e => { setSelectedService(e.target.value); const s = services.find(sv => sv.id === e.target.value); if (s) setServiceLabor(s.laborCost); else setServiceLabor(0); }} className="w-full mt-1.5 h-10 px-3 rounded-xl bg-zinc-800/50 border border-zinc-700 text-sm text-white">
                   <option value="">No service</option>
                   {pendingServices.map(s => <option key={s.id} value={s.id}>{s.customerName} — {s.serviceType}</option>)}
                 </select>
               </div>
             </div>
 
-            <div className="bg-[#FAFAF9] rounded-2xl p-4">
-              <h4 className="text-[13px] font-semibold text-[#1C1917] mb-3">Cart</h4>
+            <div className="bg-zinc-800/30 rounded-2xl p-4 border border-zinc-800">
+              <h4 className="text-sm font-semibold text-white mb-3">Cart</h4>
               <AnimatePresence>
                 {cart.length === 0 && !selectedService ? (
-                  <p className="text-[12px] text-[#D6D3D1] text-center py-10">Add parts or select a service</p>
+                  <p className="text-sm text-zinc-500 text-center py-10">Add parts or select a service</p>
                 ) : (
                   <div className="space-y-2">
                     {cart.map(item => (
-                      <motion.div key={item.partId} layout initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -8 }} className="flex items-center justify-between bg-white rounded-xl p-2.5 border border-[#F5F5F4]">
-                        <div className="flex-1 min-w-0"><p className="text-[12px] font-medium text-[#44403C] truncate">{item.name}</p><p className="text-[10px] text-[#D6D3D1]">₱{item.price.toLocaleString()} each</p></div>
-                        <div className="flex items-center gap-1.5 ml-2">
-                          <button onClick={() => updateQty(item.partId, item.quantity - 1)} className="w-6 h-6 rounded-md bg-[#FAFAF9] flex items-center justify-center text-[#78716C] text-xs font-bold hover:bg-[#F5F5F4]">-</button>
-                          <span className="text-[12px] font-semibold w-4 text-center tabular-nums">{item.quantity}</span>
-                          <button onClick={() => updateQty(item.partId, item.quantity + 1)} className="w-6 h-6 rounded-md bg-[#FAFAF9] flex items-center justify-center text-[#78716C] text-xs font-bold hover:bg-[#F5F5F4]">+</button>
-                          <button onClick={() => removeFromCart(item.partId)} className="p-1 text-[#D6D3D1] hover:text-[#EF4444] ml-1"><Trash2 className="w-3 h-3" /></button>
+                      <motion.div key={item.partId} layout initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -8 }} className="flex items-center justify-between bg-zinc-800/50 rounded-xl p-3 border border-zinc-700">
+                        <div className="flex-1 min-w-0"><p className="text-sm font-medium text-white truncate">{item.name}</p><p className="text-xs text-zinc-500">₱{item.price.toLocaleString()} each</p></div>
+                        <div className="flex items-center gap-2 ml-3">
+                          <button onClick={() => updateQty(item.partId, item.quantity - 1)} className="w-7 h-7 rounded-lg bg-zinc-700/50 flex items-center justify-center text-zinc-400 text-xs font-bold hover:bg-zinc-700">-</button>
+                          <span className="text-sm font-semibold w-5 text-center tabular-nums text-white">{item.quantity}</span>
+                          <button onClick={() => updateQty(item.partId, item.quantity + 1)} className="w-7 h-7 rounded-lg bg-zinc-700/50 flex items-center justify-center text-zinc-400 text-xs font-bold hover:bg-zinc-700">+</button>
+                          <button onClick={() => removeFromCart(item.partId)} className="p-1 text-zinc-500 hover:text-red-400 ml-1"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       </motion.div>
                     ))}
                     {selectedService && (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-[#F5F3FF] rounded-xl p-3 border border-[#EDE9FE]">
-                        <p className="text-[12px] font-medium text-[#5B21B6]">Service Labor</p>
-                        <p className="text-[10px] text-[#7C3AED]">{services.find(s => s.id === selectedService)?.serviceType}</p>
-                        <p className="text-[13px] font-semibold text-[#5B21B6] mt-0.5">₱{serviceLabor.toLocaleString()}</p>
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-violet-500/10 rounded-xl p-3 border border-violet-500/20">
+                        <p className="text-sm font-medium text-violet-300">Service Labor</p>
+                        <p className="text-xs text-violet-400">{services.find(s => s.id === selectedService)?.serviceType}</p>
+                        <p className="text-sm font-semibold text-violet-300 mt-0.5">₱{serviceLabor.toLocaleString()}</p>
                       </motion.div>
                     )}
                   </div>
                 )}
               </AnimatePresence>
 
-              <div className="mt-4 pt-4 border-t border-[#E7E5E4]">
+              <div className="mt-4 pt-4 border-t border-zinc-700">
                 <div className="flex gap-2 mb-4">
-                  <button onClick={() => setPaymentMethod('Cash')} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-[12px] font-medium transition-all ${paymentMethod === 'Cash' ? 'bg-[#059669] text-white' : 'bg-white text-[#78716C] border border-[#E7E5E4]'}`}><Banknote className="w-3.5 h-3.5" />Cash</button>
-                  <button onClick={() => setPaymentMethod('GCash')} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-[12px] font-medium transition-all ${paymentMethod === 'GCash' ? 'bg-[#2563EB] text-white' : 'bg-white text-[#78716C] border border-[#E7E5E4]'}`}><Smartphone className="w-3.5 h-3.5" />GCash</button>
+                  <button onClick={() => setPaymentMethod('Cash')} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all ${paymentMethod === 'Cash' ? 'bg-green-500 text-white' : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700'}`}><Banknote className="w-4 h-4" />Cash</button>
+                  <button onClick={() => setPaymentMethod('GCash')} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all ${paymentMethod === 'GCash' ? 'bg-violet-500 text-white' : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700'}`}><Smartphone className="w-4 h-4" />GCash</button>
                 </div>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-[13px] text-[#A8A29E]">Total</span>
-                  <span className="text-2xl font-bold text-[#1C1917] tracking-tight tabular-nums">₱{grandTotal.toLocaleString()}</span>
+                  <span className="text-sm text-zinc-400">Total</span>
+                  <span className="text-2xl font-bold text-white tracking-tight tabular-nums">₱{grandTotal.toLocaleString()}</span>
                 </div>
-                <Button onClick={handleCheckout} disabled={grandTotal === 0} className="w-full h-10 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-white text-[13px] font-medium disabled:opacity-40">Complete Transaction</Button>
+                <Button onClick={handleCheckout} disabled={grandTotal === 0} className="w-full h-10 rounded-xl bg-white hover:bg-zinc-200 text-black text-sm font-semibold disabled:opacity-40">Complete Transaction</Button>
               </div>
             </div>
           </div>
@@ -224,27 +236,27 @@ export default function Sales() {
       </Dialog>
 
       <Dialog open={!!receiptTx} onOpenChange={() => setReceiptTx(null)}>
-        <DialogContent className="sm:max-w-sm rounded-[20px] border-[#F0EFED] p-6">
+        <DialogContent className="sm:max-w-sm rounded-2xl border-zinc-800 bg-zinc-900 p-6">
           <DialogHeader>
-            <DialogTitle className="text-[15px] font-semibold text-center flex items-center justify-center gap-2">
+            <DialogTitle className="text-base font-semibold text-center flex items-center justify-center gap-2 text-white">
               Receipt
-              <button onClick={() => window.print()} className="p-1 rounded hover:bg-[#F5F5F4] text-[#A8A29E]" title="Print"><Printer className="w-3.5 h-3.5" /></button>
+              <button onClick={() => window.print()} className="p-1.5 rounded hover:bg-zinc-800 text-zinc-500" title="Print"><Printer className="w-4 h-4" /></button>
             </DialogTitle>
           </DialogHeader>
           {selectedTx && (
-            <div className="space-y-3 mt-1">
-              <div className="text-center border-b border-dashed border-[#E7E5E4] pb-3">
-                <p className="text-[12px] text-[#A8A29E]">MoSPAMS Motorcycle Shop</p>
-                <p className="text-[10px] text-[#D6D3D1] mt-1">{new Date(selectedTx.createdAt).toLocaleString()}</p>
-                <p className="text-[10px] font-mono text-[#D6D3D1] mt-0.5">TXN-{selectedTx.id.slice(-8).toUpperCase()}</p>
+            <div className="space-y-3 mt-2">
+              <div className="text-center border-b border-dashed border-zinc-700 pb-4">
+                <p className="text-sm text-zinc-400">MoSPAMS Motorcycle Shop</p>
+                <p className="text-xs text-zinc-500 mt-1">{new Date(selectedTx.createdAt).toLocaleString()}</p>
+                <p className="text-xs font-mono text-zinc-500 mt-0.5">TXN-{selectedTx.id.slice(-8).toUpperCase()}</p>
               </div>
               {selectedTx.items.map((item, i) => (
-                <div key={i} className="flex justify-between text-[12px]"><span className="text-[#78716C]">{item.name} x{item.quantity}</span><span className="font-medium text-[#44403C] tabular-nums">₱{(item.price * item.quantity).toLocaleString()}</span></div>
+                <div key={i} className="flex justify-between text-sm"><span className="text-zinc-400">{item.name} x{item.quantity}</span><span className="font-medium text-white tabular-nums">₱{(item.price * item.quantity).toLocaleString()}</span></div>
               ))}
-              {selectedTx.serviceLaborCost && <div className="flex justify-between text-[12px] font-medium text-[#7C3AED]"><span>Service Labor</span><span className="tabular-nums">₱{selectedTx.serviceLaborCost.toLocaleString()}</span></div>}
-              <div className="border-t border-dashed border-[#E7E5E4] pt-3">
-                <div className="flex justify-between text-[14px] font-bold text-[#1C1917]"><span>Total</span><span className="tabular-nums">₱{selectedTx.total.toLocaleString()}</span></div>
-                <div className="flex justify-between text-[11px] text-[#A8A29E] mt-1"><span>Payment</span><span className="flex items-center gap-1">{selectedTx.paymentMethod === 'GCash' ? <Smartphone className="w-3 h-3" /> : <Banknote className="w-3 h-3" />}{selectedTx.paymentMethod}</span></div>
+              {selectedTx.serviceLaborCost && <div className="flex justify-between text-sm font-medium text-violet-400"><span>Service Labor</span><span className="tabular-nums">₱{selectedTx.serviceLaborCost.toLocaleString()}</span></div>}
+              <div className="border-t border-dashed border-zinc-700 pt-4">
+                <div className="flex justify-between text-base font-bold text-white"><span>Total</span><span className="tabular-nums">₱{selectedTx.total.toLocaleString()}</span></div>
+                <div className="flex justify-between text-xs text-zinc-400 mt-2"><span>Payment</span><span className="flex items-center gap-1">{selectedTx.paymentMethod === 'GCash' ? <Smartphone className="w-3.5 h-3.5" /> : <Banknote className="w-3.5 h-3.5" />}{selectedTx.paymentMethod}</span></div>
               </div>
             </div>
           )}

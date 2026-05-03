@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { motion } from 'framer-motion';
 import { Plus, Pencil, Trash2, Search, AlertTriangle, Package, ArrowDownToLine, ArrowUpFromLine, History, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,6 +31,12 @@ const movementSchema = z.object({
   reason: z.string().min(1, 'Reason required'),
 });
 type MovementForm = z.infer<typeof movementSchema>;
+
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
+});
 
 export default function Inventory() {
   const { parts, addPart, updatePart, deletePart, recordStockMovement, stockMovements } = useData();
@@ -84,92 +91,92 @@ export default function Inventory() {
   const lowCount = parts.filter(p => p.stock <= p.minStock).length;
 
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-7">
+    <div className="space-y-6">
+      <motion.div {...fadeUp(0)} className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h2 className="text-[22px] font-bold text-[#1C1917] tracking-tight">Inventory</h2>
-          <p className="text-[13px] text-[#D6D3D1] mt-0.5">{parts.length} parts in stock {lowCount > 0 && <span className="text-[#F59E0B]">— {lowCount} low</span>}</p>
+          <h2 className="text-2xl font-bold text-white tracking-tight">Inventory</h2>
+          <p className="text-sm text-zinc-500 mt-1">{parts.length} parts in stock {lowCount > 0 && <span className="text-amber-400">— {lowCount} low</span>}</p>
         </div>
         {canCreate && (
-          <Button onClick={openAdd} size="sm" className="h-9 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-white text-[12px] font-medium px-4 shadow-sm">
-            <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Part
+          <Button onClick={openAdd} size="sm" className="h-10 rounded-xl bg-white hover:bg-zinc-200 text-black text-sm font-semibold px-5">
+            <Plus className="w-4 h-4 mr-2" /> Add Part
           </Button>
         )}
-      </div>
+      </motion.div>
 
-      <div className="flex flex-col sm:flex-row gap-2.5 mb-5">
+      <motion.div {...fadeUp(0.1)} className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#D6D3D1]" />
-          <Input
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+          <input
             autoFocus
             placeholder="Search parts or scan barcode…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="pl-9 h-9 rounded-xl border-[#E7E5E4] bg-white text-[13px] focus:border-[#C4C0BC] focus:ring-0"
+            className="w-full h-11 pl-11 pr-4 rounded-xl bg-zinc-900/50 border border-zinc-800 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-700 focus:ring-2 focus:ring-white/10"
           />
         </div>
-        <select value={catFilter} onChange={e => setCatFilter(e.target.value)} className="h-9 px-3.5 rounded-xl border border-[#E7E5E4] text-[13px] bg-white text-[#78716C] focus:outline-none focus:border-[#C4C0BC]">
+        <select value={catFilter} onChange={e => setCatFilter(e.target.value)} className="h-11 px-4 rounded-xl bg-zinc-900/50 border border-zinc-800 text-sm text-zinc-400 focus:outline-none focus:border-zinc-700">
           <option value="All">All Categories</option>
           {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
-      </div>
+      </motion.div>
 
-      <div className="bg-white rounded-2xl border border-[#F5F5F4] shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
+      <motion.div {...fadeUp(0.2)} className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-[#F5F5F4]">
-                <th className="text-left px-5 py-3 text-[10px] font-semibold text-[#D6D3D1] uppercase tracking-wider">Part</th>
-                <th className="text-left px-5 py-3 text-[10px] font-semibold text-[#D6D3D1] uppercase tracking-wider">Category</th>
-                <th className="text-left px-5 py-3 text-[10px] font-semibold text-[#D6D3D1] uppercase tracking-wider">Stock</th>
-                <th className="text-left px-5 py-3 text-[10px] font-semibold text-[#D6D3D1] uppercase tracking-wider">Price</th>
-                <th className="text-left px-5 py-3 text-[10px] font-semibold text-[#D6D3D1] uppercase tracking-wider">Barcode</th>
-                <th className="text-right px-5 py-3 text-[10px] font-semibold text-[#D6D3D1] uppercase tracking-wider"></th>
+              <tr className="border-b border-zinc-800">
+                <th className="text-left px-5 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Part</th>
+                <th className="text-left px-5 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Category</th>
+                <th className="text-left px-5 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Stock</th>
+                <th className="text-left px-5 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Price</th>
+                <th className="text-left px-5 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Barcode</th>
+                <th className="text-right px-5 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#FAFAF9]">
+            <tbody className="divide-y divide-zinc-800/50">
               {filtered.map(part => {
                 const isLow = part.stock <= part.minStock;
                 return (
-                  <tr key={part.id} className="hover:bg-[#FAFAF9]/60 transition-colors group">
-                    <td className="px-5 py-3.5">
+                  <tr key={part.id} className="hover:bg-zinc-800/30 transition-colors group">
+                    <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-[10px] bg-[#F5F5F4] flex items-center justify-center shrink-0 group-hover:bg-[#EFEDEA] transition-colors">
-                          <Package className="w-3.5 h-3.5 text-[#A8A29E]" strokeWidth={1.5} />
+                        <div className="w-10 h-10 rounded-xl bg-zinc-800/50 flex items-center justify-center shrink-0 group-hover:bg-zinc-800 transition-colors">
+                          <Package className="w-5 h-5 text-zinc-400" strokeWidth={1.5} />
                         </div>
                         <div>
-                          <p className="text-[13px] font-medium text-[#44403C]">{part.name}</p>
-                          {isLow && <p className="text-[10px] text-[#F59E0B] font-medium flex items-center gap-1"><AlertTriangle className="w-2.5 h-2.5" />Low stock</p>}
+                          <p className="text-sm font-medium text-white">{part.name}</p>
+                          {isLow && <p className="text-xs text-amber-400 font-medium flex items-center gap-1"><AlertTriangle className="w-3 h-3" />Low stock</p>}
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-3.5"><span className="text-[11px] font-medium text-[#A8A29E] bg-[#F5F5F4] px-2.5 py-[3px] rounded-full">{part.category}</span></td>
-                    <td className="px-5 py-3.5">
+                    <td className="px-5 py-4"><span className="text-xs font-medium text-zinc-400 bg-zinc-800/50 px-3 py-1.5 rounded-full">{part.category}</span></td>
+                    <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <span className={`text-[13px] font-semibold tabular-nums ${isLow ? 'text-[#F59E0B]' : 'text-[#44403C]'}`}>{part.stock}</span>
-                        <div className="w-12 h-[3px] bg-[#F5F5F4] rounded-full overflow-hidden">
-                          <div className={`h-full rounded-full ${isLow ? 'bg-[#FBBF24]' : 'bg-[#34D399]'}`} style={{ width: `${Math.min(100, (part.stock / Math.max(part.minStock * 2, 1)) * 100)}%` }} />
+                        <span className={`text-sm font-semibold tabular-nums ${isLow ? 'text-amber-400' : 'text-white'}`}>{part.stock}</span>
+                        <div className="w-16 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                          <div className={`h-full rounded-full ${isLow ? 'bg-amber-500' : 'bg-green-500'}`} style={{ width: `${Math.min(100, (part.stock / Math.max(part.minStock * 2, 1)) * 100)}%` }} />
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-3.5 text-[13px] font-semibold text-[#44403C] tabular-nums">₱{part.price.toLocaleString()}</td>
-                    <td className="px-5 py-3.5 text-[11px] font-mono text-[#A8A29E]">{part.barcode}</td>
-                    <td className="px-5 py-3.5 text-right">
-                      <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                    <td className="px-5 py-4 text-sm font-semibold text-white tabular-nums">₱{part.price.toLocaleString()}</td>
+                    <td className="px-5 py-4 text-xs font-mono text-zinc-500">{part.barcode}</td>
+                    <td className="px-5 py-4 text-right">
+                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                         {canMove && (
-                          <button title="Stock movement" onClick={() => openMovement(part)} className="p-1.5 rounded-lg hover:bg-[#F5F5F4] text-[#D6D3D1] hover:text-[#10B981] transition-colors">
-                            <ArrowDownToLine className="w-3.5 h-3.5" />
+                          <button title="Stock movement" onClick={() => openMovement(part)} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-green-400 transition-colors">
+                            <ArrowDownToLine className="w-4 h-4" />
                           </button>
                         )}
-                        <button title="History" onClick={() => setHistoryTarget(part)} className="p-1.5 rounded-lg hover:bg-[#F5F5F4] text-[#D6D3D1] hover:text-[#78716C] transition-colors">
-                          <History className="w-3.5 h-3.5" />
+                        <button title="History" onClick={() => setHistoryTarget(part)} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors">
+                          <History className="w-4 h-4" />
                         </button>
-                        <button title="Edit" onClick={() => openEdit(part)} className="p-1.5 rounded-lg hover:bg-[#F5F5F4] text-[#D6D3D1] hover:text-[#78716C] transition-colors">
-                          <Pencil className="w-3.5 h-3.5" />
+                        <button title="Edit" onClick={() => openEdit(part)} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors">
+                          <Pencil className="w-4 h-4" />
                         </button>
                         {canDelete && (
-                          <button title="Delete" onClick={() => setConfirmDelete(part.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-[#D6D3D1] hover:text-[#EF4444] transition-colors">
-                            <Trash2 className="w-3.5 h-3.5" />
+                          <button title="Delete" onClick={() => setConfirmDelete(part.id)} className="p-2 rounded-lg hover:bg-red-500/10 text-zinc-500 hover:text-red-400 transition-colors">
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         )}
                       </div>
@@ -178,75 +185,82 @@ export default function Inventory() {
                 );
               })}
               {filtered.length === 0 && (
-                <tr><td colSpan={6} className="px-5 py-14 text-center text-[13px] text-[#D6D3D1]">No parts found</td></tr>
+                <tr><td colSpan={6} className="px-5 py-16 text-center text-sm text-zinc-500">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-zinc-800/50 flex items-center justify-center">
+                    <Package className="w-8 h-8 text-zinc-600" />
+                  </div>
+                  No parts found
+                </td></tr>
               )}
             </tbody>
           </table>
         </div>
-      </div>
+      </motion.div>
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="sm:max-w-md rounded-[20px] border-[#F0EFED] p-6">
-          <DialogHeader className="pb-1"><DialogTitle className="text-[15px] font-semibold">{editing ? 'Edit Part' : 'Add New Part'}</DialogTitle></DialogHeader>
-          <form onSubmit={onSubmit} className="space-y-4 pt-3">
+        <DialogContent className="sm:max-w-md rounded-2xl border-zinc-800 bg-zinc-900 p-6">
+          <DialogHeader className="pb-2">
+            <DialogTitle className="text-base font-semibold text-white">{editing ? 'Edit Part' : 'Add New Part'}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={onSubmit} className="space-y-4 pt-2">
             <div>
-              <Label className="text-[11px] font-medium text-[#78716C]">Part Name</Label>
-              <Input {...form.register('name')} className="mt-1.5 h-9 rounded-xl border-[#E7E5E4] text-[13px] focus:border-[#C4C0BC] focus:ring-0" placeholder="e.g. Brake Pad Set" />
-              {form.formState.errors.name && <p className="text-[10px] text-[#EF4444] mt-1">{form.formState.errors.name.message}</p>}
+              <Label className="text-xs font-medium text-zinc-400">Part Name</Label>
+              <Input {...form.register('name')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white placeholder:text-zinc-500 focus:border-zinc-600" placeholder="e.g. Brake Pad Set" />
+              {form.formState.errors.name && <p className="text-xs text-red-400 mt-1">{form.formState.errors.name.message}</p>}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-[11px] font-medium text-[#78716C]">Category</Label>
-                <select {...form.register('category')} className="w-full mt-1.5 h-9 px-3 rounded-xl border border-[#E7E5E4] text-[13px] bg-white focus:outline-none focus:border-[#C4C0BC]">
+                <Label className="text-xs font-medium text-zinc-400">Category</Label>
+                <select {...form.register('category')} className="w-full mt-1.5 h-10 px-3 rounded-xl bg-zinc-800/50 border border-zinc-700 text-sm text-white focus:outline-none focus:border-zinc-600">
                   {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div>
-                <Label className="text-[11px] font-medium text-[#78716C]">Barcode</Label>
-                <Input {...form.register('barcode')} className="mt-1.5 h-9 rounded-xl border-[#E7E5E4] text-[13px] font-mono focus:border-[#C4C0BC] focus:ring-0" placeholder="BRK-001" />
-                {form.formState.errors.barcode && <p className="text-[10px] text-[#EF4444] mt-1">{form.formState.errors.barcode.message}</p>}
+                <Label className="text-xs font-medium text-zinc-400">Barcode</Label>
+                <Input {...form.register('barcode')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white font-mono placeholder:text-zinc-500 focus:border-zinc-600" placeholder="BRK-001" />
+                {form.formState.errors.barcode && <p className="text-xs text-red-400 mt-1">{form.formState.errors.barcode.message}</p>}
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3">
-              <div><Label className="text-[11px] font-medium text-[#78716C]">Stock</Label><Input type="number" {...form.register('stock', { valueAsNumber: true })} className="mt-1.5 h-9 rounded-xl border-[#E7E5E4] text-[13px] focus:border-[#C4C0BC] focus:ring-0" /></div>
-              <div><Label className="text-[11px] font-medium text-[#78716C]">Min Stock</Label><Input type="number" {...form.register('minStock', { valueAsNumber: true })} className="mt-1.5 h-9 rounded-xl border-[#E7E5E4] text-[13px] focus:border-[#C4C0BC] focus:ring-0" /></div>
-              <div><Label className="text-[11px] font-medium text-[#78716C]">Price (₱)</Label><Input type="number" {...form.register('price', { valueAsNumber: true })} className="mt-1.5 h-9 rounded-xl border-[#E7E5E4] text-[13px] focus:border-[#C4C0BC] focus:ring-0" /></div>
+              <div><Label className="text-xs font-medium text-zinc-400">Stock</Label><Input type="number" {...form.register('stock', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white focus:border-zinc-600" /></div>
+              <div><Label className="text-xs font-medium text-zinc-400">Min Stock</Label><Input type="number" {...form.register('minStock', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white focus:border-zinc-600" /></div>
+              <div><Label className="text-xs font-medium text-zinc-400">Price (₱)</Label><Input type="number" {...form.register('price', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white focus:border-zinc-600" /></div>
             </div>
-            <div className="flex gap-2 pt-2">
-              <Button type="submit" className="flex-1 h-9 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-white text-[12px] font-medium">{editing ? 'Save Changes' : 'Add Part'}</Button>
-              <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-9 rounded-xl text-[12px] border-[#E7E5E4] text-[#78716C] hover:bg-[#F5F5F4]">Cancel</Button>
+            <div className="flex gap-3 pt-2">
+              <Button type="submit" className="flex-1 h-10 rounded-xl bg-white hover:bg-zinc-200 text-black text-sm font-semibold">{editing ? 'Save Changes' : 'Add Part'}</Button>
+              <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-10 rounded-xl text-sm border-zinc-700 text-zinc-400 hover:bg-zinc-800">Cancel</Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
 
       <Dialog open={!!stockMoveTarget} onOpenChange={(o) => !o && setStockMoveTarget(null)}>
-        <DialogContent className="sm:max-w-sm rounded-[20px] border-[#F0EFED] p-6">
-          <DialogHeader><DialogTitle className="text-[15px] font-semibold">Stock Movement</DialogTitle></DialogHeader>
+        <DialogContent className="sm:max-w-sm rounded-2xl border-zinc-800 bg-zinc-900 p-6">
+          <DialogHeader><DialogTitle className="text-base font-semibold text-white">Stock Movement</DialogTitle></DialogHeader>
           {stockMoveTarget && (
             <form onSubmit={onSubmitMovement} className="mt-2 space-y-3">
-              <p className="text-[12px] text-[#A8A29E]">{stockMoveTarget.name} — current: <span className="font-semibold text-[#44403C]">{stockMoveTarget.stock}</span></p>
+              <p className="text-sm text-zinc-400">{stockMoveTarget.name} — current: <span className="font-semibold text-white">{stockMoveTarget.stock}</span></p>
               <div className="grid grid-cols-3 gap-2">
                 {(['in', 'out', 'adjust'] as const).map(t => (
-                  <label key={t} className={`flex items-center justify-center gap-1 h-9 rounded-xl border text-[12px] font-medium capitalize cursor-pointer transition-all ${moveForm.watch('type') === t ? 'bg-[#1C1917] border-[#1C1917] text-white' : 'bg-white border-[#E7E5E4] text-[#78716C]'}`}>
+                  <label key={t} className={`flex items-center justify-center gap-1 h-10 rounded-xl border text-sm font-medium capitalize cursor-pointer transition-all ${moveForm.watch('type') === t ? 'bg-white border-white text-black' : 'bg-zinc-800/50 border-zinc-700 text-zinc-400'}`}>
                     <input type="radio" value={t} {...moveForm.register('type')} className="hidden" />
-                    {t === 'in' ? <ArrowDownToLine className="w-3 h-3" /> : t === 'out' ? <ArrowUpFromLine className="w-3 h-3" /> : null}
+                    {t === 'in' ? <ArrowDownToLine className="w-3.5 h-3.5" /> : t === 'out' ? <ArrowUpFromLine className="w-3.5 h-3.5" /> : null}
                     {t === 'adjust' ? 'Set' : t}
                   </label>
                 ))}
               </div>
               <div>
-                <Label className="text-[11px] font-medium text-[#78716C]">{moveForm.watch('type') === 'adjust' ? 'New Stock Level' : 'Quantity'}</Label>
-                <Input type="number" {...moveForm.register('qty', { valueAsNumber: true })} className="mt-1.5 h-9 rounded-xl border-[#E7E5E4] text-[13px]" />
+                <Label className="text-xs font-medium text-zinc-400">{moveForm.watch('type') === 'adjust' ? 'New Stock Level' : 'Quantity'}</Label>
+                <Input type="number" {...moveForm.register('qty', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white focus:border-zinc-600" />
               </div>
               <div>
-                <Label className="text-[11px] font-medium text-[#78716C]">Reason</Label>
-                <Input {...moveForm.register('reason')} placeholder="Restock from supplier" className="mt-1.5 h-9 rounded-xl border-[#E7E5E4] text-[13px]" />
-                {moveForm.formState.errors.reason && <p className="text-[10px] text-[#EF4444] mt-1">{moveForm.formState.errors.reason.message}</p>}
+                <Label className="text-xs font-medium text-zinc-400">Reason</Label>
+                <Input {...moveForm.register('reason')} placeholder="Restock from supplier" className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white placeholder:text-zinc-500 focus:border-zinc-600" />
+                {moveForm.formState.errors.reason && <p className="text-xs text-red-400 mt-1">{moveForm.formState.errors.reason.message}</p>}
               </div>
-              <div className="flex gap-2 pt-1">
-                <Button type="submit" className="flex-1 h-9 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-white text-[12px]">Record</Button>
-                <Button type="button" variant="outline" onClick={() => setStockMoveTarget(null)} className="h-9 rounded-xl text-[12px] border-[#E7E5E4] text-[#78716C]">Cancel</Button>
+              <div className="flex gap-3 pt-1">
+                <Button type="submit" className="flex-1 h-10 rounded-xl bg-white hover:bg-zinc-200 text-black text-sm font-semibold">Record</Button>
+                <Button type="button" variant="outline" onClick={() => setStockMoveTarget(null)} className="h-10 rounded-xl text-sm border-zinc-700 text-zinc-400">Cancel</Button>
               </div>
             </form>
           )}
@@ -255,28 +269,28 @@ export default function Inventory() {
 
       {historyTarget && (
         <>
-          <div className="fixed inset-0 bg-black/20 z-40" onClick={() => setHistoryTarget(null)} />
-          <aside className="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-white z-50 shadow-2xl flex flex-col">
-            <div className="flex items-center justify-between px-5 h-[56px] border-b border-[#F0EFED]">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40" onClick={() => setHistoryTarget(null)} />
+          <aside className="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-zinc-900 border-l border-zinc-800 z-50 shadow-2xl flex flex-col">
+            <div className="flex items-center justify-between px-5 h-16 border-b border-zinc-800">
               <div>
-                <p className="text-[10px] font-medium text-[#A8A29E] uppercase tracking-wide">Stock History</p>
-                <p className="text-[13px] font-semibold text-[#1C1917]">{historyTarget.name}</p>
+                <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide">Stock History</p>
+                <p className="text-sm font-semibold text-white">{historyTarget.name}</p>
               </div>
-              <button onClick={() => setHistoryTarget(null)} className="p-1.5 rounded-lg hover:bg-[#F5F5F4] text-[#A8A29E]"><X className="w-4 h-4" /></button>
+              <button onClick={() => setHistoryTarget(null)} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500"><X className="w-5 h-5" /></button>
             </div>
             <div className="flex-1 overflow-y-auto px-5 py-4">
-              {partHistory.length === 0 && <p className="text-[12px] text-[#D6D3D1] text-center py-12">No movements recorded yet.</p>}
+              {partHistory.length === 0 && <p className="text-sm text-zinc-500 text-center py-12">No movements recorded yet.</p>}
               <ul className="space-y-2">
                 {partHistory.map(m => (
-                  <li key={m.id} className="bg-[#FAFAF9] rounded-xl p-3 border border-[#F5F5F4]">
+                  <li key={m.id} className="bg-zinc-800/50 rounded-xl p-4 border border-zinc-800">
                     <div className="flex items-center justify-between">
-                      <span className={`text-[10px] font-bold uppercase px-2 py-[3px] rounded-full ${m.type === 'in' ? 'bg-[#ECFDF5] text-[#059669]' : m.type === 'out' ? 'bg-red-50 text-[#EF4444]' : 'bg-[#EFF6FF] text-[#3B82F6]'}`}>
+                      <span className={`text-xs font-bold uppercase px-2.5 py-1 rounded-full ${m.type === 'in' ? 'bg-green-500/10 text-green-400' : m.type === 'out' ? 'bg-red-500/10 text-red-400' : 'bg-blue-500/10 text-blue-400'}`}>
                         {m.type} · {m.qty}
                       </span>
-                      <span className="text-[10px] text-[#A8A29E] tabular-nums">{new Date(m.timestamp).toLocaleString()}</span>
+                      <span className="text-xs text-zinc-500 tabular-nums">{new Date(m.timestamp).toLocaleString()}</span>
                     </div>
-                    <p className="text-[12px] text-[#44403C] mt-1.5">{m.reason}</p>
-                    <p className="text-[10px] text-[#D6D3D1] mt-0.5">by {m.userName}</p>
+                    <p className="text-sm text-white mt-2">{m.reason}</p>
+                    <p className="text-xs text-zinc-500 mt-1">by {m.userName}</p>
                   </li>
                 ))}
               </ul>
@@ -286,12 +300,12 @@ export default function Inventory() {
       )}
 
       <Dialog open={!!confirmDelete} onOpenChange={() => setConfirmDelete(null)}>
-        <DialogContent className="sm:max-w-sm rounded-[20px] border-[#F0EFED] p-6">
-          <DialogHeader><DialogTitle className="text-[15px] font-semibold">Delete Part?</DialogTitle></DialogHeader>
-          <p className="text-[13px] text-[#A8A29E] mt-1">This action cannot be undone.</p>
-          <div className="flex gap-2 pt-3">
-            <Button onClick={() => { if (confirmDelete) { deletePart(confirmDelete); setConfirmDelete(null); } }} variant="destructive" className="flex-1 h-9 rounded-xl text-[12px]">Delete</Button>
-            <Button variant="outline" onClick={() => setConfirmDelete(null)} className="h-9 rounded-xl text-[12px] border-[#E7E5E4]">Cancel</Button>
+        <DialogContent className="sm:max-w-sm rounded-2xl border-zinc-800 bg-zinc-900 p-6">
+          <DialogHeader><DialogTitle className="text-base font-semibold text-white">Delete Part?</DialogTitle></DialogHeader>
+          <p className="text-sm text-zinc-400 mt-1">This action cannot be undone.</p>
+          <div className="flex gap-3 pt-3">
+            <Button onClick={() => { if (confirmDelete) { deletePart(confirmDelete); setConfirmDelete(null); } }} variant="destructive" className="flex-1 h-10 rounded-xl text-sm font-semibold">Delete</Button>
+            <Button variant="outline" onClick={() => setConfirmDelete(null)} className="h-10 rounded-xl text-sm border-zinc-700 text-zinc-400">Cancel</Button>
           </div>
         </DialogContent>
       </Dialog>
