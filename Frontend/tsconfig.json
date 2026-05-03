@@ -1,0 +1,19 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/lib/utils": ["./src/shared/lib/utils.ts"],
+      "@/hooks/use-mobile": ["./src/shared/hooks/use-mobile.ts"],
+      "@/*": ["./src/*"]
+    }
+  }
+}
