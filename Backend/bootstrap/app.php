@@ -18,6 +18,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'shop.active' => \App\Http\Middleware\EnsureShopActive::class,
             'tenant.user' => \App\Http\Middleware\EnsureTenantUser::class,
             'tenant.resolve' => \App\Http\Middleware\ResolveTenantContext::class,
+            'tenant.token' => \App\Http\Middleware\EnforceTenantToken::class,
+            'platform.token' => \App\Http\Middleware\EnforcePlatformToken::class,
         ]);
 
         $middleware->prependToGroup('api', \App\Http\Middleware\ResolveTenantContext::class);

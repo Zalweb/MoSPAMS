@@ -29,7 +29,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    Route::prefix('superadmin')->middleware('role:SuperAdmin')->group(function () {
+    Route::prefix('superadmin')->middleware(['role:SuperAdmin', 'platform.token'])->group(function () {
         Route::get('/analytics', [SuperAdminController::class, 'analytics']);
 
         Route::get('/shops', [SuperAdminController::class, 'shops']);
@@ -63,7 +63,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/system-health', [SuperAdminController::class, 'systemHealth']);
     });
 
-    Route::middleware(['shop.active', 'tenant.user'])->group(function () {
+    Route::middleware(['shop.active', 'tenant.user', 'tenant.token'])->group(function () {
         Route::get('/parts', [MospamsController::class, 'parts'])->middleware('role:Owner,Staff');
         Route::post('/parts', [MospamsController::class, 'storePart'])->middleware('role:Owner');
         Route::patch('/parts/{part}', [MospamsController::class, 'updatePart'])->middleware('role:Owner,Staff');
