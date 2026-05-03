@@ -13,25 +13,20 @@ class RoleRequestTest extends TestCase
 
     private function seedBase(): array
     {
-        foreach (['Admin', 'Staff', 'Mechanic', 'Customer'] as $role) {
-            DB::table('roles')->insert(['role_name' => $role]);
-        }
-        DB::table('user_statuses')->insert([
-            ['status_code' => 'ACTIVE',   'status_name' => 'Active',   'description' => null],
-            ['status_code' => 'INACTIVE', 'status_name' => 'Inactive', 'description' => null],
-        ]);
-        DB::table('mechanic_statuses')->insert([
-            ['status_code' => 'ACTIVE', 'status_name' => 'Active', 'description' => null],
-        ]);
+        $this->artisan('db:seed', ['--class' => 'RolesAndStatusesSeeder']);
+        $this->artisan('db:seed', ['--class' => 'ShopsSeeder']);
+        
         return [
+            'shopId' => DB::table('shops')->value('shop_id'),
             'roles'    => DB::table('roles')->pluck('role_id', 'role_name'),
-            'activeId' => DB::table('user_statuses')->where('status_code', 'ACTIVE')->value('user_status_id'),
+            'activeId' => DB::table('user_statuses')->where('status_code', 'active')->value('user_status_id'),
         ];
     }
 
     private function createUser(array $seed, string $role, array $extra = []): object
     {
         $id = DB::table('users')->insertGetId(array_merge([
+            'shop_id_fk'        => $seed['shopId'],
             'full_name'         => 'Test User',
             'username'          => 'user_' . uniqid(),
             'password_hash'     => Hash::make('password'),
@@ -45,8 +40,10 @@ class RoleRequestTest extends TestCase
 
     private function actingAsAdmin(array $seed): static
     {
-        $admin = $this->createUser($seed, 'Admin');
-        $token = \App\Models\User::find($admin->user_id)->createToken('test')->plainTextToken;
+        $admin = $this->createUser($seed, 'Owner');
+        $token = \App\Models\User::find($admin->user_id)
+            ->createToken('test', [sprintf('tenant:%d', (int) $seed['shopId'])])
+            ->plainTextToken;
         return $this->withToken($token);
     }
 
@@ -55,6 +52,7 @@ class RoleRequestTest extends TestCase
         $seed = $this->seedBase();
         $customer = $this->createUser($seed, 'Customer', ['email' => 'c@test.com']);
         DB::table('role_requests')->insert([
+            'shop_id_fk'             => $seed['shopId'],
             'user_id_fk'           => $customer->user_id,
             'requested_role_id_fk' => $seed['roles']['Staff'],
             'status'               => 'pending',
@@ -62,7 +60,7 @@ class RoleRequestTest extends TestCase
             'updated_at'           => now(),
         ]);
 
-        $response = $this->actingAsAdmin($seed)->getJson('/api/role-requests');
+        $response = $this->actingAsAdmin($seed)->getJson('http://default.mospams.local/api/role-requests');
         $response->assertOk()->assertJsonCount(1, 'data');
     }
 
@@ -71,6 +69,7 @@ class RoleRequestTest extends TestCase
         $seed = $this->seedBase();
         $customer = $this->createUser($seed, 'Customer', ['email' => 'c2@test.com']);
         $requestId = DB::table('role_requests')->insertGetId([
+            'shop_id_fk'             => $seed['shopId'],
             'user_id_fk'           => $customer->user_id,
             'requested_role_id_fk' => $seed['roles']['Staff'],
             'status'               => 'pending',
@@ -78,7 +77,7 @@ class RoleRequestTest extends TestCase
             'updated_at'           => now(),
         ]);
 
-        $response = $this->actingAsAdmin($seed)->patchJson("/api/role-requests/{$requestId}/approve");
+        $response = $this->actingAsAdmin($seed)->patchJson("http://default.mospams.local/api/role-requests/{$requestId}/approve");
         $response->assertOk();
 
         $updated = DB::table('users')->where('user_id', $customer->user_id)->first();
@@ -91,6 +90,7 @@ class RoleRequestTest extends TestCase
         $seed = $this->seedBase();
         $customer = $this->createUser($seed, 'Customer', ['email' => 'c3@test.com']);
         $requestId = DB::table('role_requests')->insertGetId([
+            'shop_id_fk'             => $seed['shopId'],
             'user_id_fk'           => $customer->user_id,
             'requested_role_id_fk' => $seed['roles']['Mechanic'],
             'status'               => 'pending',
@@ -98,7 +98,7 @@ class RoleRequestTest extends TestCase
             'updated_at'           => now(),
         ]);
 
-        $response = $this->actingAsAdmin($seed)->patchJson("/api/role-requests/{$requestId}/deny");
+        $response = $this->actingAsAdmin($seed)->patchJson("http://default.mospams.local/api/role-requests/{$requestId}/deny");
         $response->assertOk();
         $this->assertDatabaseHas('role_requests', ['id' => $requestId, 'status' => 'denied']);
     }

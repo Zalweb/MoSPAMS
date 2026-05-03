@@ -14,22 +14,26 @@ class GoogleAuthTest extends TestCase
 
     private function seedBase(): array
     {
-        foreach (['Admin', 'Staff', 'Mechanic', 'Customer'] as $role) {
-            DB::table('roles')->insert(['role_name' => $role]);
-        }
-        DB::table('user_statuses')->insert([
-            ['status_code' => 'ACTIVE', 'status_name' => 'Active', 'description' => null],
-            ['status_code' => 'INACTIVE', 'status_name' => 'Inactive', 'description' => null],
-        ]);
+        config()->set('tenancy.base_domain', 'mospams.local');
+        config()->set('tenancy.public_hosts', ['mospams.local']);
+        config()->set('tenancy.platform_hosts', ['admin.mospams.local']);
+        config()->set('tenancy.api_hosts', ['api.mospams.local']);
+
+        $this->artisan('db:seed', ['--class' => 'RolesAndStatusesSeeder']);
+        $this->artisan('db:seed', ['--class' => 'ShopsSeeder']);
+
         return [
+            'shopId'   => (int) DB::table('shops')->value('shop_id'),
+            'shopSubdomain' => (string) DB::table('shops')->value('subdomain'),
             'roles'    => DB::table('roles')->pluck('role_id', 'role_name'),
-            'activeId' => DB::table('user_statuses')->where('status_code', 'ACTIVE')->value('user_status_id'),
+            'activeId' => DB::table('user_statuses')->where('status_code', 'active')->value('user_status_id'),
         ];
     }
 
     private function createUser(array $seed, string $role = 'Customer', array $extra = []): object
     {
         $id = DB::table('users')->insertGetId(array_merge([
+            'shop_id_fk'        => $seed['shopId'],
             'full_name'          => 'Test User',
             'username'           => 'testuser_' . uniqid(),
             'password_hash'      => Hash::make('password'),
@@ -43,7 +47,7 @@ class GoogleAuthTest extends TestCase
 
     public function test_google_login_returns_needs_registration_for_new_user(): void
     {
-        $this->seedBase();
+        $seed = $this->seedBase();
         config(['services.google.client_id' => 'test-client-id']);
 
         Http::fake([
@@ -55,7 +59,7 @@ class GoogleAuthTest extends TestCase
             ], 200),
         ]);
 
-        $response = $this->postJson('/api/auth/google', ['credential' => 'fake-token']);
+        $response = $this->postJson("http://{$seed['shopSubdomain']}.mospams.local/api/auth/google", ['credential' => 'fake-token']);
 
         $response->assertOk()->assertJson([
             'needs_registration' => true,
@@ -82,7 +86,7 @@ class GoogleAuthTest extends TestCase
             ], 200),
         ]);
 
-        $response = $this->postJson('/api/auth/google', ['credential' => 'fake-token']);
+        $response = $this->postJson("http://{$seed['shopSubdomain']}.mospams.local/api/auth/google", ['credential' => 'fake-token']);
 
         $response->assertOk()->assertJsonStructure(['token', 'user']);
     }
@@ -91,7 +95,7 @@ class GoogleAuthTest extends TestCase
     {
         $seed = $this->seedBase();
 
-        $response = $this->postJson('/api/auth/google/register', [
+        $response = $this->postJson("http://{$seed['shopSubdomain']}.mospams.local/api/auth/google/register", [
             'google_id'       => 'google_sub_123',
             'name'            => 'New Customer',
             'email'           => 'customer@example.com',
@@ -109,7 +113,7 @@ class GoogleAuthTest extends TestCase
     {
         $seed = $this->seedBase();
 
-        $response = $this->postJson('/api/auth/google/register', [
+        $response = $this->postJson("http://{$seed['shopSubdomain']}.mospams.local/api/auth/google/register", [
             'google_id'      => 'google_sub_456',
             'name'           => 'New Staff',
             'email'          => 'staff@example.com',

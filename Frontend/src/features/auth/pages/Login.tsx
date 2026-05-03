@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
+import type { CredentialResponse } from '@react-oauth/google';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/features/auth/context/AuthContext';
@@ -23,7 +24,7 @@ export default function Login() {
 
   const dest = () => {
     const state = location.state as LocationState | null;
-    return state?.from?.pathname && state.from.pathname !== '/login' ? state.from.pathname : '/';
+    return state?.from?.pathname && state.from.pathname !== '/login' ? state.from.pathname : '/dashboard';
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -14,9 +14,11 @@ class RoleRequestController extends Controller
     public function index(Request $request): JsonResponse
     {
         $status = $request->query('status', 'pending');
+        $shopId = (int) $request->user()->shop_id_fk;
 
         $requests = RoleRequest::with(['user', 'requestedRole'])
             ->where('status', $status)
+            ->whereHas('user', fn ($q) => $q->where('shop_id_fk', $shopId))
             ->latest()
             ->get()
             ->map(fn ($r) => [
@@ -34,6 +36,8 @@ class RoleRequestController extends Controller
 
     public function approve(RoleRequest $roleRequest): JsonResponse
     {
+        abort_if((int) $roleRequest->user?->shop_id_fk !== (int) auth()->user()?->shop_id_fk, 404, 'Role request not found.');
+
         if ($roleRequest->status !== 'pending') {
             return response()->json(['message' => 'Request already resolved.'], 422);
         }
@@ -54,8 +58,9 @@ class RoleRequestController extends Controller
                 }
 
                 Mechanic::firstOrCreate(
-                    ['user_id_fk' => $user->user_id],
+                    ['user_id_fk' => $user->user_id, 'shop_id_fk' => $user->shop_id_fk],
                     [
+                        'shop_id_fk'             => $user->shop_id_fk,
                         'full_name'             => $user->full_name,
                         'email'                 => $user->email ?? $user->username,
                         'mechanic_status_id_fk' => $mechanicStatusId,
@@ -77,6 +82,8 @@ class RoleRequestController extends Controller
 
     public function deny(RoleRequest $roleRequest): JsonResponse
     {
+        abort_if((int) $roleRequest->user?->shop_id_fk !== (int) auth()->user()?->shop_id_fk, 404, 'Role request not found.');
+
         if ($roleRequest->status !== 'pending') {
             return response()->json(['message' => 'Request already resolved.'], 422);
         }
@@ -95,6 +102,7 @@ class RoleRequestController extends Controller
     private function log(int $userId, string $action, ?string $table = null, ?int $recordId = null): void
     {
         DB::table('activity_logs')->insert([
+            'shop_id_fk'  => auth()->user()?->shop_id_fk,
             'user_id_fk'  => $userId,
             'action'      => $action,
             'table_name'  => $table,

@@ -12,13 +12,13 @@ class CustomerController extends Controller
     public function services(Request $request): JsonResponse
     {
         $user = auth()->user();
-        $customer = DB::table('customers')->where('user_id_fk', $user->user_id)->first();
+        $customer = $this->tenantTable('customers')->where('user_id_fk', $user->user_id)->first();
 
         if (!$customer) {
             return response()->json(['data' => []]);
         }
 
-        $services = DB::table('service_jobs')
+        $services = $this->tenantTable('service_jobs')
             ->join('customers', 'customers.customer_id', '=', 'service_jobs.customer_id_fk')
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
             ->leftJoin('service_job_items', 'service_job_items.job_id_fk', '=', 'service_jobs.job_id')
@@ -51,21 +51,23 @@ class CustomerController extends Controller
         ]);
 
         $user = auth()->user();
-        $customer = DB::table('customers')->where('user_id_fk', $user->user_id)->firstOrFail();
+        $customer = $this->tenantTable('customers')->where('user_id_fk', $user->user_id)->firstOrFail();
 
         $service = DB::transaction(function () use ($request, $customer, $user) {
             $serviceTypeId = DB::table('service_types')
+                ->where('shop_id_fk', $user->shop_id_fk)
                 ->where('service_name', $request->service_type)
                 ->value('service_type_id');
 
             $laborCost = $serviceTypeId
-                ? DB::table('service_types')->where('service_type_id', $serviceTypeId)->value('labor_cost')
+                ? DB::table('service_types')->where('shop_id_fk', $user->shop_id_fk)->where('service_type_id', $serviceTypeId)->value('labor_cost')
                 : 0;
 
             $jobId = DB::table('service_jobs')->insertGetId([
+                'shop_id_fk' => $user->shop_id_fk,
                 'customer_id_fk' => $customer->customer_id,
                 'created_by_fk' => $user->user_id,
-                'service_job_status_id_fk' => DB::table('service_job_statuses')->where('status_code', 'PENDING')->value('service_job_status_id'),
+                'service_job_status_id_fk' => DB::table('service_job_statuses')->where('status_code', 'pending')->value('service_job_status_id'),
                 'job_date' => now()->toDateString(),
                 'motorcycle_model' => $request->motorcycle_model,
                 'notes' => $request->notes,
@@ -85,7 +87,7 @@ class CustomerController extends Controller
             return $jobId;
         });
 
-        $service = DB::table('service_jobs')
+        $service = $this->tenantTable('service_jobs')
             ->join('customers', 'customers.customer_id', '=', 'service_jobs.customer_id_fk')
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
             ->where('service_jobs.job_id', $service)
@@ -102,13 +104,13 @@ class CustomerController extends Controller
     public function payments(Request $request): JsonResponse
     {
         $user = auth()->user();
-        $customer = DB::table('customers')->where('user_id_fk', $user->user_id)->first();
+        $customer = $this->tenantTable('customers')->where('user_id_fk', $user->user_id)->first();
 
         if (!$customer) {
             return response()->json(['data' => []]);
         }
 
-        $payments = DB::table('sales')
+        $payments = $this->tenantTable('sales')
             ->join('payments', 'payments.sale_id_fk', '=', 'sales.sale_id')
             ->join('payment_statuses', 'payment_statuses.payment_status_id', '=', 'payments.payment_status_id_fk')
             ->where('sales.customer_id_fk', $customer->customer_id)
@@ -128,7 +130,9 @@ class CustomerController extends Controller
 
     private function log(int $userId, string $action, ?string $table = null, ?int $recordId = null): void
     {
+        $user = auth()->user();
         DB::table('activity_logs')->insert([
+            'shop_id_fk'  => $user?->shop_id_fk,
             'user_id_fk'  => $userId,
             'action'      => $action,
             'table_name'  => $table,

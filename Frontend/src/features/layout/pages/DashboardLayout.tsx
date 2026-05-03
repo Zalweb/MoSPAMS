@@ -9,6 +9,7 @@ import {
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { useData } from '@/shared/contexts/DataContext';
 import { NAV_ACCESS } from '@/shared/lib/permissions';
+import { normalizeRole } from '@/shared/lib/roles';
 
 const navItems: { label: string; to: string; icon: typeof LayoutDashboard; end?: boolean }[] = [
   { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard, end: true },
@@ -38,7 +39,8 @@ export default function DashboardLayout() {
   const [profileOpen, setProfileOpen] = useState(false);
 
   const lowStock = parts.filter(p => p.stock <= p.minStock);
-  const visibleNav = navItems.filter(item => (NAV_ACCESS[item.to] ?? []).includes(user!.role));
+  const role = normalizeRole(user?.role);
+  const visibleNav = navItems.filter(item => role ? (NAV_ACCESS[item.to] ?? []).includes(role) : false);
 
   const currentLabel = navItems.find(n => n.end ? location.pathname === n.to : location.pathname.startsWith(n.to) && n.to !== '/dashboard')?.label
     ?? (location.pathname === '/dashboard' ? 'Dashboard' : '');
@@ -68,7 +70,9 @@ export default function DashboardLayout() {
           </div>
           <div>
             <span className="text-[13px] font-bold text-[#1C1917] tracking-tight leading-none">MoSPAMS</span>
-            <span className="block text-[9px] text-[#D6D3D1] font-medium leading-none mt-0.5">MANAGEMENT</span>
+            <span className="block text-[9px] text-[#D6D3D1] font-medium leading-none mt-0.5">
+              {user?.shopName ? user.shopName.toUpperCase() : 'MANAGEMENT'}
+            </span>
           </div>
           <button className="ml-auto lg:hidden p-1 text-[#D6D3D1] hover:text-[#78716C]" onClick={() => setSidebarOpen(false)}>
             <X className="w-4 h-4" />

@@ -7,11 +7,14 @@ import '@fontsource/inter/700.css'
 import '../index.css'
 import App from './App.tsx'
 import { registerSW } from '@/shared/lib/serviceWorker'
+import { TenantBrandingProvider } from '@/shared/contexts/TenantBrandingContext'
 
 registerSW()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <TenantBrandingProvider>
+      <App />
+    </TenantBrandingProvider>
   </StrictMode>,
 )

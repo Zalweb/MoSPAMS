@@ -101,7 +101,7 @@ export default function AboutSection() {
                 </div>
               </div>
               <p className="text-zinc-400 text-sm leading-relaxed mb-4">
-                MoSPAMS V1 focuses on Admin and Staff workflows. Mechanic and Customer roles are
+                MoSPAMS V1 focuses on Owner and Staff workflows. Mechanic and Customer roles are
                 part of the database schema and are planned for future versions.
               </p>
               <div className="flex flex-wrap gap-2">

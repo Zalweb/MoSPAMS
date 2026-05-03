@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,9 +15,15 @@ class MospamsController extends Controller
 {
     public function parts(): JsonResponse
     {
-        $parts = DB::table('parts')
-            ->join('categories', 'categories.category_id', '=', 'parts.category_id_fk')
-            ->orderBy('parts.part_name')
+        $query = DB::table('parts')
+            ->join('categories', 'categories.category_id', '=', 'parts.category_id_fk');
+        
+        $shopId = $this->shopId();
+        if ($shopId !== null) {
+            $query->where('parts.shop_id_fk', $shopId);
+        }
+        
+        $parts = $query->orderBy('parts.part_name')
             ->get()
             ->map(fn ($part) => $this->partResource($part));
 
@@ -25,22 +32,31 @@ class MospamsController extends Controller
 
     public function publicStats(): JsonResponse
     {
+        // For public stats, use default shop or first active shop
+        $shopId = DB::table('shops')
+            ->join('shop_statuses', 'shop_statuses.shop_status_id', '=', 'shops.shop_status_id_fk')
+            ->where('shop_statuses.status_code', 'ACTIVE')
+            ->value('shops.shop_id');
+
         $totalJobsCompleted = DB::table('service_jobs')
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
-            ->where('service_job_statuses.status_code', 'COMPLETED')
+            ->where('service_jobs.shop_id_fk', $shopId)
+            ->where('service_job_statuses.status_code', 'completed')
             ->count();
 
-        $totalCustomers = DB::table('customers')->count();
-        $totalRevenue = (float) DB::table('sales')->sum('net_amount');
+        $totalCustomers = DB::table('customers')->where('shop_id_fk', $shopId)->count();
+        $totalRevenue = (float) DB::table('sales')->where('shop_id_fk', $shopId)->sum('net_amount');
 
         $totalParts = DB::table('parts')
             ->join('part_statuses', 'part_statuses.part_status_id', '=', 'parts.part_status_id_fk')
-            ->where('part_statuses.status_code', 'ACTIVE')
+            ->where('parts.shop_id_fk', $shopId)
+            ->where('part_statuses.status_code', 'in_stock')
             ->count();
 
         $activeServices = DB::table('service_jobs')
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
-            ->whereIn('service_job_statuses.status_code', ['PENDING', 'ONGOING'])
+            ->where('service_jobs.shop_id_fk', $shopId)
+            ->whereIn('service_job_statuses.status_code', ['pending', 'in_progress'])
             ->count();
 
         $start = now()->subDays(29)->startOfDay();
@@ -48,12 +64,14 @@ class MospamsController extends Controller
 
         $revenueRows = DB::table('sales')
             ->selectRaw('DATE(sale_date) as day, SUM(net_amount) as amount')
+            ->where('shop_id_fk', $shopId)
             ->whereBetween('sale_date', [$start, $end])
             ->groupByRaw('DATE(sale_date)')
             ->pluck('amount', 'day');
 
         $jobRows = DB::table('service_jobs')
             ->selectRaw('DATE(job_date) as day, COUNT(*) as count')
+            ->where('shop_id_fk', $shopId)
             ->whereBetween('job_date', [$start->toDateString(), $end->toDateString()])
             ->groupByRaw('DATE(job_date)')
             ->pluck('count', 'day');
@@ -68,6 +86,7 @@ class MospamsController extends Controller
 
         $statusRows = DB::table('service_jobs')
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->where('service_jobs.shop_id_fk', $shopId)
             ->selectRaw('LOWER(service_job_statuses.status_code) as code, COUNT(*) as count')
             ->groupByRaw('LOWER(service_job_statuses.status_code)')
             ->pluck('count', 'code');
@@ -79,6 +98,8 @@ class MospamsController extends Controller
         ];
 
         $paymentRows = DB::table('payments')
+            ->join('sales', 'sales.sale_id', '=', 'payments.sale_id_fk')
+            ->where('sales.shop_id_fk', $shopId)
             ->selectRaw('LOWER(payment_method) as method, SUM(amount_paid) as total')
             ->groupByRaw('LOWER(payment_method)')
             ->pluck('total', 'method');
@@ -89,7 +110,9 @@ class MospamsController extends Controller
         ];
 
         $topServiceTypes = DB::table('service_job_items')
+            ->join('service_jobs', 'service_jobs.job_id', '=', 'service_job_items.job_id_fk')
             ->join('service_types', 'service_types.service_type_id', '=', 'service_job_items.service_type_id_fk')
+            ->where('service_jobs.shop_id_fk', $shopId)
             ->selectRaw('service_types.service_name as name, COUNT(*) as count, SUM(service_job_items.labor_cost) as revenue')
             ->groupBy('service_types.service_name')
             ->orderByDesc('count')
@@ -133,13 +156,14 @@ class MospamsController extends Controller
 
         return DB::transaction(function () use ($request, $data) {
             $partId = DB::table('parts')->insertGetId([
+                'shop_id_fk' => $this->shopId(),
                 'category_id_fk' => $this->categoryId($data['category']),
                 'part_name' => $data['name'],
                 'barcode' => $data['barcode'] ?? null,
                 'unit_price' => $data['price'],
                 'stock_quantity' => $data['stock'],
                 'reorder_level' => $data['minStock'],
-                'part_status_id_fk' => $this->statusId('part_statuses', 'part_status_id', 'ACTIVE'),
+                'part_status_id_fk' => $this->statusId('part_statuses', 'part_status_id', 'in_stock'),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -156,7 +180,7 @@ class MospamsController extends Controller
 
     public function updatePart(Request $request, int $part): JsonResponse
     {
-        $existing = DB::table('parts')->where('part_id', $part)->first();
+        $existing = DB::table('parts')->where('part_id', $part)->where('shop_id_fk', $this->shopId())->first();
         abort_if(! $existing, 404);
 
         $data = $request->validate([
@@ -177,7 +201,7 @@ class MospamsController extends Controller
             if (array_key_exists('price', $data)) $patch['unit_price'] = $data['price'];
             if (array_key_exists('barcode', $data)) $patch['barcode'] = $data['barcode'];
 
-            DB::table('parts')->where('part_id', $part)->update($patch);
+            DB::table('parts')->where('part_id', $part)->where('shop_id_fk', $this->shopId())->update($patch);
 
             if (array_key_exists('stock', $data) && (int) $data['stock'] !== (int) $existing->stock_quantity) {
                 $difference = (int) $data['stock'] - (int) $existing->stock_quantity;
@@ -192,10 +216,10 @@ class MospamsController extends Controller
 
     public function deletePart(Request $request, int $part): JsonResponse
     {
-        $existing = DB::table('parts')->where('part_id', $part)->first();
+        $existing = DB::table('parts')->where('part_id', $part)->where('shop_id_fk', $this->shopId())->first();
         abort_if(! $existing, 404);
 
-        DB::table('parts')->where('part_id', $part)->delete();
+        DB::table('parts')->where('part_id', $part)->where('shop_id_fk', $this->shopId())->delete();
         $this->log($request, 'Deleted part: '.$existing->part_name, 'parts', $part);
 
         return response()->json(['message' => 'Part deleted.']);
@@ -204,6 +228,7 @@ class MospamsController extends Controller
     public function categories(): JsonResponse
     {
         $categories = DB::table('categories')
+            ->where('shop_id_fk', $this->shopId())
             ->orderBy('category_name')
             ->get()
             ->map(fn ($row) => [
@@ -220,6 +245,7 @@ class MospamsController extends Controller
         $movements = DB::table('stock_movements')
             ->join('parts', 'parts.part_id', '=', 'stock_movements.part_id_fk')
             ->join('users', 'users.user_id', '=', 'stock_movements.user_id_fk')
+            ->where('parts.shop_id_fk', $this->shopId())
             ->orderByDesc('movement_date')
             ->get()
             ->map(fn ($row) => [
@@ -247,7 +273,7 @@ class MospamsController extends Controller
         ]);
 
         $partId = $this->numericId($data['partId']);
-        $part = DB::table('parts')->where('part_id', $partId)->first();
+        $part = DB::table('parts')->where('part_id', $partId)->where('shop_id_fk', $this->shopId())->first();
         abort_if(! $part, 404);
 
         DB::transaction(function () use ($request, $part, $partId, $data) {
@@ -257,7 +283,7 @@ class MospamsController extends Controller
                 'adjust' => $data['qty'],
             };
 
-            DB::table('parts')->where('part_id', $partId)->update(['stock_quantity' => $newStock, 'updated_at' => now()]);
+            DB::table('parts')->where('part_id', $partId)->where('shop_id_fk', $this->shopId())->update(['stock_quantity' => $newStock, 'updated_at' => now()]);
             $this->recordMovement($partId, $request->user()->user_id, $data['type'], $data['qty'], $data['reason']);
             $this->log($request, 'Recorded stock '.$data['type'].' for '.$part->part_name, 'stock_movements', $partId);
         });
@@ -268,6 +294,7 @@ class MospamsController extends Controller
     public function serviceTypes(): JsonResponse
     {
         $types = DB::table('service_types')
+            ->where('shop_id_fk', $this->shopId())
             ->orderBy('service_name')
             ->get()
             ->map(fn ($row) => $this->serviceTypeResource($row));
@@ -283,9 +310,10 @@ class MospamsController extends Controller
         ]);
 
         $id = DB::table('service_types')->insertGetId([
+            'shop_id_fk' => $this->shopId(),
             'service_name' => $data['name'],
             'labor_cost' => $data['defaultLaborCost'],
-            'service_type_status_id_fk' => $this->statusId('service_type_statuses', 'service_type_status_id', 'ACTIVE'),
+            'service_type_status_id_fk' => $this->statusId('service_type_statuses', 'service_type_status_id', 'active'),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -305,7 +333,7 @@ class MospamsController extends Controller
         if (array_key_exists('name', $data)) $patch['service_name'] = $data['name'];
         if (array_key_exists('defaultLaborCost', $data)) $patch['labor_cost'] = $data['defaultLaborCost'];
 
-        DB::table('service_types')->where('service_type_id', $serviceType)->update($patch);
+        DB::table('service_types')->where('service_type_id', $serviceType)->where('shop_id_fk', $this->shopId())->update($patch);
         $this->log($request, 'Updated service type #'.$serviceType, 'service_types', $serviceType);
 
         return response()->json(['data' => $this->serviceTypeResource(DB::table('service_types')->where('service_type_id', $serviceType)->first())]);
@@ -313,7 +341,7 @@ class MospamsController extends Controller
 
     public function deleteServiceType(Request $request, int $serviceType): JsonResponse
     {
-        DB::table('service_types')->where('service_type_id', $serviceType)->delete();
+        DB::table('service_types')->where('service_type_id', $serviceType)->where('shop_id_fk', $this->shopId())->delete();
         $this->log($request, 'Deleted service type #'.$serviceType, 'service_types', $serviceType);
 
         return response()->json(['message' => 'Service type deleted.']);
@@ -326,6 +354,7 @@ class MospamsController extends Controller
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
             ->leftJoin('service_job_items', 'service_job_items.job_id_fk', '=', 'service_jobs.job_id')
             ->leftJoin('service_types', 'service_types.service_type_id', '=', 'service_job_items.service_type_id_fk')
+            ->where('service_jobs.shop_id_fk', $this->shopId())
             ->select('service_jobs.*', 'customers.full_name as customer_name', 'service_job_statuses.status_name', 'service_types.service_name', 'service_job_items.labor_cost')
             ->orderByDesc('service_jobs.created_at')
             ->get()
@@ -350,13 +379,14 @@ class MospamsController extends Controller
 
         $jobId = DB::transaction(function () use ($request, $data) {
             $customerId = $this->customerId($data['customerName']);
-            $statusCode = strtoupper($data['status'] ?? 'Pending');
+            $statusCode = strtolower($data['status'] ?? 'Pending');
             $jobId = DB::table('service_jobs')->insertGetId([
+                'shop_id_fk' => $this->shopId(),
                 'customer_id_fk' => $customerId,
                 'created_by_fk' => $request->user()->user_id,
                 'service_job_status_id_fk' => $this->statusId('service_job_statuses', 'service_job_status_id', $statusCode),
                 'job_date' => now()->toDateString(),
-                'completion_date' => $statusCode === 'COMPLETED' ? now()->toDateString() : null,
+                'completion_date' => $statusCode === 'completed' ? now()->toDateString() : null,
                 'motorcycle_model' => $data['motorcycleModel'] ?? null,
                 'notes' => $data['notes'] ?? null,
                 'created_at' => now(),
@@ -408,11 +438,11 @@ class MospamsController extends Controller
             if (array_key_exists('motorcycleModel', $data)) $patch['motorcycle_model'] = $data['motorcycleModel'];
             if (array_key_exists('notes', $data)) $patch['notes'] = $data['notes'];
             if (array_key_exists('status', $data)) {
-                $statusCode = strtoupper($data['status']);
+                $statusCode = strtolower($data['status']);
                 $patch['service_job_status_id_fk'] = $this->statusId('service_job_statuses', 'service_job_status_id', $statusCode);
-                $patch['completion_date'] = $statusCode === 'COMPLETED' ? now()->toDateString() : null;
+                $patch['completion_date'] = $statusCode === 'completed' ? now()->toDateString() : null;
             }
-            DB::table('service_jobs')->where('job_id', $service)->update($patch);
+            DB::table('service_jobs')->where('job_id', $service)->where('shop_id_fk', $this->shopId())->update($patch);
 
             if (array_key_exists('serviceType', $data) || array_key_exists('laborCost', $data)) {
                 $current = DB::table('service_job_items')->where('job_id_fk', $service)->first();
@@ -432,7 +462,7 @@ class MospamsController extends Controller
 
     public function deleteService(Request $request, int $service): JsonResponse
     {
-        DB::table('service_jobs')->where('job_id', $service)->delete();
+        DB::table('service_jobs')->where('job_id', $service)->where('shop_id_fk', $this->shopId())->delete();
         $this->log($request, 'Deleted service record #'.$service, 'service_jobs', $service);
 
         return response()->json(['message' => 'Service deleted.']);
@@ -442,6 +472,7 @@ class MospamsController extends Controller
     {
         $transactions = DB::table('sales')
             ->leftJoin('payments', 'payments.sale_id_fk', '=', 'sales.sale_id')
+            ->where('sales.shop_id_fk', $this->shopId())
             ->orderByDesc('sales.sale_date')
             ->select('sales.*', 'payments.payment_method')
             ->get()
@@ -468,6 +499,7 @@ class MospamsController extends Controller
             $jobId = isset($data['serviceId']) ? $this->numericId($data['serviceId']) : null;
             $customerId = $jobId ? DB::table('service_jobs')->where('job_id', $jobId)->value('customer_id_fk') : null;
             $saleId = DB::table('sales')->insertGetId([
+                'shop_id_fk' => $this->shopId(),
                 'customer_id_fk' => $customerId,
                 'job_id_fk' => $jobId,
                 'processed_by_fk' => $request->user()->user_id,
@@ -504,7 +536,7 @@ class MospamsController extends Controller
                 'amount_paid' => $data['total'],
                 'payment_date' => now(),
                 'reference_number' => null,
-                'payment_status_id_fk' => $this->statusId('payment_statuses', 'payment_status_id', 'PAID'),
+                'payment_status_id_fk' => $this->statusId('payment_statuses', 'payment_status_id', 'paid'),
             ]);
 
             $this->log($request, 'Recorded '.$data['type'].' transaction (#'.$saleId.')', 'sales', $saleId);
@@ -518,8 +550,11 @@ class MospamsController extends Controller
     public function payments(): JsonResponse
     {
         $payments = DB::table('payments')
+            ->join('sales', 'sales.sale_id', '=', 'payments.sale_id_fk')
             ->join('payment_statuses', 'payment_statuses.payment_status_id', '=', 'payments.payment_status_id_fk')
+            ->where('sales.shop_id_fk', $this->shopId())
             ->orderByDesc('payment_date')
+            ->select('payments.*', 'payment_statuses.status_name')
             ->get()
             ->map(fn ($row) => [
                 'id' => (string) $row->payment_id,
@@ -536,7 +571,7 @@ class MospamsController extends Controller
 
     public function users(): JsonResponse
     {
-        return response()->json(['data' => User::query()->with(['role', 'status'])->orderBy('full_name')->get()->map(fn ($user) => $this->userResource($user))]);
+        return response()->json(['data' => User::query()->where('shop_id_fk', $this->shopId())->with(['role', 'status'])->orderBy('full_name')->get()->map(fn ($user) => $this->userResource($user))]);
     }
 
     public function storeUser(Request $request): JsonResponse
@@ -544,16 +579,17 @@ class MospamsController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:100'],
             'email' => ['required', 'string', 'max:100', 'unique:users,username'],
-            'role' => ['required', Rule::in(['Admin', 'Staff', 'Mechanic', 'Customer'])],
+            'role' => ['required', Rule::in(['Owner', 'Staff', 'Mechanic', 'Customer'])],
             'password' => ['required', 'string', 'min:6'],
         ]);
 
         $user = User::query()->create([
+            'shop_id_fk' => $this->shopId(),
             'role_id_fk' => DB::table('roles')->where('role_name', $data['role'])->value('role_id'),
             'full_name' => $data['name'],
             'username' => $data['email'],
             'password_hash' => Hash::make($data['password']),
-            'user_status_id_fk' => $this->statusId('user_statuses', 'user_status_id', 'ACTIVE'),
+            'user_status_id_fk' => $this->statusId('user_statuses', 'user_status_id', 'active'),
         ])->load(['role', 'status']);
 
         $this->log($request, 'Created user '.$data['name'].' ('.$data['role'].')', 'users', $user->user_id);
@@ -566,7 +602,7 @@ class MospamsController extends Controller
         $data = $request->validate([
             'name' => ['sometimes', 'string', 'max:100'],
             'email' => ['sometimes', 'string', 'max:100', Rule::unique('users', 'username')->ignore($user, 'user_id')],
-            'role' => ['sometimes', Rule::in(['Admin', 'Staff', 'Mechanic', 'Customer'])],
+            'role' => ['sometimes', Rule::in(['Owner', 'Staff', 'Mechanic', 'Customer'])],
             'password' => ['nullable', 'string', 'min:6'],
         ]);
 
@@ -577,10 +613,10 @@ class MospamsController extends Controller
         if (! empty($data['password'])) $patch['password_hash'] = Hash::make($data['password']);
         if ($patch) $patch['updated_at'] = now();
 
-        DB::table('users')->where('user_id', $user)->update($patch);
+        DB::table('users')->where('user_id', $user)->where('shop_id_fk', $this->shopId())->update($patch);
         $this->log($request, 'Updated user #'.$user, 'users', $user);
 
-        return response()->json(['data' => $this->userResource(User::query()->with(['role', 'status'])->findOrFail($user))]);
+        return response()->json(['data' => $this->userResource(User::query()->where('shop_id_fk', $this->shopId())->with(['role', 'status'])->findOrFail($user))]);
     }
 
     public function updateUserStatus(Request $request, int $user): JsonResponse
@@ -588,8 +624,8 @@ class MospamsController extends Controller
         $data = $request->validate(['status' => ['required', Rule::in(['Active', 'Inactive'])]]);
         abort_if($request->user()->user_id === $user, 422, 'You cannot disable your own account.');
 
-        DB::table('users')->where('user_id', $user)->update([
-            'user_status_id_fk' => $this->statusId('user_statuses', 'user_status_id', strtoupper($data['status'])),
+        DB::table('users')->where('user_id', $user)->where('shop_id_fk', $this->shopId())->update([
+            'user_status_id_fk' => $this->statusId('user_statuses', 'user_status_id', strtolower($data['status'])),
             'updated_at' => now(),
         ]);
         $this->log($request, 'Set user #'.$user.' status to '.$data['status'], 'users', $user);
@@ -600,7 +636,7 @@ class MospamsController extends Controller
     public function deleteUser(Request $request, int $user): JsonResponse
     {
         abort_if($request->user()->user_id === $user, 422, 'You cannot delete your own account.');
-        DB::table('users')->where('user_id', $user)->delete();
+        DB::table('users')->where('user_id', $user)->where('shop_id_fk', $this->shopId())->delete();
         $this->log($request, 'Deleted user #'.$user, 'users', $user);
 
         return response()->json(['message' => 'User deleted.']);
@@ -610,6 +646,7 @@ class MospamsController extends Controller
     {
         $logs = DB::table('activity_logs')
             ->leftJoin('users', 'users.user_id', '=', 'activity_logs.user_id_fk')
+            ->where('activity_logs.shop_id_fk', $this->shopId())
             ->orderByDesc('log_date')
             ->get()
             ->map(fn ($row) => [
@@ -626,6 +663,7 @@ class MospamsController extends Controller
     {
         $mechanics = DB::table('mechanics')
             ->join('mechanic_statuses', 'mechanic_statuses.mechanic_status_id', '=', 'mechanics.mechanic_status_id_fk')
+            ->where('mechanics.shop_id_fk', $this->shopId())
             ->orderBy('full_name')
             ->get()
             ->map(fn ($row) => [
@@ -641,26 +679,50 @@ class MospamsController extends Controller
 
     public function salesReport(Request $request): JsonResponse
     {
-        return response()->json(['data' => [
-            'totalRevenue' => (float) DB::table('sales')->sum('net_amount'),
-            'transactions' => DB::table('sales')->count(),
-            'cash' => (float) DB::table('payments')->where('payment_method', 'Cash')->sum('amount_paid'),
-            'gcash' => (float) DB::table('payments')->where('payment_method', 'GCash')->sum('amount_paid'),
-        ]]);
+        $shopId = $this->shopId();
+        $cacheKey = $this->tenantCacheKey('report:sales:summary', $shopId);
+
+        $data = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($shopId) {
+            return [
+                'totalRevenue' => (float) DB::table('sales')->where('shop_id_fk', $shopId)->sum('net_amount'),
+                'transactions' => DB::table('sales')->where('shop_id_fk', $shopId)->count(),
+                'cash' => (float) DB::table('payments')
+                    ->join('sales', 'sales.sale_id', '=', 'payments.sale_id_fk')
+                    ->where('sales.shop_id_fk', $shopId)
+                    ->where('payment_method', 'Cash')
+                    ->sum('amount_paid'),
+                'gcash' => (float) DB::table('payments')
+                    ->join('sales', 'sales.sale_id', '=', 'payments.sale_id_fk')
+                    ->where('sales.shop_id_fk', $shopId)
+                    ->where('payment_method', 'GCash')
+                    ->sum('amount_paid'),
+            ];
+        });
+
+        return response()->json(['data' => $data]);
     }
 
     public function inventoryReport(): JsonResponse
     {
-        return response()->json(['data' => [
-            'parts' => DB::table('parts')->count(),
-            'lowStock' => DB::table('parts')->whereColumn('stock_quantity', '<=', 'reorder_level')->count(),
-            'stockValue' => (float) DB::table('parts')->selectRaw('SUM(stock_quantity * unit_price) as value')->value('value'),
-        ]]);
+        $shopId = $this->shopId();
+        $cacheKey = $this->tenantCacheKey('report:inventory:summary', $shopId);
+
+        $data = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($shopId) {
+            return [
+                'parts' => DB::table('parts')->where('shop_id_fk', $shopId)->count(),
+                'lowStock' => DB::table('parts')->where('shop_id_fk', $shopId)->whereColumn('stock_quantity', '<=', 'reorder_level')->count(),
+                'stockValue' => (float) DB::table('parts')->where('shop_id_fk', $shopId)->selectRaw('SUM(stock_quantity * unit_price) as value')->value('value'),
+            ];
+        });
+
+        return response()->json(['data' => $data]);
     }
 
     public function servicesReport(): JsonResponse
     {
+        $shopId = $this->shopId();
         return response()->json(['data' => DB::table('service_jobs')
+            ->where('shop_id_fk', $shopId)
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
             ->select('service_job_statuses.status_name as status', DB::raw('COUNT(*) as count'))
             ->groupBy('service_job_statuses.status_name')
@@ -669,8 +731,12 @@ class MospamsController extends Controller
 
     public function incomeReport(): JsonResponse
     {
-        $sales = (float) DB::table('sales')->sum('net_amount');
-        $labor = (float) DB::table('service_job_items')->sum('labor_cost');
+        $shopId = $this->shopId();
+        $sales = (float) DB::table('sales')->where('shop_id_fk', $shopId)->sum('net_amount');
+        $labor = (float) DB::table('service_job_items')
+            ->join('service_jobs', 'service_jobs.job_id', '=', 'service_job_items.job_id_fk')
+            ->where('service_jobs.shop_id_fk', $shopId)
+            ->sum('labor_cost');
 
         return response()->json(['data' => ['sales' => $sales, 'labor' => $labor, 'total' => $sales]]);
     }
@@ -680,6 +746,7 @@ class MospamsController extends Controller
         $part = DB::table('parts')
             ->join('categories', 'categories.category_id', '=', 'parts.category_id_fk')
             ->where('part_id', $id)
+            ->where('parts.shop_id_fk', $this->shopId())
             ->first();
 
         return $this->partResource($part);
@@ -694,6 +761,7 @@ class MospamsController extends Controller
             ->leftJoin('service_types', 'service_types.service_type_id', '=', 'service_job_items.service_type_id_fk')
             ->select('service_jobs.*', 'customers.full_name as customer_name', 'service_job_statuses.status_name', 'service_types.service_name', 'service_job_items.labor_cost')
             ->where('service_jobs.job_id', $id)
+            ->where('service_jobs.shop_id_fk', $this->shopId())
             ->first();
 
         return $this->serviceResource($row);
@@ -705,6 +773,7 @@ class MospamsController extends Controller
             ->leftJoin('payments', 'payments.sale_id_fk', '=', 'sales.sale_id')
             ->select('sales.*', 'payments.payment_method')
             ->where('sales.sale_id', $id)
+            ->where('sales.shop_id_fk', $this->shopId())
             ->first();
 
         return $this->transactionResource($sale);
@@ -798,12 +867,14 @@ class MospamsController extends Controller
 
     private function categoryId(string $name): int
     {
-        $existing = DB::table('categories')->where('category_name', $name)->value('category_id');
+        $shopId = $this->shopId();
+        $existing = DB::table('categories')->where('category_name', $name)->where('shop_id_fk', $shopId)->value('category_id');
         if ($existing) return (int) $existing;
 
         return DB::table('categories')->insertGetId([
+            'shop_id_fk' => $shopId,
             'category_name' => $name,
-            'category_status_id_fk' => $this->statusId('category_statuses', 'category_status_id', 'ACTIVE'),
+            'category_status_id_fk' => $this->statusId('category_statuses', 'category_status_id', 'active'),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -811,21 +882,24 @@ class MospamsController extends Controller
 
     private function customerId(string $name): int
     {
-        $existing = DB::table('customers')->where('full_name', $name)->value('customer_id');
+        $shopId = $this->shopId();
+        $existing = DB::table('customers')->where('full_name', $name)->where('shop_id_fk', $shopId)->value('customer_id');
         if ($existing) return (int) $existing;
 
-        return DB::table('customers')->insertGetId(['full_name' => $name, 'created_at' => now(), 'updated_at' => now()]);
+        return DB::table('customers')->insertGetId(['shop_id_fk' => $shopId, 'full_name' => $name, 'created_at' => now(), 'updated_at' => now()]);
     }
 
     private function serviceTypeId(string $name, float|int|string $labor): int
     {
-        $existing = DB::table('service_types')->where('service_name', $name)->value('service_type_id');
+        $shopId = $this->shopId();
+        $existing = DB::table('service_types')->where('service_name', $name)->where('shop_id_fk', $shopId)->value('service_type_id');
         if ($existing) return (int) $existing;
 
         return DB::table('service_types')->insertGetId([
+            'shop_id_fk' => $shopId,
             'service_name' => $name,
             'labor_cost' => $labor,
-            'service_type_status_id_fk' => $this->statusId('service_type_statuses', 'service_type_status_id', 'ACTIVE'),
+            'service_type_status_id_fk' => $this->statusId('service_type_statuses', 'service_type_status_id', 'active'),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -839,6 +913,7 @@ class MospamsController extends Controller
     private function recordMovement(int $partId, int $userId, string $type, int $quantity, string $remarks, ?string $referenceType = null, ?int $referenceId = null): void
     {
         DB::table('stock_movements')->insert([
+            'shop_id_fk' => $this->shopId(),
             'part_id_fk' => $partId,
             'user_id_fk' => $userId,
             'movement_type' => $type,
@@ -853,6 +928,7 @@ class MospamsController extends Controller
     private function log(Request $request, string $action, ?string $table = null, ?int $recordId = null): void
     {
         DB::table('activity_logs')->insert([
+            'shop_id_fk' => $this->shopId(),
             'user_id_fk' => $request->user()?->user_id,
             'action' => mb_substr($action, 0, 100),
             'table_name' => $table,
@@ -860,6 +936,42 @@ class MospamsController extends Controller
             'log_date' => now(),
             'description' => $action,
         ]);
+    }
+
+    private function shopId(): ?int
+    {
+        $user = request()->user();
+
+        if (! $user) {
+            abort(401, 'Unauthenticated');
+        }
+
+        // SuperAdmin can see all shops
+        if ($user->isSuperAdmin()) {
+            return null;
+        }
+
+        $resolvedTenantId = $this->tenantManager()->id();
+        if ($resolvedTenantId) {
+            return $resolvedTenantId;
+        }
+
+        if (! $user->shop_id_fk) {
+            abort(403, 'User has no shop assigned');
+        }
+
+        return (int) $user->shop_id_fk;
+    }
+
+    private function scopeToShop($query)
+    {
+        $shopId = $this->shopId();
+
+        if ($shopId !== null) {
+            $query->where('shop_id_fk', $shopId);
+        }
+
+        return $query;
     }
 
     private function numericId(mixed $id): int

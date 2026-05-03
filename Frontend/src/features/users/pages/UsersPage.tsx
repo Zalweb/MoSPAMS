@@ -15,17 +15,18 @@ import type { RoleRequest, User } from '@/shared/types';
 const newUserSchema = z.object({
   name: z.string().min(2, 'Required'),
   email: z.string().email(),
-  role: z.enum(['Admin', 'Staff', 'Mechanic', 'Customer']),
+  role: z.enum(['Owner', 'Staff', 'Mechanic', 'Customer']),
   password: z.string().min(6, 'Min 6 characters'),
 });
 const editUserSchema = z.object({
   name: z.string().min(2, 'Required'),
   email: z.string().email(),
-  role: z.enum(['Admin', 'Staff', 'Mechanic', 'Customer']),
+  role: z.enum(['Owner', 'Staff', 'Mechanic', 'Customer']),
   password: z.string().optional(),
 });
 type NewUserForm = z.infer<typeof newUserSchema>;
 type EditUserForm = z.infer<typeof editUserSchema>;
+type EditableRole = NewUserForm['role'];
 
 export default function Users() {
   const { logs, users, addUser, updateUser, setUserStatus, deleteUser } = useData();
@@ -41,7 +42,7 @@ export default function Users() {
   const addForm = useForm<NewUserForm>({ resolver: zodResolver(newUserSchema), defaultValues: { name: '', email: '', role: 'Staff', password: '' } });
   const editForm = useForm<EditUserForm>({ resolver: zodResolver(editUserSchema) });
 
-  const adminCount = users.filter(u => u.role === 'Admin').length;
+  const adminCount = users.filter(u => u.role === 'Owner').length;
   const staffCount = users.filter(u => u.role === 'Staff').length;
 
   const filteredLogs = useMemo(() => {
@@ -70,7 +71,11 @@ export default function Users() {
   };
 
   const openAdd = () => { setEditing(null); addForm.reset({ name: '', email: '', role: 'Staff', password: '' }); setModalOpen(true); };
-  const openEdit = (u: User) => { setEditing(u); editForm.reset({ name: u.name, email: u.email, role: u.role, password: '' }); setModalOpen(true); };
+  const asEditableRole = (role: User['role']): EditableRole => {
+    return role === 'Owner' || role === 'Staff' || role === 'Mechanic' || role === 'Customer' ? role : 'Staff';
+  };
+
+  const openEdit = (u: User) => { setEditing(u); editForm.reset({ name: u.name, email: u.email, role: asEditableRole(u.role), password: '' }); setModalOpen(true); };
 
   const onSubmitAdd = addForm.handleSubmit(async (values) => {
     await addUser(values);
@@ -126,7 +131,7 @@ export default function Users() {
         <>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
         {[
-          { title: 'Administrators', desc: 'Full system access', count: adminCount, icon: Shield, accent: 'bg-[#1C1917] text-white' },
+          { title: 'Owners', desc: 'Full system access', count: adminCount, icon: Shield, accent: 'bg-[#1C1917] text-white' },
           { title: 'Staff / Mechanic', desc: 'Operational access', count: staffCount, icon: UserCheck, accent: 'bg-[#EFF6FF] text-[#3B82F6]' },
           { title: 'Activity Logs', desc: 'Recorded actions', count: logs.length, icon: Activity, accent: 'bg-[#F5F3FF] text-[#8B5CF6]' },
         ].map(card => (
@@ -162,7 +167,7 @@ export default function Users() {
                 <tr key={u.id}>
                   <td className="px-3 py-3 text-[12px] font-medium text-[#44403C]">{u.name}{me?.id === u.id && <span className="ml-1.5 text-[10px] text-[#3B82F6]">(you)</span>}</td>
                   <td className="px-3 py-3 text-[12px] text-[#78716C]">{u.email}</td>
-                  <td className="px-3 py-3"><span className={`text-[10px] font-bold uppercase px-2 py-[3px] rounded-full ${u.role === 'Admin' ? 'bg-[#1C1917] text-white' : 'bg-[#EFF6FF] text-[#3B82F6]'}`}>{u.role}</span></td>
+                  <td className="px-3 py-3"><span className={`text-[10px] font-bold uppercase px-2 py-[3px] rounded-full ${u.role === 'Owner' ? 'bg-[#1C1917] text-white' : 'bg-[#EFF6FF] text-[#3B82F6]'}`}>{u.role}</span></td>
                   <td className="px-3 py-3"><span className={`text-[10px] font-medium px-2 py-[3px] rounded-full ${u.status === 'Active' ? 'bg-[#ECFDF5] text-[#059669]' : 'bg-[#F5F5F4] text-[#A8A29E]'}`}>{u.status}</span></td>
                   <td className="px-3 py-3 text-[11px] text-[#A8A29E] tabular-nums">{new Date(u.lastActive).toLocaleString()}</td>
                   <td className="px-3 py-3 text-right">
@@ -188,7 +193,7 @@ export default function Users() {
           <table className="w-full">
             <thead><tr className="border-b border-[#F5F5F4]">
               <th className="text-left px-4 py-3 text-[10px] font-semibold text-[#D6D3D1] uppercase">Module</th>
-              <th className="text-center px-4 py-3 text-[10px] font-semibold text-[#D6D3D1] uppercase">Administrator</th>
+              <th className="text-center px-4 py-3 text-[10px] font-semibold text-[#D6D3D1] uppercase">Owner</th>
               <th className="text-center px-4 py-3 text-[10px] font-semibold text-[#D6D3D1] uppercase">Staff / Mechanic</th>
             </tr></thead>
             <tbody className="divide-y divide-[#FAFAF9]">
@@ -228,7 +233,7 @@ export default function Users() {
         <div className="space-y-0 max-h-[480px] overflow-y-auto">
           {filteredLogs.map((log, i) => (
             <div key={log.id} className={`flex items-start gap-3 py-3 ${i < filteredLogs.length - 1 ? 'border-b border-[#FAFAF9]' : ''}`}>
-              <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-[10px] font-bold ${log.user.includes('Admin') ? 'bg-[#1C1917] text-white' : 'bg-[#EFF6FF] text-[#3B82F6]'}`}>
+              <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-[10px] font-bold ${log.user.includes('Owner') ? 'bg-[#1C1917] text-white' : 'bg-[#EFF6FF] text-[#3B82F6]'}`}>
                 {log.user.charAt(0)}
               </div>
               <div className="flex-1 min-w-0">
@@ -314,7 +319,7 @@ export default function Users() {
               <div>
                 <Label className="text-[11px] font-medium text-[#78716C]">Role</Label>
                 <select {...editForm.register('role')} className="w-full mt-1.5 h-9 px-3 rounded-xl border border-[#E7E5E4] text-[13px] bg-white">
-                  <option value="Admin">Admin</option>
+                  <option value="Owner">Owner</option>
                   <option value="Staff">Staff</option>
                   <option value="Mechanic">Mechanic</option>
                   <option value="Customer">Customer</option>
@@ -345,7 +350,7 @@ export default function Users() {
                 <Label className="text-[11px] font-medium text-[#78716C]">Role</Label>
                 <select {...addForm.register('role')} className="w-full mt-1.5 h-9 px-3 rounded-xl border border-[#E7E5E4] text-[13px] bg-white">
                   <option value="Staff">Staff</option>
-                  <option value="Admin">Admin</option>
+                  <option value="Owner">Owner</option>
                   <option value="Mechanic">Mechanic</option>
                   <option value="Customer">Customer</option>
                 </select>

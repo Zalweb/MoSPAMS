@@ -19,12 +19,11 @@ self.addEventListener('fetch', (event) => {
         // Try network first
         const networkResponse = await fetch(event.request);
 
-        // Clone the response before using it
+        // Clone the response before caching
         const responseToCache = networkResponse.clone();
-
-        // Cache the response
-        const cache = await caches.open(CACHE_NAME);
-        cache.put(event.request, responseToCache);
+        caches.open(CACHE_NAME).then((cache) => {
+          try { cache.put(event.request, responseToCache); } catch (_) {}
+        });
 
         return networkResponse;
       } catch (error) {

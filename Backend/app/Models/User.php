@@ -15,6 +15,7 @@ class User extends Authenticatable
 
     protected $fillable = [
         'role_id_fk',
+        'shop_id_fk',
         'full_name',
         'username',
         'email',
@@ -36,6 +37,16 @@ class User extends Authenticatable
     public function status()
     {
         return $this->belongsTo(UserStatus::class, 'user_status_id_fk', 'user_status_id');
+    }
+
+    public function shop()
+    {
+        return $this->belongsTo(Shop::class, 'shop_id_fk', 'shop_id');
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->role?->role_name === 'SuperAdmin';
     }
 
     public function getAuthPassword(): string

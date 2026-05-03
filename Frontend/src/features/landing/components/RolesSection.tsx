@@ -1,7 +1,7 @@
 const ROLES = [
   {
     icon: '🛡️',
-    title: 'Admin',
+    title: 'Owner',
     status: 'Active — V1',
     statusColor: 'green',
     description:
@@ -162,7 +162,7 @@ export default function RolesSection() {
             <p className="text-sm font-semibold text-white mb-0.5">About Future Roles</p>
             <p className="text-sm text-zinc-400">
               Mechanic and Customer roles exist in the database schema for future expansion. Version
-              1 of MoSPAMS focuses on Admin and Staff workflows. Future versions will unlock
+              1 of MoSPAMS focuses on Owner and Staff workflows. Future versions will unlock
               Mechanic job tracking and Customer service portals.
             </p>
           </div>

@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 
 class RoleRequest extends Model
 {
-    protected $fillable = ['user_id_fk', 'requested_role_id_fk', 'status', 'reviewed_by_fk', 'reviewed_at'];
+    use BelongsToTenant;
+
+    protected $fillable = ['shop_id_fk', 'user_id_fk', 'requested_role_id_fk', 'status', 'reviewed_by_fk', 'reviewed_at'];
 
     protected function casts(): array
     {

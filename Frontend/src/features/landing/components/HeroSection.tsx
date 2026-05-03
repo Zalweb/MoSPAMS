@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router';
 import HeroLoginCard from './HeroLoginCard';
 
 interface HeroSectionProps {
@@ -7,6 +8,7 @@ interface HeroSectionProps {
 }
 
 export default function HeroSection({ showLogin, onBackClick }: HeroSectionProps) {
+  const navigate = useNavigate();
 
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
@@ -53,7 +55,7 @@ export default function HeroSection({ showLogin, onBackClick }: HeroSectionProps
             <div className="flex flex-col sm:flex-row gap-3 mb-10">
               <button
                 id="hero-get-started-btn"
-                onClick={() => scrollTo('features')}
+                onClick={() => navigate('/register-shop')}
                 className="px-7 py-3.5 rounded-full bg-white text-black font-semibold text-sm hover:bg-zinc-200 transition-all duration-200"
               >
                 Get Started

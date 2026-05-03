@@ -35,9 +35,9 @@ const FEATURES = [
     icon: '👥',
     title: 'User Management',
     description:
-      'Manage Admin and Staff accounts with secure login and role-based access control.',
+      'Manage Owner and Staff accounts with secure login and role-based access control.',
     color: 'pink',
-    tags: ['Admin', 'Staff', 'Access Control'],
+    tags: ['Owner', 'Staff', 'Access Control'],
   },
   {
     icon: '📋',

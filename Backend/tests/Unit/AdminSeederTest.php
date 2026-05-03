@@ -11,8 +11,17 @@ class AdminSeederTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->artisan('db:seed', ['--class' => 'RolesAndStatusesSeeder']);
+        $this->artisan('db:seed', ['--class' => 'ShopsSeeder']);
+    }
+
     public function test_admin_seeder_creates_user_with_email(): void
     {
+        config(['app.admin_email' => 'admin@mospams.com']);
+        
         $seeder = new AdminSeeder();
         $seeder->run();
 

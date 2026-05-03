@@ -29,6 +29,13 @@ try {
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
 $FrontendPath = Join-Path $RepoRoot 'Frontend'
 
+# Check if XAMPP MySQL is running
+$mysqld = Get-Process -Name mysqld -ErrorAction SilentlyContinue
+if (-not $mysqld) {
+    Write-Error "XAMPP MySQL is not running. Please start MySQL from the XAMPP Control Panel first."
+    exit 1
+}
+
 Write-Host "Starting MoSPAMS full stack with ngrok tunnels..."
 Write-Host "Backend port: $BackendPort"
 Write-Host "Frontend port: $FrontendPort"

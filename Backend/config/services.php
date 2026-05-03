@@ -40,4 +40,15 @@ return [
         'client_id' => env('GOOGLE_CLIENT_ID'),
     ],
 
+    'paymongo' => [
+        'secret_key' => env('PAYMONGO_SECRET_KEY'),
+        'public_key' => env('PAYMONGO_PUBLIC_KEY'),
+        'webhook_secret' => env('PAYMONGO_WEBHOOK_SECRET'),
+    ],
+
+    'cloudflare' => [
+        'api_token' => env('CLOUDFLARE_API_TOKEN'),
+        'zone_id' => env('CLOUDFLARE_ZONE_ID'),
+    ],
+
 ];

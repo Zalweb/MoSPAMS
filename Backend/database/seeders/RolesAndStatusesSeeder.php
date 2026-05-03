@@ -12,9 +12,11 @@ class RolesAndStatusesSeeder extends Seeder
     {
         // Create roles
         $roles = [
-            ['role_name' => 'admin'],
-            ['role_name' => 'customer'],
-            ['role_name' => 'mechanic'],
+            ['role_name' => 'SuperAdmin'],
+            ['role_name' => 'Owner'],
+            ['role_name' => 'Staff'],
+            ['role_name' => 'Mechanic'],
+            ['role_name' => 'Customer'],
         ];
 
         foreach ($roles as $role) {

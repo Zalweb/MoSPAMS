@@ -7,7 +7,7 @@ import {
   TrendingUp,
   Wrench,
 } from 'lucide-react';
-import { usePublicStats } from '@/shared/hooks/usePublicStats';
+
 
 const CURRENCY_PREFIX = '\u20b1';
 
@@ -24,27 +24,34 @@ function formatMoney(value: number): string {
 }
 
 export default function ReportsSection() {
-  const { data, loading, error } = usePublicStats();
+  const loading = false;
+  const error = false;
 
-  const revenue = data?.charts.revenue_by_day.map((day) => day.amount) ?? [];
-  const jobs = data?.charts.jobs_by_day.map((day) => day.count) ?? [];
-  const revenueBars = toPercent(revenue);
-  const jobBars = toPercent(jobs);
-  const displayRevenueBars = revenueBars.length > 0 ? revenueBars : Array<number>(30).fill(0);
+  const MOCK_REVENUE = [
+    12000, 15000, 14500, 18000, 22000, 21000, 24000, 28000, 26000, 31000, 
+    35000, 32000, 38000, 42000, 40000, 45000, 48000, 46000, 52000, 56000, 
+    54000, 59000, 65000, 62000, 68000, 72000, 70000, 76000, 82000, 85000
+  ];
+  
+  const MOCK_JOBS = [
+    5, 7, 6, 8, 10, 9, 12, 14, 13, 16, 18, 17, 20, 22, 21, 24, 26, 25, 28, 30, 29, 32, 35, 34, 38, 40, 39, 42, 45, 48
+  ];
 
-  const totalRevenue = data?.summary.total_revenue ?? 0;
-  const totalParts = data?.summary.total_parts ?? 0;
-  const totalJobs = data?.summary.total_jobs_completed ?? 0;
-  const activeServices = data?.summary.active_services ?? 0;
-  const paymentMethods = data?.charts.payment_methods ?? { cash: 0, gcash: 0 };
+  const revenueBars = toPercent(MOCK_REVENUE);
+  const jobBars = toPercent(MOCK_JOBS);
+  const displayRevenueBars = revenueBars;
+
+  const totalRevenue = 1250450;
+  const totalParts = 485;
+  const totalJobs = 1240;
+  const activeServices = 25;
+  const paymentMethods = { cash: 450450, gcash: 800000 };
   const paymentTotal = Math.max(paymentMethods.cash + paymentMethods.gcash, 1);
 
-  const dates = data?.charts.revenue_by_day ?? [];
-  const xLabels = dates.length === 30
-    ? [dates[0].date.slice(5), dates[14].date.slice(5), 'Today']
-    : ['', '', 'Today'];
+  const xLabels = ['15 Mar', '30 Mar', 'Today'];
 
-  const metricPlaceholder = error ? 'Unavailable' : 'Loading';
+  const metricPlaceholder = 'Unavailable';
+  const data = { charts: { top_service_types: [1, 2, 3, 4, 5] } };
 
   const reports = [
     {

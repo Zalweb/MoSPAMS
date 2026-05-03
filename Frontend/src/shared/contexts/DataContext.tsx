@@ -3,50 +3,7 @@ import { toast } from 'sonner';
 import type { Part, ServiceRecord, Transaction, ActivityLog, ServiceType, StockMovement, User, Role } from '@/shared/types';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { apiGet, apiMutation } from '@/shared/lib/api';
-
-const DEMO_PARTS: Part[] = [
-  { id: 'p1', name: 'Brake Pad Set - Honda', category: 'Braking', stock: 15, minStock: 5, price: 850, barcode: 'BRK-HND-001', createdAt: '2026-04-01T10:00:00Z' },
-  { id: 'p2', name: 'Engine Oil 10W40 - Yamalube', category: 'Fluids', stock: 8, minStock: 10, price: 450, barcode: 'OIL-YML-010', createdAt: '2026-04-02T09:30:00Z' },
-  { id: 'p3', name: 'Chain Sprocket Kit - KTM', category: 'Drivetrain', stock: 22, minStock: 5, price: 1200, barcode: 'CHN-KTM-220', createdAt: '2026-04-03T14:15:00Z' },
-  { id: 'p4', name: 'Air Filter - NGK', category: 'Filtration', stock: 3, minStock: 8, price: 350, barcode: 'AIR-NGK-003', createdAt: '2026-04-04T11:00:00Z' },
-  { id: 'p5', name: 'Spark Plug - Iridium', category: 'Ignition', stock: 50, minStock: 10, price: 180, barcode: 'SPK-IRI-050', createdAt: '2026-04-05T08:45:00Z' },
-  { id: 'p6', name: 'Clutch Cable - Universal', category: 'Controls', stock: 12, minStock: 5, price: 250, barcode: 'CLT-UNV-012', createdAt: '2026-04-06T16:20:00Z' },
-  { id: 'p7', name: 'Tire Inner Tube 70/90-17', category: 'Wheels', stock: 20, minStock: 8, price: 320, barcode: 'TIR-7090-017', createdAt: '2026-04-07T13:10:00Z' },
-  { id: 'p8', name: 'Headlight Bulb LED - White', category: 'Electrical', stock: 6, minStock: 5, price: 550, barcode: 'LED-WHT-006', createdAt: '2026-04-08T09:00:00Z' },
-];
-
-const DEMO_SERVICES: ServiceRecord[] = [
-  { id: 's1', customerName: 'Juan Dela Cruz', motorcycleModel: 'Honda Click 150i', serviceType: 'Oil Change', laborCost: 350, status: 'Completed', partsUsed: [{ partId: 'p2', quantity: 1 }], notes: 'Regular maintenance', createdAt: '2026-04-20T08:00:00Z', completedAt: '2026-04-20T09:30:00Z' },
-  { id: 's2', customerName: 'Maria Santos', motorcycleModel: 'Yamaha NMAX', serviceType: 'Brake Repair', laborCost: 500, status: 'Ongoing', partsUsed: [{ partId: 'p1', quantity: 1 }], notes: 'Front brake pad replacement', createdAt: '2026-04-22T10:00:00Z' },
-  { id: 's3', customerName: 'Pedro Reyes', motorcycleModel: 'Suzuki Raider 150', serviceType: 'Full Tune-up', laborCost: 800, status: 'Pending', partsUsed: [], notes: 'Complete overhaul requested', createdAt: '2026-04-23T07:30:00Z' },
-  { id: 's4', customerName: 'Ana Lim', motorcycleModel: 'Kawasaki Rouser 200', serviceType: 'Chain Replacement', laborCost: 450, status: 'Pending', partsUsed: [{ partId: 'p3', quantity: 1 }], notes: 'Chain slipping issue', createdAt: '2026-04-23T11:00:00Z' },
-  { id: 's5', customerName: 'Roberto Tan', motorcycleModel: 'Honda Beat Fi', serviceType: 'Oil Change', laborCost: 350, status: 'Completed', partsUsed: [{ partId: 'p2', quantity: 1 }], notes: '10,000 km service', createdAt: '2026-04-21T14:00:00Z', completedAt: '2026-04-21T15:15:00Z' },
-  { id: 's6', customerName: 'Elena Garcia', motorcycleModel: 'Yamaha Mio Sporty', serviceType: 'Electrical Check', laborCost: 400, status: 'Ongoing', partsUsed: [{ partId: 'p8', quantity: 1 }], notes: 'Headlight not working', createdAt: '2026-04-22T16:00:00Z' },
-];
-
-const DEMO_TRANSACTIONS: Transaction[] = [
-  { id: 't1', type: 'parts-only', items: [{ partId: 'p1', name: 'Brake Pad Set - Honda', quantity: 1, price: 850 }], paymentMethod: 'Cash', total: 850, createdAt: '2026-04-23T09:00:00Z' },
-  { id: 't2', type: 'service+parts', items: [{ partId: 'p2', name: 'Engine Oil 10W40', quantity: 1, price: 450 }], serviceId: 's1', serviceLaborCost: 350, paymentMethod: 'GCash', total: 800, createdAt: '2026-04-20T09:30:00Z' },
-  { id: 't3', type: 'parts-only', items: [{ partId: 'p3', name: 'Chain Sprocket Kit', quantity: 1, price: 1200 }], paymentMethod: 'Cash', total: 1200, createdAt: '2026-04-22T14:00:00Z' },
-  { id: 't4', type: 'service+parts', items: [{ partId: 'p1', name: 'Brake Pad Set - Honda', quantity: 1, price: 850 }], serviceId: 's2', serviceLaborCost: 500, paymentMethod: 'GCash', total: 1350, createdAt: '2026-04-22T10:00:00Z' },
-];
-
-const DEMO_LOGS: ActivityLog[] = [
-  { id: 'l1', user: 'Admin User', action: 'Logged in to the system', timestamp: '2026-04-23T08:00:00Z' },
-  { id: 'l2', user: 'Staff User', action: 'Created service record #s3 for Pedro Reyes', timestamp: '2026-04-23T07:35:00Z' },
-  { id: 'l3', user: 'Staff User', action: 'Recorded sale #t1 (Cash)', timestamp: '2026-04-23T09:05:00Z' },
-  { id: 'l4', user: 'Admin User', action: 'Updated stock for Brake Pad Set - Honda', timestamp: '2026-04-23T10:15:00Z' },
-  { id: 'l5', user: 'Staff User', action: 'Updated service #s2 status to Ongoing', timestamp: '2026-04-22T10:30:00Z' },
-];
-
-const DEMO_SERVICE_TYPES: ServiceType[] = [
-  { id: 'st1', name: 'Oil Change', defaultLaborCost: 350 },
-  { id: 'st2', name: 'Brake Repair', defaultLaborCost: 500 },
-  { id: 'st3', name: 'Full Tune-up', defaultLaborCost: 800 },
-  { id: 'st4', name: 'Chain Replacement', defaultLaborCost: 450 },
-  { id: 'st5', name: 'Electrical Check', defaultLaborCost: 400 },
-  { id: 'st6', name: 'Engine Overhaul', defaultLaborCost: 2000 },
-];
+import { normalizeRole } from '@/shared/lib/roles';
 
 interface DataContextType {
   parts: Part[];
@@ -56,6 +13,7 @@ interface DataContextType {
   serviceTypes: ServiceType[];
   stockMovements: StockMovement[];
   users: User[];
+  loading: boolean;
   addPart: (part: Omit<Part, 'id' | 'createdAt'>) => Promise<void>;
   updatePart: (id: string, part: Partial<Part>) => Promise<void>;
   deletePart: (id: string) => Promise<void>;
@@ -87,21 +45,46 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const userRef = useRef(user);
   useEffect(() => { userRef.current = user; }, [user]);
 
-  const [parts, setParts] = useState<Part[]>(DEMO_PARTS);
-  const [services, setServices] = useState<ServiceRecord[]>(DEMO_SERVICES);
-  const [transactions, setTransactions] = useState<Transaction[]>(DEMO_TRANSACTIONS);
-  const [logs, setLogs] = useState<ActivityLog[]>(DEMO_LOGS);
-  const [serviceTypes, setServiceTypes] = useState<ServiceType[]>(DEMO_SERVICE_TYPES);
+  const [parts, setParts] = useState<Part[]>([]);
+  const [services, setServices] = useState<ServiceRecord[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [logs, setLogs] = useState<ActivityLog[]>([]);
+  const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([]);
   const [stockMovements, setStockMovements] = useState<StockMovement[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setParts([]);
+      setServices([]);
+      setTransactions([]);
+      setLogs([]);
+      setServiceTypes([]);
+      setStockMovements([]);
+      setUsers([]);
+      setLoading(false);
+      return;
+    }
 
     let cancelled = false;
-    const activeRole = user.role;
+    const activeRole = normalizeRole(user.role);
 
     async function loadFromApi() {
+      // SuperAdmin and Customer use dedicated data sources outside tenant data context.
+      if (activeRole === 'SuperAdmin' || activeRole === 'Customer' || activeRole === 'Mechanic') {
+        setParts([]);
+        setServices([]);
+        setTransactions([]);
+        setLogs([]);
+        setServiceTypes([]);
+        setStockMovements([]);
+        setUsers([]);
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
       try {
         const [
           partsResponse,
@@ -124,7 +107,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         setServiceTypes(serviceTypesResponse.data);
         setStockMovements(stockMovementsResponse.data);
 
-        if (activeRole === 'Admin') {
+        if (activeRole === 'Owner' || activeRole === 'Admin') {
           const [usersResponse, logsResponse] = await Promise.all([
             apiGet<ApiList<User>>('/api/users'),
             apiGet<ApiList<ActivityLog>>('/api/activity-logs'),
@@ -132,10 +115,15 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           if (cancelled) return;
           setUsers(usersResponse.data);
           setLogs(logsResponse.data);
+        } else {
+          setUsers([]);
+          setLogs([]);
         }
       } catch (error) {
         console.error('Failed to load backend data', error);
         toast.error('Could not load backend data. Make sure the Laravel API is running.');
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     }
 
@@ -385,7 +373,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   return (
     <DataContext.Provider value={{
       parts, services, transactions, logs, serviceTypes, stockMovements,
-      users,
+      users, loading,
       addPart, updatePart, deletePart, recordStockMovement,
       addService, updateService, deleteService,
       addTransaction,

@@ -1,4 +1,4 @@
-export type Role = 'Admin' | 'Staff' | 'Mechanic' | 'Customer';
+export type Role = 'SuperAdmin' | 'Owner' | 'Staff' | 'Mechanic' | 'Customer' | 'Admin';
 
 export interface Part {
   id: string;
@@ -44,9 +44,13 @@ export interface Transaction {
 export interface User {
   id: string;
   name: string;
+  username?: string;
   email: string;
   role: Role;
   status: 'Active' | 'Inactive';
+  shopId?: string | null;
+  shopName?: string | null;
+  shopStatus?: string | null;
   lastActive: string;
 }
 
@@ -89,4 +93,127 @@ export interface GoogleData {
   google_id: string;
   name: string;
   email: string;
+}
+
+export interface TenantBranding {
+  shopId: number;
+  shopName: string;
+  subdomain: string | null;
+  customDomain: string | null;
+  domainStatus: string | null;
+  logoUrl: string | null;
+  primaryColor: string;
+  secondaryColor: string;
+  phone: string | null;
+  address: string | null;
+  description: string | null;
+  socialMedia: {
+    facebook: string | null;
+    instagram: string | null;
+  };
+  businessHours: Record<string, unknown> | null;
+}
+
+export interface SuperAdminShop {
+  shopId: number;
+  shopName: string;
+  email?: string | null;
+  phone: string | null;
+  address: string | null;
+  statusCode: 'ACTIVE' | 'SUSPENDED' | 'PENDING' | 'INACTIVE' | string;
+  statusName: string;
+  owner: {
+    userId: number | null;
+    name: string | null;
+    email: string | null;
+  };
+  applicant: {
+    name: string | null;
+    email: string | null;
+  };
+  registration: {
+    status: 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED' | 'SYSTEM_PROVISIONED' | string;
+    rejectionReason: string | null;
+    approvedAt: string | null;
+    rejectedAt: string | null;
+  };
+  subscription: {
+    shopSubscriptionId: number;
+    status: string;
+    startsAt: string | null;
+    endsAt: string | null;
+    renewsAt: string | null;
+    plan: {
+      planId: number;
+      planCode: string;
+      planName: string;
+      monthlyPrice: number;
+    };
+  } | null;
+  createdAt: string | null;
+}
+
+export interface SubscriptionPlan {
+  planId: number;
+  planCode: string;
+  planName: string;
+  monthlyPrice: number;
+  description: string | null;
+  isActive: boolean;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface ShopSubscription {
+  shopSubscriptionId: number;
+  shopId: number;
+  shopName: string;
+  planId: number;
+  planCode: string;
+  planName: string;
+  monthlyPrice: number;
+  status: string;
+  startsAt: string | null;
+  endsAt: string | null;
+  renewsAt: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface SubscriptionPayment {
+  subscriptionPaymentId: number;
+  shopSubscriptionId: number;
+  shopId: number;
+  shopName: string;
+  planName: string;
+  paymentStatus: string;
+  amount: number;
+  paymentMethod: string | null;
+  dueAt: string | null;
+  paidAt: string | null;
+  referenceNumber: string | null;
+  notes: string | null;
+  createdAt: string | null;
+}
+
+export interface PlatformAdmin {
+  userId: number;
+  name: string;
+  email: string;
+  status: string;
+  statusCode: string;
+  lastActive: string | null;
+}
+
+export interface PlatformAuditLog {
+  logId: number;
+  shopId: number | null;
+  shopName: string | null;
+  userId: number | null;
+  actorName: string | null;
+  action: string;
+  tableName: string | null;
+  recordId: number | null;
+  description: string | null;
+  loggedAt: string | null;
 }

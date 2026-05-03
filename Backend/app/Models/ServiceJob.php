@@ -2,13 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 
 class ServiceJob extends Model
 {
+    use BelongsToTenant;
+
     protected $primaryKey = 'job_id';
 
     protected $fillable = [
+        'shop_id_fk',
         'customer_id_fk',
         'assigned_mechanic_id_fk',
         'created_by_fk',

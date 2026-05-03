@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import type { User, GoogleData } from '@/shared/types';
 import { apiMutation, setAuthToken } from '@/shared/lib/api';
+import { normalizeRole } from '@/shared/lib/roles';
 
 interface AuthContextType {
   user: User | null;
@@ -28,6 +29,11 @@ interface GoogleLoginResponse {
   user?: User;
 }
 
+function normalizeUserRole(user: User): User {
+  const normalizedRole = normalizeRole(user.role);
+  return normalizedRole ? { ...user, role: normalizedRole } : user;
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
@@ -35,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await apiMutation<LoginResponse>('/api/login', 'POST', { email, password });
       setAuthToken(response.token);
-      setUser(response.user);
+      setUser(normalizeUserRole(response.user));
       return { success: true };
     } catch (error) {
       setAuthToken(null);
@@ -56,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       if (response.token && response.user) {
         setAuthToken(response.token);
-        setUser(response.user);
+        setUser(normalizeUserRole(response.user));
       }
       return { needsRegistration: false as const };
     } catch {
@@ -75,7 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await apiMutation<LoginResponse>('/api/auth/google/register', 'POST', payload);
       setAuthToken(response.token);
-      setUser(response.user);
+      setUser(normalizeUserRole(response.user));
       return true;
     } catch {
       return false;
