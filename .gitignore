@@ -1,22 +1,43 @@
-# Ignore Google OAuth client secret files
+# Secrets
 client_secret_*.json
 *.json.bak
-
-# Node
-node_modules/
-npm-debug.log
-yarn-error.log
 .env
 .env.local
+Backend/.env
+Frontend/.env
+Frontend/.env.local
+Frontend/.env.production.local
 
-# Laravel / PHP
+# Dependencies / build outputs
+node_modules/
 vendor/
-.env
+Frontend/dist/
+
+# Logs / runtime caches
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
 .phpunit.result.cache
-storage/*.key
+Backend/storage/*.key
+Backend/storage/logs/
+Backend/storage/framework/cache/data/
+Backend/storage/framework/sessions/
+Backend/storage/framework/testing/
+Backend/storage/framework/views/
+
+# Local tooling / IDE
+.claude/
+.amazonq/
+.kilo/
+.idea/
+.vscode/
+Frontend/.vercel/
+
+# Local installers / OS noise
+Composer-Setup.exe
 Homestead.json
 Homestead.yaml
-
-# General
 .DS_Store
 Thumbs.db
