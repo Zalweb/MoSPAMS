@@ -17,7 +17,10 @@ RUN apk add --no-cache \
     oniguruma-dev \
     freetype-dev \
     libjpeg-turbo-dev \
-    libwebp-dev
+    libwebp-dev \
+    libpng \
+    libjpeg-turbo \
+    freetype
 
 # Install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
@@ -68,7 +71,9 @@ RUN apk add --no-cache \
     freetype \
     libjpeg-turbo \
     libwebp \
-    oniguruma
+    oniguruma \
+    libgcc \
+    libstdc++
 
 # Install PHP extensions (same as builder)
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
