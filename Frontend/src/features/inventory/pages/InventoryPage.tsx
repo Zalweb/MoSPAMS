@@ -25,6 +25,12 @@ const partSchema = z.object({
 });
 type PartForm = z.infer<typeof partSchema>;
 
+const categorySchema = z.object({
+  name: z.string().min(2, 'Category name is too short'),
+  description: z.string().optional(),
+});
+type CategoryForm = z.infer<typeof categorySchema>;
+
 const movementSchema = z.object({
   type: z.enum(['in', 'out', 'adjust']),
   qty: z.number().int().min(0),
@@ -39,7 +45,7 @@ const fadeUp = (delay = 0) => ({
 });
 
 export default function Inventory() {
-  const { addPart, updatePart, deletePart, recordStockMovement, categories } = useData();
+  const { addPart, updatePart, deletePart, recordStockMovement, categories, addCategory } = useData();
   const { user } = useAuth();
   const role = user?.role;
   const canCreate = can(role, 'inventory', 'create');
@@ -49,6 +55,7 @@ export default function Inventory() {
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('All');
   const [modalOpen, setModalOpen] = useState(false);
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [editing, setEditing] = useState<Part | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [stockMoveTarget, setStockMoveTarget] = useState<Part | null>(null);
@@ -70,6 +77,10 @@ export default function Inventory() {
   const form = useForm<PartForm>({
     resolver: zodResolver(partSchema),
     defaultValues: { name: '', category: defaultCategory, stock: 0, minStock: 5, price: 0, barcode: '' },
+  });
+  const categoryForm = useForm<CategoryForm>({
+    resolver: zodResolver(categorySchema),
+    defaultValues: { name: '', description: '' },
   });
   const moveForm = useForm<MovementForm>({
     resolver: zodResolver(movementSchema),
@@ -94,6 +105,12 @@ export default function Inventory() {
       prependItem(created);
     }
     setModalOpen(false);
+  });
+
+  const onSubmitCategory = categoryForm.handleSubmit(async (values) => {
+    await addCategory(values.name, values.description || '');
+    categoryForm.reset();
+    setCategoryModalOpen(false);
   });
 
   const openMovement = (part: Part) => { setStockMoveTarget(part); moveForm.reset({ type: 'in', qty: 0, reason: '' }); };
@@ -139,10 +156,17 @@ export default function Inventory() {
             className="w-full h-11 pl-11 pr-4 rounded-xl bg-zinc-900/50 border border-zinc-800 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-700 focus:ring-2 focus:ring-white/10"
           />
         </div>
-        <select value={catFilter} onChange={e => setCatFilter(e.target.value)} className="h-11 px-4 rounded-xl bg-zinc-900/50 border border-zinc-800 text-sm text-zinc-400 focus:outline-none focus:border-zinc-700">
-          <option value="All">All Categories</option>
-          {categoryNames.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
+        <div className="flex gap-2">
+          <select value={catFilter} onChange={e => setCatFilter(e.target.value)} className="h-11 px-4 rounded-xl bg-zinc-900/50 border border-zinc-800 text-sm text-zinc-400 focus:outline-none focus:border-zinc-700">
+            <option value="All">All Categories</option>
+            {categoryNames.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+          {canCreate && (
+            <Button onClick={() => setCategoryModalOpen(true)} size="sm" variant="outline" className="h-11 rounded-xl border-zinc-800 text-zinc-400 hover:bg-zinc-800 hover:text-white">
+              <Plus className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
       </motion.div>
 
       <motion.div {...fadeUp(0.2)} className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl overflow-hidden">
@@ -287,6 +311,29 @@ export default function Inventory() {
             <div className="flex gap-3 pt-2">
               <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-white text-sm font-semibold transition-opacity">{editing ? 'Save Changes' : 'Add Part'}</Button>
               <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-10 rounded-xl text-sm border-zinc-700 text-zinc-400 hover:bg-zinc-800">Cancel</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={categoryModalOpen} onOpenChange={setCategoryModalOpen}>
+        <DialogContent className="sm:max-w-md rounded-2xl border-zinc-800 bg-zinc-900 p-6">
+          <DialogHeader className="pb-2">
+            <DialogTitle className="text-base font-semibold text-white">Add New Category</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={onSubmitCategory} className="space-y-4 pt-2">
+            <div>
+              <Label className="text-xs font-medium text-zinc-400">Category Name</Label>
+              <Input {...categoryForm.register('name')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white placeholder:text-zinc-500 focus:border-zinc-600" placeholder="e.g. Brake Parts" />
+              {categoryForm.formState.errors.name && <p className="text-xs text-red-400 mt-1">{categoryForm.formState.errors.name.message}</p>}
+            </div>
+            <div>
+              <Label className="text-xs font-medium text-zinc-400">Description (Optional)</Label>
+              <Input {...categoryForm.register('description')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white placeholder:text-zinc-500 focus:border-zinc-600" placeholder="Brief description" />
+            </div>
+            <div className="flex gap-3 pt-2">
+              <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-white text-sm font-semibold transition-opacity">Add Category</Button>
+              <Button type="button" variant="outline" onClick={() => setCategoryModalOpen(false)} className="h-10 rounded-xl text-sm border-zinc-700 text-zinc-400 hover:bg-zinc-800">Cancel</Button>
             </div>
           </form>
         </DialogContent>
