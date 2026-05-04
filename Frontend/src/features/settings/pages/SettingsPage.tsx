@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Store, Palette, Globe, Upload, Copy, RefreshCw, Check, AlertCircle } from 'lucide-react';
+import { Store, Palette, Globe, Upload, Copy, RefreshCw, Check, AlertCircle, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiGet, apiMutation } from '@/shared/lib/api';
+import { useAuth } from '@/features/auth/context/AuthContext';
 
 interface ShopBranding {
   shopName: string;
@@ -17,14 +18,16 @@ interface ShopBranding {
   domainStatus: 'NONE' | 'PENDING' | 'VERIFIED' | 'ACTIVE';
 }
 
-type TabType = 'profile' | 'branding' | 'domain';
+type TabType = 'user' | 'shop' | 'branding' | 'domain';
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<TabType>('profile');
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<TabType>('user');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [branding, setBranding] = useState<ShopBranding | null>(null);
   const [copied, setCopied] = useState(false);
+  const [userName, setUserName] = useState(user?.name || '');
 
   useEffect(() => {
     loadBranding();
@@ -43,7 +46,22 @@ export default function SettingsPage() {
     }
   }
 
-  async function handleSaveProfile() {
+  async function handleSaveUserProfile() {
+    try {
+      setSaving(true);
+      await apiMutation('/api/users/profile', 'PATCH', {
+        fullName: userName,
+      });
+      toast.success('Profile updated successfully');
+    } catch (error) {
+      console.error('Failed to save profile:', error);
+      toast.error('Failed to save profile');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleSaveShopProfile() {
     if (!branding) return;
     try {
       setSaving(true);
@@ -72,7 +90,6 @@ export default function SettingsPage() {
         secondaryColor: branding.secondaryColor,
       });
       toast.success('Branding updated successfully');
-      // Apply colors to document root
       document.documentElement.style.setProperty('--color-primary-rgb', hexToRgb(branding.primaryColor));
       document.documentElement.style.setProperty('--color-secondary-rgb', hexToRgb(branding.secondaryColor));
     } catch (error) {
@@ -151,20 +168,25 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white mb-2">Settings</h1>
-        <p className="text-sm text-zinc-400">Manage your shop profile, branding, and access settings</p>
+        <p className="text-sm text-zinc-400">Manage your profile, shop, branding, and access settings</p>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 border-b border-zinc-800">
+      <div className="flex gap-2 border-b border-zinc-800 overflow-x-auto">
         <button
-          onClick={() => setActiveTab('profile')}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
-            activeTab === 'profile'
-              ? 'text-white border-white'
-              : 'text-zinc-500 border-transparent hover:text-zinc-300'
+          onClick={() => setActiveTab('user')}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${
+            activeTab === 'user' ? 'text-white border-white' : 'text-zinc-500 border-transparent hover:text-zinc-300'
+          }`}
+        >
+          <User className="w-4 h-4" strokeWidth={2} />
+          User Profile
+        </button>
+        <button
+          onClick={() => setActiveTab('shop')}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${
+            activeTab === 'shop' ? 'text-white border-white' : 'text-zinc-500 border-transparent hover:text-zinc-300'
           }`}
         >
           <Store className="w-4 h-4" strokeWidth={2} />
@@ -172,10 +194,8 @@ export default function SettingsPage() {
         </button>
         <button
           onClick={() => setActiveTab('branding')}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
-            activeTab === 'branding'
-              ? 'text-white border-white'
-              : 'text-zinc-500 border-transparent hover:text-zinc-300'
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${
+            activeTab === 'branding' ? 'text-white border-white' : 'text-zinc-500 border-transparent hover:text-zinc-300'
           }`}
         >
           <Palette className="w-4 h-4" strokeWidth={2} />
@@ -183,10 +203,8 @@ export default function SettingsPage() {
         </button>
         <button
           onClick={() => setActiveTab('domain')}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
-            activeTab === 'domain'
-              ? 'text-white border-white'
-              : 'text-zinc-500 border-transparent hover:text-zinc-300'
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${
+            activeTab === 'domain' ? 'text-white border-white' : 'text-zinc-500 border-transparent hover:text-zinc-300'
           }`}
         >
           <Globe className="w-4 h-4" strokeWidth={2} />
@@ -194,9 +212,68 @@ export default function SettingsPage() {
         </button>
       </div>
 
-      {/* Content */}
       <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-6">
-        {activeTab === 'profile' && (
+        {activeTab === 'user' && (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-4">Personal Information</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-300 mb-2">Full Name</label>
+                  <input
+                    type="text"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                    placeholder="Enter your full name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-zinc-300 mb-2">Email Address</label>
+                  <input
+                    type="email"
+                    value={user?.email || ''}
+                    disabled
+                    className="w-full px-4 py-2.5 bg-zinc-800/50 border border-zinc-700 rounded-xl text-zinc-500 text-sm cursor-not-allowed"
+                  />
+                  <p className="text-xs text-zinc-500 mt-1">Email is linked to your Google account and cannot be changed</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-zinc-300 mb-2">Role</label>
+                  <input
+                    type="text"
+                    value={user?.role || ''}
+                    disabled
+                    className="w-full px-4 py-2.5 bg-zinc-800/50 border border-zinc-700 rounded-xl text-zinc-500 text-sm cursor-not-allowed"
+                  />
+                  <p className="text-xs text-zinc-500 mt-1">Your role determines your access level in the system</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-zinc-300 mb-2">Shop</label>
+                  <input
+                    type="text"
+                    value={user?.shopName || 'N/A'}
+                    disabled
+                    className="w-full px-4 py-2.5 bg-zinc-800/50 border border-zinc-700 rounded-xl text-zinc-500 text-sm cursor-not-allowed"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={handleSaveUserProfile}
+              disabled={saving}
+              className="px-6 py-2.5 bg-white text-black rounded-xl font-semibold text-sm hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        )}
+
+        {activeTab === 'shop' && (
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold text-white mb-4">Shop Information</h3>
@@ -262,7 +339,7 @@ export default function SettingsPage() {
             </div>
 
             <button
-              onClick={handleSaveProfile}
+              onClick={handleSaveShopProfile}
               disabled={saving}
               className="px-6 py-2.5 bg-white text-black rounded-xl font-semibold text-sm hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >

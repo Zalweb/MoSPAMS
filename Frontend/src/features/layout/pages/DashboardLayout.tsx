@@ -4,11 +4,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Package, Wrench, ShoppingCart,
   BarChart3, Shield, LogOut, Menu, X, Bell, ClipboardCheck,
-  Home, Calendar, CreditCard, Users, ScrollText, Settings, Bike,
+  Home, Calendar, CreditCard, Users, ScrollText, Settings, Bike, Search, Sun, Moon,
 } from 'lucide-react';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { NAV_ACCESS } from '@/shared/lib/permissions';
 import { normalizeRole } from '@/shared/lib/roles';
+import { useTheme } from 'next-themes';
 
 const navItems: { label: string; to: string; icon: typeof LayoutDashboard; end?: boolean }[] = [
   { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard, end: true },
@@ -31,6 +32,7 @@ export default function DashboardLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme, setTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [bellOpen, setBellOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -134,6 +136,24 @@ export default function DashboardLayout() {
 
             {/* Right side actions */}
             <div className="ml-auto flex items-center gap-2">
+              {/* Search */}
+              <div className="relative hidden md:block">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" strokeWidth={1.5} />
+                <input
+                  type="text"
+                  placeholder="Type to search..."
+                  className="w-[280px] pl-10 pr-4 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20"
+                />
+              </div>
+
+              {/* Theme toggle */}
+              <button
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="p-2.5 rounded-xl hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all"
+                aria-label="Toggle theme"
+              >
+                {theme === 'dark' ? <Sun className="w-5 h-5" strokeWidth={1.5} /> : <Moon className="w-5 h-5" strokeWidth={1.5} />}
+              </button>
               {/* Bell / Notifications */}
               <div className="relative">
                 <motion.button
