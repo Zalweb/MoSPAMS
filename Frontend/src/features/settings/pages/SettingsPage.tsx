@@ -229,10 +229,11 @@ export default function SettingsPage() {
                     <input
                       type="email"
                       value={branding.contactEmail || ''}
-                      onChange={(e) => setBranding({ ...branding, contactEmail: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                      disabled
+                      className="w-full px-4 py-2.5 bg-zinc-800/50 border border-zinc-700 rounded-xl text-zinc-500 text-sm cursor-not-allowed"
                       placeholder="shop@example.com"
                     />
+                    <p className="text-xs text-zinc-500 mt-1">Email is linked to your Google account</p>
                   </div>
 
                   <div>
