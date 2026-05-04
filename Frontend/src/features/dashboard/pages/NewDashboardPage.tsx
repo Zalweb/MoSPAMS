@@ -36,7 +36,7 @@ export default function DashboardPage() {
   const lowStock = metrics?.lowStock?.map(item => ({
     id: item.part_id.toString(),
     name: item.part_name,
-    category: '',
+    category: item.category || '',
     stock: item.stock,
     minStock: item.min_stock,
     price: item.price,

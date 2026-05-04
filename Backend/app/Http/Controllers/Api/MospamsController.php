@@ -114,7 +114,11 @@ class MospamsController extends Controller
         $activePipeline = $pendingServices + $ongoingServices;
 
         // Inventory metrics
-        $allParts = DB::table('parts')->where('shop_id_fk', $shopId)->get();
+        $allParts = DB::table('parts')
+            ->join('categories', 'categories.category_id', '=', 'parts.category_id_fk')
+            ->where('parts.shop_id_fk', $shopId)
+            ->select('parts.*', 'categories.category_name')
+            ->get();
         $lowStockParts = $allParts->filter(fn($p) => $p->stock_quantity <= $p->reorder_level);
         $inventoryHealth = $allParts->count() > 0 
             ? (($allParts->count() - $lowStockParts->count()) / $allParts->count()) * 100 
@@ -129,6 +133,7 @@ class MospamsController extends Controller
             return [
                 'part_id' => $part->part_id,
                 'part_name' => $part->part_name,
+                'category' => $part->category_name,
                 'stock' => (int) $part->stock_quantity,
                 'min_stock' => (int) $part->reorder_level,
                 'price' => (float) $part->unit_price,
