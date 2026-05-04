@@ -33,7 +33,7 @@ export default function SettingsPage() {
   async function loadBranding() {
     try {
       setLoading(true);
-      const response = await apiGet<{ data: ShopBranding }>('/shop/branding');
+      const response = await apiGet<{ data: ShopBranding }>('/api/shop/branding');
       setBranding(response.data);
     } catch (error) {
       console.error('Failed to load branding:', error);
@@ -47,7 +47,7 @@ export default function SettingsPage() {
     if (!branding) return;
     try {
       setSaving(true);
-      await apiMutation('/shop/branding', 'PATCH', {
+      await apiMutation('/api/shop/branding', 'PATCH', {
         shopName: branding.shopName,
         shopDescription: branding.shopDescription,
         contactEmail: branding.contactEmail,
@@ -67,7 +67,7 @@ export default function SettingsPage() {
     if (!branding) return;
     try {
       setSaving(true);
-      await apiMutation('/shop/branding', 'PATCH', {
+      await apiMutation('/api/shop/branding', 'PATCH', {
         primaryColor: branding.primaryColor,
         secondaryColor: branding.secondaryColor,
       });
@@ -87,7 +87,7 @@ export default function SettingsPage() {
     try {
       const formData = new FormData();
       formData.append('logo', file);
-      await apiMutation('/shop/logo', 'POST', formData);
+      await apiMutation('/api/shop/logo', 'POST', formData);
       toast.success('Logo uploaded successfully');
       loadBranding();
     } catch (error) {
@@ -98,7 +98,7 @@ export default function SettingsPage() {
 
   async function handleDeleteLogo() {
     try {
-      await apiMutation('/shop/logo', 'DELETE');
+      await apiMutation('/api/shop/logo', 'DELETE');
       toast.success('Logo deleted successfully');
       loadBranding();
     } catch (error) {
@@ -109,7 +109,7 @@ export default function SettingsPage() {
 
   async function handleRegenerateCode() {
     try {
-      await apiMutation('/shop/invitation-code/regenerate', 'POST');
+      await apiMutation('/api/shop/invitation-code/regenerate', 'POST');
       toast.success('Invitation code regenerated');
       loadBranding();
     } catch (error) {
