@@ -24,6 +24,7 @@ interface DataContextType {
   addServiceType: (st: Omit<ServiceType, 'id'>) => Promise<ServiceType>;
   updateServiceType: (id: string, st: Partial<ServiceType>) => Promise<ServiceType>;
   deleteServiceType: (id: string) => Promise<void>;
+  addCategory: (cat: Omit<Category, 'id'>) => Promise<Category>;
   addUser: (input: { name: string; email: string; role: Role; password: string }) => Promise<void>;
   updateUser: (id: string, patch: Partial<User> & { password?: string }) => Promise<void>;
   setUserStatus: (id: string, status: 'Active' | 'Inactive') => Promise<void>;
@@ -162,6 +163,15 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     } catch (error) { showApiFailure('Delete service type', error); throw error; }
   }, [queryClient]);
 
+  const addCategory = useCallback(async (cat: Omit<Category, 'id'>): Promise<Category> => {
+    try {
+      const response = await apiMutation<ApiItem<Category>>('/api/categories', 'POST', cat);
+      queryClient.setQueryData<Category[]>(['ref', 'categories'], old => [...(old ?? []), response.data]);
+      toast.success(`Category added: ${cat.name}`);
+      return response.data;
+    } catch (error) { showApiFailure('Add category', error); throw error; }
+  }, [queryClient]);
+
   const addUser = useCallback(async ({ name, email, role: userRole, password }: { name: string; email: string; role: Role; password: string }) => {
     try {
       const currentUsers = queryClient.getQueryData<User[]>(['ref', 'users']) ?? [];
@@ -210,6 +220,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       addService, updateService, deleteService,
       addTransaction,
       addServiceType, updateServiceType, deleteServiceType,
+      addCategory,
       addUser, updateUser, setUserStatus, deleteUser,
     }}>
       {children}

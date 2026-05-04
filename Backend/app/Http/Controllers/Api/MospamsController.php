@@ -365,6 +365,33 @@ class MospamsController extends Controller
         return response()->json(['data' => $categories]);
     }
 
+    public function storeCategory(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'description' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $id = DB::table('categories')->insertGetId([
+            'shop_id_fk' => $this->shopId(),
+            'category_name' => $data['name'],
+            'description' => $data['description'] ?? null,
+            'category_status_id_fk' => $this->statusId('category_statuses', 'category_status_id', 'active'),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->log($request, 'Added category: '.$data['name'], 'categories', $id);
+
+        $category = DB::table('categories')->where('category_id', $id)->first();
+
+        return response()->json(['data' => [
+            'id' => (string) $category->category_id,
+            'name' => $category->category_name,
+            'description' => $category->description,
+        ]], 201);
+    }
+
     public function stockMovements(): JsonResponse
     {
         $query = DB::table('stock_movements')
