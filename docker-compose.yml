@@ -1,54 +1,106 @@
+version: '3.8'
+
 services:
-  db:
-    image: mysql:8.4
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
     container_name: mospams-mysql
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: mospams_db
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_USER: mospams
-      MYSQL_PASSWORD: mospams
-    ports:
-      - "3307:3306"
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password_change_me}
+      MYSQL_DATABASE: ${DB_DATABASE:-mospams_production}
+      MYSQL_USER: ${DB_USERNAME:-mospams_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-mospams_password_change_me}
     volumes:
-      - mospams_mysql_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-umospams", "-pmospams"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      - mysql_data:/var/lib/mysql
+      - ./Backend/docker/mysql/my.cnf:/etc/mysql/conf.d/custom.cnf:ro
+    ports:
+      - "${DB_PORT:-3306}:3306"
     networks:
       - mospams-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-root_password_change_me}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
-  backend:
-    build:
-      context: ./Backend
-      dockerfile: Dockerfile
-    container_name: mospams-backend
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: mospams-redis
     restart: unless-stopped
-    ports:
-      - "8001:8001"
-    environment:
-      APP_ENV: local
-      APP_DEBUG: "true"
-      APP_URL: http://localhost:8001
-      DB_CONNECTION: mysql
-      DB_HOST: db
-      DB_PORT: 3306
-      DB_DATABASE: mospams_db
-      DB_USERNAME: mospams
-      DB_PASSWORD: mospams
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_password_change_me}
     volumes:
-      - ./Backend:/app
+      - redis_data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - mospams-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Laravel Application
+  app:
+    build:
+      context: .
+      dockerfile: Backend/Dockerfile
+    container_name: mospams-app
+    restart: unless-stopped
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_KEY: ${APP_KEY}
+      APP_URL: ${APP_URL:-http://localhost}
+      
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-mospams_production}
+      DB_USERNAME: ${DB_USERNAME:-mospams_user}
+      DB_PASSWORD: ${DB_PASSWORD:-mospams_password_change_me}
+      
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis_password_change_me}
+      REDIS_PORT: 6379
+      
+      CACHE_STORE: redis
+      QUEUE_CONNECTION: redis
+      SESSION_DRIVER: redis
+      
+      FRONTEND_URL: ${FRONTEND_URL:-https://yourdomain.com}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      CORS_ALLOWED_ORIGINS_PATTERNS: ${CORS_ALLOWED_ORIGINS_PATTERNS}
+    volumes:
+      - ./Backend:/var/www/html
+      - storage_data:/var/www/html/storage
+      - ./Backend/docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
+    ports:
+      - "${APP_PORT:-8000}:80"
     depends_on:
-      db:
+      mysql:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - mospams-network
-    command: sh -c "php artisan migrate --force && php -S 0.0.0.0:8001 -t public"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
 volumes:
-  mospams_mysql_data:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  storage_data:
+    driver: local
 
 networks:
   mospams-network:

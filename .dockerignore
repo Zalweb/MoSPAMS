@@ -1,0 +1,60 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+README.md
+DEPLOYMENT.md
+AWS_DEPLOYMENT.md
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Dependencies
+Backend/vendor/
+Backend/node_modules/
+Frontend/node_modules/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Laravel
+Backend/storage/logs/*
+Backend/storage/framework/cache/*
+Backend/storage/framework/sessions/*
+Backend/storage/framework/views/*
+!Backend/storage/logs/.gitkeep
+!Backend/storage/framework/cache/.gitkeep
+!Backend/storage/framework/sessions/.gitkeep
+!Backend/storage/framework/views/.gitkeep
+
+# Testing
+Backend/tests/
+Backend/phpunit.xml
+Backend/.phpunit.result.cache
+
+# Build artifacts
+Backend/public/hot
+Backend/public/storage
+Backend/public/build
+
+# Docker
+docker-compose.yml
+docker-compose.*.yml
+Dockerfile
+.dockerignore
+
+# Frontend (not needed in backend image)
+Frontend/
