@@ -29,7 +29,6 @@ const CustomerDashboard = lazy(() => import('@/features/customers/pages/Customer
 const BookService = lazy(() => import('@/features/customers/pages/BookService'));
 const ServiceHistory = lazy(() => import('@/features/customers/pages/ServiceHistory'));
 const Payments = lazy(() => import('@/features/customers/pages/Payments'));
-const RolesPage = lazy(() => import('@/features/roles/pages/RolesPage'));
 const ActivityLogsPage = lazy(() => import('@/features/activity-logs/pages/ActivityLogsPage'));
 const SettingsPage = lazy(() => import('@/features/settings/pages/SettingsPage'));
 const NotFound = lazy(() => import('@/features/common/NotFound'));
