@@ -77,6 +77,7 @@ export function useDashboardData(): DashboardData {
             low_stock: Array<{
               part_id: number;
               part_name: string;
+              category: string;
               stock: number;
               min_stock: number;
               price: number;
