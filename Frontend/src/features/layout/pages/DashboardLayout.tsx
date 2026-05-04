@@ -26,6 +26,8 @@ const navItems: { label: string; to: string; icon: typeof LayoutDashboard; end?:
   { label: 'Book', to: '/dashboard/customer/book', icon: Calendar },
   { label: 'History', to: '/dashboard/customer/history', icon: Wrench },
   { label: 'Payments', to: '/dashboard/customer/payments', icon: CreditCard },
+  // Mechanic navigation
+  { label: 'My Jobs', to: '/dashboard/mechanic/jobs', icon: Wrench },
 ];
 
 export default function DashboardLayout() {

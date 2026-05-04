@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\BillingWebhookController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DomainOnboardingController;
 use App\Http\Controllers\Api\GoogleAuthController;
+use App\Http\Controllers\Api\MechanicController;
 use App\Http\Controllers\Api\MospamsController;
 use App\Http\Controllers\Api\RoleRequestController;
 use App\Http\Controllers\Api\ShopBrandingController;
@@ -119,5 +120,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/customer/services', [CustomerController::class, 'services']);
         Route::post('/customer/services', [CustomerController::class, 'createService']);
         Route::get('/customer/payments', [CustomerController::class, 'payments']);
+
+        // Mechanic routes
+        Route::middleware(['role:Mechanic'])->prefix('mechanic')->group(function () {
+            Route::get('/jobs', [MechanicController::class, 'assignedJobs']);
+            Route::get('/jobs/{job}', [MechanicController::class, 'jobDetails']);
+            Route::patch('/jobs/{job}/status', [MechanicController::class, 'updateJobStatus']);
+            Route::post('/jobs/{job}/parts', [MechanicController::class, 'addPartToJob']);
+            Route::delete('/jobs/{job}/parts/{jobPart}', [MechanicController::class, 'removePartFromJob']);
+        });
     });
 });

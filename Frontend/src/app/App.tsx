@@ -35,6 +35,10 @@ const SettingsPage = lazy(() => import('@/features/settings/pages/SettingsPage')
 const NotFound = lazy(() => import('@/features/common/NotFound'));
 const ShopBlockedScreen = lazy(() => import('@/features/common/ShopBlockedScreen'));
 
+// Mechanic pages
+const AssignedJobsPage = lazy(() => import('@/features/mechanic/pages/AssignedJobsPage'));
+const JobDetailsPage = lazy(() => import('@/features/mechanic/pages/JobDetailsPage'));
+
 // SuperAdmin pages
 const SuperAdminAnalyticsPage = lazy(() => import('@/features/superadmin/pages/SuperAdminAnalyticsPage'));
 const SuperAdminShopsPage = lazy(() => import('@/features/superadmin/pages/SuperAdminShopsPage'));
@@ -93,6 +97,14 @@ function RequireCustomer() {
   if (!ready) return null;
   if (!user) return <Navigate to="/" replace />;
   if (normalizeRole(user.role) !== 'Customer') return <Navigate to={defaultRouteForUser(user)} replace />;
+  return <Outlet />;
+}
+
+function RequireMechanic() {
+  const { user, ready } = useAuth();
+  if (!ready) return null;
+  if (!user) return <Navigate to="/" replace />;
+  if (normalizeRole(user.role) !== 'Mechanic') return <Navigate to={defaultRouteForUser(user)} replace />;
   return <Outlet />;
 }
 
@@ -220,6 +232,10 @@ function App() {
                             <Route path="customer/book" element={<BookService />} />
                             <Route path="customer/history" element={<ServiceHistory />} />
                             <Route path="customer/payments" element={<Payments />} />
+                          </Route>
+                          <Route element={<RequireMechanic />}>
+                            <Route path="mechanic/jobs" element={<AssignedJobsPage />} />
+                            <Route path="mechanic/jobs/:id" element={<JobDetailsPage />} />
                           </Route>
                           <Route path="*" element={<NotFound />} />
                         </Route>
