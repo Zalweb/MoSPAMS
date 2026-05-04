@@ -18,9 +18,6 @@ const navItems: { label: string; to: string; icon: typeof LayoutDashboard; end?:
   { label: 'Reports', to: '/dashboard/reports', icon: BarChart3 },
   { label: 'Users', to: '/dashboard/users', icon: Shield },
   { label: 'Approvals', to: '/dashboard/approvals', icon: ClipboardCheck },
-  { label: 'Roles', to: '/dashboard/roles', icon: Users },
-  { label: 'Activity Logs', to: '/dashboard/activity-logs', icon: ScrollText },
-  { label: 'Settings', to: '/dashboard/settings', icon: Settings },
   // Customer navigation
   { label: 'Home', to: '/dashboard/customer', icon: Home, end: true },
   { label: 'Book', to: '/dashboard/customer/book', icon: Calendar },
@@ -116,17 +113,7 @@ export default function DashboardLayout() {
           ))}
         </nav>
 
-        {/* Bottom section */}
-        <div className="px-3 py-4 border-t border-zinc-800">
-          <motion.button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200"
-            whileHover={{ x: 4 }}
-          >
-            <LogOut className="w-[18px] h-[18px]" strokeWidth={1.5} />
-            <span>Sign Out</span>
-          </motion.button>
-        </div>
+
       </aside>
 
       {/* Main Content */}
@@ -245,9 +232,29 @@ export default function DashboardLayout() {
                         <p className="text-sm font-semibold text-white truncate">{user?.name}</p>
                         <p className="text-xs text-zinc-500 mt-0.5">{user?.email}</p>
                       </div>
+                      <div className="py-1">
+                        {role === 'Owner' && (
+                          <>
+                            <button
+                              onClick={() => { setProfileOpen(false); navigate('/dashboard/activity-logs'); }}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors"
+                            >
+                              <ScrollText className="w-[18px] h-[18px]" strokeWidth={1.5} />
+                              Activity Logs
+                            </button>
+                            <button
+                              onClick={() => { setProfileOpen(false); navigate('/dashboard/settings'); }}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors"
+                            >
+                              <Settings className="w-[18px] h-[18px]" strokeWidth={1.5} />
+                              Settings
+                            </button>
+                          </>
+                        )}
+                      </div>
                       <button
                         onClick={() => { setProfileOpen(false); handleLogout(); }}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors border-t border-zinc-800"
                       >
                         <LogOut className="w-[18px] h-[18px]" strokeWidth={1.5} />
                         Sign Out

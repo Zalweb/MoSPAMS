@@ -223,7 +223,6 @@ function App() {
                           <Route element={<RequireRole role="Owner" />}>
                             <Route path="users" element={<UsersPage />} />
                             <Route path="approvals" element={<ApprovalsPage />} />
-                            <Route path="roles" element={<RolesPage />} />
                             <Route path="activity-logs" element={<ActivityLogsPage />} />
                             <Route path="settings" element={<SettingsPage />} />
                           </Route>
