@@ -60,8 +60,13 @@ class ShopBrandingController extends Controller
             'data' => [
                 'shopId' => (string) $shop->shop_id,
                 'shopName' => $shop->shop_name,
+                'shopDescription' => $shop->shop_description ?? '',
+                'contactEmail' => $shop->contact_email ?? '',
+                'contactPhone' => $shop->contact_phone ?? '',
+                'address' => $shop->address ?? '',
                 'subdomain' => $shop->subdomain,
                 'customDomain' => $shop->custom_domain,
+                'domainStatus' => $shop->domain_status ?? 'NONE',
                 'logoUrl' => $shop->logo_url,
                 'primaryColor' => $shop->primary_color ?? '#ef4444',
                 'secondaryColor' => $shop->secondary_color ?? '#f97316',
@@ -80,6 +85,10 @@ class ShopBrandingController extends Controller
         
         $data = $request->validate([
             'shopName' => ['sometimes', 'string', 'max:100'],
+            'shopDescription' => ['sometimes', 'nullable', 'string', 'max:500'],
+            'contactEmail' => ['sometimes', 'nullable', 'email', 'max:100'],
+            'contactPhone' => ['sometimes', 'nullable', 'string', 'max:20'],
+            'address' => ['sometimes', 'nullable', 'string', 'max:255'],
             'primaryColor' => ['sometimes', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'secondaryColor' => ['sometimes', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'logoUrl' => ['sometimes', 'nullable', 'string', 'max:500', 'url'],
@@ -89,6 +98,22 @@ class ShopBrandingController extends Controller
         
         if (isset($data['shopName'])) {
             $update['shop_name'] = $data['shopName'];
+        }
+        
+        if (array_key_exists('shopDescription', $data)) {
+            $update['shop_description'] = $data['shopDescription'];
+        }
+        
+        if (array_key_exists('contactEmail', $data)) {
+            $update['contact_email'] = $data['contactEmail'];
+        }
+        
+        if (array_key_exists('contactPhone', $data)) {
+            $update['contact_phone'] = $data['contactPhone'];
+        }
+        
+        if (array_key_exists('address', $data)) {
+            $update['address'] = $data['address'];
         }
         
         if (isset($data['primaryColor'])) {
