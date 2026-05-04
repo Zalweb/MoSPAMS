@@ -29,10 +29,7 @@ class AuthController extends Controller
 
         $user = User::query()
             ->with(['role', 'status', 'shop.status'])
-            ->where(function ($q) use ($credentials) {
-                $q->where('username', $credentials['email'])
-                  ->orWhere('email', $credentials['email']);
-            })
+            ->where('email', $credentials['email'])
             ->first();
 
         if (! $user || ! Hash::check($credentials['password'], $user->password_hash)) {
@@ -151,7 +148,6 @@ class AuthController extends Controller
                 'shop_id_fk' => $shop->shop_id,
                 'role_id_fk' => $customerRoleId,
                 'full_name' => $data['fullName'],
-                'username' => $data['email'],
                 'email' => $data['email'],
                 'password_hash' => Hash::make($data['password']),
                 'user_status_id_fk' => $pendingStatusId,
@@ -187,7 +183,6 @@ class AuthController extends Controller
         return [
             'id' => (string) $user->user_id,
             'name' => $user->full_name,
-            'username' => $user->username,
             'email' => $user->email,
             'role' => $user->role?->role_name,
             'status' => $user->status?->status_name,

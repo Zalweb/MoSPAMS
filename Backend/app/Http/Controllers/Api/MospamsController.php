@@ -757,7 +757,7 @@ class MospamsController extends Controller
             'shop_id_fk' => $this->shopId(),
             'role_id_fk' => DB::table('roles')->where('role_name', $data['role'])->value('role_id'),
             'full_name' => $data['name'],
-            'username' => $data['email'],
+            'email' => $data['email'],
             'password_hash' => Hash::make($data['password']),
             'user_status_id_fk' => $this->statusId('user_statuses', 'user_status_id', 'active'),
         ])->load(['role', 'status']);
@@ -771,14 +771,14 @@ class MospamsController extends Controller
     {
         $data = $request->validate([
             'name' => ['sometimes', 'string', 'max:100'],
-            'email' => ['sometimes', 'string', 'max:100', Rule::unique('users', 'username')->ignore($user, 'user_id')],
+            'email' => ['sometimes', 'string', 'max:100', Rule::unique('users', 'email')->ignore($user, 'user_id')],
             'role' => ['sometimes', Rule::in(['Owner', 'Staff', 'Mechanic', 'Customer'])],
             'password' => ['nullable', 'string', 'min:6'],
         ]);
 
         $patch = [];
         if (array_key_exists('name', $data)) $patch['full_name'] = $data['name'];
-        if (array_key_exists('email', $data)) $patch['username'] = $data['email'];
+        if (array_key_exists('email', $data)) $patch['email'] = $data['email'];
         if (array_key_exists('role', $data)) $patch['role_id_fk'] = DB::table('roles')->where('role_name', $data['role'])->value('role_id');
         if (! empty($data['password'])) $patch['password_hash'] = Hash::make($data['password']);
         if ($patch) $patch['updated_at'] = now();
