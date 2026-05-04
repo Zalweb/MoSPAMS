@@ -61,8 +61,8 @@ class ShopBrandingController extends Controller
                 'shopId' => (string) $shop->shop_id,
                 'shopName' => $shop->shop_name,
                 'shopDescription' => $shop->shop_description ?? '',
-                'contactEmail' => $shop->contact_email ?? '',
-                'contactPhone' => $shop->contact_phone ?? '',
+                'contactEmail' => $user->email ?? $user->username, // Get from logged-in user
+                'contactPhone' => $shop->contact_phone ?? $shop->phone ?? '', // Try both columns
                 'address' => $shop->address ?? '',
                 'subdomain' => $shop->subdomain,
                 'customDomain' => $shop->custom_domain,
@@ -86,7 +86,7 @@ class ShopBrandingController extends Controller
         $data = $request->validate([
             'shopName' => ['sometimes', 'string', 'max:100'],
             'shopDescription' => ['sometimes', 'nullable', 'string', 'max:500'],
-            'contactEmail' => ['sometimes', 'nullable', 'email', 'max:100'],
+            'contactEmail' => ['sometimes', 'nullable', 'email', 'max:100'], // Ignored, comes from user
             'contactPhone' => ['sometimes', 'nullable', 'string', 'max:20'],
             'address' => ['sometimes', 'nullable', 'string', 'max:255'],
             'primaryColor' => ['sometimes', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
@@ -104,12 +104,10 @@ class ShopBrandingController extends Controller
             $update['shop_description'] = $data['shopDescription'];
         }
         
-        if (array_key_exists('contactEmail', $data)) {
-            $update['contact_email'] = $data['contactEmail'];
-        }
-        
+        // Save phone to both contact_phone and phone for compatibility
         if (array_key_exists('contactPhone', $data)) {
             $update['contact_phone'] = $data['contactPhone'];
+            $update['phone'] = $data['contactPhone'];
         }
         
         if (array_key_exists('address', $data)) {
