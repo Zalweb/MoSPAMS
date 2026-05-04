@@ -69,7 +69,7 @@ const NAV_SECTIONS = [
   {
     title: 'PLATFORM SETTINGS',
     items: [
-      { to: '/superadmin/settings', label: 'Subscription Plans Config', icon: Settings },
+      { to: '/superadmin/settings', label: 'Platform Settings', icon: Settings },
       { to: '/superadmin/settings/maintenance', label: 'System Maintenance', icon: Wrench },
       { to: '/superadmin/settings/api', label: 'API Keys', icon: Terminal },
       { to: '/superadmin/settings/email', label: 'Email Templates', icon: Mail },
@@ -95,7 +95,7 @@ export default function SuperAdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-slate-300 font-sans selection:bg-teal-500/30 flex">
+    <div className="min-h-screen bg-black text-zinc-300 font-sans selection:bg-zinc-700 flex">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <button
@@ -107,19 +107,19 @@ export default function SuperAdminLayout() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 z-50 h-screen bg-[#111111] border-r border-white/5 flex flex-col w-[260px] shrink-0 transition-transform duration-300 ${
+        className={`fixed lg:sticky top-0 left-0 z-50 h-screen bg-zinc-950 border-r border-zinc-800 flex flex-col w-[260px] shrink-0 transition-transform duration-300 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
-        <div className="flex items-center gap-3 px-6 h-[70px] border-b border-white/5 shrink-0">
-          <div className="w-8 h-8 rounded-xl bg-teal-500/20 text-teal-400 border border-teal-500/30 flex items-center justify-center text-sm font-bold shadow-[0_0_15px_rgba(20,184,166,0.2)]">
+        <div className="flex items-center gap-3 px-6 h-[70px] border-b border-zinc-800 shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-zinc-800 text-white border border-zinc-700 flex items-center justify-center text-sm font-bold">
             SA
           </div>
           <div>
             <span className="text-[15px] font-bold text-white tracking-tight leading-none block">MoSPAMS</span>
-            <span className="block text-[10px] text-teal-500 font-semibold tracking-wider leading-none mt-1">PLATFORM</span>
+            <span className="block text-[10px] text-zinc-400 font-semibold tracking-wider leading-none mt-1">PLATFORM</span>
           </div>
-          <button className="ml-auto lg:hidden p-1.5 text-slate-400 hover:text-white" onClick={() => setSidebarOpen(false)}>
+          <button className="ml-auto lg:hidden p-1.5 text-zinc-400 hover:text-white" onClick={() => setSidebarOpen(false)}>
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -127,40 +127,46 @@ export default function SuperAdminLayout() {
         <nav className="flex-1 px-4 py-6 space-y-6 overflow-y-auto custom-scrollbar">
           {NAV_SECTIONS.map((section, idx) => (
             <div key={idx}>
-              <h3 className="px-3 text-[10px] font-bold text-slate-500 tracking-wider mb-2 uppercase">{section.title}</h3>
+              <h3 className="px-3 text-[10px] font-bold text-zinc-500 tracking-wider mb-2 uppercase">{section.title}</h3>
               <div className="space-y-1">
-                {section.items.map((item) => (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    onClick={() => setSidebarOpen(false)}
-                    className={({ isActive }) =>
-                      `w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 group ${
-                        isActive || (item.to === '/superadmin/analytics' && location.pathname === '/superadmin')
-                          ? 'bg-teal-500/10 text-teal-400 shadow-[inset_2px_0_0_0_rgba(20,184,166,1)]'
-                          : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
-                      }`
-                    }
-                  >
-                    <item.icon 
-                      className={`w-[16px] h-[16px] transition-colors ${location.pathname.startsWith(item.to) || (item.to === '/superadmin/analytics' && location.pathname === '/superadmin') ? 'text-teal-400' : 'text-slate-500 group-hover:text-slate-300'}`} 
-                      strokeWidth={1.75} 
-                    />
-                    <span>{item.label}</span>
-                  </NavLink>
-                ))}
+                {section.items.map((item) => {
+                  const isExactMatch = location.pathname === item.to;
+                  const isChildRoute = location.pathname.startsWith(item.to + '/') && item.to !== '/superadmin/shops' && item.to !== '/superadmin/settings';
+                  const isActive = isExactMatch || isChildRoute || (item.to === '/superadmin/analytics' && location.pathname === '/superadmin');
+                  
+                  return (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      onClick={() => setSidebarOpen(false)}
+                      className={() =>
+                        `w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 group ${
+                          isActive
+                            ? 'bg-zinc-800 text-white border-l-2 border-white'
+                            : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
+                        }`
+                      }
+                    >
+                      <item.icon 
+                        className={`w-[16px] h-[16px] transition-colors ${isActive ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'}`} 
+                        strokeWidth={1.75} 
+                      />
+                      <span>{item.label}</span>
+                    </NavLink>
+                  );
+                })}
               </div>
             </div>
           ))}
         </nav>
         
-        <div className="p-4 border-t border-white/5 shrink-0">
+        <div className="p-4 border-t border-zinc-800 shrink-0">
            <button
               onClick={() => {
                 logout();
                 navigate('/', { replace: true });
               }}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-[13px] font-medium text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-[13px] font-medium text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
             >
               <LogOut className="w-[16px] h-[16px]" />
               <span>Sign Out</span>
@@ -171,47 +177,45 @@ export default function SuperAdminLayout() {
       {/* Main Content */}
       <main className="flex-1 min-w-0 min-h-screen flex flex-col">
         {/* Top Navbar */}
-        <header className="flex items-center gap-4 px-6 h-[70px] bg-[#0A0A0A]/80 backdrop-blur-md border-b border-white/5 sticky top-0 z-30 shrink-0">
-          <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-1.5 -ml-2 rounded-lg hover:bg-white/5 text-slate-400">
+        <header className="flex items-center gap-4 px-6 h-[70px] bg-black/80 backdrop-blur-md border-b border-zinc-800 sticky top-0 z-30 shrink-0">
+          <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-1.5 -ml-2 rounded-lg hover:bg-zinc-900 text-zinc-400">
             <Menu className="w-5 h-5" />
           </button>
           
           <div className="flex-1 max-w-md hidden sm:block">
             <div className="relative group">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-teal-500 transition-colors" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-white transition-colors" />
               <input 
                 type="text" 
                 placeholder="Search shops, users, or transactions..." 
-                className="w-full bg-[#111111] border border-white/10 rounded-full pl-9 pr-4 py-2 text-[13px] text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/50 transition-all"
+                className="w-full bg-zinc-950 border border-zinc-800 rounded-full pl-9 pr-4 py-2 text-[13px] text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-700 focus:ring-1 focus:ring-zinc-700 transition-all"
               />
             </div>
           </div>
 
           <div className="ml-auto flex items-center gap-4 lg:gap-6">
-            <button className="relative p-2 rounded-full hover:bg-white/5 text-slate-400 transition-colors">
+            <button className="relative p-2 rounded-full hover:bg-zinc-900 text-zinc-400 transition-colors">
               <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.8)]"></span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-white"></span>
             </button>
             
-            <div className="w-px h-6 bg-white/10 hidden sm:block"></div>
+            <div className="w-px h-6 bg-zinc-800 hidden sm:block"></div>
 
             <div className="flex items-center gap-3 cursor-pointer group">
               <div className="hidden sm:block text-right">
-                <p className="text-[13px] font-semibold text-slate-200 leading-none group-hover:text-white transition-colors">{user?.name}</p>
+                <p className="text-[13px] font-semibold text-zinc-200 leading-none group-hover:text-white transition-colors">{user?.name}</p>
                 <div className="flex items-center justify-end gap-1.5 mt-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.6)]"></span>
-                  <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wider leading-none">SuperAdmin</p>
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                  <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider leading-none">SuperAdmin</p>
                 </div>
               </div>
               <div className="relative">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-teal-500 to-emerald-400 p-[2px]">
-                  <div className="w-full h-full rounded-full bg-[#111111] flex items-center justify-center overflow-hidden border border-black">
+                <div className="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center overflow-hidden">
                      {/* Fallback avatar if no image */}
                      <UserAvatarInitials name={user?.name ?? 'S A'} />
-                  </div>
                 </div>
               </div>
-              <ChevronDown className="w-4 h-4 text-slate-500 group-hover:text-slate-300 hidden sm:block transition-colors" />
+              <ChevronDown className="w-4 h-4 text-zinc-500 group-hover:text-zinc-300 hidden sm:block transition-colors" />
             </div>
           </div>
         </header>
@@ -233,7 +237,7 @@ export default function SuperAdminLayout() {
           border-radius: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.2);
+          background: rgba(255, 255, 255, 0.15);
         }
       `}</style>
     </div>

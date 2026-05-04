@@ -101,11 +101,21 @@ export function TenantBrandingProvider({ children }: { children: React.ReactNode
         if (!response.ok) {
           const payload = await response.json().catch(() => ({}));
           if (!active) return;
+          
+          let errorMessage = 'Tenant bootstrap failed';
+          if (typeof payload?.message === 'string') {
+            errorMessage = payload.message;
+          } else if (response.status === 404) {
+            errorMessage = 'Shop not found. Please check the URL or contact support.';
+          } else {
+            errorMessage = `Tenant bootstrap failed (HTTP ${response.status})`;
+          }
+          
           setState({
             loading: false,
             ready: false,
             statusCode: response.status,
-            error: typeof payload?.message === 'string' ? payload.message : `Tenant bootstrap failed (${response.status})`,
+            error: errorMessage,
             branding: null,
           });
           setTenantBootstrapReady(false);

@@ -10,7 +10,7 @@ export default defineConfig({
   server: {
     port: 5173,
     host: '0.0.0.0',
-    allowedHosts: ['.ngrok-free.dev', '.ngrok.dev', '.ngrok.io', '.mospams.local'],
+    allowedHosts: ['.ngrok-free.dev', '.ngrok.dev', '.ngrok.io', '.mospams.local', '.mospams.shop', 'localhost'],
   },
   resolve: {
     alias: [

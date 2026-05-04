@@ -28,7 +28,10 @@ class ShopBrandingController extends Controller
         $shop = $this->tenantManager->current() ?? $request->attributes->get('shop');
 
         if (!$shop) {
-            return response()->json(['error' => 'Shop not found'], 404);
+            return response()->json([
+                'error' => 'Shop not found',
+                'message' => 'This domain is not associated with any shop. Please check the URL or contact support.',
+            ], 404);
         }
 
         return response()->json([

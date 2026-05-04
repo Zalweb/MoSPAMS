@@ -14,6 +14,8 @@ import {
 } from '@/features/superadmin/lib/api';
 import type { ShopSubscription, SubscriptionPayment, SubscriptionPlan, SuperAdminShop } from '@/shared/types';
 
+const CURRENCY_PREFIX = '\u20b1';
+
 export default function SuperAdminSubscriptionsPage() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [shops, setShops] = useState<SuperAdminShop[]>([]);
@@ -121,109 +123,109 @@ export default function SuperAdminSubscriptionsPage() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-6">
-        <section className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl p-4">
+        <section className="bg-zinc-950 rounded-2xl border border-zinc-800 p-4">
           <h3 className="text-[13px] font-semibold text-white mb-3">Create Plan</h3>
           <div className="space-y-2.5">
-            <Input placeholder="Plan code (e.g. BASIC_PLUS)" value={planForm.planCode} onChange={(e) => setPlanForm((prev) => ({ ...prev, planCode: e.target.value }))} className="border-zinc-700 bg-zinc-800 text-zinc-200 text-[12px] placeholder:text-zinc-600" />
-            <Input placeholder="Plan name" value={planForm.planName} onChange={(e) => setPlanForm((prev) => ({ ...prev, planName: e.target.value }))} className="border-zinc-700 bg-zinc-800 text-zinc-200 text-[12px] placeholder:text-zinc-600" />
-            <Input type="number" placeholder="Monthly price" value={planForm.monthlyPrice} onChange={(e) => setPlanForm((prev) => ({ ...prev, monthlyPrice: e.target.value }))} className="border-zinc-700 bg-zinc-800 text-zinc-200 text-[12px] placeholder:text-zinc-600" />
-            <Button className="w-full h-9 text-[12px] bg-white hover:bg-zinc-200 text-zinc-900" onClick={() => void onCreatePlan()}>Save Plan</Button>
+            <Input placeholder="Plan code (e.g. BASIC_PLUS)" value={planForm.planCode} onChange={(e) => setPlanForm((prev) => ({ ...prev, planCode: e.target.value }))} className="bg-zinc-900 border-zinc-700 text-zinc-200 placeholder:text-zinc-500" />
+            <Input placeholder="Plan name" value={planForm.planName} onChange={(e) => setPlanForm((prev) => ({ ...prev, planName: e.target.value }))} className="bg-zinc-900 border-zinc-700 text-zinc-200 placeholder:text-zinc-500" />
+            <Input type="number" placeholder="Monthly price" value={planForm.monthlyPrice} onChange={(e) => setPlanForm((prev) => ({ ...prev, monthlyPrice: e.target.value }))} className="bg-zinc-900 border-zinc-700 text-zinc-200 placeholder:text-zinc-500" />
+            <Button className="w-full h-9 text-[12px] bg-white hover:bg-zinc-200 text-black" onClick={() => void onCreatePlan()}>Save Plan</Button>
           </div>
         </section>
 
-        <section className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl p-4">
+        <section className="bg-zinc-950 rounded-2xl border border-zinc-800 p-4">
           <h3 className="text-[13px] font-semibold text-white mb-3">Assign Subscription</h3>
           <div className="space-y-2.5">
-            <select className="w-full h-9 rounded-xl border border-zinc-700 px-3 text-[12px] bg-zinc-800 text-zinc-200" value={subscriptionForm.shopId} onChange={(e) => setSubscriptionForm((prev) => ({ ...prev, shopId: e.target.value }))}>
+            <select className="w-full h-9 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-200 px-3 text-[12px]" value={subscriptionForm.shopId} onChange={(e) => setSubscriptionForm((prev) => ({ ...prev, shopId: e.target.value }))}>
               <option value="">Select shop</option>
               {shops.map((shop) => (
                 <option key={shop.shopId} value={shop.shopId}>{shop.shopName}</option>
               ))}
             </select>
-            <select className="w-full h-9 rounded-xl border border-zinc-700 px-3 text-[12px] bg-zinc-800 text-zinc-200" value={subscriptionForm.planId} onChange={(e) => setSubscriptionForm((prev) => ({ ...prev, planId: e.target.value }))}>
+            <select className="w-full h-9 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-200 px-3 text-[12px]" value={subscriptionForm.planId} onChange={(e) => setSubscriptionForm((prev) => ({ ...prev, planId: e.target.value }))}>
               <option value="">Select plan</option>
               {plans.map((plan) => (
                 <option key={plan.planId} value={plan.planId}>{plan.planName}</option>
               ))}
             </select>
-            <select className="w-full h-9 rounded-xl border border-zinc-700 px-3 text-[12px] bg-zinc-800 text-zinc-200" value={subscriptionForm.status} onChange={(e) => setSubscriptionForm((prev) => ({ ...prev, status: e.target.value as typeof prev.status }))}>
+            <select className="w-full h-9 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-200 px-3 text-[12px]" value={subscriptionForm.status} onChange={(e) => setSubscriptionForm((prev) => ({ ...prev, status: e.target.value as typeof prev.status }))}>
               <option value="PENDING">PENDING</option>
               <option value="ACTIVE">ACTIVE</option>
               <option value="EXPIRED">EXPIRED</option>
               <option value="CANCELLED">CANCELLED</option>
             </select>
-            <Input type="date" value={subscriptionForm.endsAt} onChange={(e) => setSubscriptionForm((prev) => ({ ...prev, endsAt: e.target.value }))} className="border-zinc-700 bg-zinc-800 text-zinc-200 text-[12px]" />
-            <Button className="w-full h-9 text-[12px] bg-white hover:bg-zinc-200 text-zinc-900" onClick={() => void onAssignSubscription()}>Assign</Button>
+            <Input type="date" value={subscriptionForm.endsAt} onChange={(e) => setSubscriptionForm((prev) => ({ ...prev, endsAt: e.target.value }))} className="bg-zinc-900 border-zinc-700 text-zinc-200" />
+            <Button className="w-full h-9 text-[12px] bg-white hover:bg-zinc-200 text-black" onClick={() => void onAssignSubscription()}>Assign</Button>
           </div>
         </section>
 
-        <section className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl p-4">
+        <section className="bg-zinc-950 rounded-2xl border border-zinc-800 p-4">
           <h3 className="text-[13px] font-semibold text-white mb-3">Record Payment</h3>
           <div className="space-y-2.5">
-            <select className="w-full h-9 rounded-xl border border-zinc-700 px-3 text-[12px] bg-zinc-800 text-zinc-200" value={paymentForm.shopSubscriptionId} onChange={(e) => setPaymentForm((prev) => ({ ...prev, shopSubscriptionId: e.target.value }))}>
+            <select className="w-full h-9 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-200 px-3 text-[12px]" value={paymentForm.shopSubscriptionId} onChange={(e) => setPaymentForm((prev) => ({ ...prev, shopSubscriptionId: e.target.value }))}>
               <option value="">Select subscription</option>
               {subscriptions.map((subscription) => (
-                <option key={subscription.shopSubscriptionId} value={subscription.shopSubscriptionId}>{subscription.shopName} — {subscription.planName}</option>
+                <option key={subscription.shopSubscriptionId} value={subscription.shopSubscriptionId}>{subscription.shopName} | {subscription.planName}</option>
               ))}
             </select>
-            <Input type="number" placeholder="Amount" value={paymentForm.amount} onChange={(e) => setPaymentForm((prev) => ({ ...prev, amount: e.target.value }))} className="border-zinc-700 bg-zinc-800 text-zinc-200 text-[12px] placeholder:text-zinc-600" />
-            <select className="w-full h-9 rounded-xl border border-zinc-700 px-3 text-[12px] bg-zinc-800 text-zinc-200" value={paymentForm.paymentStatus} onChange={(e) => setPaymentForm((prev) => ({ ...prev, paymentStatus: e.target.value as typeof prev.paymentStatus }))}>
+            <Input type="number" placeholder="Amount" value={paymentForm.amount} onChange={(e) => setPaymentForm((prev) => ({ ...prev, amount: e.target.value }))} className="bg-zinc-900 border-zinc-700 text-zinc-200 placeholder:text-zinc-500" />
+            <select className="w-full h-9 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-200 px-3 text-[12px]" value={paymentForm.paymentStatus} onChange={(e) => setPaymentForm((prev) => ({ ...prev, paymentStatus: e.target.value as typeof prev.paymentStatus }))}>
               <option value="PAID">PAID</option>
               <option value="PENDING">PENDING</option>
               <option value="FAILED">FAILED</option>
               <option value="REFUNDED">REFUNDED</option>
             </select>
-            <Input placeholder="Payment method" value={paymentForm.paymentMethod} onChange={(e) => setPaymentForm((prev) => ({ ...prev, paymentMethod: e.target.value }))} className="border-zinc-700 bg-zinc-800 text-zinc-200 text-[12px] placeholder:text-zinc-600" />
-            <Input type="date" value={paymentForm.dueAt} onChange={(e) => setPaymentForm((prev) => ({ ...prev, dueAt: e.target.value }))} className="border-zinc-700 bg-zinc-800 text-zinc-200 text-[12px]" />
-            <Button className="w-full h-9 text-[12px] bg-white hover:bg-zinc-200 text-zinc-900" onClick={() => void onRecordPayment()}>Record</Button>
+            <Input placeholder="Payment method" value={paymentForm.paymentMethod} onChange={(e) => setPaymentForm((prev) => ({ ...prev, paymentMethod: e.target.value }))} className="bg-zinc-900 border-zinc-700 text-zinc-200 placeholder:text-zinc-500" />
+            <Input type="date" value={paymentForm.dueAt} onChange={(e) => setPaymentForm((prev) => ({ ...prev, dueAt: e.target.value }))} className="bg-zinc-900 border-zinc-700 text-zinc-200" />
+            <Button className="w-full h-9 text-[12px] bg-white hover:bg-zinc-200 text-black" onClick={() => void onRecordPayment()}>Record</Button>
           </div>
         </section>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <section className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl p-4 overflow-x-auto">
+        <section className="bg-zinc-950 rounded-2xl border border-zinc-800 p-4 overflow-x-auto">
           <h3 className="text-[13px] font-semibold text-white mb-3">Plans</h3>
-          <table className="w-full text-[12px] min-w-[360px]">
+          <table className="w-full text-[12px] text-zinc-300 min-w-[360px]">
             <thead>
               <tr className="border-b border-zinc-800">
-                <th className="text-left py-2 text-zinc-500 text-[10px] font-semibold uppercase">Code</th>
-                <th className="text-left py-2 text-zinc-500 text-[10px] font-semibold uppercase">Name</th>
-                <th className="text-left py-2 text-zinc-500 text-[10px] font-semibold uppercase">Monthly</th>
+                <th className="text-left py-2 text-zinc-400">Code</th>
+                <th className="text-left py-2 text-zinc-400">Name</th>
+                <th className="text-left py-2 text-zinc-400">Monthly</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800">
               {plans.map((plan) => (
                 <tr key={plan.planId}>
-                  <td className="py-2 text-zinc-300">{plan.planCode}</td>
-                  <td className="py-2 text-zinc-300">{plan.planName}</td>
-                  <td className="py-2 text-zinc-300">₱{plan.monthlyPrice.toLocaleString()}</td>
+                  <td className="py-2">{plan.planCode}</td>
+                  <td className="py-2">{plan.planName}</td>
+                  <td className="py-2">{CURRENCY_PREFIX}{plan.monthlyPrice.toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </section>
 
-        <section className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl p-4 overflow-x-auto">
+        <section className="bg-zinc-950 rounded-2xl border border-zinc-800 p-4 overflow-x-auto">
           <h3 className="text-[13px] font-semibold text-white mb-3">Expiring in 7 Days</h3>
-          <table className="w-full text-[12px] min-w-[360px]">
+          <table className="w-full text-[12px] text-zinc-300 min-w-[360px]">
             <thead>
               <tr className="border-b border-zinc-800">
-                <th className="text-left py-2 text-zinc-500 text-[10px] font-semibold uppercase">Shop</th>
-                <th className="text-left py-2 text-zinc-500 text-[10px] font-semibold uppercase">Plan</th>
-                <th className="text-left py-2 text-zinc-500 text-[10px] font-semibold uppercase">Days Left</th>
+                <th className="text-left py-2 text-zinc-400">Shop</th>
+                <th className="text-left py-2 text-zinc-400">Plan</th>
+                <th className="text-left py-2 text-zinc-400">Days Left</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800">
               {expiring.length === 0 ? (
                 <tr>
-                  <td className="py-3 text-zinc-500" colSpan={3}>No expiring subscriptions.</td>
+                  <td className="py-3 text-zinc-400" colSpan={3}>No expiring subscriptions.</td>
                 </tr>
               ) : (
                 expiring.map((item) => (
                   <tr key={item.shopSubscriptionId}>
-                    <td className="py-2 text-zinc-300">{item.shopName}</td>
-                    <td className="py-2 text-zinc-300">{item.planName}</td>
-                    <td className="py-2 text-zinc-300">{item.daysRemaining}</td>
+                    <td className="py-2">{item.shopName}</td>
+                    <td className="py-2">{item.planName}</td>
+                    <td className="py-2">{item.daysRemaining}</td>
                   </tr>
                 ))
               )}
@@ -233,48 +235,48 @@ export default function SuperAdminSubscriptionsPage() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4">
-        <section className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl p-4 overflow-x-auto">
+        <section className="bg-zinc-950 rounded-2xl border border-zinc-800 p-4 overflow-x-auto">
           <h3 className="text-[13px] font-semibold text-white mb-3">Subscriptions</h3>
-          <table className="w-full text-[12px] min-w-[480px]">
+          <table className="w-full text-[12px] text-zinc-300 min-w-[480px]">
             <thead>
               <tr className="border-b border-zinc-800">
-                <th className="text-left py-2 text-zinc-500 text-[10px] font-semibold uppercase">Shop</th>
-                <th className="text-left py-2 text-zinc-500 text-[10px] font-semibold uppercase">Plan</th>
-                <th className="text-left py-2 text-zinc-500 text-[10px] font-semibold uppercase">Status</th>
-                <th className="text-left py-2 text-zinc-500 text-[10px] font-semibold uppercase">Ends At</th>
+                <th className="text-left py-2 text-zinc-400">Shop</th>
+                <th className="text-left py-2 text-zinc-400">Plan</th>
+                <th className="text-left py-2 text-zinc-400">Status</th>
+                <th className="text-left py-2 text-zinc-400">Ends At</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800">
               {subscriptions.map((subscription) => (
                 <tr key={subscription.shopSubscriptionId}>
-                  <td className="py-2 text-zinc-300">{subscription.shopName}</td>
-                  <td className="py-2 text-zinc-300">{subscription.planName}</td>
-                  <td className="py-2 text-zinc-300">{subscription.status}</td>
-                  <td className="py-2 text-zinc-300">{subscription.endsAt ? new Date(subscription.endsAt).toLocaleDateString() : '—'}</td>
+                  <td className="py-2">{subscription.shopName}</td>
+                  <td className="py-2">{subscription.planName}</td>
+                  <td className="py-2">{subscription.status}</td>
+                  <td className="py-2">{subscription.endsAt ? new Date(subscription.endsAt).toLocaleDateString() : 'N/A'}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </section>
 
-        <section className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl p-4 overflow-x-auto">
+        <section className="bg-zinc-950 rounded-2xl border border-zinc-800 p-4 overflow-x-auto">
           <h3 className="text-[13px] font-semibold text-white mb-3">Payment History</h3>
-          <table className="w-full text-[12px] min-w-[480px]">
+          <table className="w-full text-[12px] text-zinc-300 min-w-[480px]">
             <thead>
               <tr className="border-b border-zinc-800">
-                <th className="text-left py-2 text-zinc-500 text-[10px] font-semibold uppercase">Shop</th>
-                <th className="text-left py-2 text-zinc-500 text-[10px] font-semibold uppercase">Amount</th>
-                <th className="text-left py-2 text-zinc-500 text-[10px] font-semibold uppercase">Status</th>
-                <th className="text-left py-2 text-zinc-500 text-[10px] font-semibold uppercase">Date</th>
+                <th className="text-left py-2 text-zinc-400">Shop</th>
+                <th className="text-left py-2 text-zinc-400">Amount</th>
+                <th className="text-left py-2 text-zinc-400">Status</th>
+                <th className="text-left py-2 text-zinc-400">Date</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800">
               {payments.map((payment) => (
                 <tr key={payment.subscriptionPaymentId}>
-                  <td className="py-2 text-zinc-300">{payment.shopName}</td>
-                  <td className="py-2 text-zinc-300">₱{payment.amount.toLocaleString()}</td>
-                  <td className="py-2 text-zinc-300">{payment.paymentStatus}</td>
-                  <td className="py-2 text-zinc-300">{payment.createdAt ? new Date(payment.createdAt).toLocaleDateString() : '—'}</td>
+                  <td className="py-2">{payment.shopName}</td>
+                  <td className="py-2">{CURRENCY_PREFIX}{payment.amount.toLocaleString()}</td>
+                  <td className="py-2">{payment.paymentStatus}</td>
+                  <td className="py-2">{payment.createdAt ? new Date(payment.createdAt).toLocaleDateString() : 'N/A'}</td>
                 </tr>
               ))}
             </tbody>
@@ -284,3 +286,6 @@ export default function SuperAdminSubscriptionsPage() {
     </div>
   );
 }
+
+
+

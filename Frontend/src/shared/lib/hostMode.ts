@@ -31,6 +31,13 @@ export function detectHostMode(host: string): HostMode {
     return 'public';
   }
 
+  // localhost and loopback addresses have no subdomain context; treat them as
+  // the public/landing-page host so the landing page is the default entry point.
+  const normalizedHost = normalizeHost(host);
+  if (normalizedHost === 'localhost' || normalizedHost === '127.0.0.1') {
+    return 'public';
+  }
+
   return 'tenant';
 }
 

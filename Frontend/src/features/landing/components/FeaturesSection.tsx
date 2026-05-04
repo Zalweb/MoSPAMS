@@ -1,13 +1,4 @@
-import { motion } from 'framer-motion';
-import {
-  Activity,
-  BarChart3,
-  Package,
-  Receipt,
-  Shield,
-  Users,
-} from 'lucide-react';
-import { useScrollAnimation } from '@/shared/hooks/useScrollAnimation';
+import { Package, Wrench, Receipt, BarChart3, Users, ClipboardList, Zap } from 'lucide-react';
 
 const FEATURES = [
   {
@@ -19,7 +10,7 @@ const FEATURES = [
     tags: ['Stock Tracking', 'Barcodes', 'Alerts'],
   },
   {
-    icon: Activity,
+    icon: Wrench,
     title: 'Service Job Tracking',
     description:
       'Create service records, assign labor costs, and track service status from Pending to Ongoing to Completed.',
@@ -51,7 +42,7 @@ const FEATURES = [
     tags: ['Owner', 'Staff', 'Access Control'],
   },
   {
-    icon: Shield,
+    icon: ClipboardList,
     title: 'Activity Logs',
     description:
       'Track every user action for full accountability and a complete audit history.',
@@ -63,50 +54,43 @@ const FEATURES = [
 const colorMap: Record<string, { card: string; icon: string; tag: string; dot: string }> = {
   violet: {
     card: 'hover:border-zinc-700 hover:shadow-black/60',
-    icon: 'bg-violet-500/10 text-violet-400',
+    icon: 'bg-zinc-800 text-white',
     tag: 'bg-zinc-950 text-zinc-300 border-zinc-800',
-    dot: 'bg-violet-500',
+    dot: 'bg-zinc-500',
   },
   blue: {
     card: 'hover:border-zinc-700 hover:shadow-black/60',
-    icon: 'bg-blue-500/10 text-blue-400',
+    icon: 'bg-zinc-800 text-white',
     tag: 'bg-zinc-950 text-zinc-300 border-zinc-800',
-    dot: 'bg-blue-500',
+    dot: 'bg-zinc-500',
   },
   green: {
     card: 'hover:border-zinc-700 hover:shadow-black/60',
-    icon: 'bg-green-500/10 text-green-400',
+    icon: 'bg-zinc-800 text-white',
     tag: 'bg-zinc-950 text-zinc-300 border-zinc-800',
-    dot: 'bg-green-500',
+    dot: 'bg-zinc-500',
   },
   orange: {
     card: 'hover:border-zinc-700 hover:shadow-black/60',
-    icon: 'bg-orange-500/10 text-orange-400',
+    icon: 'bg-zinc-800 text-white',
     tag: 'bg-zinc-950 text-zinc-300 border-zinc-800',
-    dot: 'bg-orange-500',
+    dot: 'bg-zinc-500',
   },
   pink: {
     card: 'hover:border-zinc-700 hover:shadow-black/60',
-    icon: 'bg-pink-500/10 text-pink-400',
+    icon: 'bg-zinc-800 text-white',
     tag: 'bg-zinc-950 text-zinc-300 border-zinc-800',
-    dot: 'bg-pink-500',
+    dot: 'bg-zinc-500',
   },
   indigo: {
     card: 'hover:border-zinc-700 hover:shadow-black/60',
-    icon: 'bg-indigo-500/10 text-indigo-400',
+    icon: 'bg-zinc-800 text-white',
     tag: 'bg-zinc-950 text-zinc-300 border-zinc-800',
-    dot: 'bg-indigo-500',
+    dot: 'bg-zinc-500',
   },
 };
 
 export default function FeaturesSection() {
-  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation<HTMLDivElement>({
-    threshold: 0.2,
-  });
-  const { ref: gridRef, isVisible: gridVisible } = useScrollAnimation<HTMLDivElement>({
-    threshold: 0.1,
-  });
-
   return (
     <section id="features" className="relative py-24 bg-black">
       {/* Subtle top gradient */}
@@ -114,70 +98,38 @@ export default function FeaturesSection() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div
-          ref={headerRef}
-          className={`text-center max-w-2xl mx-auto mb-16 transition-all duration-700 ${
-            headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
-        >
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={headerVisible ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 0.1 }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-semibold mb-4"
-          >
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-            >
-              <Activity className="w-3.5 h-3.5" />
-            </motion.div>
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-semibold mb-4">
+            <Zap className="w-3.5 h-3.5" strokeWidth={2} />
             Core Features
-          </motion.div>
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            animate={headerVisible ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 0.2 }}
-            className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight"
-          >
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">
             Powerful features built for{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-300 to-zinc-500">
               motorcycle shop management
             </span>
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={headerVisible ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 0.3 }}
-            className="text-zinc-400 text-lg leading-relaxed"
-          >
+          </h2>
+          <p className="text-zinc-400 text-lg leading-relaxed">
             Everything your shop needs, from tracking inventory to completing service jobs and
             processing payments.
-          </motion.p>
+          </p>
         </div>
 
         {/* Feature Cards Grid */}
-        <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {FEATURES.map((feature, index) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {FEATURES.map((feature) => {
             const c = colorMap[feature.color];
-            const Icon = feature.icon;
             return (
-              <motion.div
+              <div
                 key={feature.title}
-                initial={{ opacity: 0, y: 30 }}
-                animate={gridVisible ? { opacity: 1, y: 0 } : {}}
-                transition={{ delay: index * 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                className={`group relative bg-zinc-900 rounded-2xl border border-zinc-800 p-6 shadow-sm hover:shadow-lg ${c.card} hover:-translate-y-1 cursor-default`}
-                whileHover={{ y: -4 }}
+                className={`group relative bg-zinc-900 rounded-2xl border border-zinc-800 p-6 shadow-sm hover:shadow-lg transition-all duration-300 ${c.card} hover:-translate-y-1 cursor-default`}
               >
                 {/* Icon */}
-                <motion.div
-                  className={`w-11 h-11 rounded-xl flex items-center justify-center mb-4 ${c.icon}`}
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  transition={{ type: 'spring', stiffness: 400 }}
+                <div
+                  className={`w-11 h-11 rounded-xl flex items-center justify-center mb-4 ${c.icon} transition-transform group-hover:scale-110 duration-200`}
                 >
-                  <Icon className="w-5 h-5" />
-                </motion.div>
+                  <feature.icon className="w-5 h-5" strokeWidth={2} />
+                </div>
 
                 {/* Content */}
                 <h3 className="text-base font-semibold text-white mb-2">{feature.title}</h3>
@@ -197,16 +149,12 @@ export default function FeaturesSection() {
                 </div>
 
                 {/* Hover arrow */}
-                <motion.div
-                  className="absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  initial={{ opacity: 0, x: -5 }}
-                  whileHover={{ opacity: 1, x: 0 }}
-                >
+                <div className="absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   <svg className="w-4 h-4 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17L17 7M17 7H7M17 7v10" />
                   </svg>
-                </motion.div>
-              </motion.div>
+                </div>
+              </div>
             );
           })}
         </div>

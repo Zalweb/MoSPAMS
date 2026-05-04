@@ -33,9 +33,14 @@ class ResolveTenantContext
         $effectiveHost = $requestHost;
         $effectiveMode = $requestMode;
 
-        if (in_array($requestMode, [PlatformHostResolver::MODE_API, PlatformHostResolver::MODE_PUBLIC], true) && $contextHost) {
-            $effectiveHost = $contextHost;
-            $effectiveMode = $this->platformHosts->modeForHost($contextHost);
+        if (in_array($requestMode, [PlatformHostResolver::MODE_API, PlatformHostResolver::MODE_PUBLIC, PlatformHostResolver::MODE_LOCAL], true) && $contextHost) {
+            $contextMode = $this->platformHosts->modeForHost($contextHost);
+            // Only promote the effective mode if the context host resolves to a recognised mode;
+            // this prevents a plain "localhost" X-Tenant-Host from overriding a real subdomain.
+            if ($contextMode !== PlatformHostResolver::MODE_LOCAL) {
+                $effectiveHost = $contextHost;
+                $effectiveMode = $contextMode;
+            }
         }
 
         $request->attributes->set('request_host', $requestHost);
@@ -74,7 +79,7 @@ class ResolveTenantContext
             return $this->jsonError('Shop not found', 'This domain is not associated with any shop.', 404);
         }
 
-        if (! $this->isShopActive($shop)) {
+        if (! $this->isShopActive($shop) && ! $this->isShopStatusCheckExempt($request)) {
             $this->audit->write('tenant_inactive', 'notice', ['host' => $effectiveHost, 'shopId' => $shop->shop_id]);
 
             return $this->jsonError('Shop unavailable', 'This shop is currently not accepting requests.', 503);
@@ -95,6 +100,14 @@ class ResolveTenantContext
             || $request->is('api/webhooks/*')
             || $request->is('api/stats')
             || $request->is('api/shop-registration');
+        // NOTE: api/shop/info is intentionally NOT exempt so the shop can be resolved
+        // and passed to ShopBrandingController. The shop-active check is skipped separately.
+    }
+
+    // Routes that bypass the shop-active (503) guard but still get shop resolution.
+    private function isShopStatusCheckExempt(Request $request): bool
+    {
+        return $request->is('api/shop/info');
     }
 
     private function requiresTenantContextHeader(Request $request): bool
@@ -120,10 +133,10 @@ class ResolveTenantContext
 
             $tokenUser = $this->resolveUserFromRequest($request);
             if ($tokenUser?->shop_id_fk) {
-                return Shop::query()->find((int) $tokenUser->shop_id_fk);
+                return Shop::query()->with('status')->find((int) $tokenUser->shop_id_fk);
             }
 
-            return Shop::query()->where('subdomain', (string) config('tenancy.default_local_subdomain', 'default'))->first();
+            return Shop::query()->with('status')->where('subdomain', (string) config('tenancy.default_local_subdomain', 'default'))->first();
         }
 
         $customDomain = $this->shopByCustomDomain($host);
@@ -136,7 +149,7 @@ class ResolveTenantContext
             return null;
         }
 
-        return Shop::query()->where('subdomain', $subdomain)->first();
+        return Shop::query()->with('status')->where('subdomain', $subdomain)->first();
     }
 
     private function resolveUserFromRequest(Request $request): ?User
@@ -164,7 +177,7 @@ class ResolveTenantContext
 
     private function shopByCustomDomain(string $host): ?Shop
     {
-        $query = Shop::query()->where('custom_domain', $host);
+        $query = Shop::query()->with('status')->where('custom_domain', $host);
 
         if (Schema::hasColumn('shops', 'domain_status')) {
             $query->whereIn(DB::raw('UPPER(domain_status)'), ['VERIFIED', 'ACTIVE']);
