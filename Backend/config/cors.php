@@ -13,7 +13,7 @@ return [
         'http://mospams.local:5173',
         'http://motoworks.mospams.local:5173',
         'http://speedzone.mospams.local:5173',
-        'http://dc-motorparts-and-accessories.mospams.shop:5173',
+        'http://dc-motorparts-and-accessories.mospams.local:5173',
         'http://admin.mospams.local:5173',
         'http://admin.mospams.shop:5173',
         $frontendUrl,

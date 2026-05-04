@@ -1,5 +1,11 @@
 export type Role = 'SuperAdmin' | 'Owner' | 'Staff' | 'Mechanic' | 'Customer' | 'Admin';
 
+export interface Category {
+  id: string;
+  name: string;
+  description?: string;
+}
+
 export interface Part {
   id: string;
   name: string;

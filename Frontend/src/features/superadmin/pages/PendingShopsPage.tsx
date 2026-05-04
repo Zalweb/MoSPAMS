@@ -34,7 +34,19 @@ export default function PendingShopsPage() {
     setActionLoading(true);
     try {
       const result = await approveShopRegistration(shopId);
-      toast.success(`Shop approved! Owner credentials sent. Trial ends: ${result.data.trialEndsAt}`);
+      
+      const trialLabel = result.data.trialEndsAt
+        ? ` Trial ends: ${new Date(result.data.trialEndsAt).toLocaleDateString()}.`
+        : '';
+
+      if (result.message === 'Shop already approved.') {
+        toast.info(`Shop was already approved.${trialLabel}`);
+      } else if (result.data.temporaryPassword) {
+        toast.success(`Shop approved! Temporary password: ${result.data.temporaryPassword}.${trialLabel}`);
+      } else {
+        toast.success(`Shop approved! Owner account already exists.${trialLabel}`);
+      }
+      
       await loadPendingShops();
       setSelectedShop(null);
     } catch (error) {

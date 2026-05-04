@@ -9,7 +9,7 @@ export default function PricingSection() {
       name: 'Basic',
       price: '₱499',
       period: '/month',
-      description: 'Perfect for small shops getting started',
+      description: 'Perfect for small shops',
       features: [
         'Up to 500 parts inventory',
         'Up to 50 service jobs/month',
@@ -24,7 +24,7 @@ export default function PricingSection() {
       name: 'Premium',
       price: '₱999',
       period: '/month',
-      description: 'Best for growing motorcycle shops',
+      description: 'Best for growing shops',
       features: [
         'Unlimited parts inventory',
         'Unlimited service jobs',
@@ -41,7 +41,7 @@ export default function PricingSection() {
       name: 'Enterprise',
       price: '₱1,999',
       period: '/month',
-      description: 'For multi-branch operations',
+      description: 'Multi-branch operations',
       features: [
         'Everything in Premium',
         'Unlimited staff accounts',
@@ -57,81 +57,99 @@ export default function PricingSection() {
   ];
 
   return (
-    <section id="pricing" className="relative py-24 bg-transparent overflow-hidden">
+    <section id="pricing" className="relative py-32 overflow-hidden">
+      {/* Large background text */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+        <h2 className="text-[20rem] font-bold text-white/[0.02] select-none whitespace-nowrap">
+          Pricing
+        </h2>
+      </div>
+
+      {/* Decorative glow effects */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 right-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+      </div>
+
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-semibold mb-6">
-            <DollarSign className="w-3.5 h-3.5" strokeWidth={2} />
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/50 backdrop-blur-sm border border-zinc-800/50 text-zinc-300 text-sm font-medium mb-6">
+            <DollarSign className="w-4 h-4" strokeWidth={2} />
             Simple Pricing
           </div>
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6 tracking-tight leading-tight">
-            Choose the{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-300 to-zinc-500">
+          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4 tracking-tight">
+            Choose your{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 via-zinc-400 to-zinc-600">
               perfect plan
             </span>
-            {' '}for your shop
           </h2>
           <p className="text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto">
-            Start with a plan that fits your needs. Upgrade or downgrade anytime.
+            Flexible pricing for shops of all sizes. Start free, upgrade anytime.
           </p>
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {plans.map((plan) => (
             <div
               key={plan.name}
-              className={`relative rounded-2xl border p-8 transition-all duration-300 hover:scale-105 ${
+              className={`relative group rounded-3xl p-8 transition-all duration-300 ${
                 plan.popular
-                  ? 'bg-zinc-900 border-zinc-700 shadow-2xl'
-                  : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'
-              }`}
+                  ? 'bg-gradient-to-b from-zinc-800/80 to-zinc-900/80 border-2 border-zinc-700/50 shadow-2xl scale-105'
+                  : 'bg-zinc-900/40 border border-zinc-800/50 hover:border-zinc-700/50'
+              } backdrop-blur-xl`}
             >
-              {/* Popular Badge */}
-              {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <div className="px-4 py-1.5 rounded-full bg-white text-black text-xs font-bold shadow-lg">
-                    MOST POPULAR
-                  </div>
-                </div>
-              )}
-
-              {/* Plan Header */}
-              <div className="mb-6">
-                <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
-                <p className="text-sm text-zinc-400 mb-4">{plan.description}</p>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold text-white">{plan.price}</span>
-                  <span className="text-zinc-400 text-sm">{plan.period}</span>
-                </div>
+              {/* Glow effect on hover */}
+              <div className={`absolute inset-0 rounded-3xl transition-opacity duration-300 ${
+                plan.popular ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+              }`}>
+                <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent rounded-3xl" />
               </div>
 
-              {/* Features List */}
-              <ul className="space-y-3 mb-8">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-3">
-                    <div className="mt-0.5 flex-shrink-0">
-                      <Check className="w-5 h-5 text-zinc-400" />
-                    </div>
-                    <span className="text-sm text-zinc-300">{feature}</span>
-                  </li>
-                ))}
-              </ul>
+              {/* Content */}
+              <div className="relative">
+                {/* Plan Label */}
+                <div className="mb-6">
+                  <p className="text-sm text-zinc-500 mb-2">{plan.name} Plan</p>
+                  <div className="flex items-baseline gap-1 mb-2">
+                    <span className="text-5xl font-bold text-white">{plan.price}</span>
+                    <span className="text-zinc-500 text-lg">{plan.period}</span>
+                  </div>
+                  <p className="text-sm text-zinc-400">{plan.description}</p>
+                </div>
 
-              {/* CTA Button */}
-              <button
-                onClick={() => navigate('/register-shop')}
-                className={`w-full py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
-                  plan.popular
-                    ? 'bg-white text-black hover:bg-zinc-200'
-                    : 'bg-zinc-800 text-white hover:bg-zinc-700 border border-zinc-700'
-                }`}
-              >
-                Get Started
-              </button>
+                {/* Divider */}
+                <div className="h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent mb-6" />
+
+                {/* Features List */}
+                <ul className="space-y-4 mb-8">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-3">
+                      <div className="mt-0.5 flex-shrink-0">
+                        <div className="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center">
+                          <Check className="w-3 h-3 text-zinc-400" strokeWidth={3} />
+                        </div>
+                      </div>
+                      <span className="text-sm text-zinc-400 leading-relaxed">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* CTA Button */}
+                <button
+                  onClick={() => navigate('/register-shop')}
+                  className={`w-full py-3.5 rounded-2xl font-semibold text-sm transition-all duration-200 ${
+                    plan.popular
+                      ? 'bg-white text-black hover:bg-zinc-100 shadow-lg'
+                      : 'bg-zinc-800/50 text-white hover:bg-zinc-800 border border-zinc-700/50'
+                  }`}
+                >
+                  Get Started
+                </button>
+              </div>
             </div>
           ))}
         </div>

@@ -7,7 +7,6 @@ import {
   Home, Calendar, CreditCard, Users, ScrollText, Settings, Bike,
 } from 'lucide-react';
 import { useAuth } from '@/features/auth/context/AuthContext';
-import { useData } from '@/shared/contexts/DataContext';
 import { NAV_ACCESS } from '@/shared/lib/permissions';
 import { normalizeRole } from '@/shared/lib/roles';
 
@@ -31,14 +30,13 @@ const navItems: { label: string; to: string; icon: typeof LayoutDashboard; end?:
 
 export default function DashboardLayout() {
   const { user, logout } = useAuth();
-  const { parts } = useData();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [bellOpen, setBellOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
-  const lowStock = parts.filter(p => p.stock <= p.minStock);
+  const lowStock: { id: string; name: string; category: string; stock: number }[] = [];
   const role = normalizeRole(user?.role);
   const visibleNav = navItems.filter(item => role ? (NAV_ACCESS[item.to] ?? []).includes(role) : false);
 

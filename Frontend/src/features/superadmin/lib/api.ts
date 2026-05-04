@@ -136,7 +136,10 @@ export async function getShopDiagnostics(shopId: number) {
 }
 
 export async function approveShopRegistration(shopId: number) {
-  return apiMutation<{ data: { ownerId: number; temporaryPassword: string; trialDays: number; trialEndsAt: string } }>(`/api/superadmin/shops/${shopId}/approve-registration`, 'POST');
+  return apiMutation<{
+    message: string;
+    data: { ownerId: number | null; temporaryPassword: string | null; trialDays: number; trialEndsAt: string | null };
+  }>(`/api/superadmin/shops/${shopId}/approve-registration`, 'POST');
 }
 
 export async function rejectShopRegistration(shopId: number, payload?: { reason?: string }) {

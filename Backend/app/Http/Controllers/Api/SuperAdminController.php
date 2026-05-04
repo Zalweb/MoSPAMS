@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -365,76 +366,34 @@ class SuperAdminController extends Controller
             $registrationStatus = strtoupper((string) ($shopRow->registration_status ?? 'SYSTEM_PROVISIONED'));
             abort_if($registrationStatus === 'REJECTED', 422, 'Rejected registrations cannot be approved.');
 
-            $ownerEmail = strtolower((string) ($shopRow->registration_owner_email ?? ''));
-            $ownerName = (string) ($shopRow->registration_owner_name ?? '');
+            // Idempotency guard — safe to call multiple times
+            if ($registrationStatus === 'APPROVED') {
+                $existingOwnerId = DB::table('users as u')
+                    ->join('roles as r', 'r.role_id', '=', 'u.role_id_fk')
+                    ->where('u.shop_id_fk', $shop)
+                    ->where('r.role_name', 'Owner')
+                    ->value('u.user_id');
 
-            abort_if($ownerEmail === '' || $ownerName === '', 422, 'Registration applicant details are incomplete.');
+                return [
+                    'ownerId' => $existingOwnerId ? (int) $existingOwnerId : null,
+                    'temporaryPassword' => null,
+                    'trialDays' => $trialDays,
+                    'trialEndsAt' => null,
+                    'alreadyApproved' => true,
+                ];
+            }
 
-            $existingOwner = DB::table('users as u')
-                ->join('roles as r', 'r.role_id', '=', 'u.role_id_fk')
-                ->where('u.shop_id_fk', $shop)
-                ->where('r.role_name', 'Owner')
-                ->select('u.user_id')
-                ->first();
-            abort_if($existingOwner, 422, 'Shop already has an Owner account.');
+            abort_if(
+                empty($shopRow->registration_owner_email) || empty($shopRow->registration_owner_name),
+                422,
+                'Registration applicant details are incomplete.'
+            );
 
-            $emailTaken = DB::table('users')->whereRaw('LOWER(email) = ?', [$ownerEmail])->exists();
-            abort_if($emailTaken, 422, 'Registration owner email is already used by another account.');
-
-            $temporaryPassword = Str::random(12);
-
-            $ownerId = DB::table('users')->insertGetId([
-                'shop_id_fk' => $shop,
-                'role_id_fk' => $ownerRoleId,
-                'full_name' => $ownerName,
-                'username' => $ownerEmail,
-                'email' => $ownerEmail,
-                'password_hash' => Hash::make($temporaryPassword),
-                'user_status_id_fk' => $activeUserStatusId,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            [$ownerId, $temporaryPassword] = $this->createOwnerIfMissing($shop, $shopRow, $ownerRoleId, $activeUserStatusId);
 
             $this->setShopStatus($shop, 'ACTIVE');
 
-            $endsAt = now()->addDays($trialDays);
-            $subscription = DB::table('shop_subscriptions')
-                ->where('shop_id_fk', $shop)
-                ->orderByDesc('shop_subscription_id')
-                ->first();
-
-            if ($subscription) {
-                DB::table('shop_subscriptions')
-                    ->where('shop_subscription_id', $subscription->shop_subscription_id)
-                    ->update([
-                        'subscription_status' => 'ACTIVE',
-                        'starts_at' => now(),
-                        'ends_at' => $endsAt,
-                        'renews_at' => $endsAt,
-                        'updated_by_fk' => $request->user()?->user_id,
-                        'updated_at' => now(),
-                    ]);
-            } else {
-                $fallbackPlanId = (int) DB::table('subscription_plans')
-                    ->where('is_active', true)
-                    ->orderBy('plan_id')
-                    ->value('plan_id');
-
-                abort_unless($fallbackPlanId > 0, 422, 'No active subscription plan available for trial activation.');
-
-                DB::table('shop_subscriptions')->insert([
-                    'shop_id_fk' => $shop,
-                    'plan_id_fk' => $fallbackPlanId,
-                    'subscription_status' => 'ACTIVE',
-                    'starts_at' => now(),
-                    'ends_at' => $endsAt,
-                    'renews_at' => $endsAt,
-                    'created_by_fk' => $request->user()?->user_id,
-                    'updated_by_fk' => $request->user()?->user_id,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
+            $endsAt = $this->activateShopSubscription($shop, $trialDays, $request);
 
             DB::table('shops')->where('shop_id', $shop)->update([
                 'registration_status' => 'APPROVED',
@@ -454,9 +413,97 @@ class SuperAdminController extends Controller
             ];
         });
 
+        $alreadyApproved = $payload['alreadyApproved'] ?? false;
+
         return response()->json([
-            'data' => $payload,
+            'message' => $alreadyApproved ? 'Shop already approved.' : 'Shop approved successfully.',
+            'data' => [
+                'ownerId' => $payload['ownerId'],
+                'temporaryPassword' => $payload['temporaryPassword'],
+                'trialDays' => $payload['trialDays'],
+                'trialEndsAt' => $payload['trialEndsAt'],
+            ],
         ]);
+    }
+
+    private function createOwnerIfMissing(int $shop, object $shopRow, int $ownerRoleId, int $activeUserStatusId): array
+    {
+        $existingOwner = DB::table('users as u')
+            ->join('roles as r', 'r.role_id', '=', 'u.role_id_fk')
+            ->where('u.shop_id_fk', $shop)
+            ->where('r.role_name', 'Owner')
+            ->select('u.user_id', 'u.email')
+            ->first();
+
+        if ($existingOwner) {
+            Log::warning("Shop #{$shop} approval: reusing existing Owner (user_id: {$existingOwner->user_id}). Recovering from inconsistent state.");
+            return [(int) $existingOwner->user_id, null];
+        }
+
+        $ownerEmail = strtolower((string) $shopRow->registration_owner_email);
+        $emailTaken = DB::table('users')->whereRaw('LOWER(email) = ?', [$ownerEmail])->exists();
+        abort_if($emailTaken, 422, 'Registration owner email is already used by another account.');
+
+        $temporaryPassword = Str::random(12);
+
+        $ownerId = DB::table('users')->insertGetId([
+            'shop_id_fk' => $shop,
+            'role_id_fk' => $ownerRoleId,
+            'full_name' => (string) $shopRow->registration_owner_name,
+            'username' => $ownerEmail,
+            'email' => $ownerEmail,
+            'password_hash' => Hash::make($temporaryPassword),
+            'user_status_id_fk' => $activeUserStatusId,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return [(int) $ownerId, $temporaryPassword];
+    }
+
+    private function activateShopSubscription(int $shop, int $trialDays, Request $request): Carbon
+    {
+        $endsAt = now()->addDays($trialDays);
+
+        $subscription = DB::table('shop_subscriptions')
+            ->where('shop_id_fk', $shop)
+            ->orderByDesc('shop_subscription_id')
+            ->first();
+
+        if ($subscription) {
+            DB::table('shop_subscriptions')
+                ->where('shop_subscription_id', $subscription->shop_subscription_id)
+                ->update([
+                    'subscription_status' => 'ACTIVE',
+                    'starts_at' => now(),
+                    'ends_at' => $endsAt,
+                    'renews_at' => $endsAt,
+                    'updated_by_fk' => $request->user()?->user_id,
+                    'updated_at' => now(),
+                ]);
+        } else {
+            $fallbackPlanId = (int) DB::table('subscription_plans')
+                ->where('is_active', true)
+                ->orderBy('plan_id')
+                ->value('plan_id');
+
+            abort_unless($fallbackPlanId > 0, 422, 'No active subscription plan available for trial activation.');
+
+            DB::table('shop_subscriptions')->insert([
+                'shop_id_fk' => $shop,
+                'plan_id_fk' => $fallbackPlanId,
+                'subscription_status' => 'ACTIVE',
+                'starts_at' => now(),
+                'ends_at' => $endsAt,
+                'renews_at' => $endsAt,
+                'created_by_fk' => $request->user()?->user_id,
+                'updated_by_fk' => $request->user()?->user_id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return $endsAt;
     }
 
     public function rejectRegistration(Request $request, int $shop): JsonResponse

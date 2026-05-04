@@ -1,43 +1,94 @@
-# Secrets
+# ============================================================
+# SECRETS & ENVIRONMENT — never commit real credentials
+# ============================================================
+# Google OAuth client secret (contains private_key / client_secret)
 client_secret_*.json
 *.json.bak
+
+# All .env files except .env.example templates
 .env
 .env.local
+.env.*.local
 Backend/.env
+Backend/.env.production
+Backend/.env.staging
 Frontend/.env
 Frontend/.env.local
-Frontend/.env.production.local
+Frontend/.env.production
+Frontend/.env.staging
 
-# Dependencies / build outputs
+# Laravel app key / storage encryption keys
+Backend/storage/*.key
+
+# ============================================================
+# DEPENDENCIES — reproducible from lock files; never commit
+# ============================================================
 node_modules/
 vendor/
-Frontend/dist/
+tools/composer.phar
 
-# Logs / runtime caches
+# ============================================================
+# BUILD OUTPUTS — generated; never commit
+# ============================================================
+Frontend/dist/
+Frontend/dist-ssr/
+Backend/public/build/
+Backend/public/hot/
+Backend/public/storage
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# Vite dev-server cache
+.vite/
+Frontend/.vite/
+
+# Test coverage
+coverage/
+Frontend/coverage/
+
+# ============================================================
+# LOGS & RUNTIME CACHES — machine-specific; never commit
+# ============================================================
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-*.log
+lerna-debug.log*
 .phpunit.result.cache
-Backend/storage/*.key
+Backend/.phpunit.cache
 Backend/storage/logs/
 Backend/storage/framework/cache/data/
 Backend/storage/framework/sessions/
 Backend/storage/framework/testing/
 Backend/storage/framework/views/
 
-# Local tooling / IDE
+# ============================================================
+# LOCAL TOOLING & IDE — machine-specific; never commit
+# ============================================================
 .claude/
 .amazonq/
 .kilo/
 .idea/
 .vscode/
+.cursor/
+.zed/
 Frontend/.vercel/
 
-# Local installers / OS noise
-Composer-Setup.exe
-Homestead.json
-Homestead.yaml
+# ============================================================
+# OS NOISE — never commit
+# ============================================================
 .DS_Store
 Thumbs.db
+Desktop.ini
+
+# ============================================================
+# BINARY / LARGE FILES — not useful in git
+# ============================================================
+Composer-Setup.exe
+*.exe
+*.docx
+*.pdf
+Homestead.json
+Homestead.yaml

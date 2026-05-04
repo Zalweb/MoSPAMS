@@ -1,16 +1,23 @@
 type ApiMethod = 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
-let authToken: string | null = null;
-let tenantBootstrapReady = false;
+const TOKEN_STORAGE_KEY = 'mospams_auth_token';
+
+// Rehydrate from localStorage so the token survives page refreshes.
+let authToken: string | null =
+  typeof window !== 'undefined' ? localStorage.getItem(TOKEN_STORAGE_KEY) : null;
+
 const REQUEST_HOST = typeof window !== 'undefined' ? window.location.host : null;
 
 export function setAuthToken(token: string | null) {
   authToken = token;
-}
-
-export function setTenantBootstrapReady(ready: boolean) {
-  tenantBootstrapReady = ready;
+  if (typeof window !== 'undefined') {
+    if (token) {
+      localStorage.setItem(TOKEN_STORAGE_KEY, token);
+    } else {
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+    }
+  }
 }
 
 export async function apiGet<T>(path: string): Promise<T> {
@@ -22,10 +29,6 @@ export async function apiMutation<T = unknown>(path: string, method: ApiMethod, 
 }
 
 async function apiRequest<T>(path: string, method: ApiMethod | 'GET', body?: unknown): Promise<T> {
-  if (!tenantBootstrapReady && path !== '/api/shop/info') {
-    throw new Error('Tenant context is not ready yet.');
-  }
-
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method,
     headers: {

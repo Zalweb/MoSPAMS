@@ -6,7 +6,7 @@ type Module = 'inventory' | 'services' | 'sales' | 'reports' | 'users' | 'audit'
 const POLICY: Record<Module, Record<Action, Role[]>> = {
   inventory: {
     view: ['Owner', 'Admin', 'Staff'],
-    create: ['Owner', 'Admin'],
+    create: ['Owner', 'Admin', 'Staff'],
     update: ['Owner', 'Admin', 'Staff'],
     delete: ['Owner', 'Admin'],
   },

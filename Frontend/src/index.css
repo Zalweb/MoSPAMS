@@ -34,6 +34,12 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
     --tenant-primary: #3B82F6;
     --tenant-secondary: #10B981;
+    
+    /* Dashboard theme colors (overridden by ShopContext) */
+    --color-primary: 0 84% 60%;
+    --color-secondary: 25 95% 53%;
+    --color-primary-rgb: 239 68 68;
+    --color-secondary-rgb: 249 115 22;
   }
 
   * {
@@ -53,5 +59,144 @@
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Glassmorphism utilities */
+  .glass {
+    @apply bg-zinc-900/90 backdrop-blur-xl border border-zinc-800/50;
+  }
+
+  .glass-hover {
+    @apply hover:border-zinc-700/50 transition-all duration-300;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))];
+  }
+
+  /* Gradient background */
+  .gradient-bg {
+    @apply bg-gradient-to-br from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))];
+  }
+
+  /* Animated gradient */
+  .animated-gradient {
+    background: linear-gradient(
+      -45deg,
+      rgb(var(--color-primary-rgb)),
+      rgb(var(--color-secondary-rgb)),
+      rgb(var(--color-primary-rgb)),
+      rgb(var(--color-secondary-rgb))
+    );
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+  }
+
+  @keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  /* Shimmer effect */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shimmer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0,
+      rgba(255, 255, 255, 0.05) 20%,
+      rgba(255, 255, 255, 0.1) 60%,
+      rgba(255, 255, 255, 0)
+    );
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  /* Glow effect */
+  .glow {
+    box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.3),
+                0 0 40px rgba(var(--color-primary-rgb), 0.2),
+                0 0 60px rgba(var(--color-primary-rgb), 0.1);
+  }
+
+  /* Smooth transitions */
+  .transition-smooth {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Loading skeleton */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      #18181b 0%,
+      #27272a 50%,
+      #18181b 100%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+  }
+
+  @keyframes skeleton-loading {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  /* Float animation */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-zinc-950;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-zinc-800 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-zinc-700;
   }
 }

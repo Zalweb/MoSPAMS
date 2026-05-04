@@ -1,13 +1,15 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Plus, Trash2, Banknote, Smartphone, Receipt, Search, Printer } from 'lucide-react';
+import { Plus, Trash2, Banknote, Smartphone, Receipt, Search, Printer, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useData } from '@/shared/contexts/DataContext';
+import { usePaginatedFetch } from '@/shared/hooks/usePaginatedFetch';
+import { apiGet } from '@/shared/lib/api';
 import { inPeriod, type Period } from '@/shared/lib/period';
-import type { Transaction } from '@/shared/types';
+import type { Part, ServiceRecord, Transaction } from '@/shared/types';
 
 interface CartItem { partId: string; name: string; price: number; quantity: number }
 
@@ -22,17 +24,31 @@ const fadeUp = (delay = 0) => ({
 });
 
 export default function Sales() {
-  const { transactions, parts, services, addTransaction } = useData();
+  const { addTransaction } = useData();
   const [modalOpen, setModalOpen] = useState(false);
-  const [receiptTx, setReceiptTx] = useState<string | null>(null);
+  const [receiptTx, setReceiptTx] = useState<Transaction | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [search, setSearch] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'Cash' | 'GCash'>('Cash');
   const [selectedService, setSelectedService] = useState('');
   const [serviceLabor, setServiceLabor] = useState(0);
-
   const [period, setPeriod] = useState<Period | 'all'>('daily');
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>('All');
+  const [modalParts, setModalParts] = useState<Part[]>([]);
+  const [modalServices, setModalServices] = useState<ServiceRecord[]>([]);
+
+  const { data: transactions, loading, meta, page, setPage, prependItem } = usePaginatedFetch<Transaction>('/api/transactions');
+  const selectedServiceRef = useRef<ServiceRecord | undefined>(undefined);
+
+  useEffect(() => {
+    if (!modalOpen) return;
+    void apiGet<{ data: Part[] }>('/api/parts?limit=100').then(r => setModalParts(r.data)).catch(() => {});
+    void apiGet<{ data: ServiceRecord[] }>('/api/services?limit=100').then(r => setModalServices(r.data)).catch(() => {});
+  }, [modalOpen]);
+
+  useEffect(() => {
+    selectedServiceRef.current = modalServices.find(s => s.id === selectedService);
+  }, [selectedService, modalServices]);
 
   const filteredTx = useMemo(() => {
     return transactions
@@ -44,9 +60,9 @@ export default function Sales() {
   const cashTotal = filteredTx.filter(t => t.paymentMethod === 'Cash').reduce((s, t) => s + t.total, 0);
   const gcashTotal = filteredTx.filter(t => t.paymentMethod === 'GCash').reduce((s, t) => s + t.total, 0);
 
-  const pendingServices = services.filter(s => s.status !== 'Completed');
+  const pendingServices = modalServices.filter(s => s.status !== 'Completed');
 
-  const addToCart = (part: typeof parts[number]) => {
+  const addToCart = (part: Part) => {
     const existing = cart.find(c => c.partId === part.id);
     setCart(existing
       ? cart.map(c => c.partId === part.id ? { ...c, quantity: c.quantity + 1 } : c)
@@ -58,9 +74,9 @@ export default function Sales() {
   const partsTotal = cart.reduce((s, c) => s + c.price * c.quantity, 0);
   const grandTotal = partsTotal + (selectedService ? serviceLabor : 0);
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (cart.length === 0 && !selectedService) return;
-    addTransaction({
+    const newTx = await addTransaction({
       type: selectedService ? 'service+parts' : 'parts-only',
       items: cart.map(c => ({ partId: c.partId, name: c.name, quantity: c.quantity, price: c.price })),
       serviceId: selectedService || undefined,
@@ -68,20 +84,20 @@ export default function Sales() {
       paymentMethod,
       total: grandTotal,
     });
+    prependItem(newTx);
     setModalOpen(false); setCart([]); setSelectedService(''); setServiceLabor(0); setPaymentMethod('Cash');
   };
 
-  const filteredParts = parts.filter(p => (p.name.toLowerCase().includes(search.toLowerCase()) || p.barcode.includes(search)) && p.stock > 0);
-  const selectedTx: Transaction | undefined = transactions.find(t => t.id === receiptTx);
+  const filteredParts = modalParts.filter(p => (p.name.toLowerCase().includes(search.toLowerCase()) || p.barcode.includes(search)) && p.stock > 0);
 
   return (
     <div className="space-y-6">
       <motion.div {...fadeUp(0)} className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-white tracking-tight">Sales</h2>
-          <p className="text-sm text-zinc-500 mt-1">{transactions.length} transactions total</p>
+          <p className="text-sm text-zinc-500 mt-1">{meta ? meta.total : transactions.length} transactions total</p>
         </div>
-        <Button onClick={() => setModalOpen(true)} size="sm" className="h-10 rounded-xl bg-white hover:bg-zinc-200 text-black text-sm font-semibold px-5">
+        <Button onClick={() => setModalOpen(true)} size="sm" className="h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-white text-sm font-semibold px-5 transition-opacity">
           <Plus className="w-4 h-4 mr-2" /> New Transaction
         </Button>
       </motion.div>
@@ -132,7 +148,11 @@ export default function Sales() {
               <th className="text-right px-5 py-4 text-xs font-semibold text-zinc-500 uppercase"></th>
             </tr></thead>
             <tbody className="divide-y divide-zinc-800/50">
-              {filteredTx.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(tx => (
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i}><td colSpan={6} className="px-5 py-4"><div className="h-4 bg-zinc-800/60 rounded animate-pulse" /></td></tr>
+                ))
+              ) : filteredTx.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(tx => (
                 <tr key={tx.id} className="hover:bg-zinc-800/30 transition-colors">
                   <td className="px-5 py-4 text-xs text-zinc-500 tabular-nums whitespace-nowrap">{new Date(tx.createdAt).toLocaleDateString()} <span className="text-zinc-600">{new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></td>
                   <td className="px-5 py-4"><span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${tx.type === 'service+parts' ? 'bg-violet-500/10 text-violet-400' : 'bg-blue-500/10 text-blue-400'}`}>{tx.type}</span></td>
@@ -145,11 +165,11 @@ export default function Sales() {
                   </td>
                   <td className="px-5 py-4 text-right text-sm font-semibold text-white tabular-nums">₱{tx.total.toLocaleString()}</td>
                   <td className="px-5 py-4 text-right">
-                    <button onClick={() => setReceiptTx(tx.id)} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-white transition-colors"><Receipt className="w-4 h-4" /></button>
+                    <button onClick={() => setReceiptTx(tx)} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-white transition-colors"><Receipt className="w-4 h-4" /></button>
                   </td>
                 </tr>
               ))}
-              {filteredTx.length === 0 && (
+              {!loading && filteredTx.length === 0 && (
                 <tr><td colSpan={6} className="px-5 py-16 text-center text-sm text-zinc-500">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-zinc-800/50 flex items-center justify-center">
                     <Receipt className="w-8 h-8 text-zinc-600" />
@@ -160,6 +180,20 @@ export default function Sales() {
             </tbody>
           </table>
         </div>
+
+        {meta && meta.lastPage > 1 && (
+          <div className="flex items-center justify-between px-5 py-3 border-t border-zinc-800">
+            <p className="text-xs text-zinc-500">Page {meta.currentPage} of {meta.lastPage} — {meta.total} total</p>
+            <div className="flex items-center gap-1">
+              <button onClick={() => setPage(page - 1)} disabled={page <= 1} className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button onClick={() => setPage(page + 1)} disabled={page >= meta.lastPage} className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </motion.div>
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
@@ -183,7 +217,11 @@ export default function Sales() {
               </div>
               <div className="mt-4 pt-4 border-t border-zinc-800">
                 <Label className="text-xs font-medium text-zinc-400">Link Service (optional)</Label>
-                <select value={selectedService} onChange={e => { setSelectedService(e.target.value); const s = services.find(sv => sv.id === e.target.value); if (s) setServiceLabor(s.laborCost); else setServiceLabor(0); }} className="w-full mt-1.5 h-10 px-3 rounded-xl bg-zinc-800/50 border border-zinc-700 text-sm text-white">
+                <select value={selectedService} onChange={e => {
+                  setSelectedService(e.target.value);
+                  const s = modalServices.find(sv => sv.id === e.target.value);
+                  if (s) setServiceLabor(s.laborCost); else setServiceLabor(0);
+                }} className="w-full mt-1.5 h-10 px-3 rounded-xl bg-zinc-800/50 border border-zinc-700 text-sm text-white">
                   <option value="">No service</option>
                   {pendingServices.map(s => <option key={s.id} value={s.id}>{s.customerName} — {s.serviceType}</option>)}
                 </select>
@@ -211,7 +249,7 @@ export default function Sales() {
                     {selectedService && (
                       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-violet-500/10 rounded-xl p-3 border border-violet-500/20">
                         <p className="text-sm font-medium text-violet-300">Service Labor</p>
-                        <p className="text-xs text-violet-400">{services.find(s => s.id === selectedService)?.serviceType}</p>
+                        <p className="text-xs text-violet-400">{modalServices.find(s => s.id === selectedService)?.serviceType}</p>
                         <p className="text-sm font-semibold text-violet-300 mt-0.5">₱{serviceLabor.toLocaleString()}</p>
                       </motion.div>
                     )}
@@ -228,7 +266,7 @@ export default function Sales() {
                   <span className="text-sm text-zinc-400">Total</span>
                   <span className="text-2xl font-bold text-white tracking-tight tabular-nums">₱{grandTotal.toLocaleString()}</span>
                 </div>
-                <Button onClick={handleCheckout} disabled={grandTotal === 0} className="w-full h-10 rounded-xl bg-white hover:bg-zinc-200 text-black text-sm font-semibold disabled:opacity-40">Complete Transaction</Button>
+                <Button onClick={handleCheckout} disabled={grandTotal === 0} className="w-full h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-white text-sm font-semibold disabled:opacity-40 transition-opacity">Complete Transaction</Button>
               </div>
             </div>
           </div>
@@ -243,20 +281,20 @@ export default function Sales() {
               <button onClick={() => window.print()} className="p-1.5 rounded hover:bg-zinc-800 text-zinc-500" title="Print"><Printer className="w-4 h-4" /></button>
             </DialogTitle>
           </DialogHeader>
-          {selectedTx && (
+          {receiptTx && (
             <div className="space-y-3 mt-2">
               <div className="text-center border-b border-dashed border-zinc-700 pb-4">
                 <p className="text-sm text-zinc-400">MoSPAMS Motorcycle Shop</p>
-                <p className="text-xs text-zinc-500 mt-1">{new Date(selectedTx.createdAt).toLocaleString()}</p>
-                <p className="text-xs font-mono text-zinc-500 mt-0.5">TXN-{selectedTx.id.slice(-8).toUpperCase()}</p>
+                <p className="text-xs text-zinc-500 mt-1">{new Date(receiptTx.createdAt).toLocaleString()}</p>
+                <p className="text-xs font-mono text-zinc-500 mt-0.5">TXN-{receiptTx.id.slice(-8).toUpperCase()}</p>
               </div>
-              {selectedTx.items.map((item, i) => (
+              {receiptTx.items.map((item, i) => (
                 <div key={i} className="flex justify-between text-sm"><span className="text-zinc-400">{item.name} x{item.quantity}</span><span className="font-medium text-white tabular-nums">₱{(item.price * item.quantity).toLocaleString()}</span></div>
               ))}
-              {selectedTx.serviceLaborCost && <div className="flex justify-between text-sm font-medium text-violet-400"><span>Service Labor</span><span className="tabular-nums">₱{selectedTx.serviceLaborCost.toLocaleString()}</span></div>}
+              {receiptTx.serviceLaborCost && <div className="flex justify-between text-sm font-medium text-violet-400"><span>Service Labor</span><span className="tabular-nums">₱{receiptTx.serviceLaborCost.toLocaleString()}</span></div>}
               <div className="border-t border-dashed border-zinc-700 pt-4">
-                <div className="flex justify-between text-base font-bold text-white"><span>Total</span><span className="tabular-nums">₱{selectedTx.total.toLocaleString()}</span></div>
-                <div className="flex justify-between text-xs text-zinc-400 mt-2"><span>Payment</span><span className="flex items-center gap-1">{selectedTx.paymentMethod === 'GCash' ? <Smartphone className="w-3.5 h-3.5" /> : <Banknote className="w-3.5 h-3.5" />}{selectedTx.paymentMethod}</span></div>
+                <div className="flex justify-between text-base font-bold text-white"><span>Total</span><span className="tabular-nums">₱{receiptTx.total.toLocaleString()}</span></div>
+                <div className="flex justify-between text-xs text-zinc-400 mt-2"><span>Payment</span><span className="flex items-center gap-1">{receiptTx.paymentMethod === 'GCash' ? <Smartphone className="w-3.5 h-3.5" /> : <Banknote className="w-3.5 h-3.5" />}{receiptTx.paymentMethod}</span></div>
               </div>
             </div>
           )}

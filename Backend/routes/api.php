@@ -22,7 +22,9 @@ Route::get('/stats', [MospamsController::class, 'publicStats']);
 Route::post('/shop-registration', [ShopRegistrationController::class, 'register'])->middleware('throttle:shop-registration');
 
 // Public shop branding (no auth required)
-Route::get('/shop/info', [ShopBrandingController::class, 'publicShopInfo'])->middleware('throttle:shop-info');
+Route::get('/shop/info', [ShopBrandingController::class, 'publicShopInfo']);
+
+
 Route::post('/webhooks/paymongo', [BillingWebhookController::class, 'paymongo'])->middleware('throttle:billing-webhooks');
 
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -65,7 +67,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::middleware(['shop.active', 'tenant.user', 'tenant.token'])->group(function () {
         Route::get('/parts', [MospamsController::class, 'parts'])->middleware('role:Owner,Staff');
-        Route::post('/parts', [MospamsController::class, 'storePart'])->middleware('role:Owner');
+        Route::post('/parts', [MospamsController::class, 'storePart'])->middleware('role:Owner,Staff');
         Route::patch('/parts/{part}', [MospamsController::class, 'updatePart'])->middleware('role:Owner,Staff');
         Route::delete('/parts/{part}', [MospamsController::class, 'deletePart'])->middleware('role:Owner');
         Route::get('/categories', [MospamsController::class, 'categories'])->middleware('role:Owner,Staff');

@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import type { User, GoogleData } from '@/shared/types';
-import { apiMutation, setAuthToken } from '@/shared/lib/api';
+import { apiGet, apiMutation, setAuthToken } from '@/shared/lib/api';
 import { normalizeRole } from '@/shared/lib/roles';
 
 interface AuthContextType {
@@ -36,6 +36,17 @@ function normalizeUserRole(user: User): User {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    apiGet<{ user: User }>('/api/me')
+      .then(response => setUser(normalizeUserRole(response.user)))
+      .catch(() => {
+        setAuthToken(null);
+        setUser(null);
+      })
+      .finally(() => setReady(true));
+  }, []);
 
   const login = useCallback(async (email: string, password: string) => {
     try {
@@ -105,7 +116,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       googleLogin,
       googleRegister,
       logout: () => { void logout(); },
-      ready: true,
+      ready,
     }}>
       {children}
     </AuthContext.Provider>

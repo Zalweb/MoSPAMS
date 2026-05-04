@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, Plus, Search, ShieldAlert, Wrench } from 'lucide-react';
+import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import {
   approveShopRegistration,
-  createShop,
   getShopDiagnostics,
   getShops,
   rejectShopRegistration,
@@ -16,21 +16,12 @@ import {
 import type { SuperAdminShop } from '@/shared/types';
 
 export default function SuperAdminShopsPage() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [shops, setShops] = useState<SuperAdminShop[]>([]);
   const [loading, setLoading] = useState(true);
-  const [openCreate, setOpenCreate] = useState(false);
   const [diag, setDiag] = useState<ShopDiagnostics | null>(null);
   const [diagOpen, setDiagOpen] = useState(false);
-
-  const [form, setForm] = useState({
-    shopName: '',
-    email: '',
-    phone: '',
-    address: '',
-    ownerName: '',
-    ownerEmail: '',
-  });
 
   const load = async (query = '') => {
     setLoading(true);
@@ -70,7 +61,15 @@ export default function SuperAdminShopsPage() {
   const onApproveRegistration = async (shop: SuperAdminShop) => {
     try {
       const response = await approveShopRegistration(shop.shopId);
-      toast.success(`Registration approved. Temporary owner password: ${response.data.temporaryPassword}`);
+      
+      if (response.data.temporaryPassword) {
+        // New Owner was created
+        toast.success(`Registration approved. Temporary owner password: ${response.data.temporaryPassword}`);
+      } else {
+        // Existing Owner was used
+        toast.success(`Registration approved. Shop activated with existing Owner account.`);
+      }
+      
       await load(search);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Approval failed');
@@ -86,31 +85,6 @@ export default function SuperAdminShopsPage() {
       await load(search);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Rejection failed');
-    }
-  };
-
-  const onCreateShop = async () => {
-    if (!form.shopName || !form.ownerName || !form.ownerEmail) {
-      toast.error('Shop name, owner name, and owner email are required');
-      return;
-    }
-
-    try {
-      const response = await createShop({
-        shopName: form.shopName,
-        email: form.email || undefined,
-        phone: form.phone || undefined,
-        address: form.address || undefined,
-        ownerName: form.ownerName,
-        ownerEmail: form.ownerEmail,
-      });
-
-      toast.success(`Shop provisioned. Temporary owner password: ${response.data.temporaryPassword}`);
-      setForm({ shopName: '', email: '', phone: '', address: '', ownerName: '', ownerEmail: '' });
-      setOpenCreate(false);
-      await load(search);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to create shop');
     }
   };
 
@@ -132,7 +106,7 @@ export default function SuperAdminShopsPage() {
           <p className="text-[13px] text-zinc-400 mt-0.5">Provision, suspend, and monitor tenant shops</p>
         </div>
 
-        <Button onClick={() => setOpenCreate(true)} className="h-9 rounded-xl bg-white hover:bg-zinc-200 text-black text-[12px] font-medium px-4">
+        <Button onClick={() => navigate('/superadmin/shops/new')} className="h-9 rounded-xl bg-white hover:bg-zinc-200 text-black text-[12px] font-medium px-4">
           <Plus className="w-3.5 h-3.5 mr-1.5" /> Add New Shop
         </Button>
       </div>
@@ -241,32 +215,6 @@ export default function SuperAdminShopsPage() {
         </table>
       </div>
 
-      <Dialog open={openCreate} onOpenChange={setOpenCreate}>
-        <DialogContent className="sm:max-w-lg rounded-[20px] border-zinc-800 bg-zinc-950 text-zinc-300 p-6">
-          <DialogHeader>
-            <DialogTitle className="text-[15px] font-semibold text-white">Provision New Shop</DialogTitle>
-          </DialogHeader>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-            <Field label="Shop Name" value={form.shopName} onChange={(value) => setForm((prev) => ({ ...prev, shopName: value }))} />
-            <Field label="Shop Email" value={form.email} onChange={(value) => setForm((prev) => ({ ...prev, email: value }))} />
-            <Field label="Phone" value={form.phone} onChange={(value) => setForm((prev) => ({ ...prev, phone: value }))} />
-            <Field label="Address" value={form.address} onChange={(value) => setForm((prev) => ({ ...prev, address: value }))} />
-            <Field label="Owner Name" value={form.ownerName} onChange={(value) => setForm((prev) => ({ ...prev, ownerName: value }))} />
-            <Field label="Owner Email" value={form.ownerEmail} onChange={(value) => setForm((prev) => ({ ...prev, ownerEmail: value }))} />
-          </div>
-
-          <div className="flex gap-2 pt-4">
-            <Button className="h-9 rounded-xl bg-white hover:bg-zinc-200 text-black text-[12px]" onClick={() => void onCreateShop()}>
-              Create Shop
-            </Button>
-            <Button variant="outline" className="h-9 rounded-xl text-[12px] border-zinc-700 bg-zinc-900 hover:bg-zinc-800 hover:border-zinc-700" onClick={() => setOpenCreate(false)}>
-              Cancel
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
       <Dialog open={diagOpen} onOpenChange={setDiagOpen}>
         <DialogContent className="sm:max-w-2xl rounded-[20px] border-zinc-800 bg-zinc-950 text-zinc-300 p-6">
           <DialogHeader>
@@ -343,15 +291,6 @@ function Stat({ label, value, icon: Icon, tone }: { label: string; value: number
       <p className="text-[11px] text-zinc-400">{label}</p>
       <p className="text-[20px] font-bold text-white">{value}</p>
     </div>
-  );
-}
-
-function Field({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
-  return (
-    <label className="block">
-      <span className="text-[11px] font-medium text-zinc-500">{label}</span>
-      <Input value={value} onChange={(event) => onChange(event.target.value)} className="mt-1.5 h-9 rounded-xl border-zinc-700 bg-zinc-900 text-zinc-200 placeholder:text-zinc-500 text-[13px]" />
-    </label>
   );
 }
 

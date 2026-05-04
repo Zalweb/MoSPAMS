@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router';
-import { DollarSign, Wrench, AlertTriangle, CheckCircle, Bike } from 'lucide-react';
+import { Sparkles, ArrowRight, Zap, Shield, TrendingUp } from 'lucide-react';
 
 export default function HeroSection() {
   const navigate = useNavigate();
@@ -10,146 +10,148 @@ export default function HeroSection() {
   };
 
   return (
-    <section id="home" className="relative pt-24 pb-20 overflow-clip bg-transparent">
+    <section id="home" className="relative pt-32 pb-24 overflow-hidden">
+      {/* Decorative glow effects */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-20 left-1/4 w-96 h-96 bg-zinc-800/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-zinc-700/10 rounded-full blur-3xl" />
+      </div>
+
+      {/* Floating sparkle decorations */}
+      <div className="absolute top-40 right-20 opacity-20">
+        <Sparkles className="w-8 h-8 text-zinc-400" strokeWidth={1.5} />
+      </div>
+      <div className="absolute bottom-40 left-20 opacity-20">
+        <Sparkles className="w-6 h-6 text-zinc-400" strokeWidth={1.5} />
+      </div>
+
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Left: Text Content */}
-          <div className="relative flex flex-col justify-center">
-
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-semibold mb-6 shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-              Web-Based Shop Management System
-            </div>
-
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight mb-6">
-              Elegance in every{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-300 to-zinc-500">
-                motorcycle shop
-              </span>
-              <br className="hidden sm:block" />
-              operation.
-            </h1>
-
-            <p className="text-lg text-zinc-400 leading-relaxed mb-8 max-w-lg">
-              MoSPAMS helps motorcycle repair shops and parts retailers manage{' '}
-              <strong className="text-zinc-200 font-medium">inventory</strong>,{' '}
-              <strong className="text-zinc-200 font-medium">service jobs</strong>,{' '}
-              <strong className="text-zinc-200 font-medium">sales</strong>, reports, and staff
-              operations in one connected web-based system.
-            </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-10">
-              <button
-                id="hero-get-started-btn"
-                onClick={() => navigate('/register-shop')}
-                className="px-7 py-3.5 rounded-full bg-white text-black font-semibold text-sm hover:bg-zinc-200 transition-all duration-200"
-              >
-                Get Started
-              </button>
-              <button
-                id="hero-learn-more-btn"
-                onClick={() => scrollTo('features')}
-                className="px-7 py-3.5 rounded-full bg-zinc-900 border border-zinc-800 text-white font-semibold text-sm hover:bg-zinc-800 transition-all duration-200"
-              >
-                Learn More
-              </button>
-            </div>
-
+        <div className="text-center max-w-4xl mx-auto mb-16">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/50 backdrop-blur-sm border border-zinc-800/50 text-zinc-300 text-sm font-medium mb-8">
+            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            Web-Based Shop Management
           </div>
 
-          {/* Right: Dashboard Preview */}
-          <div id="hero-right-container" className="hero-right relative flex justify-center lg:justify-end items-center min-h-[620px]">
-            <div className="w-full relative">
-              <div className="relative bg-zinc-950 rounded-2xl border border-zinc-800 shadow-2xl p-5 overflow-hidden">
-              {/* Dashboard Header Bar */}
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-zinc-900">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-md bg-white flex items-center justify-center">
-                    <span className="text-black text-[8px] font-bold">Mo</span>
-                  </div>
-                  <span className="text-xs font-semibold text-white">MoSPAMS Dashboard</span>
+          {/* Hero Headline */}
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight mb-6">
+            Transform your
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 via-zinc-400 to-zinc-600">
+              motorcycle shop
+            </span>
+            <br />
+            operations
+          </h1>
+
+          {/* Subtitle */}
+          <p className="text-lg sm:text-xl text-zinc-400 leading-relaxed mb-10 max-w-2xl mx-auto">
+            Complete management system for inventory, services, sales, and reports.
+            Built for modern motorcycle repair shops and parts retailers.
+          </p>
+
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+            <button
+              onClick={() => navigate('/register-shop')}
+              className="group px-8 py-4 rounded-2xl bg-white text-black font-semibold text-base hover:bg-zinc-100 transition-all duration-200 flex items-center gap-2 shadow-lg"
+            >
+              Start free trial
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" strokeWidth={2} />
+            </button>
+            <button
+              onClick={() => scrollTo('features')}
+              className="px-8 py-4 rounded-2xl bg-zinc-900/50 backdrop-blur-sm border border-zinc-800/50 text-white font-semibold text-base hover:bg-zinc-800/50 transition-all duration-200"
+            >
+              View features
+            </button>
+          </div>
+
+          {/* Trust badges */}
+          <div className="flex flex-wrap items-center justify-center gap-8 text-zinc-500 text-sm">
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4" strokeWidth={2} />
+              <span>Secure & reliable</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4" strokeWidth={2} />
+              <span>Real-time sync</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4" strokeWidth={2} />
+              <span>Analytics included</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Dashboard Preview Card */}
+        <div className="relative max-w-5xl mx-auto">
+          <div className="relative bg-zinc-900/40 backdrop-blur-2xl rounded-3xl border border-zinc-800/50 shadow-2xl p-8 overflow-hidden">
+            {/* Decorative gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-zinc-800/5 to-transparent pointer-events-none" />
+
+            {/* Dashboard Header */}
+            <div className="relative flex items-center justify-between mb-6 pb-4 border-b border-zinc-800/50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg">
+                  <span className="text-black text-sm font-bold">Mo</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
-                  <span className="text-[10px] text-zinc-500">Live</span>
+                <div>
+                  <p className="text-sm font-semibold text-white">MoSPAMS Dashboard</p>
+                  <p className="text-xs text-zinc-500">Real-time overview</p>
                 </div>
               </div>
-
-              {/* Quick Stats Grid */}
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <StatCard label="Total Sales" value="₱48,250" change="+12%" color="violet" Icon={DollarSign} />
-                <StatCard label="Active Jobs" value="14" change="+3" color="purple" Icon={Wrench} />
-                <StatCard label="Low Stock" value="7" change="Alert" color="violet" Icon={AlertTriangle} />
-                <StatCard label="Completed" value="128" change="+8 today" color="green" Icon={CheckCircle} />
-              </div>
-
-              {/* Recent Activity List */}
-              <div className="bg-zinc-900 rounded-xl p-3 mb-3 border border-zinc-800">
-                <p className="text-[10px] font-semibold text-zinc-500 mb-2 uppercase tracking-wide">Recent Transactions</p>
-                <div className="space-y-2">
-                  {[
-                    { name: 'Oil Change + Parts', amount: '₱850', status: 'Completed', color: 'green' },
-                    { name: 'Brake Repair Service', amount: '₱1,200', status: 'Ongoing', color: 'purple' },
-                    { name: 'Parts Sale - Filter', amount: '₱350', status: 'Paid', color: 'violet' },
-                  ].map((tx) => (
-                    <div key={tx.name} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
-                        <p className="text-[11px] font-medium text-zinc-300">{tx.name}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-semibold text-white">{tx.amount}</span>
-                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${
-                          tx.color === 'green' ? 'bg-green-500/10 text-green-400' :
-                          'bg-zinc-800 text-zinc-400'
-                        }`}>
-                          {tx.status}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Mini chart bar */}
-              <div className="bg-zinc-900 rounded-xl p-3 border border-zinc-800">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wide">Inventory Overview</p>
-                  <span className="text-[10px] text-zinc-400 font-medium">View All</span>
-                </div>
-                <div className="flex items-end gap-1 h-10">
-                  {[40, 65, 45, 80, 55, 90, 70].map((h, i) => (
-                    <div
-                      key={i}
-                      className="flex-1 bg-zinc-700 rounded-sm"
-                      style={{ height: `${h}%` }}
-                    />
-                  ))}
-                </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
+                <div className="w-2 h-2 rounded-full bg-green-400" />
+                <span className="text-xs font-medium text-green-400">Live</span>
               </div>
             </div>
 
-            {/* Floating UI Elements */}
-            <div className="absolute -top-4 -right-4 bg-zinc-900 rounded-2xl border border-zinc-800 shadow-lg px-4 py-2.5 flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-zinc-800 flex items-center justify-center">
-                <Bike className="w-4 h-4 text-zinc-400" strokeWidth={2} />
+            {/* Stats Grid */}
+            <div className="relative grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <StatCard label="Revenue" value="₱48.2K" trend="+12%" />
+              <StatCard label="Active Jobs" value="14" trend="+3" />
+              <StatCard label="Parts Stock" value="1,247" trend="-8" />
+              <StatCard label="Completed" value="128" trend="+8" />
+            </div>
+
+            {/* Chart Preview */}
+            <div className="relative bg-zinc-800/30 rounded-2xl border border-zinc-700/30 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-xs text-zinc-500 mb-1">Sales Performance</p>
+                  <p className="text-2xl font-bold text-white">₱125,450</p>
+                </div>
+                <div className="px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-xs font-semibold">
+                  +18.2%
+                </div>
+              </div>
+              <div className="flex items-end gap-1.5 h-32">
+                {[45, 70, 55, 85, 60, 95, 75, 90, 65, 88, 70, 92, 78, 95, 82, 88].map((height, i) => (
+                  <div
+                    key={i}
+                    className="flex-1 bg-zinc-700/50 rounded-t-lg hover:bg-zinc-600 transition-colors cursor-pointer"
+                    style={{ height: `${height}%` }}
+                  />
+                ))}
+              </div>
+              <div className="flex justify-between text-xs text-zinc-600 mt-3">
+                <span>Jan</span>
+                <span>Feb</span>
+                <span>Mar</span>
+                <span>Apr</span>
+              </div>
+            </div>
+
+            {/* Floating badge */}
+            <div className="absolute -top-4 -right-4 bg-zinc-900/80 backdrop-blur-sm rounded-2xl border border-zinc-800/50 shadow-xl px-4 py-3 flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center">
+                <TrendingUp className="w-4 h-4 text-green-400" strokeWidth={2} />
               </div>
               <div>
-                <p className="text-[10px] text-zinc-400 leading-none">Shop Status</p>
-                <p className="text-xs font-bold text-white">Fully Operational</p>
+                <p className="text-xs text-zinc-400">Growth</p>
+                <p className="text-sm font-bold text-white">+24%</p>
               </div>
-            </div>
-
-            <div className="absolute -bottom-5 -left-5 bg-zinc-900 rounded-full border border-zinc-800 shadow-lg px-3 py-2 flex items-center gap-2">
-              <div className="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center">
-                <svg className="w-3 h-3 text-zinc-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <span className="text-[11px] font-semibold text-zinc-300">Real-time sync</span>
-            </div>
             </div>
           </div>
         </div>
@@ -158,41 +160,15 @@ export default function HeroSection() {
   );
 }
 
-function StatCard({
-  label,
-  value,
-  change,
-  color,
-  Icon,
-}: {
-  label: string;
-  value: string;
-  change: string;
-  color: 'violet' | 'purple' | 'green';
-  Icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
-}) {
-  const colorMap = {
-    violet: 'bg-zinc-900 text-white border-zinc-800',
-    purple: 'bg-zinc-900 text-white border-zinc-800',
-    green: 'bg-green-500/10 text-green-400 border-green-500/20',
-  };
-  const changeColorMap = {
-    violet: 'text-zinc-400',
-    purple: 'text-zinc-400',
-    green: 'text-green-500',
-  };
+function StatCard({ label, value, trend }: { label: string; value: string; trend: string }) {
+  const isPositive = trend.startsWith('+');
   return (
-    <div className={`rounded-xl border p-2.5 flex flex-col justify-between ${colorMap[color]}`}>
-      <div className="flex justify-between items-start mb-2">
-        <span className="text-[10px] font-medium opacity-80">{label}</span>
-        <div className="w-5 h-5 rounded-md bg-zinc-800 flex items-center justify-center">
-          <Icon className="w-3 h-3" strokeWidth={2} />
-        </div>
-      </div>
-      <div>
-        <p className="text-sm font-bold">{value}</p>
-        <p className={`text-[9px] font-semibold ${changeColorMap[color]}`}>{change}</p>
-      </div>
+    <div className="bg-zinc-800/30 backdrop-blur-sm rounded-2xl border border-zinc-700/30 p-4 hover:bg-zinc-800/40 transition-all">
+      <p className="text-xs text-zinc-500 mb-2">{label}</p>
+      <p className="text-xl font-bold text-white mb-1">{value}</p>
+      <p className={`text-xs font-semibold ${isPositive ? 'text-green-400' : 'text-zinc-400'}`}>
+        {trend}
+      </p>
     </div>
   );
 }

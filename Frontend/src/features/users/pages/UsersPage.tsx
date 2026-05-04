@@ -94,7 +94,7 @@ export default function Users() {
           <h2 className="text-[22px] font-bold text-white tracking-tight">User Management</h2>
           <p className="text-[13px] text-zinc-400 mt-0.5">Manage access and monitor activity</p>
         </div>
-        <Button onClick={openAdd} size="sm" className="h-9 rounded-xl bg-white hover:bg-zinc-200 text-zinc-900 text-[12px] font-medium px-4">
+        <Button onClick={openAdd} size="sm" className="h-9 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-white text-[12px] font-medium px-4 transition-opacity">
           <Plus className="w-3.5 h-3.5 mr-1.5" /> Add User
         </Button>
       </div>
@@ -330,7 +330,7 @@ export default function Users() {
                 <Input type="password" {...editForm.register('password')} className="mt-1.5 h-9 rounded-xl border-zinc-700 bg-zinc-800 text-[13px] text-zinc-200 placeholder:text-zinc-600" />
               </div>
               <div className="flex gap-2 pt-2">
-                <Button type="submit" className="flex-1 h-9 rounded-xl bg-white hover:bg-zinc-200 text-zinc-900 text-[12px]">Save</Button>
+                <Button type="submit" className="flex-1 h-9 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-white text-[12px] transition-opacity">Save</Button>
                 <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-9 rounded-xl text-[12px] border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700">Cancel</Button>
               </div>
             </form>
@@ -361,7 +361,7 @@ export default function Users() {
                 {addForm.formState.errors.password && <p className="text-[10px] text-red-400 mt-1">{addForm.formState.errors.password.message}</p>}
               </div>
               <div className="flex gap-2 pt-2">
-                <Button type="submit" className="flex-1 h-9 rounded-xl bg-white hover:bg-zinc-200 text-zinc-900 text-[12px]">Create</Button>
+                <Button type="submit" className="flex-1 h-9 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-white text-[12px] transition-opacity">Create</Button>
                 <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-9 rounded-xl text-[12px] border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700">Cancel</Button>
               </div>
             </form>

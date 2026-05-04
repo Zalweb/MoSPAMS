@@ -92,7 +92,12 @@ const colorMap: Record<string, { card: string; icon: string; tag: string; dot: s
 
 export default function FeaturesSection() {
   return (
-    <section id="features" className="relative py-24 bg-black">
+    <section id="features" className="relative py-24">
+      {/* Decorative glow */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-zinc-800/5 rounded-full blur-3xl" />
+      </div>
+
       {/* Subtle top gradient */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
 

@@ -16,18 +16,18 @@ class MospamsController extends Controller
     public function parts(): JsonResponse
     {
         $query = DB::table('parts')
-            ->join('categories', 'categories.category_id', '=', 'parts.category_id_fk');
-        
-        $shopId = $this->shopId();
-        if ($shopId !== null) {
-            $query->where('parts.shop_id_fk', $shopId);
-        }
-        
-        $parts = $query->orderBy('parts.part_name')
-            ->get()
-            ->map(fn ($part) => $this->partResource($part));
+            ->join('categories', 'categories.category_id', '=', 'parts.category_id_fk')
+            ->select('parts.*', 'categories.category_name')
+            ->orderByDesc('parts.created_at');
 
-        return response()->json(['data' => $parts]);
+        $this->scopeToShop($query, 'parts');
+
+        $result = $this->paginateOrLimit($query);
+
+        return response()->json([
+            'data' => collect($result['data'])->map(fn ($row) => $this->partResource($row)),
+            'meta' => $result['meta'],
+        ]);
     }
 
     public function publicStats(): JsonResponse
@@ -38,6 +38,7 @@ class MospamsController extends Controller
             ->where('shop_statuses.status_code', 'ACTIVE')
             ->value('shops.shop_id');
 
+        // Basic counts
         $totalJobsCompleted = DB::table('service_jobs')
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
             ->where('service_jobs.shop_id_fk', $shopId)
@@ -59,6 +60,109 @@ class MospamsController extends Controller
             ->whereIn('service_job_statuses.status_code', ['pending', 'in_progress'])
             ->count();
 
+        // Weekly revenue calculations
+        $thisWeekStart = now()->startOfWeek();
+        $lastWeekStart = now()->subWeek()->startOfWeek();
+        $lastWeekEnd = now()->subWeek()->endOfWeek();
+
+        $thisWeekRevenue = (float) DB::table('sales')
+            ->where('shop_id_fk', $shopId)
+            ->where('sale_date', '>=', $thisWeekStart)
+            ->sum('net_amount');
+
+        $lastWeekRevenue = (float) DB::table('sales')
+            ->where('shop_id_fk', $shopId)
+            ->whereBetween('sale_date', [$lastWeekStart, $lastWeekEnd])
+            ->sum('net_amount');
+
+        $weeklyRevenueChange = $lastWeekRevenue > 0 
+            ? (($thisWeekRevenue - $lastWeekRevenue) / $lastWeekRevenue) * 100 
+            : 0;
+
+        // Today vs Yesterday revenue
+        $todayRevenue = (float) DB::table('sales')
+            ->where('shop_id_fk', $shopId)
+            ->whereDate('sale_date', now()->toDateString())
+            ->sum('net_amount');
+
+        $yesterdayRevenue = (float) DB::table('sales')
+            ->where('shop_id_fk', $shopId)
+            ->whereDate('sale_date', now()->subDay()->toDateString())
+            ->sum('net_amount');
+
+        $dailyRevenueChange = $yesterdayRevenue > 0 
+            ? (($todayRevenue - $yesterdayRevenue) / $yesterdayRevenue) * 100 
+            : 0;
+
+        // Service completion rate
+        $totalServices = DB::table('service_jobs')->where('shop_id_fk', $shopId)->count();
+        $completionRate = $totalServices > 0 ? ($totalJobsCompleted / $totalServices) * 100 : 0;
+
+        // Active pipeline (pending + ongoing)
+        $pendingServices = DB::table('service_jobs')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->where('service_jobs.shop_id_fk', $shopId)
+            ->where('service_job_statuses.status_code', 'pending')
+            ->count();
+
+        $ongoingServices = DB::table('service_jobs')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->where('service_jobs.shop_id_fk', $shopId)
+            ->where('service_job_statuses.status_code', 'in_progress')
+            ->count();
+
+        $activePipeline = $pendingServices + $ongoingServices;
+
+        // Inventory metrics
+        $allParts = DB::table('parts')->where('shop_id_fk', $shopId)->get();
+        $lowStockParts = $allParts->filter(fn($p) => $p->stock_quantity <= $p->reorder_level);
+        $inventoryHealth = $allParts->count() > 0 
+            ? (($allParts->count() - $lowStockParts->count()) / $allParts->count()) * 100 
+            : 100;
+
+        $inventoryValue = $allParts->sum(fn($p) => $p->stock_quantity * $p->unit_price);
+
+        // Low stock with urgency levels
+        $lowStockWithUrgency = $lowStockParts->map(function($part) {
+            $urgency = $part->stock_quantity === 0 ? 'critical' 
+                : ($part->stock_quantity <= $part->reorder_level / 2 ? 'high' : 'medium');
+            return [
+                'part_id' => $part->part_id,
+                'part_name' => $part->part_name,
+                'stock' => (int) $part->stock_quantity,
+                'min_stock' => (int) $part->reorder_level,
+                'price' => (float) $part->unit_price,
+                'urgency' => $urgency,
+            ];
+        })->values();
+
+        // Average revenue per customer
+        $avgRevenuePerCustomer = $totalCustomers > 0 ? $totalRevenue / $totalCustomers : 0;
+
+        // 7-day revenue sparkline
+        $revenueSparkline = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->toDateString();
+            $amount = (float) DB::table('sales')
+                ->where('shop_id_fk', $shopId)
+                ->whereDate('sale_date', $date)
+                ->sum('net_amount');
+            $revenueSparkline[] = $amount;
+        }
+
+        // 7-day parts usage sparkline
+        $partsUsageSparkline = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->toDateString();
+            $count = DB::table('service_job_parts')
+                ->join('service_jobs', 'service_jobs.job_id', '=', 'service_job_parts.job_id_fk')
+                ->where('service_jobs.shop_id_fk', $shopId)
+                ->whereDate('service_jobs.job_date', $date)
+                ->count();
+            $partsUsageSparkline[] = $count;
+        }
+
+        // 30-day charts (existing)
         $start = now()->subDays(29)->startOfDay();
         $end = now()->endOfDay();
 
@@ -93,20 +197,20 @@ class MospamsController extends Controller
 
         $serviceStatus = [
             'pending' => (int) ($statusRows['pending'] ?? 0),
-            'ongoing' => (int) ($statusRows['ongoing'] ?? 0),
+            'ongoing' => (int) ($statusRows['in_progress'] ?? 0),
             'completed' => (int) ($statusRows['completed'] ?? 0),
         ];
 
         $paymentRows = DB::table('payments')
             ->join('sales', 'sales.sale_id', '=', 'payments.sale_id_fk')
             ->where('sales.shop_id_fk', $shopId)
-            ->selectRaw('LOWER(payment_method) as method, SUM(amount_paid) as total')
+            ->selectRaw('LOWER(payment_method) as method, COUNT(*) as count')
             ->groupByRaw('LOWER(payment_method)')
-            ->pluck('total', 'method');
+            ->pluck('count', 'method');
 
         $paymentMethods = [
-            'cash' => (float) ($paymentRows['cash'] ?? 0),
-            'gcash' => (float) ($paymentRows['gcash'] ?? 0),
+            'cash' => (int) ($paymentRows['cash'] ?? 0),
+            'gcash' => (int) ($paymentRows['gcash'] ?? 0),
         ];
 
         $topServiceTypes = DB::table('service_job_items')
@@ -115,7 +219,7 @@ class MospamsController extends Controller
             ->where('service_jobs.shop_id_fk', $shopId)
             ->selectRaw('service_types.service_name as name, COUNT(*) as count, SUM(service_job_items.labor_cost) as revenue')
             ->groupBy('service_types.service_name')
-            ->orderByDesc('count')
+            ->orderByDesc('revenue')
             ->limit(5)
             ->get()
             ->map(fn ($row) => [
@@ -132,6 +236,22 @@ class MospamsController extends Controller
                 'total_revenue' => $totalRevenue,
                 'total_parts' => $totalParts,
                 'active_services' => $activeServices,
+                
+                // New metrics
+                'this_week_revenue' => $thisWeekRevenue,
+                'last_week_revenue' => $lastWeekRevenue,
+                'weekly_revenue_change' => round($weeklyRevenueChange, 2),
+                'today_revenue' => $todayRevenue,
+                'yesterday_revenue' => $yesterdayRevenue,
+                'daily_revenue_change' => round($dailyRevenueChange, 2),
+                'completion_rate' => round($completionRate, 2),
+                'active_pipeline' => $activePipeline,
+                'pending_services' => $pendingServices,
+                'ongoing_services' => $ongoingServices,
+                'inventory_health' => round($inventoryHealth, 2),
+                'inventory_value' => $inventoryValue,
+                'low_stock_count' => $lowStockParts->count(),
+                'avg_revenue_per_customer' => round($avgRevenuePerCustomer, 2),
             ],
             'charts' => [
                 'revenue_by_day' => $revenueByDay,
@@ -139,7 +259,12 @@ class MospamsController extends Controller
                 'service_status' => $serviceStatus,
                 'payment_methods' => $paymentMethods,
                 'top_service_types' => $topServiceTypes,
+                
+                // New sparklines
+                'revenue_sparkline_7d' => $revenueSparkline,
+                'parts_usage_sparkline_7d' => $partsUsageSparkline,
             ],
+            'low_stock' => $lowStockWithUrgency,
         ]);
     }
 
@@ -242,13 +367,16 @@ class MospamsController extends Controller
 
     public function stockMovements(): JsonResponse
     {
-        $movements = DB::table('stock_movements')
+        $query = DB::table('stock_movements')
             ->join('parts', 'parts.part_id', '=', 'stock_movements.part_id_fk')
             ->join('users', 'users.user_id', '=', 'stock_movements.user_id_fk')
             ->where('parts.shop_id_fk', $this->shopId())
-            ->orderByDesc('movement_date')
-            ->get()
-            ->map(fn ($row) => [
+            ->orderByDesc('movement_date');
+
+        $result = $this->paginateOrLimit($query);
+
+        return response()->json([
+            'data' => collect($result['data'])->map(fn ($row) => [
                 'id' => (string) $row->movement_id,
                 'partId' => (string) $row->part_id_fk,
                 'partName' => $row->part_name,
@@ -258,9 +386,9 @@ class MospamsController extends Controller
                 'userId' => (string) $row->user_id_fk,
                 'userName' => $row->full_name,
                 'timestamp' => $this->iso($row->movement_date),
-            ]);
-
-        return response()->json(['data' => $movements]);
+            ]),
+            'meta' => $result['meta'],
+        ]);
     }
 
     public function storeStockMovement(Request $request): JsonResponse
@@ -349,18 +477,25 @@ class MospamsController extends Controller
 
     public function services(): JsonResponse
     {
-        $services = DB::table('service_jobs')
+        $query = DB::table('service_jobs')
             ->join('customers', 'customers.customer_id', '=', 'service_jobs.customer_id_fk')
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
             ->leftJoin('service_job_items', 'service_job_items.job_id_fk', '=', 'service_jobs.job_id')
             ->leftJoin('service_types', 'service_types.service_type_id', '=', 'service_job_items.service_type_id_fk')
             ->where('service_jobs.shop_id_fk', $this->shopId())
             ->select('service_jobs.*', 'customers.full_name as customer_name', 'service_job_statuses.status_name', 'service_types.service_name', 'service_job_items.labor_cost')
-            ->orderByDesc('service_jobs.created_at')
-            ->get()
-            ->map(fn ($row) => $this->serviceResource($row));
+            ->orderByDesc('service_jobs.created_at');
 
-        return response()->json(['data' => $services]);
+        if ($status = request()->query('status')) {
+            $query->where('service_job_statuses.status_name', $status);
+        }
+
+        $result = $this->paginateOrLimit($query);
+
+        return response()->json([
+            'data' => collect($result['data'])->map(fn ($row) => $this->serviceResource($row)),
+            'meta' => $result['meta'],
+        ]);
     }
 
     public function storeService(Request $request): JsonResponse
@@ -470,15 +605,18 @@ class MospamsController extends Controller
 
     public function transactions(): JsonResponse
     {
-        $transactions = DB::table('sales')
+        $query = DB::table('sales')
             ->leftJoin('payments', 'payments.sale_id_fk', '=', 'sales.sale_id')
             ->where('sales.shop_id_fk', $this->shopId())
             ->orderByDesc('sales.sale_date')
-            ->select('sales.*', 'payments.payment_method')
-            ->get()
-            ->map(fn ($sale) => $this->transactionResource($sale));
+            ->select('sales.*', 'payments.payment_method');
 
-        return response()->json(['data' => $transactions]);
+        $result = $this->paginateOrLimit($query);
+
+        return response()->json([
+            'data' => collect($result['data'])->map(fn ($sale) => $this->transactionResource($sale)),
+            'meta' => $result['meta'],
+        ]);
     }
 
     public function storeTransaction(Request $request): JsonResponse
@@ -963,15 +1101,38 @@ class MospamsController extends Controller
         return (int) $user->shop_id_fk;
     }
 
-    private function scopeToShop($query)
+    private function scopeToShop($query, string $table = 'parts')
     {
         $shopId = $this->shopId();
 
         if ($shopId !== null) {
-            $query->where('shop_id_fk', $shopId);
+            $query->where("{$table}.shop_id_fk", $shopId);
         }
 
         return $query;
+    }
+
+    private function paginateOrLimit($query, int $defaultPerPage = 25): array
+    {
+        $request = request();
+
+        if ($limit = (int) $request->query('limit', 0)) {
+            $rows = $query->limit(max(1, min($limit, 100)))->get();
+            return ['data' => $rows, 'meta' => null];
+        }
+
+        $perPage = max(1, min((int) $request->query('per_page', $defaultPerPage), 100));
+        $paginated = $query->paginate($perPage);
+
+        return [
+            'data' => $paginated->items(),
+            'meta' => [
+                'currentPage' => $paginated->currentPage(),
+                'lastPage'    => $paginated->lastPage(),
+                'perPage'     => $paginated->perPage(),
+                'total'       => $paginated->total(),
+            ],
+        ];
     }
 
     private function numericId(mixed $id): int

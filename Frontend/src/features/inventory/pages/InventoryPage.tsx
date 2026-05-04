@@ -1,19 +1,19 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
-import { Plus, Pencil, Trash2, Search, AlertTriangle, Package, ArrowDownToLine, ArrowUpFromLine, History, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, AlertTriangle, Package, ArrowDownToLine, ArrowUpFromLine, History, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useData } from '@/shared/contexts/DataContext';
+import { usePaginatedFetch } from '@/shared/hooks/usePaginatedFetch';
+import { apiGet } from '@/shared/lib/api';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { can } from '@/shared/lib/permissions';
-import type { Part } from '@/shared/types';
-
-const CATEGORIES = ['Braking', 'Fluids', 'Drivetrain', 'Filtration', 'Ignition', 'Controls', 'Wheels', 'Electrical', 'Engine', 'Body', 'Other'];
+import type { Part, StockMovement } from '@/shared/types';
 
 const partSchema = z.object({
   name: z.string().min(2, 'Name is too short'),
@@ -39,7 +39,7 @@ const fadeUp = (delay = 0) => ({
 });
 
 export default function Inventory() {
-  const { parts, addPart, updatePart, deletePart, recordStockMovement, stockMovements } = useData();
+  const { addPart, updatePart, deletePart, recordStockMovement, categories } = useData();
   const { user } = useAuth();
   const role = user?.role;
   const canCreate = can(role, 'inventory', 'create');
@@ -53,10 +53,23 @@ export default function Inventory() {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [stockMoveTarget, setStockMoveTarget] = useState<Part | null>(null);
   const [historyTarget, setHistoryTarget] = useState<Part | null>(null);
+  const [partHistory, setPartHistory] = useState<StockMovement[]>([]);
+
+  const { data: parts, loading, meta, page, setPage, prependItem, updateItem, removeItem } = usePaginatedFetch<Part>('/api/parts');
+
+  useEffect(() => {
+    if (!historyTarget) { setPartHistory([]); return; }
+    void apiGet<{ data: StockMovement[] }>('/api/stock-movements').then(r => {
+      setPartHistory(r.data.filter(m => m.partId === historyTarget.id));
+    }).catch(() => setPartHistory([]));
+  }, [historyTarget]);
+
+  const categoryNames = useMemo(() => categories.map(c => c.name), [categories]);
+  const defaultCategory = categoryNames.length > 0 ? categoryNames[0] : 'Other';
 
   const form = useForm<PartForm>({
     resolver: zodResolver(partSchema),
-    defaultValues: { name: '', category: 'Other', stock: 0, minStock: 5, price: 0, barcode: '' },
+    defaultValues: { name: '', category: defaultCategory, stock: 0, minStock: 5, price: 0, barcode: '' },
   });
   const moveForm = useForm<MovementForm>({
     resolver: zodResolver(movementSchema),
@@ -69,24 +82,32 @@ export default function Inventory() {
     return matchesSearch && matchesCat;
   });
 
-  const openAdd = () => { setEditing(null); form.reset({ name: '', category: 'Other', stock: 0, minStock: 5, price: 0, barcode: '' }); setModalOpen(true); };
+  const openAdd = () => { setEditing(null); form.reset({ name: '', category: defaultCategory, stock: 0, minStock: 5, price: 0, barcode: '' }); setModalOpen(true); };
   const openEdit = (part: Part) => { setEditing(part); form.reset({ name: part.name, category: part.category, stock: part.stock, minStock: part.minStock, price: part.price, barcode: part.barcode }); setModalOpen(true); };
-  const onSubmit = form.handleSubmit((values) => {
-    if (editing) updatePart(editing.id, values); else addPart(values);
+
+  const onSubmit = form.handleSubmit(async (values) => {
+    if (editing) {
+      const updated = await updatePart(editing.id, values);
+      updateItem(editing.id, 'id', updated);
+    } else {
+      const created = await addPart(values);
+      prependItem(created);
+    }
     setModalOpen(false);
   });
 
   const openMovement = (part: Part) => { setStockMoveTarget(part); moveForm.reset({ type: 'in', qty: 0, reason: '' }); };
-  const onSubmitMovement = moveForm.handleSubmit((values) => {
+  const onSubmitMovement = moveForm.handleSubmit(async (values) => {
     if (!stockMoveTarget) return;
-    recordStockMovement(stockMoveTarget.id, values.type, values.qty, values.reason);
+    await recordStockMovement(stockMoveTarget.id, values.type, values.qty, values.reason);
+    // Optimistically update the stock count on the current item
+    const delta = values.type === 'in' ? values.qty : values.type === 'out' ? -values.qty : null;
+    const newStock = delta !== null
+      ? Math.max(0, stockMoveTarget.stock + delta)
+      : values.qty;
+    updateItem(stockMoveTarget.id, 'id', { ...stockMoveTarget, stock: newStock });
     setStockMoveTarget(null);
   });
-
-  const partHistory = useMemo(
-    () => historyTarget ? stockMovements.filter(m => m.partId === historyTarget.id) : [],
-    [stockMovements, historyTarget],
-  );
 
   const lowCount = parts.filter(p => p.stock <= p.minStock).length;
 
@@ -95,10 +116,13 @@ export default function Inventory() {
       <motion.div {...fadeUp(0)} className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-white tracking-tight">Inventory</h2>
-          <p className="text-sm text-zinc-500 mt-1">{parts.length} parts in stock {lowCount > 0 && <span className="text-amber-400">— {lowCount} low</span>}</p>
+          <p className="text-sm text-zinc-500 mt-1">
+            {meta ? `${meta.total} parts` : `${parts.length} parts`} in stock
+            {lowCount > 0 && <span className="text-amber-400"> — {lowCount} low</span>}
+          </p>
         </div>
         {canCreate && (
-          <Button onClick={openAdd} size="sm" className="h-10 rounded-xl bg-white hover:bg-zinc-200 text-black text-sm font-semibold px-5">
+          <Button onClick={openAdd} size="sm" className="h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-white text-sm font-semibold px-5 transition-opacity">
             <Plus className="w-4 h-4 mr-2" /> Add Part
           </Button>
         )}
@@ -117,7 +141,7 @@ export default function Inventory() {
         </div>
         <select value={catFilter} onChange={e => setCatFilter(e.target.value)} className="h-11 px-4 rounded-xl bg-zinc-900/50 border border-zinc-800 text-sm text-zinc-400 focus:outline-none focus:border-zinc-700">
           <option value="All">All Categories</option>
-          {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+          {categoryNames.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
       </motion.div>
 
@@ -135,7 +159,15 @@ export default function Inventory() {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800/50">
-              {filtered.map(part => {
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i}>
+                    <td colSpan={6} className="px-5 py-4">
+                      <div className="h-4 bg-zinc-800/60 rounded animate-pulse w-full" />
+                    </td>
+                  </tr>
+                ))
+              ) : filtered.map(part => {
                 const isLow = part.stock <= part.minStock;
                 return (
                   <tr key={part.id} className="hover:bg-zinc-800/30 transition-colors group">
@@ -184,7 +216,7 @@ export default function Inventory() {
                   </tr>
                 );
               })}
-              {filtered.length === 0 && (
+              {!loading && filtered.length === 0 && (
                 <tr><td colSpan={6} className="px-5 py-16 text-center text-sm text-zinc-500">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-zinc-800/50 flex items-center justify-center">
                     <Package className="w-8 h-8 text-zinc-600" />
@@ -195,6 +227,28 @@ export default function Inventory() {
             </tbody>
           </table>
         </div>
+
+        {meta && meta.lastPage > 1 && (
+          <div className="flex items-center justify-between px-5 py-3 border-t border-zinc-800">
+            <p className="text-xs text-zinc-500">Page {meta.currentPage} of {meta.lastPage} — {meta.total} total</p>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setPage(page - 1)}
+                disabled={page <= 1}
+                className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setPage(page + 1)}
+                disabled={page >= meta.lastPage}
+                className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </motion.div>
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
@@ -212,7 +266,11 @@ export default function Inventory() {
               <div>
                 <Label className="text-xs font-medium text-zinc-400">Category</Label>
                 <select {...form.register('category')} className="w-full mt-1.5 h-10 px-3 rounded-xl bg-zinc-800/50 border border-zinc-700 text-sm text-white focus:outline-none focus:border-zinc-600">
-                  {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  {categoryNames.length > 0 ? (
+                    categoryNames.map(c => <option key={c} value={c}>{c}</option>)
+                  ) : (
+                    <option value="Other">Other</option>
+                  )}
                 </select>
               </div>
               <div>
@@ -227,7 +285,7 @@ export default function Inventory() {
               <div><Label className="text-xs font-medium text-zinc-400">Price (₱)</Label><Input type="number" {...form.register('price', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white focus:border-zinc-600" /></div>
             </div>
             <div className="flex gap-3 pt-2">
-              <Button type="submit" className="flex-1 h-10 rounded-xl bg-white hover:bg-zinc-200 text-black text-sm font-semibold">{editing ? 'Save Changes' : 'Add Part'}</Button>
+              <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-white text-sm font-semibold transition-opacity">{editing ? 'Save Changes' : 'Add Part'}</Button>
               <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-10 rounded-xl text-sm border-zinc-700 text-zinc-400 hover:bg-zinc-800">Cancel</Button>
             </div>
           </form>
@@ -259,7 +317,7 @@ export default function Inventory() {
                 {moveForm.formState.errors.reason && <p className="text-xs text-red-400 mt-1">{moveForm.formState.errors.reason.message}</p>}
               </div>
               <div className="flex gap-3 pt-1">
-                <Button type="submit" className="flex-1 h-10 rounded-xl bg-white hover:bg-zinc-200 text-black text-sm font-semibold">Record</Button>
+                <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-white text-sm font-semibold transition-opacity">Record</Button>
                 <Button type="button" variant="outline" onClick={() => setStockMoveTarget(null)} className="h-10 rounded-xl text-sm border-zinc-700 text-zinc-400">Cancel</Button>
               </div>
             </form>
@@ -304,7 +362,7 @@ export default function Inventory() {
           <DialogHeader><DialogTitle className="text-base font-semibold text-white">Delete Part?</DialogTitle></DialogHeader>
           <p className="text-sm text-zinc-400 mt-1">This action cannot be undone.</p>
           <div className="flex gap-3 pt-3">
-            <Button onClick={() => { if (confirmDelete) { deletePart(confirmDelete); setConfirmDelete(null); } }} variant="destructive" className="flex-1 h-10 rounded-xl text-sm font-semibold">Delete</Button>
+            <Button onClick={async () => { if (confirmDelete) { await deletePart(confirmDelete); removeItem(confirmDelete, 'id'); setConfirmDelete(null); } }} variant="destructive" className="flex-1 h-10 rounded-xl text-sm font-semibold">Delete</Button>
             <Button variant="outline" onClick={() => setConfirmDelete(null)} className="h-10 rounded-xl text-sm border-zinc-700 text-zinc-400">Cancel</Button>
           </div>
         </DialogContent>

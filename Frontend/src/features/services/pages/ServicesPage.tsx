@@ -1,17 +1,19 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
-import { Plus, Pencil, Trash2, Search, Clock, Wrench, CheckCircle2, History, X, Settings2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Clock, Wrench, CheckCircle2, History, X, Settings2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useData } from '@/shared/contexts/DataContext';
+import { usePaginatedFetch } from '@/shared/hooks/usePaginatedFetch';
+import { apiGet } from '@/shared/lib/api';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { can } from '@/shared/lib/permissions';
-import type { ServiceRecord } from '@/shared/types';
+import type { Part, ServiceRecord } from '@/shared/types';
 
 type StatusFilter = 'All' | 'Pending' | 'Ongoing' | 'Completed';
 
@@ -37,8 +39,14 @@ const fadeUp = (delay = 0) => ({
   transition: { delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
 });
 
+const STATUS_STYLES = {
+  Pending: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20', icon: Clock },
+  Ongoing: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20', icon: Wrench },
+  Completed: { bg: 'bg-green-500/10', text: 'text-green-400', border: 'border-green-500/20', icon: CheckCircle2 },
+};
+
 export default function Services() {
-  const { services, parts, addService, updateService, deleteService, serviceTypes, addServiceType, updateServiceType, deleteServiceType } = useData();
+  const { addService, updateService, deleteService, serviceTypes, addServiceType, updateServiceType, deleteServiceType } = useData();
   const { user } = useAuth();
   const role = user?.role;
   const canDeleteService = can(role, 'services', 'delete');
@@ -50,8 +58,28 @@ export default function Services() {
   const [editing, setEditing] = useState<ServiceRecord | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [historyCustomer, setHistoryCustomer] = useState<{ name: string; model: string } | null>(null);
+  const [customerHistory, setCustomerHistory] = useState<ServiceRecord[]>([]);
   const [typesOpen, setTypesOpen] = useState(false);
   const [partsUsed, setPartsUsed] = useState<{ partId: string; quantity: number }[]>([]);
+  const [availableParts, setAvailableParts] = useState<Part[]>([]);
+
+  const { data: services, loading, meta, page, setPage, prependItem, updateItem, removeItem } = usePaginatedFetch<ServiceRecord>('/api/services');
+
+  useEffect(() => {
+    if (!modalOpen) return;
+    void apiGet<{ data: Part[] }>('/api/parts?limit=100').then(r => setAvailableParts(r.data)).catch(() => {});
+  }, [modalOpen]);
+
+  useEffect(() => {
+    if (!historyCustomer) { setCustomerHistory([]); return; }
+    void apiGet<{ data: ServiceRecord[] }>('/api/services?limit=50').then(r => {
+      setCustomerHistory(
+        r.data
+          .filter(s => s.customerName === historyCustomer.name && s.motorcycleModel === historyCustomer.model)
+          .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+      );
+    }).catch(() => {});
+  }, [historyCustomer]);
 
   const form = useForm<ServiceForm>({
     resolver: zodResolver(serviceSchema),
@@ -59,12 +87,17 @@ export default function Services() {
   });
   const stForm = useForm<STForm>({ resolver: zodResolver(stSchema), defaultValues: { name: '', defaultLaborCost: 0 } });
 
-  const filtered = services.filter(s => {
+  const filtered = useMemo(() => services.filter(s => {
     const q = search.toLowerCase();
     return (s.customerName.toLowerCase().includes(q) || s.motorcycleModel.toLowerCase().includes(q)) && (statusFilter === 'All' || s.status === statusFilter);
-  });
+  }), [services, search, statusFilter]);
 
-  const statusCounts = { All: services.length, Pending: services.filter(s => s.status === 'Pending').length, Ongoing: services.filter(s => s.status === 'Ongoing').length, Completed: services.filter(s => s.status === 'Completed').length };
+  const statusCounts = useMemo(() => ({
+    All: services.length,
+    Pending: services.filter(s => s.status === 'Pending').length,
+    Ongoing: services.filter(s => s.status === 'Ongoing').length,
+    Completed: services.filter(s => s.status === 'Completed').length,
+  }), [services]);
 
   const openAdd = () => {
     setEditing(null);
@@ -78,9 +111,16 @@ export default function Services() {
     setPartsUsed(s.partsUsed);
     setModalOpen(true);
   };
-  const onSubmit = form.handleSubmit((values) => {
+
+  const onSubmit = form.handleSubmit(async (values) => {
     const payload = { ...values, partsUsed };
-    if (editing) updateService(editing.id, payload); else addService(payload);
+    if (editing) {
+      const updated = await updateService(editing.id, payload);
+      updateItem(editing.id, 'id', updated);
+    } else {
+      const created = await addService(payload);
+      prependItem(created);
+    }
     setModalOpen(false);
   });
 
@@ -91,23 +131,15 @@ export default function Services() {
     form.setValue('laborCost', t.defaultLaborCost);
   };
 
-  const customerHistory = useMemo(() => {
-    if (!historyCustomer) return [];
-    return services
-      .filter(s => s.customerName === historyCustomer.name && s.motorcycleModel === historyCustomer.model)
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-  }, [services, historyCustomer]);
-
   const addPartToService = (partId: string) => {
     const existing = partsUsed.find(p => p.partId === partId);
     setPartsUsed(existing ? partsUsed.map(p => p.partId === partId ? { ...p, quantity: p.quantity + 1 } : p) : [...partsUsed, { partId, quantity: 1 }]);
   };
   const removePartFromService = (partId: string) => setPartsUsed(partsUsed.filter(p => p.partId !== partId));
 
-  const STATUS_STYLES = {
-    Pending: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20', icon: Clock },
-    Ongoing: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20', icon: Wrench },
-    Completed: { bg: 'bg-green-500/10', text: 'text-green-400', border: 'border-green-500/20', icon: CheckCircle2 },
+  const handleStatusChange = async (service: ServiceRecord, status: string) => {
+    const updated = await updateService(service.id, { status: status as 'Pending' | 'Ongoing' | 'Completed' });
+    updateItem(service.id, 'id', updated);
   };
 
   return (
@@ -115,7 +147,7 @@ export default function Services() {
       <motion.div {...fadeUp(0)} className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-white tracking-tight">Services</h2>
-          <p className="text-sm text-zinc-500 mt-1">{services.length} service records</p>
+          <p className="text-sm text-zinc-500 mt-1">{meta ? meta.total : services.length} service records</p>
         </div>
         <div className="flex gap-3">
           {canManageTypes && (
@@ -123,7 +155,7 @@ export default function Services() {
               <Settings2 className="w-4 h-4 mr-2" /> Service Types
             </Button>
           )}
-          <Button onClick={openAdd} size="sm" className="h-10 rounded-xl bg-white hover:bg-zinc-200 text-black text-sm font-semibold px-5">
+          <Button onClick={openAdd} size="sm" className="h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-white text-sm font-semibold px-5 transition-opacity">
             <Plus className="w-4 h-4 mr-2" /> New Service
           </Button>
         </div>
@@ -148,7 +180,11 @@ export default function Services() {
       </motion.div>
 
       <motion.div {...fadeUp(0.2)} className="space-y-3">
-        {filtered.map(service => {
+        {loading ? (
+          Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-20 bg-zinc-900/50 border border-zinc-800 rounded-2xl animate-pulse" />
+          ))
+        ) : filtered.map(service => {
           const style = STATUS_STYLES[service.status];
           const StatusIcon = style.icon;
           return (
@@ -167,7 +203,7 @@ export default function Services() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <select value={service.status} onChange={e => updateService(service.id, { status: e.target.value as 'Pending' | 'Ongoing' | 'Completed' })} className={`h-9 px-3 rounded-lg text-xs font-semibold border cursor-pointer focus:outline-none ${style.bg} ${style.text} ${style.border}`}>
+                  <select value={service.status} onChange={e => handleStatusChange(service, e.target.value)} className={`h-9 px-3 rounded-lg text-xs font-semibold border cursor-pointer focus:outline-none ${style.bg} ${style.text} ${style.border}`}>
                     <option value="Pending">Pending</option>
                     <option value="Ongoing">Ongoing</option>
                     <option value="Completed">Completed</option>
@@ -183,18 +219,17 @@ export default function Services() {
               </div>
               {service.partsUsed.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-zinc-800 flex flex-wrap gap-2">
-                  {service.partsUsed.map(pu => {
-                    const part = parts.find(p => p.id === pu.partId);
-                    return part ? (
-                      <span key={pu.partId} className="text-xs font-medium text-zinc-400 bg-zinc-800/50 px-2.5 py-1 rounded-lg border border-zinc-700">{part.name} x{pu.quantity}</span>
-                    ) : null;
-                  })}
+                  {service.partsUsed.map(pu => (
+                    <span key={pu.partId} className="text-xs font-medium text-zinc-400 bg-zinc-800/50 px-2.5 py-1 rounded-lg border border-zinc-700">
+                      Part #{pu.partId} x{pu.quantity}
+                    </span>
+                  ))}
                 </div>
               )}
             </div>
           );
         })}
-        {filtered.length === 0 && (
+        {!loading && filtered.length === 0 && (
           <div className="text-center py-16 text-sm text-zinc-500 bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl">
             <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-zinc-800/50 flex items-center justify-center">
               <Wrench className="w-8 h-8 text-zinc-600" />
@@ -203,6 +238,20 @@ export default function Services() {
           </div>
         )}
       </motion.div>
+
+      {meta && meta.lastPage > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-zinc-500">Page {meta.currentPage} of {meta.lastPage} — {meta.total} total</p>
+          <div className="flex items-center gap-1">
+            <button onClick={() => setPage(page - 1)} disabled={page <= 1} className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button onClick={() => setPage(page + 1)} disabled={page >= meta.lastPage} className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className="sm:max-w-lg rounded-2xl border-zinc-800 bg-zinc-900 p-6 max-h-[90vh] overflow-y-auto">
@@ -249,27 +298,27 @@ export default function Services() {
             <div>
               <Label className="text-xs font-medium text-zinc-400">Parts Used</Label>
               <div className="mt-1.5 flex flex-wrap gap-2">
-                {parts.filter(p => p.stock > 0).map(part => (
+                {availableParts.filter(p => p.stock > 0).map(part => (
                   <button type="button" key={part.id} onClick={() => addPartToService(part.id)} className="text-xs font-medium bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 px-3 py-1.5 rounded-lg border border-zinc-700 transition-colors">+ {part.name}</button>
                 ))}
               </div>
               {partsUsed.length > 0 && (
                 <div className="mt-2 space-y-1">
                   {partsUsed.map(pu => {
-                    const part = parts.find(p => p.id === pu.partId);
-                    return part ? (
+                    const part = availableParts.find(p => p.id === pu.partId);
+                    return (
                       <div key={pu.partId} className="flex items-center justify-between text-sm bg-zinc-800/50 px-3 py-2 rounded-lg border border-zinc-700">
-                        <span className="text-white">{part.name} x{pu.quantity}</span>
+                        <span className="text-white">{part ? `${part.name} x${pu.quantity}` : `Part #${pu.partId} x${pu.quantity}`}</span>
                         <button type="button" onClick={() => removePartFromService(pu.partId)} className="text-zinc-500 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
                       </div>
-                    ) : null;
+                    );
                   })}
                 </div>
               )}
             </div>
 
             <div className="flex gap-3 pt-2">
-              <Button type="submit" className="flex-1 h-10 rounded-xl bg-white hover:bg-zinc-200 text-black text-sm font-semibold">{editing ? 'Save Changes' : 'Create Record'}</Button>
+              <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-white text-sm font-semibold transition-opacity">{editing ? 'Save Changes' : 'Create Record'}</Button>
               <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-10 rounded-xl text-sm border-zinc-700 text-zinc-400">Cancel</Button>
             </div>
           </form>
@@ -300,7 +349,7 @@ export default function Services() {
           <form onSubmit={stForm.handleSubmit(values => { addServiceType(values); stForm.reset({ name: '', defaultLaborCost: 0 }); })} className="flex gap-2 pt-4 mt-4 border-t border-zinc-800">
             <Input {...stForm.register('name')} placeholder="Type name" className="flex-1 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white placeholder:text-zinc-500" />
             <Input type="number" {...stForm.register('defaultLaborCost', { valueAsNumber: true })} placeholder="₱" className="w-24 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white" />
-            <Button type="submit" className="h-10 rounded-xl bg-white text-black text-sm font-semibold px-5">Add</Button>
+            <Button type="submit" className="h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-white text-sm font-semibold px-5 transition-opacity">Add</Button>
           </form>
         </DialogContent>
       </Dialog>
@@ -342,7 +391,7 @@ export default function Services() {
           <DialogHeader><DialogTitle className="text-base font-semibold text-white">Delete Service?</DialogTitle></DialogHeader>
           <p className="text-sm text-zinc-400 mt-1">This will permanently remove this service record.</p>
           <div className="flex gap-3 pt-4">
-            <Button onClick={() => { if (confirmDelete) { deleteService(confirmDelete); setConfirmDelete(null); } }} variant="destructive" className="flex-1 h-10 rounded-xl text-sm font-semibold">Delete</Button>
+            <Button onClick={async () => { if (confirmDelete) { await deleteService(confirmDelete); removeItem(confirmDelete, 'id'); setConfirmDelete(null); } }} variant="destructive" className="flex-1 h-10 rounded-xl text-sm font-semibold">Delete</Button>
             <Button variant="outline" onClick={() => setConfirmDelete(null)} className="h-10 rounded-xl text-sm border-zinc-700 text-zinc-400">Cancel</Button>
           </div>
         </DialogContent>

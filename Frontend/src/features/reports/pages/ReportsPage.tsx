@@ -1,17 +1,26 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { TrendingUp, Package, Wrench, Download } from 'lucide-react';
-import { useData } from '@/shared/contexts/DataContext';
 import { inPeriod, type Period } from '@/shared/lib/period';
 import { downloadCSV, toCSV } from '@/shared/lib/csv';
+import { apiGet } from '@/shared/lib/api';
+import type { Part, ServiceRecord, Transaction } from '@/shared/types';
 
 type ReportType = 'sales' | 'inventory' | 'services';
 
 const PERIOD_LABEL: Record<Period, string> = { daily: 'Today', weekly: 'This week', monthly: 'This month', yearly: 'This year' };
 
 export default function Reports() {
-  const { parts, services, transactions } = useData();
+  const [parts, setParts] = useState<Part[]>([]);
+  const [services, setServices] = useState<ServiceRecord[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [reportType, setReportType] = useState<ReportType>('sales');
   const [period, setPeriod] = useState<Period>('daily');
+
+  useEffect(() => {
+    void apiGet<{ data: Part[] }>('/api/parts').then(r => setParts(r.data)).catch(() => {});
+    void apiGet<{ data: ServiceRecord[] }>('/api/services').then(r => setServices(r.data)).catch(() => {});
+    void apiGet<{ data: Transaction[] }>('/api/transactions').then(r => setTransactions(r.data)).catch(() => {});
+  }, []);
 
   const filteredTx = transactions.filter(t => inPeriod(t.createdAt, period));
   const filteredServices = services.filter(s => inPeriod(s.createdAt, period));

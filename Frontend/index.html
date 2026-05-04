@@ -3,7 +3,31 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MoSPAMS - Motorcycle Service & Parts Management</title>
+    <title>MoSPAMS - Motorcycle Service &amp; Parts Management</title>
+
+    <!-- PWA -->
+    <meta name="theme-color" content="#000000" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="MoSPAMS" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- SEO / Open Graph -->
+    <meta name="description" content="Motorcycle Service and Parts Management System" />
+
+    <!-- HTTP/2 preconnect — tell the browser early where API calls go -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Inline critical Inter font weights so text renders without FOIT -->
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+      href="/fonts/inter-latin-400-normal.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+      href="/fonts/inter-latin-600-normal.woff2" />
+
+    <!-- Preload the above-fold hero image on the landing page -->
+    <link rel="preload" as="image" href="/images/hero-bg.jpg" fetchpriority="high" />
   </head>
   <body>
     <div id="root"></div>
