@@ -37,7 +37,16 @@ type ApiItem<T> = { data: T };
 
 function showApiFailure(action: string, error: unknown) {
   console.error(`${action} failed`, error);
-  toast.error(`${action} was not saved. Start the Laravel API backend and try again.`);
+  const message = error instanceof Error ? error.message : 'Unknown error';
+  if (message.includes('401') || message.includes('Unauthenticated')) {
+    toast.error(`${action} failed: Please log in again.`);
+  } else if (message.includes('403') || message.includes('Forbidden')) {
+    toast.error(`${action} failed: You don't have permission.`);
+  } else if (message.includes('Failed to fetch') || message.includes('NetworkError')) {
+    toast.error(`${action} failed: Cannot connect to server. Check if backend is running.`);
+  } else {
+    toast.error(`${action} failed: ${message}`);
+  }
 }
 
 function useReferenceQuery<T>(key: string, path: string, enabled: boolean) {
