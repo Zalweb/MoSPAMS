@@ -29,6 +29,8 @@ export async function apiMutation<T = unknown>(path: string, method: ApiMethod, 
 }
 
 async function apiRequest<T>(path: string, method: ApiMethod | 'GET', body?: unknown): Promise<T> {
+  const isFormData = body instanceof FormData;
+  
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method,
     headers: {
@@ -36,9 +38,10 @@ async function apiRequest<T>(path: string, method: ApiMethod | 'GET', body?: unk
       'ngrok-skip-browser-warning': 'true',
       ...(REQUEST_HOST ? { 'X-Tenant-Host': REQUEST_HOST } : {}),
       ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-      ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+      // Don't set Content-Type for FormData - browser will set it with boundary
+      ...(body === undefined || isFormData ? {} : { 'Content-Type': 'application/json' }),
     },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
   });
 
   if (!response.ok) {
