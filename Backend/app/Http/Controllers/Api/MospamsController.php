@@ -911,6 +911,241 @@ class MospamsController extends Controller
         return response()->json(['data' => ['sales' => $sales, 'labor' => $labor, 'total' => $sales]]);
     }
 
+    public function dashboardStats(): JsonResponse
+    {
+        $shopId = $this->shopId();
+
+        // Basic counts
+        $totalJobsCompleted = DB::table('service_jobs')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->where('service_jobs.shop_id_fk', $shopId)
+            ->where('service_job_statuses.status_code', 'completed')
+            ->count();
+
+        $totalCustomers = DB::table('customers')->where('shop_id_fk', $shopId)->count();
+        $totalRevenue = (float) DB::table('sales')->where('shop_id_fk', $shopId)->sum('net_amount');
+
+        $totalParts = DB::table('parts')
+            ->join('part_statuses', 'part_statuses.part_status_id', '=', 'parts.part_status_id_fk')
+            ->where('parts.shop_id_fk', $shopId)
+            ->where('part_statuses.status_code', 'in_stock')
+            ->count();
+
+        $activeServices = DB::table('service_jobs')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->where('service_jobs.shop_id_fk', $shopId)
+            ->whereIn('service_job_statuses.status_code', ['pending', 'in_progress'])
+            ->count();
+
+        // Weekly revenue calculations
+        $thisWeekStart = now()->startOfWeek();
+        $lastWeekStart = now()->subWeek()->startOfWeek();
+        $lastWeekEnd = now()->subWeek()->endOfWeek();
+
+        $thisWeekRevenue = (float) DB::table('sales')
+            ->where('shop_id_fk', $shopId)
+            ->where('sale_date', '>=', $thisWeekStart)
+            ->sum('net_amount');
+
+        $lastWeekRevenue = (float) DB::table('sales')
+            ->where('shop_id_fk', $shopId)
+            ->whereBetween('sale_date', [$lastWeekStart, $lastWeekEnd])
+            ->sum('net_amount');
+
+        $weeklyRevenueChange = $lastWeekRevenue > 0 
+            ? (($thisWeekRevenue - $lastWeekRevenue) / $lastWeekRevenue) * 100 
+            : 0;
+
+        // Today vs Yesterday revenue
+        $todayRevenue = (float) DB::table('sales')
+            ->where('shop_id_fk', $shopId)
+            ->whereDate('sale_date', now()->toDateString())
+            ->sum('net_amount');
+
+        $yesterdayRevenue = (float) DB::table('sales')
+            ->where('shop_id_fk', $shopId)
+            ->whereDate('sale_date', now()->subDay()->toDateString())
+            ->sum('net_amount');
+
+        $dailyRevenueChange = $yesterdayRevenue > 0 
+            ? (($todayRevenue - $yesterdayRevenue) / $yesterdayRevenue) * 100 
+            : 0;
+
+        // Service completion rate
+        $totalServices = DB::table('service_jobs')->where('shop_id_fk', $shopId)->count();
+        $completionRate = $totalServices > 0 ? ($totalJobsCompleted / $totalServices) * 100 : 0;
+
+        // Active pipeline (pending + ongoing)
+        $pendingServices = DB::table('service_jobs')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->where('service_jobs.shop_id_fk', $shopId)
+            ->where('service_job_statuses.status_code', 'pending')
+            ->count();
+
+        $ongoingServices = DB::table('service_jobs')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->where('service_jobs.shop_id_fk', $shopId)
+            ->where('service_job_statuses.status_code', 'in_progress')
+            ->count();
+
+        $activePipeline = $pendingServices + $ongoingServices;
+
+        // Inventory metrics with category
+        $allParts = DB::table('parts')
+            ->join('categories', 'categories.category_id', '=', 'parts.category_id_fk')
+            ->where('parts.shop_id_fk', $shopId)
+            ->select('parts.*', 'categories.category_name')
+            ->get();
+        $lowStockParts = $allParts->filter(fn($p) => $p->stock_quantity <= $p->reorder_level);
+        $inventoryHealth = $allParts->count() > 0 
+            ? (($allParts->count() - $lowStockParts->count()) / $allParts->count()) * 100 
+            : 100;
+
+        $inventoryValue = $allParts->sum(fn($p) => $p->stock_quantity * $p->unit_price);
+
+        // Low stock with urgency levels and category
+        $lowStockWithUrgency = $lowStockParts->map(function($part) {
+            $urgency = $part->stock_quantity === 0 ? 'critical' 
+                : ($part->stock_quantity <= $part->reorder_level / 2 ? 'high' : 'medium');
+            return [
+                'part_id' => $part->part_id,
+                'part_name' => $part->part_name,
+                'category' => $part->category_name,
+                'stock' => (int) $part->stock_quantity,
+                'min_stock' => (int) $part->reorder_level,
+                'price' => (float) $part->unit_price,
+                'urgency' => $urgency,
+            ];
+        })->values();
+
+        // Average revenue per customer
+        $avgRevenuePerCustomer = $totalCustomers > 0 ? $totalRevenue / $totalCustomers : 0;
+
+        // 7-day revenue sparkline
+        $revenueSparkline = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->toDateString();
+            $amount = (float) DB::table('sales')
+                ->where('shop_id_fk', $shopId)
+                ->whereDate('sale_date', $date)
+                ->sum('net_amount');
+            $revenueSparkline[] = $amount;
+        }
+
+        // 7-day parts usage sparkline
+        $partsUsageSparkline = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->toDateString();
+            $count = DB::table('service_job_parts')
+                ->join('service_jobs', 'service_jobs.job_id', '=', 'service_job_parts.job_id_fk')
+                ->where('service_jobs.shop_id_fk', $shopId)
+                ->whereDate('service_jobs.job_date', $date)
+                ->count();
+            $partsUsageSparkline[] = $count;
+        }
+
+        // 30-day charts
+        $start = now()->subDays(29)->startOfDay();
+        $end = now()->endOfDay();
+
+        $revenueRows = DB::table('sales')
+            ->selectRaw('DATE(sale_date) as day, SUM(net_amount) as amount')
+            ->where('shop_id_fk', $shopId)
+            ->whereBetween('sale_date', [$start, $end])
+            ->groupByRaw('DATE(sale_date)')
+            ->pluck('amount', 'day');
+
+        $jobRows = DB::table('service_jobs')
+            ->selectRaw('DATE(job_date) as day, COUNT(*) as count')
+            ->where('shop_id_fk', $shopId)
+            ->whereBetween('job_date', [$start->toDateString(), $end->toDateString()])
+            ->groupByRaw('DATE(job_date)')
+            ->pluck('count', 'day');
+
+        $revenueByDay = [];
+        $jobsByDay = [];
+        for ($i = 29; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $revenueByDay[] = ['date' => $date, 'amount' => (float) ($revenueRows[$date] ?? 0)];
+            $jobsByDay[] = ['date' => $date, 'count' => (int) ($jobRows[$date] ?? 0)];
+        }
+
+        $statusRows = DB::table('service_jobs')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->where('service_jobs.shop_id_fk', $shopId)
+            ->selectRaw('LOWER(service_job_statuses.status_code) as code, COUNT(*) as count')
+            ->groupByRaw('LOWER(service_job_statuses.status_code)')
+            ->pluck('count', 'code');
+
+        $serviceStatus = [
+            'pending' => (int) ($statusRows['pending'] ?? 0),
+            'ongoing' => (int) ($statusRows['in_progress'] ?? 0),
+            'completed' => (int) ($statusRows['completed'] ?? 0),
+        ];
+
+        $paymentRows = DB::table('payments')
+            ->join('sales', 'sales.sale_id', '=', 'payments.sale_id_fk')
+            ->where('sales.shop_id_fk', $shopId)
+            ->selectRaw('LOWER(payment_method) as method, COUNT(*) as count')
+            ->groupByRaw('LOWER(payment_method)')
+            ->pluck('count', 'method');
+
+        $paymentMethods = [
+            'cash' => (int) ($paymentRows['cash'] ?? 0),
+            'gcash' => (int) ($paymentRows['gcash'] ?? 0),
+        ];
+
+        $topServiceTypes = DB::table('service_job_items')
+            ->join('service_jobs', 'service_jobs.job_id', '=', 'service_job_items.job_id_fk')
+            ->join('service_types', 'service_types.service_type_id', '=', 'service_job_items.service_type_id_fk')
+            ->where('service_jobs.shop_id_fk', $shopId)
+            ->selectRaw('service_types.service_name as name, COUNT(*) as count, SUM(service_job_items.labor_cost) as revenue')
+            ->groupBy('service_types.service_name')
+            ->orderByDesc('revenue')
+            ->limit(5)
+            ->get()
+            ->map(fn ($row) => [
+                'name' => $row->name,
+                'count' => (int) $row->count,
+                'revenue' => (float) $row->revenue,
+            ])
+            ->values();
+
+        return response()->json([
+            'summary' => [
+                'total_jobs_completed' => $totalJobsCompleted,
+                'total_customers' => $totalCustomers,
+                'total_revenue' => $totalRevenue,
+                'total_parts' => $totalParts,
+                'active_services' => $activeServices,
+                'this_week_revenue' => $thisWeekRevenue,
+                'last_week_revenue' => $lastWeekRevenue,
+                'weekly_revenue_change' => round($weeklyRevenueChange, 2),
+                'today_revenue' => $todayRevenue,
+                'yesterday_revenue' => $yesterdayRevenue,
+                'daily_revenue_change' => round($dailyRevenueChange, 2),
+                'completion_rate' => round($completionRate, 2),
+                'active_pipeline' => $activePipeline,
+                'pending_services' => $pendingServices,
+                'ongoing_services' => $ongoingServices,
+                'inventory_health' => round($inventoryHealth, 2),
+                'inventory_value' => $inventoryValue,
+                'low_stock_count' => $lowStockParts->count(),
+                'avg_revenue_per_customer' => round($avgRevenuePerCustomer, 2),
+            ],
+            'charts' => [
+                'revenue_by_day' => $revenueByDay,
+                'jobs_by_day' => $jobsByDay,
+                'service_status' => $serviceStatus,
+                'payment_methods' => $paymentMethods,
+                'top_service_types' => $topServiceTypes,
+                'revenue_sparkline_7d' => $revenueSparkline,
+                'parts_usage_sparkline_7d' => $partsUsageSparkline,
+            ],
+            'low_stock' => $lowStockWithUrgency,
+        ]);
+    }
+
     private function partById(int $id): array
     {
         $part = DB::table('parts')

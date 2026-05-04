@@ -83,7 +83,7 @@ export function useDashboardData(): DashboardData {
               price: number;
               urgency: 'critical' | 'high' | 'medium';
             }>;
-          }>('/api/stats');
+          }>('/api/dashboard/stats');
 
           const incomeResponse = await apiGet<{
             data: { sales: number; labor: number; total: number };

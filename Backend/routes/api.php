@@ -102,6 +102,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/reports/services', [MospamsController::class, 'servicesReport'])->middleware('role:Owner,Staff');
         Route::get('/reports/income', [MospamsController::class, 'incomeReport'])->middleware('role:Owner,Staff');
 
+        Route::get('/dashboard/stats', [MospamsController::class, 'dashboardStats'])->middleware('role:Owner,Staff');
+
         Route::get('/role-requests', [RoleRequestController::class, 'index'])->middleware('role:Owner');
         Route::patch('/role-requests/{roleRequest}/approve', [RoleRequestController::class, 'approve'])->middleware('role:Owner');
         Route::patch('/role-requests/{roleRequest}/deny', [RoleRequestController::class, 'deny'])->middleware('role:Owner');
