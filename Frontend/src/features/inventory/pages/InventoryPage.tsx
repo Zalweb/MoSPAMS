@@ -108,7 +108,7 @@ export default function Inventory() {
   });
 
   const onSubmitCategory = categoryForm.handleSubmit(async (values) => {
-    await addCategory(values.name, values.description || '');
+    await addCategory(values);
     categoryForm.reset();
     setCategoryModalOpen(false);
   });
