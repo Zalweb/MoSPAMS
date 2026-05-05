@@ -8,6 +8,8 @@ import type {
   SuperAdminShop,
 } from '@/shared/types';
 
+export type { SuperAdminShop };
+
 export interface PlatformAnalytics {
   summary: {
     platformSalesRevenue: number;
