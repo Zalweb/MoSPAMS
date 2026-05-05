@@ -5,7 +5,7 @@ echo "Starting MoSPAMS Backend..."
 
 # Wait for MySQL to be ready
 echo "Waiting for MySQL..."
-until php artisan db:monitor --max-attempts=30 2>/dev/null; do
+until mysqladmin ping -h"$DB_HOST" -u"$DB_USERNAME" -p"$DB_PASSWORD" --skip-ssl --silent 2>/dev/null; do
     echo "MySQL is unavailable - sleeping"
     sleep 2
 done
