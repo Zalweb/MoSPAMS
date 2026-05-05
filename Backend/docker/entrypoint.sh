@@ -34,7 +34,10 @@ fi
 # Clear and cache config
 echo "Optimizing application..."
 echo "Clearing config cache..."
-php artisan config:clear || { echo "config:clear failed"; exit 1; }
+if ! php artisan config:clear 2>&1; then
+    echo "ERROR: config:clear failed with above error"
+    exit 1
+fi
 echo "Clearing app cache..."
 php artisan cache:clear || { echo "cache:clear failed"; exit 1; }
 echo "Clearing route cache..."
