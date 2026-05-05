@@ -55,9 +55,6 @@ export default function ReportsSection() {
 
   const xLabels = ['15 Mar', '30 Mar', 'Today'];
 
-  const metricPlaceholder = 'Unavailable';
-  const data = { charts: { top_service_types: [1, 2, 3, 4, 5] } };
-
   const reports = [
     {
       icon: DollarSign,
@@ -90,7 +87,7 @@ export default function ReportsSection() {
       icon: Star,
       title: 'Most Used Parts & Services',
       description: 'Identify top-selling parts and most-requested services to optimize your stock.',
-      metric: String(data?.charts.top_service_types.length ?? 0),
+      metric: '5',
       metricLabel: 'Items Ranked',
       trend: 'Top services',
       bars: jobBars,

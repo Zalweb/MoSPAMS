@@ -36,7 +36,7 @@ export default function DashboardPage() {
   const lowStock = metrics?.lowStock?.map(item => ({
     id: item.part_id.toString(),
     name: item.part_name,
-    category: item.category || '',
+    category: '',
     stock: item.stock,
     minStock: item.min_stock,
     price: item.price,
@@ -148,7 +148,7 @@ export default function DashboardPage() {
             key={kpi.title}
             title={kpi.title}
             value={kpi.value}
-            change={kpi.change}
+            change={'change' in kpi ? kpi.change : undefined}
             icon={kpi.icon}
             loading={loading}
             delay={index * 0.1}

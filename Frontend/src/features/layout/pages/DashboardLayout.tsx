@@ -3,8 +3,8 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Package, Wrench, ShoppingCart,
-  BarChart3, Shield, LogOut, Menu, X, Bell, ClipboardCheck,
-  Home, Calendar, CreditCard, Users, ScrollText, Settings, Bike, Search, Sun, Moon,
+  BarChart3, Shield, LogOut, Menu, X, ClipboardCheck,
+  Home, Calendar, CreditCard, ScrollText, Settings, Bike,
 } from 'lucide-react';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { NAV_ACCESS } from '@/shared/lib/permissions';
@@ -34,10 +34,8 @@ export default function DashboardLayout() {
   const location = useLocation();
   const { theme, setTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [bellOpen, setBellOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
-  const lowStock: { id: string; name: string; category: string; stock: number }[] = [];
   const role = normalizeRole(user?.role);
   const visibleNav = navItems.filter(item => role ? (NAV_ACCESS[item.to] ?? []).includes(role) : false);
 
@@ -142,7 +140,7 @@ export default function DashboardLayout() {
               {/* Profile */}
               <div className="relative">
                 <motion.button
-                  onClick={() => { setProfileOpen(o => !o); setBellOpen(false); }}
+                  onClick={() => { setProfileOpen(o => !o); }}
                   className="flex items-center gap-3 pl-1 pr-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-all"
                   whileHover={{ scale: 1.02 }}
                 >
