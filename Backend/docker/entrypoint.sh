@@ -42,6 +42,9 @@ echo "Setting permissions..."
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
+# Create supervisor log directory
+mkdir -p /var/log/supervisor
+
 echo "MoSPAMS Backend is ready!"
 
 # Execute the main command
