@@ -135,6 +135,7 @@ class ProductionSeeder extends Seeder
                 'shop_id_fk'        => null,
                 'full_name'         => 'Super Admin',
                 'email'             => 'superadmin@mospams.shop',
+                'username'          => 'superadmin',
                 'password_hash'     => Hash::make('Admin@1234'),
                 'user_status_id_fk' => $activeStatusId,
                 'created_at'        => now(),
