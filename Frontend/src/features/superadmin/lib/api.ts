@@ -3,22 +3,10 @@ import type {
   PlatformAdmin,
   PlatformAuditLog,
   ShopSubscription,
+  SubscriptionPayment,
   SubscriptionPlan,
+  SuperAdminShop,
 } from '@/shared/types';
-import type { SubscriptionPayment } from '@/shared/types';
-
-export interface SuperAdminShop {
-  shopId: number;
-  shopName: string;
-  email: string | null;
-  phone: string | null;
-  address: string | null;
-  statusCode: string;
-  statusName: string;
-  createdAt: string | null;
-  ownerName: string | null;
-  ownerEmail: string | null;
-}
 
 export interface PlatformAnalytics {
   summary: {

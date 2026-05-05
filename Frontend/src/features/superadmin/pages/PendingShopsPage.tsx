@@ -117,11 +117,11 @@ export default function PendingShopsPage() {
               <div className="space-y-2 mb-6">
                 <div className="flex items-center gap-2 text-sm text-zinc-400">
                   <User className="w-4 h-4" strokeWidth={2} />
-                  <span>{shop.applicantName || 'N/A'}</span>
+                  <span>{shop.applicant?.name || 'N/A'}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-zinc-400">
                   <Mail className="w-4 h-4" strokeWidth={2} />
-                  <span className="truncate">{shop.applicantEmail || 'N/A'}</span>
+                  <span className="truncate">{shop.applicant?.email || 'N/A'}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-zinc-400">
                   <Calendar className="w-4 h-4" strokeWidth={2} />
@@ -192,11 +192,11 @@ export default function PendingShopsPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-sm text-zinc-500">Name:</span>
-                    <span className="text-sm text-white font-medium">{selectedShop.applicantName || 'N/A'}</span>
+                    <span className="text-sm text-white font-medium">{selectedShop.applicant?.name || 'N/A'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-zinc-500">Email:</span>
-                    <span className="text-sm text-white">{selectedShop.applicantEmail || 'N/A'}</span>
+                    <span className="text-sm text-white">{selectedShop.applicant?.email || 'N/A'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-zinc-500">Applied On:</span>
