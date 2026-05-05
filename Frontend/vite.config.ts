@@ -33,10 +33,6 @@ export default defineConfig({
           if (id.includes('node_modules/react-router') || id.includes('node_modules/@remix-run')) {
             return 'vendor-router';
           }
-          // Charts (recharts + chart.js are heavy)
-          if (id.includes('node_modules/recharts') || id.includes('node_modules/chart.js') || id.includes('node_modules/react-chartjs-2') || id.includes('node_modules/d3-')) {
-            return 'vendor-charts';
-          }
           // Animation
           if (id.includes('node_modules/framer-motion')) {
             return 'vendor-motion';
@@ -57,7 +53,7 @@ export default defineConfig({
           if (id.includes('node_modules/@tanstack')) {
             return 'vendor-query';
           }
-          // Everything else in node_modules → common vendor chunk
+          // Charts + d3 + everything else in one chunk to avoid circular deps
           if (id.includes('node_modules/')) {
             return 'vendor-misc';
           }
