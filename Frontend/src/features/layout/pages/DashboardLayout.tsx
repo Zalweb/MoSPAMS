@@ -9,7 +9,6 @@ import {
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { NAV_ACCESS } from '@/shared/lib/permissions';
 import { normalizeRole } from '@/shared/lib/roles';
-import { useTheme } from 'next-themes';
 
 const navItems: { label: string; to: string; icon: typeof LayoutDashboard; end?: boolean }[] = [
   { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard, end: true },

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle, XCircle, Eye, AlertCircle, Store, Calendar, Mail, User } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { getShops, approveShopRegistration, rejectShopRegistration, type SuperAdminShop } from '@/features/superadmin/lib/api';
+import { getShops, approveShopRegistration, rejectShopRegistration } from '@/features/superadmin/lib/api';
+import type { SuperAdminShop } from '@/shared/types';
 import { toast } from 'sonner';
 
 export default function PendingShopsPage() {

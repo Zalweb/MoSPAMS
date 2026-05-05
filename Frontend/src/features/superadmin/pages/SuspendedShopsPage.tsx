@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Shield, RefreshCw, AlertTriangle, Store, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { getShops, setShopStatus, type SuperAdminShop } from '@/features/superadmin/lib/api';
+import { getShops, setShopStatus } from '@/features/superadmin/lib/api';
+import type { SuperAdminShop } from '@/shared/types';
 import { toast } from 'sonner';
 
 export default function SuspendedShopsPage() {
