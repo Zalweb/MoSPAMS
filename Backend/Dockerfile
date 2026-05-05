@@ -20,10 +20,16 @@ RUN apk add --no-cache \
     libwebp-dev \
     libpng \
     libjpeg-turbo \
-    freetype
+    freetype \
+    zlib-dev \
+    libxml2-dev \
+    bzip2-dev
 
 # Install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+RUN docker-php-ext-configure gd \
+        --with-freetype=/usr/include/ \
+        --with-jpeg=/usr/include/ \
+        --with-webp=/usr/include/ \
     && docker-php-ext-install -j$(nproc) \
     pdo_mysql \
     mbstring \
@@ -76,7 +82,20 @@ RUN apk add --no-cache \
     libstdc++
 
 # Install PHP extensions (same as builder)
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+RUN apk add --no-cache \
+    libpng-dev \
+    libzip-dev \
+    oniguruma-dev \
+    freetype-dev \
+    libjpeg-turbo-dev \
+    libwebp-dev \
+    zlib-dev \
+    libxml2-dev \
+    bzip2-dev \
+    && docker-php-ext-configure gd \
+        --with-freetype=/usr/include/ \
+        --with-jpeg=/usr/include/ \
+        --with-webp=/usr/include/ \
     && docker-php-ext-install -j$(nproc) \
     pdo_mysql \
     mbstring \
