@@ -7,7 +7,6 @@ import {
   Store,
   TrendingDown,
   TrendingUp,
-  Users,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getPlatformAnalytics, type PlatformAnalytics } from '@/features/superadmin/lib/api';

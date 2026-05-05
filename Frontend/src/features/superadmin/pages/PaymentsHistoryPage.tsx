@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { FileText, Calendar, DollarSign, Filter, Download } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { getSubscriptionPayments, type SubscriptionPayment } from '@/features/superadmin/lib/api';
+import { getSubscriptionPayments } from '@/features/superadmin/lib/api';
+import type { SubscriptionPayment } from '@/shared/types';
 import { toast } from 'sonner';
 
 const CURRENCY_PREFIX = '\u20b1';

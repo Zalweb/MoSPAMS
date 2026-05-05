@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Store, User, Mail, Phone, MapPin, ArrowLeft, CheckCircle, Copy } from 'lucide-react';
+import { Store, User, ArrowLeft, CheckCircle, Copy } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
 import { createShop } from '@/features/superadmin/lib/api';

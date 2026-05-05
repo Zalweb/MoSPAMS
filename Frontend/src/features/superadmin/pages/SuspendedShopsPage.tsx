@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Shield, RefreshCw, Eye, AlertTriangle, Store, Calendar } from 'lucide-react';
+import { Shield, RefreshCw, AlertTriangle, Store, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getShops, setShopStatus, type SuperAdminShop } from '@/features/superadmin/lib/api';
 import { toast } from 'sonner';

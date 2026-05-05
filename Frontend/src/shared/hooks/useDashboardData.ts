@@ -85,10 +85,6 @@ export function useDashboardData(): DashboardData {
             }>;
           }>('/api/dashboard/stats');
 
-          const incomeResponse = await apiGet<{
-            data: { sales: number; labor: number; total: number };
-          }>('/api/reports/income');
-
           const totalExpenses = statsResponse.summary.total_revenue * 0.3;
 
           setMetrics({

@@ -20,7 +20,7 @@ interface ShopBranding {
 }
 
 export default function ShopBrandingSettings() {
-  const { shop, refetch } = useShop();
+  const { refetch } = useShop();
   const [branding, setBranding] = useState<ShopBranding | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -90,8 +90,6 @@ export default function ShopBrandingSettings() {
       });
 
       if (!response.ok) throw new Error('Upload failed');
-
-      const data = await response.json();
       toast.success('Logo uploaded successfully');
       await refetch();
       await fetchBranding();

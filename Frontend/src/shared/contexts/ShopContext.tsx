@@ -1,4 +1,4 @@
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, type ReactNode } from 'react';
 import { useTenantBranding } from './TenantBrandingContext';
 import type { ShopBranding } from '@/shared/types/shop';
 
