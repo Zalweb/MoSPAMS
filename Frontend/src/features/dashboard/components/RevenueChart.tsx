@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { TrendingUp } from 'lucide-react';
 
 interface RevenueChartProps {
   data: Array<{ date: string; amount: number }>;
