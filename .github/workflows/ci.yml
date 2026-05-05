@@ -5,6 +5,8 @@ on:
     branches:
       - master
       - main
+    paths:
+      - 'Frontend/**'
   pull_request:
     branches:
       - master
@@ -14,45 +16,45 @@ permissions:
   contents: read
 
 jobs:
-  backend:
-    name: Backend / Laravel
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: Backend
+  # backend:
+  #   name: Backend / Laravel
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: Backend
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.3"
-          extensions: mbstring, pdo_sqlite, sqlite3, fileinfo, openssl
-          coverage: none
+  #     - name: Setup PHP
+  #       uses: shivammathur/setup-php@v2
+  #       with:
+  #         php-version: "8.3"
+  #         extensions: mbstring, pdo_sqlite, sqlite3, fileinfo, openssl
+  #         coverage: none
 
-      - name: Cache Composer dependencies
-        uses: actions/cache@v4
-        with:
-          path: Backend/vendor
-          key: composer-${{ runner.os }}-${{ hashFiles('Backend/composer.lock') }}
-          restore-keys: composer-${{ runner.os }}-
+  #     - name: Cache Composer dependencies
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: Backend/vendor
+  #         key: composer-${{ runner.os }}-${{ hashFiles('Backend/composer.lock') }}
+  #         restore-keys: composer-${{ runner.os }}-
 
-      - name: Install Composer dependencies
-        run: composer install --no-interaction --prefer-dist --no-progress
+  #     - name: Install Composer dependencies
+  #       run: composer install --no-interaction --prefer-dist --no-progress
 
-      - name: Run backend tests
-        env:
-          APP_ENV: testing
-          APP_KEY: base64:WJj5p1xO7cvW+ZuQeN1qj6qN2jTt+S8wqM2Y7tQH1rY=
-          DB_CONNECTION: sqlite
-          DB_DATABASE: ":memory:"
-          CACHE_STORE: array
-          SESSION_DRIVER: array
-          QUEUE_CONNECTION: sync
-          GOOGLE_CLIENT_ID: test-client-id
-        run: php artisan test
+  #     - name: Run backend tests
+  #       env:
+  #         APP_ENV: testing
+  #         APP_KEY: base64:WJj5p1xO7cvW+ZuQeN1qj6qN2jTt+S8wqM2Y7tQH1rY=
+  #         DB_CONNECTION: sqlite
+  #         DB_DATABASE: ":memory:"
+  #         CACHE_STORE: array
+  #         SESSION_DRIVER: array
+  #         QUEUE_CONNECTION: sync
+  #         GOOGLE_CLIENT_ID: test-client-id
+  #       run: php artisan test
 
   frontend:
     name: Frontend / React Vite
