@@ -356,7 +356,7 @@ export default function DashboardPage() {
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-zinc-500">{part.category} • ₱{part.price.toLocaleString()}/unit</p>
+                        <p className="text-xs text-zinc-500">₱{part.price.toLocaleString()}/unit</p>
                       </div>
                       <div className="flex items-center gap-3 ml-4">
                         <div className="text-right">

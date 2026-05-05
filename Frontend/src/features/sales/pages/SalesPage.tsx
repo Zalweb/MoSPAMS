@@ -124,7 +124,7 @@ export default function Sales() {
           { label: 'Transactions', value: filteredTx.length.toString(), color: 'blue' },
           { label: 'Cash', value: `₱${cashTotal.toLocaleString()}`, color: 'green' },
           { label: 'GCash', value: `₱${gcashTotal.toLocaleString()}`, color: 'purple' },
-        ].map((s, i) => (
+        ].map((s) => (
           <div key={s.label} className={`rounded-2xl p-5 ${s.dark ? 'bg-zinc-900/50 border border-zinc-800' : s.color === 'blue' ? 'bg-blue-500/10 border border-blue-500/20' : s.color === 'green' ? 'bg-green-500/10 border border-green-500/20' : 'bg-violet-500/10 border border-violet-500/20'}`}>
             <p className="text-xs font-medium text-zinc-400">{s.label}</p>
             <p className="text-2xl font-bold text-white mt-1 tracking-tight">{s.value}</p>
