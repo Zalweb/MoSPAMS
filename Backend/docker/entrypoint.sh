@@ -31,26 +31,8 @@ if [ "$SEED_DATABASE" = "true" ]; then
     php artisan db:seed --force --no-interaction
 fi
 
-# Clear and cache config
-echo "Optimizing application..."
-echo "Clearing config cache..."
-if ! php artisan config:clear 2>&1; then
-    echo "ERROR: config:clear failed with above error"
-    exit 1
-fi
-echo "Clearing app cache..."
-php artisan cache:clear || { echo "cache:clear failed"; exit 1; }
-echo "Clearing route cache..."
-php artisan route:clear || { echo "route:clear failed"; exit 1; }
-echo "Clearing view cache..."
-php artisan view:clear || { echo "view:clear failed"; exit 1; }
-
-echo "Caching config..."
-php artisan config:cache || { echo "config:cache failed"; exit 1; }
-echo "Caching routes..."
-php artisan route:cache || { echo "route:cache failed"; exit 1; }
-echo "Caching views..."
-php artisan view:cache || { echo "view:cache failed"; exit 1; }
+# Clear and cache config (skip for now to get app running)
+echo "Skipping optimization for initial startup..."
 
 # Create storage link
 php artisan storage:link || true
