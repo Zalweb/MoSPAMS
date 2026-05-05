@@ -33,14 +33,21 @@ fi
 
 # Clear and cache config
 echo "Optimizing application..."
-php artisan config:clear
-php artisan cache:clear
-php artisan route:clear
-php artisan view:clear
+echo "Clearing config cache..."
+php artisan config:clear || { echo "config:clear failed"; exit 1; }
+echo "Clearing app cache..."
+php artisan cache:clear || { echo "cache:clear failed"; exit 1; }
+echo "Clearing route cache..."
+php artisan route:clear || { echo "route:clear failed"; exit 1; }
+echo "Clearing view cache..."
+php artisan view:clear || { echo "view:clear failed"; exit 1; }
 
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+echo "Caching config..."
+php artisan config:cache || { echo "config:cache failed"; exit 1; }
+echo "Caching routes..."
+php artisan route:cache || { echo "route:cache failed"; exit 1; }
+echo "Caching views..."
+php artisan view:cache || { echo "view:cache failed"; exit 1; }
 
 # Create storage link
 php artisan storage:link || true
