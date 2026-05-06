@@ -62,7 +62,7 @@ function applyBranding(branding: TenantBranding) {
   }
   themeMeta.setAttribute('content', branding.primaryColor || '#3B82F6');
 
-  const href = branding.logoUrl || '/favicon.ico';
+  const href = branding.logoUrl || '/images/logo.png';
   let iconLink = document.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
   if (!iconLink) {
     iconLink = document.createElement('link');

@@ -64,13 +64,11 @@ export function DashboardHeader() {
         </button>
 
         {/* User Avatar */}
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[rgb(var(--color-primary-rgb))]/20 to-[rgb(var(--color-secondary-rgb))]/20 border border-[rgb(var(--color-primary-rgb))]/30 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-xl bg-zinc-900/50 border border-zinc-800/50 flex items-center justify-center overflow-hidden">
           {shop?.logoUrl ? (
             <img src={shop.logoUrl} alt={shop.shopName} className="w-full h-full rounded-xl object-cover" loading="lazy" decoding="async" />
           ) : (
-            <span className="text-sm font-semibold text-[rgb(var(--color-primary-rgb))]">
-              {user?.name?.charAt(0).toUpperCase() || 'U'}
-            </span>
+            <img src="/images/logo.png" alt="MoSPAMS" className="w-7 h-7 object-contain" loading="lazy" decoding="async" />
           )}
         </div>
       </div>

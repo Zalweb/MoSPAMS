@@ -93,8 +93,8 @@ export default function HeroSection() {
             {/* Dashboard Header */}
             <div className="relative flex items-center justify-between mb-6 pb-4 border-b border-zinc-800/50">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg">
-                  <span className="text-black text-sm font-bold">Mo</span>
+                <div className="w-10 h-10 rounded-xl bg-white/5 border border-zinc-700/50 flex items-center justify-center shadow-lg overflow-hidden">
+                  <img src="/images/logo.png" alt="MoSPAMS" className="w-8 h-8 object-contain" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-white">MoSPAMS Dashboard</p>

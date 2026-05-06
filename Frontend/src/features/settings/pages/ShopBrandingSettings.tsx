@@ -176,8 +176,15 @@ export default function ShopBrandingSettings() {
               </button>
             </div>
           ) : (
-            <div className="w-24 h-24 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center">
-              <Upload className="w-8 h-8 text-zinc-600" />
+            <div className="relative w-24 h-24 rounded-xl bg-zinc-800/50 border border-zinc-700 flex items-center justify-center overflow-hidden">
+              <img
+                src="/images/logo.png"
+                alt="Default MoSPAMS logo"
+                className="w-20 h-20 object-contain opacity-60"
+                loading="lazy"
+                decoding="async"
+              />
+              <span className="absolute bottom-1 left-0 right-0 text-center text-[9px] text-zinc-500 font-medium">Default</span>
             </div>
           )}
 

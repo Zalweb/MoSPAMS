@@ -112,8 +112,8 @@ export default function SuperAdminLayout() {
         }`}
       >
         <div className="flex items-center gap-3 px-6 h-[70px] border-b border-zinc-800 shrink-0">
-          <div className="w-8 h-8 rounded-xl bg-zinc-800 text-white border border-zinc-700 flex items-center justify-center text-sm font-bold">
-            SA
+          <div className="w-8 h-8 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center overflow-hidden shrink-0">
+            <img src="/images/logo.png" alt="MoSPAMS" className="w-6 h-6 object-contain" />
           </div>
           <div>
             <span className="text-[15px] font-bold text-white tracking-tight leading-none block">MoSPAMS</span>
