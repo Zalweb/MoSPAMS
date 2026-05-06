@@ -35,7 +35,6 @@ async function apiRequest<T>(path: string, method: ApiMethod | 'GET', body?: unk
     method,
     headers: {
       Accept: 'application/json',
-      'ngrok-skip-browser-warning': 'true',
       ...(REQUEST_HOST ? { 'X-Tenant-Host': REQUEST_HOST } : {}),
       ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
       // Don't set Content-Type for FormData - browser will set it with boundary
