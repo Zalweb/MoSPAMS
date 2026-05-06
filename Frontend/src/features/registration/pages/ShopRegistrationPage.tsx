@@ -64,6 +64,10 @@ export default function ShopRegistrationPage() {
     shopName: string;
     subdomain: string;
     invitationCode: string;
+    ownerEmail: string;
+    temporaryPassword: string;
+    trialDays: number;
+    trialEndsAt: string;
   } | null>(null);
 
   const [form, setForm] = useState<RegistrationForm>({
@@ -151,9 +155,13 @@ export default function ShopRegistrationPage() {
         shopName: data.data.shopName,
         subdomain: data.data.subdomain,
         invitationCode: data.data.invitationCode,
+        ownerEmail: data.data.ownerEmail,
+        temporaryPassword: data.data.temporaryPassword,
+        trialDays: data.data.trialDays,
+        trialEndsAt: data.data.trialEndsAt,
       });
       setStep('success');
-      toast.success('Registration submitted successfully!');
+      toast.success('Your shop is ready!');
     } catch (error) {
       console.error('Registration error:', error);
       toast.error(error instanceof Error ? error.message : 'Registration failed. Please try again.');
@@ -163,9 +171,12 @@ export default function ShopRegistrationPage() {
   };
 
   if (step === 'success' && registrationResult) {
+    const trialEnd = new Date(registrationResult.trialEndsAt).toLocaleDateString('en-US', {
+      year: 'numeric', month: 'long', day: 'numeric',
+    });
+
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
-        {/* Background effects */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-green-500/5 rounded-full blur-3xl" />
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl" />
@@ -176,71 +187,73 @@ export default function ShopRegistrationPage() {
             <div className="w-16 h-16 bg-green-500/10 border border-green-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Check className="w-8 h-8 text-green-400" strokeWidth={2} />
             </div>
-            <h1 className="text-3xl font-bold text-white mb-2">Registration Submitted!</h1>
-            <p className="text-zinc-400">Your shop registration is under review</p>
+            <h1 className="text-3xl font-bold text-white mb-2">Your Shop is Ready!</h1>
+            <p className="text-zinc-400">
+              {registrationResult.trialDays}-day free trial active &mdash; expires {trialEnd}
+            </p>
           </div>
 
-          <div className="bg-zinc-800/30 rounded-2xl border border-zinc-700/30 p-6 mb-6">
-            <h2 className="font-semibold text-white mb-4">Your Shop Details:</h2>
-            <div className="space-y-4">
+          {/* Temporary login credentials */}
+          <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-6 mb-6">
+            <h2 className="font-semibold text-green-400 mb-4">Your Login Credentials</h2>
+            <div className="space-y-3">
               <div>
-                <p className="text-sm text-zinc-500 mb-1">Shop Name</p>
+                <p className="text-xs text-zinc-500 mb-1">Email</p>
+                <p className="font-mono text-sm text-white bg-zinc-800/50 rounded-lg px-3 py-2 border border-zinc-700/30">
+                  {registrationResult.ownerEmail}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-zinc-500 mb-1">Temporary Password</p>
+                <p className="font-mono font-bold text-lg text-white bg-zinc-800/50 rounded-lg px-3 py-2 border border-zinc-700/30 tracking-widest">
+                  {registrationResult.temporaryPassword}
+                </p>
+              </div>
+            </div>
+            <p className="text-xs text-zinc-500 mt-3">
+              Save this password — it won't be shown again. Change it after your first login.
+            </p>
+          </div>
+
+          {/* Shop details */}
+          <div className="bg-zinc-800/30 rounded-2xl border border-zinc-700/30 p-6 mb-6">
+            <h2 className="font-semibold text-white mb-4">Shop Details</h2>
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs text-zinc-500 mb-1">Shop Name</p>
                 <p className="font-medium text-white">{registrationResult.shopName}</p>
               </div>
               <div>
-                <p className="text-sm text-zinc-500 mb-1">Your Shop URL</p>
+                <p className="text-xs text-zinc-500 mb-1">Shop URL</p>
                 <p className="font-medium text-blue-400">
                   https://{registrationResult.subdomain}.mospams.shop
                 </p>
               </div>
               <div>
-                <p className="text-sm text-zinc-500 mb-1">Invitation Code</p>
-                <p className="font-mono font-bold text-xl text-white bg-zinc-800/50 rounded-xl px-4 py-3 border border-zinc-700/30">
+                <p className="text-xs text-zinc-500 mb-1">Staff Invitation Code</p>
+                <p className="font-mono font-bold text-lg text-white bg-zinc-800/50 rounded-lg px-3 py-2 border border-zinc-700/30">
                   {registrationResult.invitationCode}
                 </p>
-                <p className="text-xs text-zinc-500 mt-2">
-                  Save this code! You'll need it to create your account after approval.
+                <p className="text-xs text-zinc-500 mt-1">
+                  Share this code with staff members to let them join your shop.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-6 mb-6">
-            <h3 className="font-semibold text-blue-400 mb-3">What happens next?</h3>
-            <ol className="space-y-3 text-sm text-zinc-400">
-              <li className="flex gap-3">
-                <span className="font-semibold text-blue-400">1.</span>
-                <span>Our team will review your application (usually within 24 hours)</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="font-semibold text-blue-400">2.</span>
-                <span>You'll receive an email when your shop is activated</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="font-semibold text-blue-400">3.</span>
-                <span>SuperAdmin will provision your Owner account and share temporary login credentials</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="font-semibold text-blue-400">4.</span>
-                <span>Start your 14-day free trial!</span>
-              </li>
-            </ol>
-          </div>
-
           <div className="text-center">
-            <p className="text-sm text-zinc-500 mb-4">
-              Questions? Contact us at{' '}
-              <a href="mailto:support@mospams.shop" className="text-blue-400 hover:text-blue-300 transition-colors">
-                support@mospams.shop
-              </a>
-            </p>
             <button
-              onClick={() => navigate('/')}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-zinc-800/50 border border-zinc-700/50 text-white font-medium hover:bg-zinc-800 transition-all"
+              onClick={() => navigate(`/`)}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white text-black font-semibold hover:bg-zinc-100 transition-all"
             >
-              <ArrowLeft className="w-4 h-4" strokeWidth={2} />
-              Back to Home
+              Go to Login
             </button>
+            <p className="text-sm text-zinc-500 mt-4">
+              Log in at{' '}
+              <span className="text-blue-400">
+                https://{registrationResult.subdomain}.mospams.shop
+              </span>
+            </p>
           </div>
         </div>
       </div>
@@ -476,7 +489,7 @@ export default function ShopRegistrationPage() {
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Submitting...
+                  Creating your shop...
                 </span>
               ) : (
                 'Start Free Trial'
@@ -484,7 +497,7 @@ export default function ShopRegistrationPage() {
             </button>
 
             <p className="text-center text-sm text-zinc-500 mt-4">
-              Your shop will be reviewed and activated within 24 hours
+              No credit card required &mdash; 14-day free trial, instant access
             </p>
           </div>
         </form>
