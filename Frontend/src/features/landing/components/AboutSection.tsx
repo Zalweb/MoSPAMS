@@ -22,8 +22,8 @@ const BENEFITS = [
 ];
 
 const STATS = [
-  { value: '100%', label: 'Web-based' },
-  { value: '2', label: 'User Roles' },
+  { value: '100%', label: 'Cloud-Based' },
+  { value: '5', label: 'User Roles' },
   { value: '5+', label: 'Report Types' },
   { value: '∞', label: 'Transactions' },
 ];
@@ -101,16 +101,15 @@ export default function AboutSection() {
                   <WrenchIcon className="w-5 h-5 text-zinc-400" strokeWidth={2} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg text-white">Version 1.0</h3>
-                  <p className="text-zinc-400 text-sm">MVP Release</p>
+                  <h3 className="font-bold text-lg text-white">Version 2.0</h3>
+                  <p className="text-zinc-400 text-sm">SaaS Platform</p>
                 </div>
               </div>
               <p className="text-zinc-400 text-sm leading-relaxed mb-4">
-                MoSPAMS V1 focuses on Owner and Staff workflows. Mechanic and Customer roles are
-                part of the database schema and are planned for future versions.
+                MoSPAMS V2 is a full multi-tenant SaaS platform. Owner, Staff, Mechanic, and Customer roles are all active with dedicated dashboards and workflows.
               </p>
               <div className="flex flex-wrap gap-2">
-                {['Inventory', 'Services', 'Sales', 'Reports', 'Users'].map((tag) => (
+                {['Inventory', 'Services', 'Sales', 'Reports', 'Users', 'Branding', 'Multi-Tenancy', 'Google Auth'].map((tag) => (
                   <span
                     key={tag}
                     className="px-2.5 py-1 rounded-full bg-zinc-800 text-zinc-300 text-xs font-medium"

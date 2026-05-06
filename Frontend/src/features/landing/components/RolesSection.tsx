@@ -4,18 +4,18 @@ const ROLES = [
   {
     icon: Shield,
     title: 'Owner',
-    status: 'Active — V1',
+    status: 'Active',
     statusColor: 'green',
     description:
-      'Full system access including inventory management, service jobs, sales, reports, user accounts, deletion permissions, and complete activity logs.',
+      'Full shop access: inventory, service jobs, sales, reports, user management, shop branding, custom domains, and complete activity logs.',
     permissions: [
-      'Inventory Management',
-      'Service Job Control',
+      'Inventory & Categories',
+      'Service Jobs & Mechanics',
       'Sales & Transactions',
       'Reports & Analytics',
       'User Management',
+      'Shop Branding & Domain',
       'Activity Logs',
-      'Delete Records',
     ],
     gradient: 'from-zinc-800 to-zinc-900',
     shadow: 'shadow-black/60',
@@ -24,16 +24,16 @@ const ROLES = [
   {
     icon: User,
     title: 'Staff',
-    status: 'Active — V1',
+    status: 'Active',
     statusColor: 'green',
     description:
-      'Operational access to daily shop tasks: view inventory, manage stock movements, handle service jobs, and process sales transactions.',
+      'Operational access to daily shop tasks: manage inventory, stock movements, service jobs, sales transactions, and view reports.',
     permissions: [
-      'View Inventory',
+      'Inventory Management',
       'Stock Movements',
       'Service Job Access',
-      'Sales Transactions',
-      'Limited Reports',
+      'Sales & Transactions',
+      'View Reports',
     ],
     gradient: 'from-zinc-800 to-zinc-900',
     shadow: 'shadow-black/60',
@@ -42,11 +42,11 @@ const ROLES = [
   {
     icon: Wrench,
     title: 'Mechanic',
-    status: 'Planned — V2',
-    statusColor: 'orange',
+    status: 'Active',
+    statusColor: 'green',
     description:
-      'Future role: track assigned service jobs, view job-related parts and payables. Schema is already in place in the database.',
-    permissions: ['View Assigned Jobs', 'Job Parts Visibility', 'Job Status Updates'],
+      'Dedicated dashboard for assigned service jobs. View job details, update job status, add or remove parts used during repairs.',
+    permissions: ['View Assigned Jobs', 'Update Job Status', 'Add/Remove Job Parts', 'Job Details'],
     gradient: 'from-zinc-800 to-zinc-900',
     shadow: 'shadow-black/60',
     featured: false,
@@ -54,11 +54,11 @@ const ROLES = [
   {
     icon: Handshake,
     title: 'Customer',
-    status: 'Planned — V2',
-    statusColor: 'gray',
+    status: 'Active',
+    statusColor: 'green',
     description:
-      'Future role: track service status, view payment history, and see parts used in their motorcycle. Schema already exists.',
-    permissions: ['Service Status Tracking', 'Payment History', 'Parts Used Visibility'],
+      'Self-service portal: view service history, submit new service requests, and track payment records for their motorcycle.',
+    permissions: ['View Service History', 'Create Service Requests', 'Payment History'],
     gradient: 'from-zinc-800 to-zinc-900',
     shadow: 'shadow-black/60',
     featured: false,
@@ -168,11 +168,11 @@ export default function RolesSection() {
             </svg>
           </div>
           <div>
-            <p className="text-sm font-semibold text-white mb-0.5">About Future Roles</p>
+            <p className="text-sm font-semibold text-white mb-0.5">Role-Based Onboarding</p>
             <p className="text-sm text-zinc-400">
-              Mechanic and Customer roles exist in the database schema for future expansion. Version
-              1 of MoSPAMS focuses on Owner and Staff workflows. Future versions will unlock
-              Mechanic job tracking and Customer service portals.
+              New team members can sign up with Google and request their role (Staff, Mechanic, or
+              Customer). The shop Owner approves each request before access is granted, keeping your
+              shop secure and organized.
             </p>
           </div>
         </div>

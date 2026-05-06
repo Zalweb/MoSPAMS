@@ -5,49 +5,49 @@ const FEATURES = [
     icon: Package,
     title: 'Inventory Management',
     description:
-      'Track parts, categories, stock-in, stock-out, low-stock alerts, and barcode scanning all in one place.',
+      'Track parts, categories, stock movements, low-stock alerts, and barcode lookups. Real-time quantity updates on every sale or service.',
     color: 'violet',
-    tags: ['Stock Tracking', 'Barcodes', 'Alerts'],
+    tags: ['Stock Tracking', 'Categories', 'Low-Stock Alerts'],
   },
   {
     icon: Wrench,
     title: 'Service Job Tracking',
     description:
-      'Create service records, assign labor costs, and track service status from Pending to Ongoing to Completed.',
+      'Create service records, assign mechanics, attach parts, and track job status from Pending through In Progress to Completed.',
     color: 'blue',
-    tags: ['Job Records', 'Labor Costs', 'Status Flow'],
+    tags: ['Mechanic Assignment', 'Job Parts', 'Status Flow'],
   },
   {
     icon: Receipt,
     title: 'Sales & Transactions',
     description:
-      'Record parts-only sales and service-plus-parts transactions with Cash and GCash payment tracking.',
+      'Record parts-only and service-plus-parts transactions with Cash and GCash payment tracking, discounts, and net amount calculation.',
     color: 'green',
-    tags: ['Cash', 'GCash', 'Receipts'],
+    tags: ['Cash', 'GCash', 'Discounts'],
   },
   {
     icon: BarChart3,
     title: 'Reports & Analytics',
     description:
-      'Generate sales reports, inventory reports, service performance reports, and income summaries.',
+      'Sales reports, inventory summaries, service performance, income breakdowns, and a real-time dashboard with KPI cards.',
     color: 'orange',
-    tags: ['Sales Report', 'Inventory', 'Income'],
+    tags: ['Sales Report', 'Income', 'Dashboard KPIs'],
   },
   {
     icon: Users,
-    title: 'User Management',
+    title: 'Role-Based Access',
     description:
-      'Manage Owner and Staff accounts with secure login and role-based access control.',
+      'Five distinct roles \u2014 Owner, Staff, Mechanic, Customer, and SuperAdmin \u2014 each with tailored permissions and views.',
     color: 'pink',
-    tags: ['Owner', 'Staff', 'Access Control'],
+    tags: ['5 Roles', 'Permissions', 'Google Sign-In'],
   },
   {
     icon: ClipboardList,
-    title: 'Activity Logs',
+    title: 'Multi-Tenant & Branding',
     description:
-      'Track every user action for full accountability and a complete audit history.',
+      'Each shop gets its own subdomain, logo, color scheme, business hours, and invitation codes. Fully isolated data per shop.',
     color: 'indigo',
-    tags: ['Audit Trail', 'History', 'Accountability'],
+    tags: ['Subdomains', 'Shop Branding', 'Data Isolation'],
   },
 ];
 
@@ -115,8 +115,8 @@ export default function FeaturesSection() {
             </span>
           </h2>
           <p className="text-zinc-400 text-lg leading-relaxed">
-            Everything your shop needs, from tracking inventory to completing service jobs and
-            processing payments.
+            Everything your shop needs — from tracking inventory and completing service jobs to
+            managing your team and branding your storefront.
           </p>
         </div>
 

@@ -30,7 +30,7 @@ export default function HeroSection() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/50 backdrop-blur-sm border border-zinc-800/50 text-zinc-300 text-sm font-medium mb-8">
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            Web-Based Shop Management
+            Multi-Tenant SaaS Platform
           </div>
 
           {/* Hero Headline */}
@@ -46,8 +46,8 @@ export default function HeroSection() {
 
           {/* Subtitle */}
           <p className="text-lg sm:text-xl text-zinc-400 leading-relaxed mb-10 max-w-2xl mx-auto">
-            Complete management system for inventory, services, sales, and reports.
-            Built for modern motorcycle repair shops and parts retailers.
+            All-in-one SaaS platform for inventory, service jobs, sales, reports, and team management.
+            Multi-tenant by design — each shop gets its own branded subdomain.
           </p>
 
           {/* CTA Buttons */}
