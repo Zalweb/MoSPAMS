@@ -13,6 +13,8 @@ import type { Role } from '@/shared/types';
 import DashboardLayout from '@/features/layout/pages/DashboardLayout';
 import SuperAdminLayout from '@/features/superadmin/pages/SuperAdminLayout';
 import LoginPage from '@/features/auth/LoginPage';
+import ForgotPasswordPage from '@/features/auth/ForgotPasswordPage';
+import ResetPasswordPage from '@/features/auth/ResetPasswordPage';
 import LandingPage from '@/features/landing/LandingPage';
 import ShopNotFoundPage from '@/features/common/ShopNotFoundPage';
 
@@ -161,12 +163,16 @@ function App() {
                   <>
                     <Route path="/" element={<LandingPage />} />
                     <Route path="/register-shop" element={<ShopRegistrationPage />} />
+                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route path="*" element={<NotFound />} />
                   </>
                 ) : hostMode === 'platform' ? (
                   <>
                     <Route path="/" element={<LoginRoute />} />
                     <Route path="/login" element={<LoginRoute />} />
+                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route element={<RequireAuth />}>
                       <Route element={<RequireSuperAdmin />}>
                         <Route path="superadmin" element={<SuperAdminLayout />}>
@@ -211,6 +217,8 @@ function App() {
                   <>
                     <Route path="/" element={<LoginRoute />} />
                     <Route path="/login" element={<LoginRoute />} />
+                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route element={<RequireAuth />}>
                       <Route element={<RequireActiveShop />}>
                         <Route path="dashboard" element={<DashboardLayout />}>

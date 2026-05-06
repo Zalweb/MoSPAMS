@@ -162,7 +162,7 @@ export default function LoginPage() {
               </label>
               <button
                 type="button"
-                onClick={() => toast.info('Password reset coming soon')}
+                onClick={() => navigate('/forgot-password')}
                 className="text-zinc-400 hover:text-white transition-colors"
               >
                 Forgot password?

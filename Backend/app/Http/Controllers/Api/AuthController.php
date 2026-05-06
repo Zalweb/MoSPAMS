@@ -3,13 +3,18 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\PasswordChangedMail;
+use App\Mail\PasswordResetMail;
+use App\Models\User;
 use App\Support\Tenancy\PlatformHostResolver;
 use App\Support\Tenancy\TenantAuditLogger;
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -18,6 +23,99 @@ class AuthController extends Controller
         private readonly PlatformHostResolver $platformHosts,
         private readonly TenantAuditLogger $tenantAudit,
     ) {
+    }
+
+    public function forgotPassword(Request $request): JsonResponse
+    {
+        $request->validate(['email' => ['required', 'email']]);
+
+        // Always return the same message — never reveal whether email exists
+        $genericMessage = 'If an account with that email exists, a reset link has been sent.';
+
+        $user = User::where('email', strtolower($request->email))->first();
+
+        if (!$user || !$user->email) {
+            return response()->json(['message' => $genericMessage]);
+        }
+
+        // Invalidate any existing unused tokens for this user
+        DB::table('password_resets')
+            ->where('user_id', $user->user_id)
+            ->where('used', false)
+            ->update(['used' => true]);
+
+        $rawToken  = Str::random(64);
+        $tokenHash = hash('sha256', $rawToken);
+
+        DB::table('password_resets')->insert([
+            'user_id'    => $user->user_id,
+            'token_hash' => $tokenHash,
+            'expires_at' => now()->addMinutes(15),
+            'used'       => false,
+            'created_at' => now(),
+        ]);
+
+        // Build reset URL pointing back to the frontend the request came from
+        $host   = $request->header('X-Tenant-Host') ?: parse_url(config('app.url'), PHP_URL_HOST);
+        $scheme = str_contains((string) $host, 'localhost') ? 'http' : 'https';
+        $resetUrl = "{$scheme}://{$host}/reset-password?token={$rawToken}";
+
+        try {
+            Mail::to($user->email)->send(new PasswordResetMail($user->full_name, $resetUrl));
+        } catch (\Throwable $e) {
+            Log::error('Password reset email failed', ['user_id' => $user->user_id, 'error' => $e->getMessage()]);
+        }
+
+        return response()->json(['message' => $genericMessage]);
+    }
+
+    public function resetPassword(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'token'    => ['required', 'string'],
+            'password' => ['required', 'string', 'min:8'],
+        ]);
+
+        $tokenHash = hash('sha256', $data['token']);
+
+        $record = DB::table('password_resets')
+            ->where('token_hash', $tokenHash)
+            ->where('used', false)
+            ->where('expires_at', '>', now())
+            ->first();
+
+        if (!$record) {
+            return response()->json(['message' => 'Invalid or expired reset link.'], 422);
+        }
+
+        $user = User::find($record->user_id);
+
+        if (!$user) {
+            return response()->json(['message' => 'Invalid or expired reset link.'], 422);
+        }
+
+        DB::transaction(function () use ($user, $data, $record) {
+            $user->update(['password_hash' => Hash::make($data['password'])]);
+
+            DB::table('password_resets')
+                ->where('id', $record->id)
+                ->update(['used' => true]);
+
+            // Revoke all active sessions / tokens
+            $user->tokens()->delete();
+        });
+
+        $this->log($user->user_id, $user->shop_id_fk, 'Password reset via email link', 'users', $user->user_id);
+
+        try {
+            if ($user->email) {
+                Mail::to($user->email)->send(new PasswordChangedMail($user->full_name));
+            }
+        } catch (\Throwable $e) {
+            Log::error('Password changed confirmation email failed', ['user_id' => $user->user_id, 'error' => $e->getMessage()]);
+        }
+
+        return response()->json(['message' => 'Password reset successfully. You can now log in.']);
     }
 
     public function login(Request $request): JsonResponse
