@@ -51,7 +51,7 @@ services:
     environment:
       APP_ENV: ${APP_ENV:-production}
       APP_DEBUG: ${APP_DEBUG:-false}
-      APP_KEY: base64:l40JPh3KSbA3E8AqDBVPYkCGZfP3BA7MjCcu/OX7LEk=
+      APP_KEY: ${APP_KEY}
       APP_URL: ${APP_URL:-http://localhost}
       
       DB_CONNECTION: mysql
@@ -69,9 +69,25 @@ services:
       QUEUE_CONNECTION: redis
       SESSION_DRIVER: redis
       
+      SESSION_LIFETIME: ${SESSION_LIFETIME:-120}
+      SESSION_DOMAIN: ${SESSION_DOMAIN:-.mospams.shop}
+      SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-true}
+      SESSION_SAME_SITE: ${SESSION_SAME_SITE:-lax}
+
+      SANCTUM_STATEFUL_DOMAINS: ${SANCTUM_STATEFUL_DOMAINS:-mospams.shop,*.mospams.shop}
+
       FRONTEND_URL: ${FRONTEND_URL:-https://yourdomain.com}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
       CORS_ALLOWED_ORIGINS_PATTERNS: ${CORS_ALLOWED_ORIGINS_PATTERNS}
+
+      TENANCY_ENFORCEMENT_MODE: ${TENANCY_ENFORCEMENT_MODE:-enforce}
+      TENANCY_BASE_DOMAIN: ${TENANCY_BASE_DOMAIN:-mospams.shop}
+      TENANCY_PLATFORM_HOSTS: ${TENANCY_PLATFORM_HOSTS:-admin.mospams.shop}
+      TENANCY_PUBLIC_HOSTS: ${TENANCY_PUBLIC_HOSTS:-mospams.shop,www.mospams.shop}
+      TENANCY_API_HOSTS: ${TENANCY_API_HOSTS:-api.mospams.shop}
+      TENANCY_ALLOW_LOCALHOST_FALLBACK: ${TENANCY_ALLOW_LOCALHOST_FALLBACK:-false}
+      DEFAULT_SHOP_SUBDOMAIN: ${DEFAULT_SHOP_SUBDOMAIN:-default}
+      SHOP_TRIAL_DAYS: ${SHOP_TRIAL_DAYS:-14}
     volumes:
       - storage_data:/var/www/html/storage
       - ./Backend/docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
