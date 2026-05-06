@@ -92,3 +92,4 @@ Composer-Setup.exe
 *.pdf
 Homestead.json
 Homestead.yaml
+.vercel

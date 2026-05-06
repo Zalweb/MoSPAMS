@@ -115,9 +115,9 @@ class ProductionSeeder extends Seeder
         // ── Subscription plans ───────────────────────────────────────────────
         if (DB::getSchemaBuilder()->hasTable('subscription_plans')) {
             $plans = [
-                ['plan_code' => 'BASIC',    'plan_name' => 'Basic',       'monthly_price' => 499,  'description' => 'Basic plan for small shops',    'is_active' => true],
-                ['plan_code' => 'PRO',      'plan_name' => 'Professional', 'monthly_price' => 999,  'description' => 'Pro plan for growing shops',     'is_active' => true],
-                ['plan_code' => 'BUSINESS', 'plan_name' => 'Business',    'monthly_price' => 1999, 'description' => 'Business plan for large shops',  'is_active' => true],
+                ['plan_code' => 'BASIC',      'plan_name' => 'Basic',      'monthly_price' => 499,  'description' => 'Basic plan for small shops',      'is_active' => true],
+                ['plan_code' => 'PREMIUM',    'plan_name' => 'Premium',    'monthly_price' => 999,  'description' => 'Premium plan for growing shops',   'is_active' => true],
+                ['plan_code' => 'ENTERPRISE', 'plan_name' => 'Enterprise', 'monthly_price' => 1999, 'description' => 'Enterprise plan for large shops',  'is_active' => true],
             ];
             foreach ($plans as $plan) {
                 DB::table('subscription_plans')->updateOrInsert(['plan_code' => $plan['plan_code']], $plan);
@@ -136,7 +136,7 @@ class ProductionSeeder extends Seeder
                 'full_name'         => 'Super Admin',
                 'email'             => 'superadmin@mospams.shop',
                 'username'          => 'superadmin',
-                'password_hash'     => Hash::make('Admin@1234'),
+                'password_hash'     => Hash::make(env('SUPERADMIN_PASSWORD', 'ChangeMe@First!')),
                 'user_status_id_fk' => $activeStatusId,
                 'created_at'        => now(),
                 'updated_at'        => now(),
@@ -146,7 +146,6 @@ class ProductionSeeder extends Seeder
         $this->command->info('✓ All lookup tables seeded.');
         $this->command->info('✓ SuperAdmin account ready:');
         $this->command->info('  Email:    superadmin@mospams.shop');
-        $this->command->info('  Password: Admin@1234');
-        $this->command->warn('  ⚠ Change the password after first login!');
+        $this->command->warn('  ⚠ Password is set from SUPERADMIN_PASSWORD env var. Change it after first login!');
     }
 }
