@@ -16,7 +16,7 @@ class ShopBrandingController extends Controller
      */
     public function publicShopInfo(Request $request): JsonResponse
     {
-        $shop = $request->attributes->get('tenant_shop');
+        $shop = $request->attributes->get('shop') ?? $request->attributes->get('tenant_shop');
         
         // If no shop found (localhost/development), return default branding
         if (!$shop) {
