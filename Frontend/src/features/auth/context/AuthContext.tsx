@@ -14,7 +14,7 @@ interface AuthContextType {
     phone?: string;
     password: string;
     requested_role: 'customer' | 'staff' | 'mechanic';
-  }) => Promise<boolean>;
+  }) => Promise<{ ok: true } | { ok: false; error: string }>;
   logout: () => void;
   ready: boolean;
 }
@@ -93,9 +93,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await apiMutation<LoginResponse>('/api/auth/google/register', 'POST', payload);
       setAuthToken(response.token);
       setUser(normalizeUserRole(response.user));
-      return true;
-    } catch {
-      return false;
+      return { ok: true as const };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Registration failed. Please try again.';
+      return { ok: false as const, error: message };
     }
   }, []);
 

@@ -101,7 +101,7 @@ class GoogleAuthController extends Controller
             throw ValidationException::withMessages(['credential' => 'This account is inactive.']);
         }
 
-        $this->log($user->user_id, 'Logged in via Google', 'users', $user->user_id);
+        $this->log($user->user_id, $user->shop_id_fk, 'Logged in via Google', 'users', $user->user_id);
 
         $abilities = $user->role?->role_name === 'SuperAdmin'
             ? ['platform:*']
@@ -127,9 +127,13 @@ class GoogleAuthController extends Controller
         $customerRole  = Role::where('role_name', 'Customer')->firstOrFail();
         $activeStatus  = UserStatus::whereRaw('LOWER(status_code) = ?', ['active'])->firstOrFail();
 
-        $user = DB::transaction(function () use ($data, $customerRole, $activeStatus) {
+        $shop   = $request->attributes->get('shop');
+        $shopId = $shop?->shop_id ?? null;
+
+        $user = DB::transaction(function () use ($data, $customerRole, $activeStatus, $shopId) {
             $user = User::create([
                 'role_id_fk'        => $customerRole->role_id,
+                'shop_id_fk'        => $shopId,
                 'full_name'         => $data['name'],
                 'username'          => $data['email'],
                 'email'             => $data['email'],
@@ -139,16 +143,18 @@ class GoogleAuthController extends Controller
             ]);
 
             Customer::create([
-                'user_id_fk' => $user->user_id,
-                'full_name'  => $data['name'],
-                'email'      => $data['email'],
-                'phone'      => $data['phone'] ?? null,
+                'user_id_fk'  => $user->user_id,
+                'shop_id_fk'  => $shopId,
+                'full_name'   => $data['name'],
+                'email'       => $data['email'],
+                'phone'       => $data['phone'] ?? null,
             ]);
 
             if (in_array($data['requested_role'], ['staff', 'mechanic'])) {
                 $requestedRole = Role::where('role_name', ucfirst($data['requested_role']))->firstOrFail();
                 RoleRequest::create([
                     'user_id_fk'           => $user->user_id,
+                    'shop_id_fk'           => $shopId,
                     'requested_role_id_fk' => $requestedRole->role_id,
                     'status'               => 'pending',
                 ]);
@@ -157,7 +163,7 @@ class GoogleAuthController extends Controller
             return $user;
         });
 
-        $this->log($user->user_id, 'Registered via Google', 'users', $user->user_id);
+        $this->log($user->user_id, $shopId, 'Registered via Google', 'users', $user->user_id);
 
         $abilities = $user->role?->role_name === 'SuperAdmin'
             ? ['platform:*']
@@ -204,10 +210,11 @@ class GoogleAuthController extends Controller
         ];
     }
 
-    private function log(int $userId, string $action, ?string $table = null, ?int $recordId = null): void
+    private function log(int $userId, ?int $shopId, string $action, ?string $table = null, ?int $recordId = null): void
     {
         DB::table('activity_logs')->insert([
             'user_id_fk'  => $userId,
+            'shop_id_fk'  => $shopId,
             'action'      => $action,
             'table_name'  => $table,
             'record_id'   => $recordId,

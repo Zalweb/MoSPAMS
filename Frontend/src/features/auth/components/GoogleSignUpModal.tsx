@@ -38,7 +38,7 @@ export default function GoogleSignUpModal({ open, googleData, onClose, onSuccess
     if (password !== confirm) { setError('Passwords do not match.'); return; }
 
     setSubmitting(true);
-    const ok = await googleRegister({
+    const result = await googleRegister({
       google_id:      googleData.google_id,
       name:           name.trim(),
       email:          googleData.email,
@@ -48,7 +48,7 @@ export default function GoogleSignUpModal({ open, googleData, onClose, onSuccess
     });
     setSubmitting(false);
 
-    if (!ok) { setError('Registration failed. Please try again.'); return; }
+    if (!result.ok) { setError(result.error); return; }
     onSuccess();
   };
 

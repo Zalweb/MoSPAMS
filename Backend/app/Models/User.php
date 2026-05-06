@@ -17,6 +17,7 @@ class User extends Authenticatable
         'role_id_fk',
         'shop_id_fk',
         'full_name',
+        'username',
         'email',
         'google_id',
         'password_hash',
