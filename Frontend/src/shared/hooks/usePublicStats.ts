@@ -52,7 +52,6 @@ export function usePublicStats() {
     fetch(`${base}/api/stats`, {
       headers: {
         Accept: 'application/json',
-        'ngrok-skip-browser-warning': 'true',
       },
     })
       .then((response) => {

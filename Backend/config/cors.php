@@ -9,7 +9,7 @@ return [
         ['/^https:\/\/([a-z0-9-]+\.)?mospams\.shop$/', '/^https:\/\/[a-z0-9-]+\.vercel\.app$/'],
         array_filter(array_map('trim', explode(',', env('CORS_ALLOWED_ORIGINS_PATTERNS', ''))))
     ),
-    'allowed_headers' => ['*'],
+    'allowed_headers' => ['Accept', 'Authorization', 'Content-Type', 'X-Tenant-Host', 'X-Requested-With'],
     'exposed_headers' => [],
     'max_age' => 0,
     'supports_credentials' => true,

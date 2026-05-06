@@ -130,7 +130,6 @@ async function fetchBrandingOnce(signal: AbortSignal): Promise<Response> {
     signal,
     headers: {
       Accept: 'application/json',
-      'ngrok-skip-browser-warning': 'true',
     },
   });
 }

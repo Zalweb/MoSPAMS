@@ -129,7 +129,6 @@ export default function ShopRegistrationPage() {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify({
           shopName: form.shopName,
@@ -317,7 +316,7 @@ export default function ShopRegistrationPage() {
                     value={form.subdomain}
                     onChange={(e) => updateForm('subdomain', e.target.value)}
                     placeholder="motoworks"
-                    pattern="[a-z0-9-]+"
+                    pattern="[a-z0-9\-]+"
                     className="flex-1 px-4 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600/50 transition-all"
                     required
                   />
