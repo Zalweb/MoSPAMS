@@ -19,6 +19,7 @@ Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->midd
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:6,1');
 Route::post('/auth/google', [GoogleAuthController::class, 'googleLogin']);
 Route::post('/auth/google/register', [GoogleAuthController::class, 'googleRegister']);
+Route::post('/auth/google/proxy', [GoogleAuthController::class, 'googleLoginProxy']);
 Route::get('/stats', [MospamsController::class, 'publicStats']);
 
 // Public shop registration

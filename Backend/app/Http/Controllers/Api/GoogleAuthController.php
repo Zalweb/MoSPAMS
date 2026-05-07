@@ -113,6 +113,121 @@ class GoogleAuthController extends Controller
         ]);
     }
 
+    /**
+     * Proxy endpoint: Google OAuth from tenant subdomains routes through the
+     * public host (mospams.shop) so only one origin is registered in Google
+     * Cloud Console. The frontend on mospams.shop obtains the GIS id_token,
+     * then POSTs it here together with the tenant host the user came from.
+     *
+     * Flow:
+     *  1. tenant.mospams.shop  →  redirect to mospams.shop/auth/google?tenant=...
+     *  2. GIS runs on mospams.shop (registered origin), user authenticates
+     *  3. mospams.shop POSTs credential + tenant_host + return_to here
+     *  4. This endpoint resolves shop context from tenant_host, authenticates,
+     *     and returns a token + validated return_to URL
+     *  5. Frontend redirects to return_to?token=...
+     */
+    public function googleLoginProxy(Request $request): JsonResponse
+    {
+        $request->validate([
+            'credential'   => ['required', 'string'],
+            'tenant_host'  => ['required', 'string', 'max:255'],
+            'return_to'    => ['required', 'url', 'max:500'],
+        ]);
+
+        // ── Security: prevent open-redirect attacks ─────────────────────
+        $returnHost = strtolower((string) parse_url($request->return_to, PHP_URL_HOST));
+        $allowedBaseDomains = array_filter(array_map('trim', [
+            config('tenancy.base_domain', 'mospams.app'),
+            'mospams.shop',
+            'mospams.local',
+        ]));
+
+        $returnHostAllowed = false;
+        foreach ($allowedBaseDomains as $base) {
+            if ($returnHost === $base || str_ends_with($returnHost, '.' . $base)) {
+                $returnHostAllowed = true;
+                break;
+            }
+        }
+
+        if (! $returnHostAllowed) {
+            return response()->json(['message' => 'Invalid return URL.'], 422);
+        }
+
+        // ── Override the request's host context so shop resolution works ─
+        $tenantHost = $this->platformHosts->normalizeHost($request->tenant_host);
+        $request->attributes->set('effective_host', $tenantHost);
+        $request->attributes->set('effective_host_mode', $this->platformHosts->modeForHost($tenantHost));
+
+        // Re-resolve shop from the overridden host
+        $shop = \App\Models\Shop::whereHas('status', fn ($q) => $q->whereRaw('LOWER(status_code) = ?', ['active']))
+            ->where('subdomain', explode('.', $tenantHost)[0] ?? '')
+            ->first();
+
+        if ($shop) {
+            $request->attributes->set('shop', $shop);
+        }
+
+        // ── Verify the Google token ─────────────────────────────────────
+        $payload = $this->verifyGoogleToken($request->credential);
+
+        if (! $payload) {
+            return response()->json(['message' => 'Invalid Google token.'], 401);
+        }
+
+        // ── Lookup user ─────────────────────────────────────────────────
+        $user = User::with(['role', 'status', 'shop.status'])
+            ->where(function ($q) use ($payload) {
+                $q->where('google_id', $payload['sub'])
+                  ->orWhere('email', $payload['email']);
+            })
+            ->first();
+
+        if (! $user) {
+            return response()->json([
+                'needs_registration' => true,
+                'google_data' => [
+                    'google_id' => $payload['sub'],
+                    'name'      => $payload['name'] ?? '',
+                    'email'     => $payload['email'],
+                ],
+                'return_to' => $request->return_to,
+                'tenant_host' => $tenantHost,
+            ]);
+        }
+
+        if ($user->google_id === null) {
+            $user->update(['google_id' => $payload['sub']]);
+        }
+
+        // ── Tenant isolation checks ─────────────────────────────────────
+        if ($shop && $user->role?->role_name !== 'SuperAdmin' && $user->shop_id_fk !== $shop->shop_id) {
+            throw ValidationException::withMessages(['credential' => 'Invalid credentials.']);
+        }
+
+        if (! $shop && $user->role?->role_name !== 'SuperAdmin') {
+            throw ValidationException::withMessages(['credential' => 'This domain is not associated with your shop account.']);
+        }
+
+        if ($user->status?->status_code !== 'active') {
+            throw ValidationException::withMessages(['credential' => 'This account is inactive.']);
+        }
+
+        // ── Issue token ─────────────────────────────────────────────────
+        $this->log($user->user_id, $user->shop_id_fk, 'Logged in via Google (proxy)', 'users', $user->user_id);
+
+        $abilities = $user->role?->role_name === 'SuperAdmin'
+            ? ['platform:*']
+            : ($user->shop_id_fk ? [sprintf('tenant:%d', (int) $user->shop_id_fk)] : ['public:guest']);
+
+        return response()->json([
+            'token'     => $user->createToken('frontend', $abilities)->plainTextToken,
+            'user'      => $this->userResource($user->fresh(['role', 'status', 'shop.status'])),
+            'return_to' => $request->return_to,
+        ]);
+    }
+
     public function googleRegister(Request $request): JsonResponse
     {
         $data = $request->validate([

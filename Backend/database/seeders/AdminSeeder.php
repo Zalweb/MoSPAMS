@@ -43,7 +43,6 @@ class AdminSeeder extends Seeder
             $this->command->info('Admin user created successfully!');
             $this->command->info("Username: $username");
             $this->command->info("Email: $email");
-            $this->command->info("Password: $password");
             $this->command->warn('Please change the default password after first login.');
         }
     }
