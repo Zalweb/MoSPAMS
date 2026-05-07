@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Shield, UserCheck, Clock, Activity, Plus, Pencil, Trash2, Power, CheckCircle, XCircle, Users } from 'lucide-react';
+import { Shield, UserCheck, Clock, Activity, Plus, Pencil, Trash2, Power, CheckCircle, XCircle, Users as UsersIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -134,7 +134,7 @@ export default function Users() {
         {[
           { title: 'Owners', desc: 'Full system access', count: adminCount, icon: Shield, accent: 'bg-white text-zinc-900' },
           { title: 'Staff / Mechanic', desc: 'Operational access', count: staffCount, icon: UserCheck, accent: 'bg-blue-500/20 text-blue-400' },
-          { title: 'Customers', desc: 'Registered clients', count: customerCount, icon: Users, accent: 'bg-emerald-500/20 text-emerald-400' },
+          { title: 'Customers', desc: 'Registered clients', count: customerCount, icon: UsersIcon, accent: 'bg-emerald-500/20 text-emerald-400' },
           { title: 'Activity Logs', desc: 'Recorded actions', count: logs.length, icon: Activity, accent: 'bg-purple-500/20 text-purple-400' },
         ].map(card => (
           <div key={card.title} className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl p-5">
