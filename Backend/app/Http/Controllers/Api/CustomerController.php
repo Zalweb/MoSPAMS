@@ -50,7 +50,7 @@ class CustomerController extends Controller
             'motorcycleModel'  => $row->motorcycle_model ?? '',
             'serviceType'      => $row->service_name ?? 'General Service',
             'laborCost'        => (float) ($row->labor_cost ?? 0),
-            'status'           => $row->status_name,
+            'status'           => match ($row->status_name) { 'In Progress' => 'Ongoing', default => $row->status_name },
             'notes'            => $row->notes ?? '',
             'mechanics'        => collect($mechanicsByJob->get($row->job_id, []))->map(fn ($m) => ['name' => $m->full_name])->values(),
             'partsUsed'        => collect($partsByJob->get($row->job_id, []))->map(fn ($p) => ['name' => $p->part_name, 'quantity' => (int) $p->quantity])->values(),

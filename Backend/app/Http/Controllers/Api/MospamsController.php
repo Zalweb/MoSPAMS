@@ -1407,13 +1407,23 @@ class MospamsController extends Controller
             'motorcycleModel' => $row->motorcycle_model ?? '',
             'serviceType'     => $row->service_name ?? 'General Service',
             'laborCost'       => (float) ($row->labor_cost ?? 0),
-            'status'          => $row->status_name,
+            'status'          => $this->mapJobStatus($row->status_name),
             'partsUsed'       => $parts,
             'mechanics'       => $mechanics,
             'notes'           => $row->notes ?? '',
             'createdAt'       => $this->iso($row->created_at),
             'completedAt'     => $row->completion_date ? $this->iso($row->completion_date) : null,
         ];
+    }
+
+    private function mapJobStatus(string $statusName): string
+    {
+        return match ($statusName) {
+            'In Progress' => 'Ongoing',
+            'Pending'     => 'Pending',
+            'Completed'   => 'Completed',
+            default       => $statusName,
+        };
     }
 
     private function partResource(object $part): array
