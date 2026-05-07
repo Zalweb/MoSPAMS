@@ -96,8 +96,8 @@ export default function LoginPage() {
                 <Shield className="w-8 h-8 text-zinc-300" strokeWidth={2} />
               </div>
             ) : (
-              <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-lg">
-                <span className="text-black text-2xl font-bold">Mo</span>
+              <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-lg overflow-hidden">
+                <img src="/images/logo.png" alt="MoSPAMS" className="w-12 h-12 object-contain" />
               </div>
             )}
           </div>
@@ -110,6 +110,17 @@ export default function LoginPage() {
             <p className="text-zinc-400 text-sm">
               {isSuperAdmin ? (
                 'Sign in to manage the platform'
+              ) : isShop ? (
+                <>
+                  New here?{' '}
+                  <button
+                    type="button"
+                    onClick={() => navigate('/register')}
+                    className="text-white font-medium hover:underline"
+                  >
+                    Join this shop
+                  </button>
+                </>
               ) : (
                 <>
                   New here?{' '}

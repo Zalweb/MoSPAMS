@@ -20,6 +20,7 @@ import ShopNotFoundPage from '@/features/common/ShopNotFoundPage';
 
 // All page-level components are lazy-loaded
 const ShopRegistrationPage = lazy(() => import('@/features/registration/pages/ShopRegistrationPage'));
+const UserRegistrationPage = lazy(() => import('@/features/auth/pages/UserRegistrationPage'));
 const NewDashboardWrapper = lazy(() => import('@/features/dashboard/pages/NewDashboardWrapper'));
 const InventoryPage = lazy(() => import('@/features/inventory/pages/InventoryPage'));
 const ServicesPage = lazy(() => import('@/features/services/pages/ServicesPage'));
@@ -163,6 +164,7 @@ function App() {
                   <>
                     <Route path="/" element={<LandingPage />} />
                     <Route path="/register-shop" element={<ShopRegistrationPage />} />
+                    <Route path="/register" element={<UserRegistrationPage />} />
                     <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route path="*" element={<NotFound />} />
@@ -217,6 +219,7 @@ function App() {
                   <>
                     <Route path="/" element={<LoginRoute />} />
                     <Route path="/login" element={<LoginRoute />} />
+                    <Route path="/register" element={<UserRegistrationPage />} />
                     <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route element={<RequireAuth />}>
