@@ -14,7 +14,7 @@ interface AuthContextType {
     phone?: string;
     password: string;
     requested_role: 'customer' | 'staff' | 'mechanic';
-  }) => Promise<{ ok: true } | { ok: false; error: string }>;
+  }) => Promise<{ ok: true; token: string } | { ok: false; error: string }>;
   logout: () => void;
   ready: boolean;
 }
