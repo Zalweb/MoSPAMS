@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useData } from '@/shared/contexts/DataContext';
 import { usePaginatedFetch } from '@/shared/hooks/usePaginatedFetch';
-import { apiGet, apiPost } from '@/shared/lib/api';
+import { apiGet, apiMutation } from '@/shared/lib/api';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { can } from '@/shared/lib/permissions';
 import type { Part, ServiceRecord } from '@/shared/types';
@@ -123,7 +123,15 @@ export default function Services() {
   };
 
   const onSubmit = form.handleSubmit(async (values) => {
-    const payload = { ...values, partsUsed, mechanicIds: selectedMechanicIds };
+    const payload = {
+      ...values,
+      partsUsed,
+      mechanicIds: selectedMechanicIds,
+      // Satisfy ServiceRecord shape for optimistic update; backend returns the real value
+      mechanics: selectedMechanicIds
+        .map(id => availableMechanics.find(m => m.id === id))
+        .filter((m): m is Mechanic => Boolean(m)),
+    };
     if (editing) {
       const updated = await updateService(editing.id, payload);
       updateItem(editing.id, 'id', updated);
@@ -159,10 +167,11 @@ export default function Services() {
     if (!billJob) return;
     setBilling(true);
     try {
-      await apiPost(`/api/services/${billJob.id}/bill`, { paymentMethod: billPaymentMethod });
+      await apiMutation(`/api/services/${billJob.id}/bill`, 'POST', { paymentMethod: billPaymentMethod });
       const updated = await apiGet<{ data: ServiceRecord }>(`/api/services/${billJob.id}`).then(r => r.data).catch(() => null);
       if (updated) updateItem(billJob.id, 'id', updated);
       setBillJob(null);
+      setBillPaymentMethod('Cash');
     } finally {
       setBilling(false);
     }

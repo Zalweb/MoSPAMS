@@ -125,7 +125,9 @@ export default function CustomerDashboard() {
             <p className="text-[12px] text-[#D6D3D1] py-10 text-center">No services yet. Book your first service!</p>
           ) : (
             recentServices.map(service => {
-              const style = STATUS_STYLES[service.status];
+              type StatusKey = 'Pending' | 'Ongoing' | 'Completed';
+              const statusKey = (service.status as StatusKey) in STATUS_STYLES ? (service.status as StatusKey) : 'Pending';
+              const style = STATUS_STYLES[statusKey];
               return (
                 <div key={service.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-[#FAFAF9]/50 transition-colors">
                   <div className="min-w-0 flex-1">

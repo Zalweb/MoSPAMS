@@ -91,7 +91,9 @@ export default function ServiceHistory() {
           </div>
         ) : (
           filtered.map(service => {
-            const style = STATUS_STYLES[service.status];
+            type StatusKey = 'Pending' | 'Ongoing' | 'Completed';
+            const statusKey = (service.status as StatusKey) in STATUS_STYLES ? (service.status as StatusKey) : 'Pending';
+            const style = STATUS_STYLES[statusKey];
             const StatusIcon = style.icon;
             return (
               <div
