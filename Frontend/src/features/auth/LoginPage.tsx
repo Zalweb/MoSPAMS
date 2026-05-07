@@ -103,8 +103,8 @@ export default function LoginPage() {
                 <Shield className="w-8 h-8 text-zinc-300" strokeWidth={2} />
               </div>
             ) : (
-              <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-lg overflow-hidden">
-                <img src="/images/logo.svg" alt="MoSPAMS" className="w-12 h-12 object-contain" />
+              <div className="w-16 h-16 rounded-2xl bg-transparent flex items-center justify-center overflow-hidden">
+                <img src={tenant.branding?.logoUrl || "/images/logo.svg"} alt="MoSPAMS" className="w-full h-full object-contain" />
               </div>
             )}
           </div>

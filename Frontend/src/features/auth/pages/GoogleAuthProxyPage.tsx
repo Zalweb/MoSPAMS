@@ -119,8 +119,8 @@ export default function GoogleAuthProxyPage() {
       <div className="w-full max-w-sm">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-lg overflow-hidden mx-auto mb-4">
-            <img src="/images/logo.svg" alt="MoSPAMS" className="w-10 h-10 object-contain" />
+          <div className="w-14 h-14 rounded-2xl bg-transparent flex items-center justify-center overflow-hidden mx-auto mb-4">
+            <img src="/images/logo.svg" alt="MoSPAMS" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-xl font-bold text-white">Sign in with Google</h1>
           {tenant && (

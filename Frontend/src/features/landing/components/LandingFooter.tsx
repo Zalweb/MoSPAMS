@@ -72,11 +72,11 @@ export default function LandingFooter() {
               whileHover={{ scale: 1.02 }}
             >
               <motion.div
-                className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-md"
+                className="w-8 h-8 rounded-lg bg-transparent flex items-center justify-center"
                 whileHover={{ rotate: 10 }}
                 transition={{ type: 'spring', stiffness: 400 }}
               >
-                <Bike className="w-4 h-4 text-black" />
+                <Bike className="w-6 h-6 text-white" />
               </motion.div>
               <span className="text-xl font-bold tracking-tight">
                 Mo<span className="text-zinc-400">SPAMS</span>

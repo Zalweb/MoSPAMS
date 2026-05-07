@@ -59,8 +59,8 @@ export default function LandingNavbar() {
             className="flex items-center gap-2 group"
             id="nav-logo-btn"
           >
-            <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-md overflow-hidden">
-              <img src="/images/logo.svg" alt="MoSPAMS" className="w-6 h-6 object-contain" />
+            <div className="w-8 h-8 rounded-lg bg-transparent flex items-center justify-center overflow-hidden">
+              <img src="/images/logo.svg" alt="MoSPAMS" className="w-full h-full object-contain" />
             </div>
             <span className="text-lg font-bold text-white tracking-tight">
               Mo<span className="text-zinc-400">SPAMS</span>
