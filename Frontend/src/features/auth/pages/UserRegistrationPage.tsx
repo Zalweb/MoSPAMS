@@ -1,16 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
-import { ArrowLeft, Loader2, UserPlus, CheckCircle2, Wrench, ClipboardList } from 'lucide-react';
+import { ArrowLeft, Loader2, UserPlus, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { apiMutation } from '@/shared/lib/api';
 
 interface RegistrationForm {
-  invitationCode: string;
   fullName: string;
   email: string;
   password: string;
   confirmPassword: string;
-  requestedRole: 'Staff' | 'Mechanic';
 }
 
 interface RegistrationResult {
@@ -25,14 +23,14 @@ export default function UserRegistrationPage() {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'form' | 'success'>('form');
   const [result, setResult] = useState<RegistrationResult | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [form, setForm] = useState<RegistrationForm>({
-    invitationCode: '',
     fullName: '',
     email: '',
     password: '',
     confirmPassword: '',
-    requestedRole: 'Staff',
   });
 
   const updateField = (field: keyof RegistrationForm, value: string) =>
@@ -41,7 +39,7 @@ export default function UserRegistrationPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!form.invitationCode || !form.fullName || !form.email || !form.password) {
+    if (!form.fullName || !form.email || !form.password) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -59,11 +57,9 @@ export default function UserRegistrationPage() {
     setLoading(true);
     try {
       const data = await apiMutation<RegistrationResult>('/api/register', 'POST', {
-        invitationCode: form.invitationCode,
         fullName: form.fullName,
         email: form.email,
         password: form.password,
-        requestedRole: form.requestedRole,
       });
       setResult(data);
       setStep('success');
@@ -90,9 +86,9 @@ export default function UserRegistrationPage() {
               </div>
             </div>
 
-            <h1 className="text-2xl font-bold text-white mb-2">Registration Successful!</h1>
+            <h1 className="text-2xl font-bold text-white mb-2">Welcome aboard!</h1>
             <p className="text-zinc-400 text-sm mb-6">
-              Your account has been created and is pending approval.
+              Your account has been created. You can log in right away.
             </p>
 
             <div className="bg-zinc-800/40 rounded-2xl border border-zinc-700/40 p-5 text-left mb-6 space-y-3">
@@ -101,21 +97,17 @@ export default function UserRegistrationPage() {
                 <p className="text-sm text-white font-medium">{result.shopName}</p>
               </div>
               <div>
-                <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Requested Role</p>
-                <p className="text-sm text-white font-medium">{result.requestedRole}</p>
+                <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Account Type</p>
+                <p className="text-sm text-white font-medium">Customer</p>
               </div>
               <div>
                 <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Status</p>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                  Pending Approval
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  Active
                 </span>
               </div>
             </div>
-
-            <p className="text-zinc-500 text-xs mb-6 leading-relaxed">
-              The shop owner will review your request. Once approved, you'll be able to log in with your email and password.
-            </p>
 
             <button
               onClick={() => navigate('/login')}
@@ -156,27 +148,14 @@ export default function UserRegistrationPage() {
           </div>
 
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-white mb-2">Join a Shop</h1>
+            <h1 className="text-2xl font-bold text-white mb-2">Create an Account</h1>
             <p className="text-zinc-400 text-sm">
-              Enter the invitation code from your shop owner to create your account.
+              Sign up to track your motorcycle service and repairs.
             </p>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Invitation Code */}
-            <div>
-              <label className="block text-xs font-medium text-zinc-400 mb-1.5">Invitation Code</label>
-              <input
-                type="text"
-                value={form.invitationCode}
-                onChange={(e) => updateField('invitationCode', e.target.value)}
-                placeholder="Enter shop invitation code"
-                className="w-full px-4 py-3 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-white placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all font-mono tracking-wider"
-                disabled={loading}
-              />
-            </div>
-
             {/* Full Name */}
             <div>
               <label className="block text-xs font-medium text-zinc-400 mb-1.5">Full Name</label>
@@ -187,6 +166,7 @@ export default function UserRegistrationPage() {
                 placeholder="Juan Dela Cruz"
                 className="w-full px-4 py-3 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-white placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
                 disabled={loading}
+                autoFocus
               />
             </div>
 
@@ -206,85 +186,45 @@ export default function UserRegistrationPage() {
             {/* Password */}
             <div>
               <label className="block text-xs font-medium text-zinc-400 mb-1.5">Password</label>
-              <input
-                type="password"
-                value={form.password}
-                onChange={(e) => updateField('password', e.target.value)}
-                placeholder="Minimum 8 characters"
-                className="w-full px-4 py-3 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-white placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
-                disabled={loading}
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={form.password}
+                  onChange={(e) => updateField('password', e.target.value)}
+                  placeholder="Minimum 8 characters"
+                  className="w-full px-4 py-3 pr-11 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-white placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             {/* Confirm Password */}
             <div>
               <label className="block text-xs font-medium text-zinc-400 mb-1.5">Confirm Password</label>
-              <input
-                type="password"
-                value={form.confirmPassword}
-                onChange={(e) => updateField('confirmPassword', e.target.value)}
-                placeholder="Re-enter password"
-                className="w-full px-4 py-3 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-white placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
-                disabled={loading}
-              />
-            </div>
-
-            {/* Role Selection */}
-            <div>
-              <label className="block text-xs font-medium text-zinc-400 mb-2.5">I want to join as</label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={form.confirmPassword}
+                  onChange={(e) => updateField('confirmPassword', e.target.value)}
+                  placeholder="Re-enter password"
+                  className="w-full px-4 py-3 pr-11 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-white placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
+                  disabled={loading}
+                />
                 <button
                   type="button"
-                  onClick={() => updateField('requestedRole', 'Staff')}
-                  className={`flex items-center gap-2.5 p-3.5 rounded-xl border transition-all text-left ${
-                    form.requestedRole === 'Staff'
-                      ? 'bg-white/5 border-white/30 ring-1 ring-white/10'
-                      : 'bg-zinc-800/30 border-zinc-700/40 hover:border-zinc-600/60'
-                  }`}
+                  onClick={() => setShowConfirmPassword(v => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                  tabIndex={-1}
                 >
-                  <div
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                      form.requestedRole === 'Staff' ? 'bg-white/10' : 'bg-zinc-800'
-                    }`}
-                  >
-                    <ClipboardList
-                      className={`w-4 h-4 ${form.requestedRole === 'Staff' ? 'text-white' : 'text-zinc-500'}`}
-                      strokeWidth={1.75}
-                    />
-                  </div>
-                  <div>
-                    <p className={`text-sm font-semibold ${form.requestedRole === 'Staff' ? 'text-white' : 'text-zinc-400'}`}>
-                      Staff
-                    </p>
-                    <p className="text-[10px] text-zinc-500">Sales & Inventory</p>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => updateField('requestedRole', 'Mechanic')}
-                  className={`flex items-center gap-2.5 p-3.5 rounded-xl border transition-all text-left ${
-                    form.requestedRole === 'Mechanic'
-                      ? 'bg-white/5 border-white/30 ring-1 ring-white/10'
-                      : 'bg-zinc-800/30 border-zinc-700/40 hover:border-zinc-600/60'
-                  }`}
-                >
-                  <div
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                      form.requestedRole === 'Mechanic' ? 'bg-white/10' : 'bg-zinc-800'
-                    }`}
-                  >
-                    <Wrench
-                      className={`w-4 h-4 ${form.requestedRole === 'Mechanic' ? 'text-white' : 'text-zinc-500'}`}
-                      strokeWidth={1.75}
-                    />
-                  </div>
-                  <div>
-                    <p className={`text-sm font-semibold ${form.requestedRole === 'Mechanic' ? 'text-white' : 'text-zinc-400'}`}>
-                      Mechanic
-                    </p>
-                    <p className="text-[10px] text-zinc-500">Service Jobs</p>
-                  </div>
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>

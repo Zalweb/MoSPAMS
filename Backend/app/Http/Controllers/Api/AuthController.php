@@ -227,21 +227,20 @@ class AuthController extends Controller
 
     public function register(Request $request): JsonResponse
     {
-        $data = $request->validate([
-            'invitationCode' => ['required', 'string', 'exists:shops,invitation_code'],
-            'fullName' => ['required', 'string', 'max:100'],
-            'email' => ['required', 'email', 'max:100', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8'],
-            'requestedRole' => ['required', 'in:Staff,Mechanic'],
-        ]);
-
-        $shop = DB::table('shops')
-            ->where('invitation_code', $data['invitationCode'])
-            ->first();
+        // The shop is already resolved from the subdomain by IdentifyShopByDomain middleware
+        $shop = $request->attributes->get('shop');
 
         if (!$shop) {
-            throw ValidationException::withMessages(['invitationCode' => 'Invalid invitation code.']);
+            return response()->json([
+                'message' => 'Could not determine which shop this registration belongs to. Please register from your shop\'s URL.',
+            ], 422);
         }
+
+        $data = $request->validate([
+            'fullName' => ['required', 'string', 'max:100'],
+            'email'    => ['required', 'email', 'max:100', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8'],
+        ]);
 
         // Check if shop is active
         $shopStatus = DB::table('shop_statuses')
@@ -249,45 +248,33 @@ class AuthController extends Controller
             ->value('status_code');
 
         if (strtoupper($shopStatus) !== 'ACTIVE') {
-            throw ValidationException::withMessages(['invitationCode' => 'This shop is not currently accepting new members.']);
+            return response()->json([
+                'message' => 'This shop is not currently accepting new members.',
+            ], 403);
         }
 
-        $requestedRoleId = DB::table('roles')->where('role_name', $data['requestedRole'])->value('role_id');
         $customerRoleId = DB::table('roles')->where('role_name', 'Customer')->value('role_id');
-        $pendingStatusId = DB::table('user_statuses')->where('status_code', 'pending')->value('user_status_id');
+        $activeStatusId = DB::table('user_statuses')->where('status_code', 'active')->value('user_status_id');
 
-        return DB::transaction(function () use ($data, $shop, $requestedRoleId, $customerRoleId, $pendingStatusId) {
-            // Create user with Customer role and pending status
+        return DB::transaction(function () use ($data, $shop, $customerRoleId, $activeStatusId) {
             $userId = DB::table('users')->insertGetId([
-                'shop_id_fk' => $shop->shop_id,
-                'role_id_fk' => $customerRoleId,
-                'full_name' => $data['fullName'],
-                'email' => $data['email'],
-                'password_hash' => Hash::make($data['password']),
-                'user_status_id_fk' => $pendingStatusId,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'shop_id_fk'          => $shop->shop_id,
+                'role_id_fk'          => $customerRoleId,
+                'full_name'           => $data['fullName'],
+                'email'               => strtolower($data['email']),
+                'password_hash'       => Hash::make($data['password']),
+                'user_status_id_fk'   => $activeStatusId,
+                'created_at'          => now(),
+                'updated_at'          => now(),
             ]);
 
-            // Create role request if requesting Staff or Mechanic
-            if ($data['requestedRole'] !== 'Customer') {
-                DB::table('role_requests')->insert([
-                    'shop_id_fk' => $shop->shop_id,
-                    'user_id_fk' => $userId,
-                    'requested_role_id_fk' => $requestedRoleId,
-                    'status' => 'pending',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
-
-            $this->log($userId, $shop->shop_id, "Registered to shop {$shop->shop_name} as {$data['requestedRole']}", 'users', $userId);
+            $this->log($userId, $shop->shop_id, "Registered as Customer in shop {$shop->shop_name}", 'users', $userId);
 
             return response()->json([
-                'message' => 'Registration successful. Your account is pending approval by the shop owner.',
-                'userId' => (string) $userId,
-                'shopName' => $shop->shop_name,
-                'requestedRole' => $data['requestedRole'],
+                'message'       => 'Account created successfully! You can now log in.',
+                'userId'        => (string) $userId,
+                'shopName'      => $shop->shop_name,
+                'requestedRole' => 'Customer',
             ], 201);
         });
     }
