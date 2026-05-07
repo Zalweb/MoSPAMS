@@ -35,7 +35,7 @@ export default function Users() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<User | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<User | null>(null);
-  const [logFilter, setLogFilter] = useState<{ user: string; query: string }>({ user: 'All', query: '' });
+
   const [pendingRequests, setPendingRequests] = useState<RoleRequest[]>([]);
   const [tab, setTab] = useState<'users' | 'requests'>('users');
 
@@ -46,9 +46,6 @@ export default function Users() {
   const staffCount = users.filter(u => u.role === 'Staff' || u.role === 'Mechanic').length;
   const customerCount = users.filter(u => u.role === 'Customer').length;
 
-  const filteredLogs = useMemo(() => {
-    return logs.filter(l => (logFilter.user === 'All' || l.user === logFilter.user) && (!logFilter.query || (l.action ?? '').toLowerCase().includes(logFilter.query.toLowerCase())));
-  }, [logs, logFilter]);
 
   const fetchPendingRequests = useCallback(async () => {
     try {
@@ -217,37 +214,7 @@ export default function Users() {
         </div>
       </div>
 
-      <div className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl p-5">
-        <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-          <h3 className="text-[13px] font-semibold text-white flex items-center gap-2">
-            <Clock className="w-3.5 h-3.5 text-zinc-500" strokeWidth={1.5} />
-            Audit Trail
-          </h3>
-          <div className="flex items-center gap-2">
-            <select value={logFilter.user} onChange={e => setLogFilter(f => ({ ...f, user: e.target.value }))} className="h-8 px-3 rounded-lg border border-zinc-800 text-[11px] bg-zinc-900 text-zinc-300">
-              <option value="All">All users</option>
-              {Array.from(new Set(logs.map(l => l.user))).map(u => <option key={u} value={u}>{u}</option>)}
-            </select>
-            <Input value={logFilter.query} onChange={e => setLogFilter(f => ({ ...f, query: e.target.value }))} placeholder="Filter actions…" className="h-8 w-44 text-[11px] rounded-lg border-zinc-800 bg-zinc-900 text-zinc-300 placeholder:text-zinc-600" />
-            <span className="text-[10px] font-medium text-zinc-500">{filteredLogs.length} entries</span>
-          </div>
-        </div>
-        <div className="space-y-0 max-h-[480px] overflow-y-auto">
-          {filteredLogs.map((log, i) => (
-            <div key={log.id} className={`flex items-start gap-3 py-3 ${i < filteredLogs.length - 1 ? 'border-b border-zinc-800' : ''}`}>
-              <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-[10px] font-bold ${(log.user ?? '').includes('Owner') ? 'bg-white text-zinc-900' : 'bg-blue-500/20 text-blue-400'}`}>
-                {(log.user ?? '?').charAt(0)}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-semibold text-zinc-200">{log.user ?? 'System'}</p>
-                <p className="text-[11px] text-zinc-500">{log.action ?? ''}</p>
-              </div>
-              <span className="text-[10px] text-zinc-600 shrink-0 tabular-nums">{new Date(log.timestamp).toLocaleString()}</span>
-            </div>
-          ))}
-          {filteredLogs.length === 0 && <p className="text-[12px] text-zinc-500 text-center py-8">No entries match this filter</p>}
-        </div>
-      </div>
+
 
         </>
       )}
