@@ -18,7 +18,7 @@ class CustomerController extends Controller
             return response()->json(['data' => []]);
         }
 
-        $services = $this->tenantTable('service_jobs')
+        $rows = $this->tenantTable('service_jobs')
             ->join('customers', 'customers.customer_id', '=', 'service_jobs.customer_id_fk')
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
             ->leftJoin('service_job_items', 'service_job_items.job_id_fk', '=', 'service_jobs.job_id')
@@ -26,18 +26,37 @@ class CustomerController extends Controller
             ->where('service_jobs.customer_id_fk', $customer->customer_id)
             ->select('service_jobs.*', 'customers.full_name as customer_name', 'service_job_statuses.status_name', 'service_types.service_name', 'service_job_items.labor_cost')
             ->orderByDesc('service_jobs.created_at')
+            ->get();
+
+        $jobIds = $rows->pluck('job_id')->all();
+
+        $partsByJob = DB::table('service_job_parts')
+            ->join('parts', 'parts.part_id', '=', 'service_job_parts.part_id_fk')
+            ->whereIn('service_job_parts.job_id_fk', $jobIds)
+            ->select('service_job_parts.job_id_fk', 'parts.part_name', 'service_job_parts.quantity')
             ->get()
-            ->map(fn ($row) => [
-                'id'               => (string) $row->job_id,
-                'customerName'     => $row->customer_name,
-                'motorcycleModel'  => $row->motorcycle_model ?? '',
-                'serviceType'      => $row->service_name ?? 'General Service',
-                'laborCost'        => (float) ($row->labor_cost ?? 0),
-                'status'           => $row->status_name,
-                'notes'            => $row->notes ?? '',
-                'createdAt'        => $row->created_at ? \Illuminate\Support\Carbon::parse($row->created_at)->toISOString() : null,
-                'completedAt'      => $row->completion_date ? \Illuminate\Support\Carbon::parse($row->completion_date)->toISOString() : null,
-            ]);
+            ->groupBy('job_id_fk');
+
+        $mechanicsByJob = DB::table('service_job_mechanics')
+            ->join('mechanics', 'mechanics.mechanic_id', '=', 'service_job_mechanics.mechanic_id_fk')
+            ->whereIn('service_job_mechanics.job_id_fk', $jobIds)
+            ->select('service_job_mechanics.job_id_fk', 'mechanics.full_name')
+            ->get()
+            ->groupBy('job_id_fk');
+
+        $services = $rows->map(fn ($row) => [
+            'id'               => (string) $row->job_id,
+            'customerName'     => $row->customer_name,
+            'motorcycleModel'  => $row->motorcycle_model ?? '',
+            'serviceType'      => $row->service_name ?? 'General Service',
+            'laborCost'        => (float) ($row->labor_cost ?? 0),
+            'status'           => $row->status_name,
+            'notes'            => $row->notes ?? '',
+            'mechanics'        => collect($mechanicsByJob->get($row->job_id, []))->map(fn ($m) => ['name' => $m->full_name])->values(),
+            'partsUsed'        => collect($partsByJob->get($row->job_id, []))->map(fn ($p) => ['name' => $p->part_name, 'quantity' => (int) $p->quantity])->values(),
+            'createdAt'        => $row->created_at ? \Illuminate\Support\Carbon::parse($row->created_at)->toISOString() : null,
+            'completedAt'      => $row->completion_date ? \Illuminate\Support\Carbon::parse($row->completion_date)->toISOString() : null,
+        ]);
 
         return response()->json(['data' => $services]);
     }

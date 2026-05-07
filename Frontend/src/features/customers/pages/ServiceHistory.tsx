@@ -2,18 +2,7 @@ import { useEffect, useState } from 'react';
 import { Wrench, Clock, CheckCircle2, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { apiGet } from '@/shared/lib/api';
-
-interface CustomerService {
-  id: string;
-  customerName: string;
-  motorcycleModel: string;
-  serviceType: string;
-  laborCost: number;
-  status: 'Pending' | 'Ongoing' | 'Completed';
-  notes: string | null;
-  createdAt: string;
-  completedAt: string | null;
-}
+import type { CustomerService } from '@/shared/types';
 
 type StatusFilter = 'All' | 'Pending' | 'Ongoing' | 'Completed';
 
@@ -118,6 +107,12 @@ export default function ServiceHistory() {
                       <p className="text-[13px] font-semibold text-[#44403C]">{service.motorcycleModel}</p>
                       <p className="text-[12px] text-[#A8A29E]">{service.serviceType}</p>
                       <p className="text-[11px] text-[#D6D3D1] mt-0.5">Labor ₱{service.laborCost.toLocaleString()}</p>
+                      {service.mechanics && service.mechanics.length > 0 && (
+                        <p className="text-[11px] text-[#A8A29E] mt-0.5">Mechanic: {service.mechanics.map(m => m.name).join(', ')}</p>
+                      )}
+                      {service.partsUsed && service.partsUsed.length > 0 && (
+                        <p className="text-[11px] text-[#A8A29E] mt-0.5">Parts: {service.partsUsed.map(p => `${p.name} x${p.quantity}`).join(', ')}</p>
+                      )}
                       {service.notes && (
                         <p className="text-[11px] text-[#78716C] mt-1">{service.notes}</p>
                       )}

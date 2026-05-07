@@ -5,17 +5,7 @@ import { Wrench, Clock, CheckCircle2, Calendar, ArrowRight } from 'lucide-react'
 import { apiGet } from '@/shared/lib/api';
 import { useAuth } from '@/features/auth/context/AuthContext';
 
-interface CustomerService {
-  id: string;
-  customerName: string;
-  motorcycleModel: string;
-  serviceType: string;
-  laborCost: number;
-  status: 'Pending' | 'Ongoing' | 'Completed';
-  notes: string | null;
-  createdAt: string;
-  completedAt: string | null;
-}
+import type { CustomerService } from '@/shared/types';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 16 },
@@ -138,9 +128,15 @@ export default function CustomerDashboard() {
               const style = STATUS_STYLES[service.status];
               return (
                 <div key={service.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-[#FAFAF9]/50 transition-colors">
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-[13px] font-medium text-[#44403C] truncate">{service.motorcycleModel}</p>
                     <p className="text-[11px] text-[#A8A29E]">{service.serviceType}</p>
+                    {service.mechanics && service.mechanics.length > 0 && (
+                      <p className="text-[11px] text-[#A8A29E] mt-0.5">Mechanic: {service.mechanics.map(m => m.name).join(', ')}</p>
+                    )}
+                    {service.partsUsed && service.partsUsed.length > 0 && (
+                      <p className="text-[11px] text-[#A8A29E] mt-0.5">Parts: {service.partsUsed.map(p => `${p.name} x${p.quantity}`).join(', ')}</p>
+                    )}
                   </div>
                   <span className={`shrink-0 text-[10px] font-semibold px-2.5 py-[3px] rounded-full ml-3 ${style.bg} ${style.text}`}>
                     {service.status}

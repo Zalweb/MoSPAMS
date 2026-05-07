@@ -533,15 +533,17 @@ class MospamsController extends Controller
     public function storeService(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'customerName' => ['required', 'string', 'max:100'],
-            'motorcycleModel' => ['nullable', 'string', 'max:150'],
-            'serviceType' => ['required', 'string', 'max:100'],
-            'laborCost' => ['required', 'numeric', 'min:0'],
-            'status' => ['nullable', Rule::in(['Pending', 'Ongoing', 'Completed'])],
-            'partsUsed' => ['array'],
-            'partsUsed.*.partId' => ['required'],
+            'customerName'         => ['required', 'string', 'max:100'],
+            'motorcycleModel'      => ['nullable', 'string', 'max:150'],
+            'serviceType'          => ['required', 'string', 'max:100'],
+            'laborCost'            => ['required', 'numeric', 'min:0'],
+            'status'               => ['nullable', Rule::in(['Pending', 'Ongoing', 'Completed'])],
+            'partsUsed'            => ['array'],
+            'partsUsed.*.partId'   => ['required'],
             'partsUsed.*.quantity' => ['required', 'integer', 'min:1'],
-            'notes' => ['nullable', 'string'],
+            'mechanicIds'          => ['array'],
+            'mechanicIds.*'        => ['string'],
+            'notes'                => ['nullable', 'string'],
         ]);
 
         $jobId = DB::transaction(function () use ($request, $data) {
@@ -580,6 +582,18 @@ class MospamsController extends Controller
                 }
             }
 
+            foreach ($data['mechanicIds'] ?? [] as $rawId) {
+                $mechId = $this->numericId($rawId);
+                if (DB::table('mechanics')->where('mechanic_id', $mechId)->where('shop_id_fk', $this->shopId())->exists()) {
+                    DB::table('service_job_mechanics')->insertOrIgnore([
+                        'job_id_fk'      => $jobId,
+                        'mechanic_id_fk' => $mechId,
+                        'shop_id_fk'     => $this->shopId(),
+                        'assigned_at'    => now(),
+                    ]);
+                }
+            }
+
             $this->log($request, 'Created service record for '.$data['customerName'], 'service_jobs', $jobId);
 
             return $jobId;
@@ -591,12 +605,17 @@ class MospamsController extends Controller
     public function updateService(Request $request, int $service): JsonResponse
     {
         $data = $request->validate([
-            'customerName' => ['sometimes', 'string', 'max:100'],
-            'motorcycleModel' => ['sometimes', 'nullable', 'string', 'max:150'],
-            'serviceType' => ['sometimes', 'string', 'max:100'],
-            'laborCost' => ['sometimes', 'numeric', 'min:0'],
-            'status' => ['sometimes', Rule::in(['Pending', 'Ongoing', 'Completed'])],
-            'notes' => ['sometimes', 'nullable', 'string'],
+            'customerName'         => ['sometimes', 'string', 'max:100'],
+            'motorcycleModel'      => ['sometimes', 'nullable', 'string', 'max:150'],
+            'serviceType'          => ['sometimes', 'string', 'max:100'],
+            'laborCost'            => ['sometimes', 'numeric', 'min:0'],
+            'status'               => ['sometimes', Rule::in(['Pending', 'Ongoing', 'Completed'])],
+            'notes'                => ['sometimes', 'nullable', 'string'],
+            'mechanicIds'          => ['sometimes', 'array'],
+            'mechanicIds.*'        => ['string'],
+            'partsUsed'            => ['sometimes', 'array'],
+            'partsUsed.*.partId'   => ['required_with:partsUsed'],
+            'partsUsed.*.quantity' => ['required_with:partsUsed', 'integer', 'min:1'],
         ]);
 
         DB::transaction(function () use ($request, $service, $data) {
@@ -621,10 +640,155 @@ class MospamsController extends Controller
                 );
             }
 
+            if (array_key_exists('mechanicIds', $data)) {
+                DB::table('service_job_mechanics')->where('job_id_fk', $service)->delete();
+                foreach ($data['mechanicIds'] as $rawId) {
+                    $mechId = $this->numericId($rawId);
+                    if (DB::table('mechanics')->where('mechanic_id', $mechId)->where('shop_id_fk', $this->shopId())->exists()) {
+                        DB::table('service_job_mechanics')->insertOrIgnore([
+                            'job_id_fk'      => $service,
+                            'mechanic_id_fk' => $mechId,
+                            'shop_id_fk'     => $this->shopId(),
+                            'assigned_at'    => now(),
+                        ]);
+                    }
+                }
+            }
+
+            if (array_key_exists('partsUsed', $data)) {
+                DB::table('service_job_parts')->where('job_id_fk', $service)->delete();
+                foreach ($data['partsUsed'] as $used) {
+                    $partId = $this->numericId($used['partId']);
+                    $part = DB::table('parts')->where('part_id', $partId)->where('shop_id_fk', $this->shopId())->first();
+                    if (! $part) continue;
+                    DB::table('service_job_parts')->insert([
+                        'job_id_fk'  => $service,
+                        'part_id_fk' => $partId,
+                        'quantity'   => $used['quantity'],
+                        'unit_price' => $part->unit_price,
+                        'subtotal'   => $part->unit_price * $used['quantity'],
+                    ]);
+                }
+            }
+
             $this->log($request, 'Updated service #'.$service, 'service_jobs', $service);
         });
 
         return response()->json(['data' => $this->serviceById($service)]);
+    }
+
+    public function assignMechanic(Request $request, int $service): JsonResponse
+    {
+        $data = $request->validate([
+            'mechanicId' => ['required', 'string'],
+        ]);
+
+        $mechId = $this->numericId($data['mechanicId']);
+        abort_unless(
+            DB::table('mechanics')->where('mechanic_id', $mechId)->where('shop_id_fk', $this->shopId())->exists(),
+            404,
+            'Mechanic not found.'
+        );
+
+        DB::table('service_job_mechanics')->insertOrIgnore([
+            'job_id_fk'      => $service,
+            'mechanic_id_fk' => $mechId,
+            'shop_id_fk'     => $this->shopId(),
+            'assigned_at'    => now(),
+        ]);
+
+        $this->log($request, "Assigned mechanic {$mechId} to job {$service}", 'service_jobs', $service);
+
+        return response()->json(['data' => $this->serviceById($service)]);
+    }
+
+    public function removeMechanic(Request $request, int $service, int $mechanic): JsonResponse
+    {
+        DB::table('service_job_mechanics')
+            ->where('job_id_fk', $service)
+            ->where('mechanic_id_fk', $mechanic)
+            ->delete();
+
+        $this->log($request, "Removed mechanic {$mechanic} from job {$service}", 'service_jobs', $service);
+
+        return response()->json(['data' => $this->serviceById($service)]);
+    }
+
+    public function billService(Request $request, int $service): JsonResponse
+    {
+        $data = $request->validate([
+            'paymentMethod' => ['required', Rule::in(['Cash', 'GCash'])],
+        ]);
+
+        abort_unless(
+            DB::table('service_jobs')->where('job_id', $service)->where('shop_id_fk', $this->shopId())->exists(),
+            404,
+            'Service job not found.'
+        );
+
+        $alreadyBilled = DB::table('sales')->where('job_id_fk', $service)->exists();
+        abort_if($alreadyBilled, 422, 'This job has already been billed.');
+
+        $saleId = DB::transaction(function () use ($request, $service, $data) {
+            $job = DB::table('service_jobs')->where('job_id', $service)->first();
+            $laborItem = DB::table('service_job_items')->where('job_id_fk', $service)->first();
+            $parts = DB::table('service_job_parts')->where('job_id_fk', $service)->get();
+
+            $laborCost = (float) ($laborItem?->labor_cost ?? 0);
+            $partsCost = $parts->sum(fn ($p) => $p->unit_price * $p->quantity);
+            $total = $laborCost + $partsCost;
+
+            $saleId = DB::table('sales')->insertGetId([
+                'shop_id_fk'      => $this->shopId(),
+                'customer_id_fk'  => $job->customer_id_fk,
+                'job_id_fk'       => $service,
+                'processed_by_fk' => $request->user()->user_id,
+                'sale_type'       => 'service+parts',
+                'total_amount'    => $total,
+                'discount'        => 0,
+                'net_amount'      => $total,
+                'sale_date'       => now(),
+                'created_at'      => now(),
+                'updated_at'      => now(),
+            ]);
+
+            foreach ($parts as $p) {
+                DB::table('sale_items')->insert([
+                    'sale_id_fk' => $saleId,
+                    'part_id_fk' => $p->part_id_fk,
+                    'quantity'   => $p->quantity,
+                    'unit_price' => $p->unit_price,
+                    'subtotal'   => $p->unit_price * $p->quantity,
+                ]);
+                $part = DB::table('parts')->where('part_id', $p->part_id_fk)->first();
+                DB::table('parts')->where('part_id', $p->part_id_fk)->update([
+                    'stock_quantity' => max(0, $part->stock_quantity - $p->quantity),
+                    'updated_at'     => now(),
+                ]);
+                $this->recordMovement($p->part_id_fk, $request->user()->user_id, 'out', $p->quantity, 'Sale '.$saleId, 'sale', $saleId);
+            }
+
+            DB::table('payments')->insert([
+                'sale_id_fk'           => $saleId,
+                'payment_method'       => $data['paymentMethod'],
+                'amount_paid'          => $total,
+                'payment_date'         => now(),
+                'reference_number'     => null,
+                'payment_status_id_fk' => $this->statusId('payment_statuses', 'payment_status_id', 'paid'),
+            ]);
+
+            DB::table('service_jobs')->where('job_id', $service)->update([
+                'service_job_status_id_fk' => $this->statusId('service_job_statuses', 'service_job_status_id', 'completed'),
+                'completion_date'          => now()->toDateString(),
+                'updated_at'               => now(),
+            ]);
+
+            $this->log($request, "Billed job {$service} → sale {$saleId}", 'sales', $saleId);
+
+            return $saleId;
+        });
+
+        return response()->json(['data' => $this->transactionById($saleId)], 201);
     }
 
     public function deleteService(Request $request, int $service): JsonResponse
@@ -1216,22 +1380,39 @@ class MospamsController extends Controller
     private function serviceResource(object $row): array
     {
         $parts = DB::table('service_job_parts')
-            ->where('job_id_fk', $row->job_id)
+            ->join('parts', 'parts.part_id', '=', 'service_job_parts.part_id_fk')
+            ->where('service_job_parts.job_id_fk', $row->job_id)
             ->get()
-            ->map(fn ($part) => ['partId' => (string) $part->part_id_fk, 'quantity' => (int) $part->quantity])
+            ->map(fn ($p) => [
+                'partId'    => (string) $p->part_id_fk,
+                'name'      => $p->part_name,
+                'quantity'  => (int) $p->quantity,
+                'unitPrice' => (float) $p->unit_price,
+            ])
+            ->values();
+
+        $mechanics = DB::table('service_job_mechanics')
+            ->join('mechanics', 'mechanics.mechanic_id', '=', 'service_job_mechanics.mechanic_id_fk')
+            ->where('service_job_mechanics.job_id_fk', $row->job_id)
+            ->get()
+            ->map(fn ($m) => [
+                'id'   => (string) $m->mechanic_id_fk,
+                'name' => $m->full_name,
+            ])
             ->values();
 
         return [
-            'id' => (string) $row->job_id,
-            'customerName' => $row->customer_name,
+            'id'              => (string) $row->job_id,
+            'customerName'    => $row->customer_name,
             'motorcycleModel' => $row->motorcycle_model ?? '',
-            'serviceType' => $row->service_name ?? 'General Service',
-            'laborCost' => (float) ($row->labor_cost ?? 0),
-            'status' => $row->status_name,
-            'partsUsed' => $parts,
-            'notes' => $row->notes ?? '',
-            'createdAt' => $this->iso($row->created_at),
-            'completedAt' => $row->completion_date ? $this->iso($row->completion_date) : null,
+            'serviceType'     => $row->service_name ?? 'General Service',
+            'laborCost'       => (float) ($row->labor_cost ?? 0),
+            'status'          => $row->status_name,
+            'partsUsed'       => $parts,
+            'mechanics'       => $mechanics,
+            'notes'           => $row->notes ?? '',
+            'createdAt'       => $this->iso($row->created_at),
+            'completedAt'     => $row->completion_date ? $this->iso($row->completion_date) : null,
         ];
     }
 

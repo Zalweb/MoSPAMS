@@ -30,8 +30,23 @@ export interface ServiceRecord {
   serviceType: string;
   laborCost: number;
   status: 'Pending' | 'Ongoing' | 'Completed';
-  partsUsed: { partId: string; quantity: number }[];
+  partsUsed: { partId: string; name?: string; quantity: number; unitPrice?: number }[];
+  mechanics: { id: string; name: string }[];
   notes: string;
+  createdAt: string;
+  completedAt?: string;
+}
+
+export interface CustomerService {
+  id: string;
+  customerName: string;
+  motorcycleModel: string;
+  serviceType: string;
+  laborCost: number;
+  status: string;
+  notes: string;
+  mechanics: { name: string }[];
+  partsUsed: { name: string; quantity: number }[];
   createdAt: string;
   completedAt?: string;
 }

@@ -83,6 +83,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/services', [MospamsController::class, 'storeService'])->middleware('role:Owner,Staff');
         Route::patch('/services/{service}', [MospamsController::class, 'updateService'])->middleware('role:Owner,Staff');
         Route::delete('/services/{service}', [MospamsController::class, 'deleteService'])->middleware('role:Owner');
+        Route::post('/services/{service}/mechanics', [MospamsController::class, 'assignMechanic'])->middleware('role:Owner,Staff');
+        Route::delete('/services/{service}/mechanics/{mechanic}', [MospamsController::class, 'removeMechanic'])->middleware('role:Owner,Staff');
+        Route::post('/services/{service}/bill', [MospamsController::class, 'billService'])->middleware('role:Owner,Staff');
         Route::get('/service-types', [MospamsController::class, 'serviceTypes'])->middleware('role:Owner,Staff');
         Route::post('/service-types', [MospamsController::class, 'storeServiceType'])->middleware('role:Owner');
         Route::patch('/service-types/{serviceType}', [MospamsController::class, 'updateServiceType'])->middleware('role:Owner');

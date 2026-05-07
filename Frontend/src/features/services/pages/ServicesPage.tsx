@@ -3,19 +3,21 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
-import { Plus, Pencil, Trash2, Search, Clock, Wrench, CheckCircle2, History, X, Settings2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Clock, Wrench, CheckCircle2, History, X, Settings2, ChevronLeft, ChevronRight, Receipt } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useData } from '@/shared/contexts/DataContext';
 import { usePaginatedFetch } from '@/shared/hooks/usePaginatedFetch';
-import { apiGet } from '@/shared/lib/api';
+import { apiGet, apiPost } from '@/shared/lib/api';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { can } from '@/shared/lib/permissions';
 import type { Part, ServiceRecord } from '@/shared/types';
 
 type StatusFilter = 'All' | 'Pending' | 'Ongoing' | 'Completed';
+
+interface Mechanic { id: string; name: string }
 
 const serviceSchema = z.object({
   customerName: z.string().min(2, 'Required'),
@@ -62,12 +64,18 @@ export default function Services() {
   const [typesOpen, setTypesOpen] = useState(false);
   const [partsUsed, setPartsUsed] = useState<{ partId: string; quantity: number }[]>([]);
   const [availableParts, setAvailableParts] = useState<Part[]>([]);
+  const [availableMechanics, setAvailableMechanics] = useState<Mechanic[]>([]);
+  const [selectedMechanicIds, setSelectedMechanicIds] = useState<string[]>([]);
+  const [billJob, setBillJob] = useState<ServiceRecord | null>(null);
+  const [billPaymentMethod, setBillPaymentMethod] = useState<'Cash' | 'GCash'>('Cash');
+  const [billing, setBilling] = useState(false);
 
   const { data: services, loading, meta, page, setPage, prependItem, updateItem, removeItem } = usePaginatedFetch<ServiceRecord>('/api/services');
 
   useEffect(() => {
     if (!modalOpen) return;
     void apiGet<{ data: Part[] }>('/api/parts?limit=100').then(r => setAvailableParts(r.data)).catch(() => {});
+    void apiGet<{ data: { id: string; name: string }[] }>('/api/mechanics?limit=100').then(r => setAvailableMechanics(r.data)).catch(() => {});
   }, [modalOpen]);
 
   useEffect(() => {
@@ -103,17 +111,19 @@ export default function Services() {
     setEditing(null);
     form.reset({ customerName: '', motorcycleModel: '', serviceType: '', laborCost: 0, status: 'Pending', notes: '' });
     setPartsUsed([]);
+    setSelectedMechanicIds([]);
     setModalOpen(true);
   };
   const openEdit = (s: ServiceRecord) => {
     setEditing(s);
     form.reset({ customerName: s.customerName, motorcycleModel: s.motorcycleModel, serviceType: s.serviceType, laborCost: s.laborCost, status: s.status, notes: s.notes });
-    setPartsUsed(s.partsUsed);
+    setPartsUsed(s.partsUsed.map(p => ({ partId: p.partId, quantity: p.quantity })));
+    setSelectedMechanicIds((s.mechanics ?? []).map(m => m.id));
     setModalOpen(true);
   };
 
   const onSubmit = form.handleSubmit(async (values) => {
-    const payload = { ...values, partsUsed };
+    const payload = { ...values, partsUsed, mechanicIds: selectedMechanicIds };
     if (editing) {
       const updated = await updateService(editing.id, payload);
       updateItem(editing.id, 'id', updated);
@@ -137,9 +147,25 @@ export default function Services() {
   };
   const removePartFromService = (partId: string) => setPartsUsed(partsUsed.filter(p => p.partId !== partId));
 
+  const toggleMechanic = (id: string) =>
+    setSelectedMechanicIds(prev => prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id]);
+
   const handleStatusChange = async (service: ServiceRecord, status: string) => {
     const updated = await updateService(service.id, { status: status as 'Pending' | 'Ongoing' | 'Completed' });
     updateItem(service.id, 'id', updated);
+  };
+
+  const handleBill = async () => {
+    if (!billJob) return;
+    setBilling(true);
+    try {
+      await apiPost(`/api/services/${billJob.id}/bill`, { paymentMethod: billPaymentMethod });
+      const updated = await apiGet<{ data: ServiceRecord }>(`/api/services/${billJob.id}`).then(r => r.data).catch(() => null);
+      if (updated) updateItem(billJob.id, 'id', updated);
+      setBillJob(null);
+    } finally {
+      setBilling(false);
+    }
   };
 
   return (
@@ -200,6 +226,11 @@ export default function Services() {
                     </button>
                     <p className="text-xs text-zinc-500">{service.motorcycleModel} — {service.serviceType}</p>
                     <p className="text-xs text-zinc-600 mt-0.5">Labor ₱{service.laborCost.toLocaleString()}</p>
+                    {(service.mechanics ?? []).length > 0 && (
+                      <p className="text-xs text-zinc-500 mt-0.5">
+                        <span className="text-zinc-600">Mechanic:</span> {service.mechanics.map(m => m.name).join(', ')}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -208,6 +239,9 @@ export default function Services() {
                     <option value="Ongoing">Ongoing</option>
                     <option value="Completed">Completed</option>
                   </select>
+                  <button title="Bill this Job" onClick={() => setBillJob(service)} className="p-2 rounded-lg hover:bg-emerald-500/10 text-zinc-500 hover:text-emerald-400 transition-colors">
+                    <Receipt className="w-4 h-4" />
+                  </button>
                   <button title="History" onClick={() => setHistoryCustomer({ name: service.customerName, model: service.motorcycleModel })} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-white transition-colors">
                     <History className="w-4 h-4" />
                   </button>
@@ -221,7 +255,7 @@ export default function Services() {
                 <div className="mt-4 pt-4 border-t border-zinc-800 flex flex-wrap gap-2">
                   {service.partsUsed.map(pu => (
                     <span key={pu.partId} className="text-xs font-medium text-zinc-400 bg-zinc-800/50 px-2.5 py-1 rounded-lg border border-zinc-700">
-                      Part #{pu.partId} x{pu.quantity}
+                      {pu.name ?? `Part #${pu.partId}`} x{pu.quantity}
                     </span>
                   ))}
                 </div>
@@ -253,6 +287,7 @@ export default function Services() {
         </div>
       )}
 
+      {/* Service create/edit modal */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className="sm:max-w-lg rounded-2xl border-zinc-800 bg-zinc-900 p-6 max-h-[90vh] overflow-y-auto">
           <DialogHeader className="pb-2"><DialogTitle className="text-base font-semibold text-white">{editing ? 'Edit Service' : 'New Service Record'}</DialogTitle></DialogHeader>
@@ -295,6 +330,24 @@ export default function Services() {
               <Input {...form.register('notes')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border border-zinc-700 text-sm text-white placeholder:text-zinc-500 focus:border-zinc-600" placeholder="Special instructions…" />
             </div>
 
+            {availableMechanics.length > 0 && (
+              <div>
+                <Label className="text-xs font-medium text-zinc-400">Assign Mechanics</Label>
+                <div className="mt-1.5 flex flex-wrap gap-2">
+                  {availableMechanics.map(m => (
+                    <button
+                      type="button"
+                      key={m.id}
+                      onClick={() => toggleMechanic(m.id)}
+                      className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors ${selectedMechanicIds.includes(m.id) ? 'bg-blue-500/20 border-blue-500/40 text-blue-300' : 'bg-zinc-800/50 border-zinc-700 text-zinc-400 hover:bg-zinc-800'}`}
+                    >
+                      {m.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div>
               <Label className="text-xs font-medium text-zinc-400">Parts Used</Label>
               <div className="mt-1.5 flex flex-wrap gap-2">
@@ -322,6 +375,47 @@ export default function Services() {
               <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-10 rounded-xl text-sm border-zinc-700 text-zinc-400">Cancel</Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bill this Job modal */}
+      <Dialog open={!!billJob} onOpenChange={() => setBillJob(null)}>
+        <DialogContent className="sm:max-w-sm rounded-2xl border-zinc-800 bg-zinc-900 p-6">
+          <DialogHeader><DialogTitle className="text-base font-semibold text-white">Bill this Job</DialogTitle></DialogHeader>
+          {billJob && (
+            <div className="mt-3 space-y-4">
+              <div className="bg-zinc-800/50 rounded-xl p-4 border border-zinc-700 space-y-2">
+                <p className="text-xs text-zinc-400 font-medium uppercase tracking-wide">Summary</p>
+                <div className="flex justify-between text-sm text-zinc-300">
+                  <span>{billJob.serviceType}</span>
+                  <span>₱{billJob.laborCost.toLocaleString()}</span>
+                </div>
+                {billJob.partsUsed.map(p => (
+                  <div key={p.partId} className="flex justify-between text-sm text-zinc-300">
+                    <span>{p.name ?? `Part #${p.partId}`} x{p.quantity}</span>
+                    <span>{p.unitPrice != null ? `₱${(p.unitPrice * p.quantity).toLocaleString()}` : '—'}</span>
+                  </div>
+                ))}
+                <div className="pt-2 border-t border-zinc-700 flex justify-between text-sm font-semibold text-white">
+                  <span>Total</span>
+                  <span>₱{(billJob.laborCost + billJob.partsUsed.reduce((s, p) => s + (p.unitPrice ?? 0) * p.quantity, 0)).toLocaleString()}</span>
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs font-medium text-zinc-400">Payment Method</Label>
+                <select value={billPaymentMethod} onChange={e => setBillPaymentMethod(e.target.value as 'Cash' | 'GCash')} className="w-full mt-1.5 h-10 px-3 rounded-xl bg-zinc-800/50 border border-zinc-700 text-sm text-white">
+                  <option value="Cash">Cash</option>
+                  <option value="GCash">GCash</option>
+                </select>
+              </div>
+              <div className="flex gap-3 pt-1">
+                <Button onClick={handleBill} disabled={billing} className="flex-1 h-10 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:opacity-90 text-white text-sm font-semibold transition-opacity">
+                  {billing ? 'Processing…' : 'Confirm & Bill'}
+                </Button>
+                <Button variant="outline" onClick={() => setBillJob(null)} className="h-10 rounded-xl text-sm border-zinc-700 text-zinc-400">Cancel</Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
