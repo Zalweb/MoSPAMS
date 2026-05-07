@@ -1,5 +1,5 @@
 // MoSPAMS Service Worker — network-first for API, stale-while-revalidate for assets
-const CACHE_VERSION = 'mospams-v4';
+const CACHE_VERSION = 'mospams-v5';
 const ASSET_CACHE = `${CACHE_VERSION}-assets`;
 const FONT_CACHE = `${CACHE_VERSION}-fonts`;
 
