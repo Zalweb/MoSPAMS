@@ -24,7 +24,7 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!assets/|images/|fonts/|sw\\.js|manifest\\.json|favicon\\.ico).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ],

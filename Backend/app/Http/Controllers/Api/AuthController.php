@@ -38,6 +38,12 @@ class AuthController extends Controller
             return response()->json(['message' => $genericMessage]);
         }
 
+        // Tenant isolation: only allow reset if user belongs to this shop
+        $shop = $request->attributes->get('shop');
+        if ($shop && $user->shop_id_fk !== $shop->shop_id) {
+            return response()->json(['message' => $genericMessage]);
+        }
+
         // Invalidate any existing unused tokens for this user
         DB::table('password_resets')
             ->where('user_id', $user->user_id)

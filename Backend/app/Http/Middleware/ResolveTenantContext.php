@@ -100,8 +100,10 @@ class ResolveTenantContext
             || $request->is('api/webhooks/*')
             || $request->is('api/stats')
             || $request->is('api/shop-registration')
-            || $request->is('api/forgot-password')
             || $request->is('api/reset-password');
+        // NOTE: api/forgot-password is intentionally NOT exempt so shop context is
+        // resolved and the controller can enforce tenant isolation (users can only
+        // reset passwords via their own shop's subdomain).
         // NOTE: api/shop/info is intentionally NOT exempt so the shop can be resolved
         // and passed to ShopBrandingController. The shop-active check is skipped separately.
     }
@@ -109,7 +111,8 @@ class ResolveTenantContext
     // Routes that bypass the shop-active (503) guard but still get shop resolution.
     private function isShopStatusCheckExempt(Request $request): bool
     {
-        return $request->is('api/shop/info');
+        return $request->is('api/shop/info')
+            || $request->is('api/forgot-password');
     }
 
     private function requiresTenantContextHeader(Request $request): bool
@@ -190,19 +193,23 @@ class ResolveTenantContext
 
     private function extractSubdomain(string $host): ?string
     {
-        $baseDomain = strtolower((string) config('tenancy.base_domain', 'mospams.app'));
+        // Check configured base_domain plus all public hosts as valid base domains.
+        // This prevents breakage when TENANCY_BASE_DOMAIN differs from the actual
+        // serving domain (e.g. env says mospams.app but requests come on mospams.shop).
+        $configured = strtolower((string) config('tenancy.base_domain', 'mospams.app'));
+        $baseDomains = array_unique(array_merge([$configured], $this->platformHosts->publicHosts()));
 
-        if (! str_ends_with($host, '.'.$baseDomain)) {
-            return null;
+        foreach ($baseDomains as $base) {
+            if (str_ends_with($host, '.' . $base)) {
+                $subdomain = substr($host, 0, -strlen('.' . $base));
+                if ($subdomain === '' || $subdomain === 'www') {
+                    continue;
+                }
+                return $subdomain;
+            }
         }
 
-        $subdomain = substr($host, 0, -strlen('.'.$baseDomain));
-
-        if ($subdomain === '' || $subdomain === 'www') {
-            return null;
-        }
-
-        return $subdomain;
+        return null;
     }
 
     private function isShopActive(Shop $shop): bool
