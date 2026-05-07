@@ -240,7 +240,7 @@ export default function LoginPage() {
                   open={signUpModal.open}
                   googleData={signUpModal.googleData}
                   onClose={() => setSignUpModal({ open: false, googleData: null })}
-                  onSuccess={() => {
+                  onSuccess={(_token: string) => {
                     setSignUpModal({ open: false, googleData: null });
                     toast.success('Account created! Welcome to MoSPAMS.');
                   }}

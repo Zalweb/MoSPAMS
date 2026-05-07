@@ -91,14 +91,13 @@ export default function GoogleAuthProxyPage() {
     }
   };
 
-  const handleRegistrationSuccess = () => {
-    // After registration, redirect back to tenant login page
-    // The user can then sign in with Google normally
+  const handleRegistrationSuccess = (token: string) => {
+    // Redirect to the tenant callback with the new token so the user
+    // is authenticated immediately without having to sign in again.
     if (returnTo) {
       setStatus('redirecting');
-      // Return to the tenant's main page (strip /auth/callback)
-      const tenantOrigin = new URL(returnTo).origin;
-      window.location.href = tenantOrigin;
+      const separator = returnTo.includes('?') ? '&' : '?';
+      window.location.href = `${returnTo}${separator}token=${encodeURIComponent(token)}`;
     }
   };
 

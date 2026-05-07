@@ -12,7 +12,7 @@ interface Props {
   open: boolean;
   googleData: GoogleData;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (token: string) => void;
 }
 
 const ROLE_OPTIONS: { value: RequestedRole; label: string; desc: string; instant: boolean }[] = [
@@ -49,7 +49,7 @@ export default function GoogleSignUpModal({ open, googleData, onClose, onSuccess
     setSubmitting(false);
 
     if (!result.ok) { setError(result.error); return; }
-    onSuccess();
+    onSuccess(result.token);
   };
 
   return (

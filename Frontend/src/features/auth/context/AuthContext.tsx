@@ -93,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await apiMutation<LoginResponse>('/api/auth/google/register', 'POST', payload);
       setAuthToken(response.token);
       setUser(normalizeUserRole(response.user));
-      return { ok: true as const };
+      return { ok: true as const, token: response.token };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Registration failed. Please try again.';
       return { ok: false as const, error: message };
