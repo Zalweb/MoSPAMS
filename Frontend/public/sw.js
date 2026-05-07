@@ -1,5 +1,5 @@
 // MoSPAMS Service Worker — network-first for API, stale-while-revalidate for assets
-const CACHE_VERSION = 'mospams-v5';
+const CACHE_VERSION = 'mospams-v6';
 const ASSET_CACHE = `${CACHE_VERSION}-assets`;
 const FONT_CACHE = `${CACHE_VERSION}-fonts`;
 
@@ -72,11 +72,19 @@ async function cacheFirst(request, cacheName) {
 
 async function staleWhileRevalidate(request, cacheName) {
   const cache = await caches.open(cacheName);
-  const cached = await cache.match(request);
+  let cached = await cache.match(request);
+
+  // Discard any cached HTML response served for an asset URL (poisoned from bad deployment)
+  if (cached) {
+    const isAssetRequest = /\.(js|css|woff2?|png|jpg|jpeg|svg|ico|webp)(\?|$)/.test(request.url);
+    const isHtmlResponse = (cached.headers.get('Content-Type') || '').includes('text/html');
+    if (isAssetRequest && isHtmlResponse) {
+      await cache.delete(request);
+      cached = null;
+    }
+  }
 
   // Use cache:'reload' to bypass the browser HTTP cache and hit the network directly.
-  // This prevents stale browser-cached HTML responses (from a past broken deployment)
-  // from being served in place of JS/CSS asset files.
   const networkRequest = new Request(request, { cache: 'reload' });
   const fetchPromise = fetch(networkRequest).then(response => {
     if (response.ok) {
