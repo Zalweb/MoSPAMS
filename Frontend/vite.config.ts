@@ -24,6 +24,11 @@ export default defineConfig({
     cssCodeSplit: true,
     rollupOptions: {
       output: {
+        // Append -r1 to force new filenames after a bad immutable-cache deployment
+        // poisoned browsers with HTML responses. Old cache entries become unreachable.
+        chunkFileNames: 'assets/[name]-[hash]-r1.js',
+        entryFileNames: 'assets/[name]-[hash]-r1.js',
+        assetFileNames: 'assets/[name]-[hash]-r1[extname]',
         manualChunks(id) {
           // Core React runtime — tiny, keep separate so it's cached long-term
           if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/') || id.includes('node_modules/scheduler/')) {
