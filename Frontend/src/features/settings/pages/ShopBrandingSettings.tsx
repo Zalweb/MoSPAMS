@@ -178,7 +178,7 @@ export default function ShopBrandingSettings() {
           ) : (
             <div className="relative w-24 h-24 rounded-xl bg-zinc-800/50 border border-zinc-700 flex items-center justify-center overflow-hidden">
               <img
-                src="/images/logo.png"
+                src="/images/logo.svg"
                 alt="Default MoSPAMS logo"
                 className="w-20 h-20 object-contain opacity-60"
                 loading="lazy"

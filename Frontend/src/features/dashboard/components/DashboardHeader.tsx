@@ -68,7 +68,7 @@ export function DashboardHeader() {
           {shop?.logoUrl ? (
             <img src={shop.logoUrl} alt={shop.shopName} className="w-full h-full rounded-xl object-cover" loading="lazy" decoding="async" />
           ) : (
-            <img src="/images/logo.png" alt="MoSPAMS" className="w-7 h-7 object-contain" loading="lazy" decoding="async" />
+            <img src="/images/logo.svg" alt="MoSPAMS" className="w-7 h-7 object-contain" loading="lazy" decoding="async" />
           )}
         </div>
       </div>

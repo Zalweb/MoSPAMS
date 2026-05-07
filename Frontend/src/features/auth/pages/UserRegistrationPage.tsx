@@ -151,7 +151,7 @@ export default function UserRegistrationPage() {
           {/* Header */}
           <div className="flex justify-center mb-6">
             <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-lg overflow-hidden">
-              <img src="/images/logo.png" alt="MoSPAMS" className="w-10 h-10 object-contain" />
+              <img src="/images/logo.svg" alt="MoSPAMS" className="w-10 h-10 object-contain" />
             </div>
           </div>
 
