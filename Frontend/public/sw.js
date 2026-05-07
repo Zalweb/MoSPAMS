@@ -1,5 +1,5 @@
 // MoSPAMS Service Worker — network-first for API, stale-while-revalidate for assets
-const CACHE_VERSION = 'mospams-v2';
+const CACHE_VERSION = 'mospams-v3';
 const ASSET_CACHE = `${CACHE_VERSION}-assets`;
 const FONT_CACHE = `${CACHE_VERSION}-fonts`;
 
@@ -75,7 +75,15 @@ async function staleWhileRevalidate(request, cacheName) {
   const cached = await cache.match(request);
 
   const fetchPromise = fetch(request).then(response => {
-    if (response.ok) cache.put(request, response.clone());
+    // Only cache if the response is valid and not an HTML fallback for a missing asset
+    if (response.ok) {
+      const contentType = response.headers.get('Content-Type') || '';
+      const isAssetRequest = /\.(js|css|woff2?|png|jpg|jpeg|svg|ico|webp)(\?|$)/.test(request.url);
+      const isHtmlResponse = contentType.includes('text/html');
+      if (!(isAssetRequest && isHtmlResponse)) {
+        cache.put(request, response.clone());
+      }
+    }
     return response;
   }).catch(() => null);
 
