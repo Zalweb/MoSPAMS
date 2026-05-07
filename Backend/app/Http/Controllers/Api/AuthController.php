@@ -44,6 +44,16 @@ class AuthController extends Controller
             return response()->json(['message' => $genericMessage]);
         }
 
+        // 60-second cooldown: silently drop the request if a token was issued recently
+        $recentlySent = DB::table('password_resets')
+            ->where('user_id', $user->user_id)
+            ->where('created_at', '>', now()->subSeconds(60))
+            ->exists();
+
+        if ($recentlySent) {
+            return response()->json(['message' => $genericMessage]);
+        }
+
         // Invalidate any existing unused tokens for this user
         DB::table('password_resets')
             ->where('user_id', $user->user_id)

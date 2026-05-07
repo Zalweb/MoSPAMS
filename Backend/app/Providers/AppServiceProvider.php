@@ -35,6 +35,13 @@ class AppServiceProvider extends ServiceProvider
             ];
         });
 
+        RateLimiter::for('forgot-password', function (Request $request) {
+            return [
+                Limit::perMinute(3)->by($request->ip()),
+                Limit::perMinute(3)->by('fp-email|' . strtolower((string) $request->input('email', ''))),
+            ];
+        });
+
         RateLimiter::for('shop-info', function (Request $request) {
             return [
                 Limit::perMinute(120)->by($request->ip()),

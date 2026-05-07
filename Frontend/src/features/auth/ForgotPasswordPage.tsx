@@ -1,20 +1,38 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { ArrowLeft, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+const COOLDOWN_SECONDS = 60;
 
 export default function ForgotPasswordPage() {
   const navigate = useNavigate();
-  const [email, setEmail]       = useState('');
-  const [loading, setLoading]   = useState(false);
+  const [email, setEmail]         = useState('');
+  const [loading, setLoading]     = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [cooldown, setCooldown]   = useState(0);
+  const timerRef                  = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim()) { toast.error('Please enter your email address.'); return; }
+  useEffect(() => {
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, []);
 
+  const startCooldown = () => {
+    setCooldown(COOLDOWN_SECONDS);
+    timerRef.current = setInterval(() => {
+      setCooldown(prev => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current!);
+          timerRef.current = null;
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const sendRequest = async (emailValue: string) => {
     setLoading(true);
     try {
       await fetch(`${API_BASE_URL}/api/forgot-password`, {
@@ -24,15 +42,29 @@ export default function ForgotPasswordPage() {
           Accept: 'application/json',
           'X-Tenant-Host': window.location.host,
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: emailValue }),
       });
-      // Always show success — never reveal if email exists
-      setSubmitted(true);
     } catch {
-      setSubmitted(true); // same message on network error to avoid info leak
+      // same behaviour on network error — never reveal if email exists
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) { toast.error('Please enter your email address.'); return; }
+
+    await sendRequest(email);
+    setSubmitted(true);
+    startCooldown();
+  };
+
+  const handleResend = async () => {
+    if (cooldown > 0 || loading) return;
+    await sendRequest(email);
+    startCooldown();
+    toast.success('Reset link resent.');
   };
 
   if (submitted) {
@@ -43,13 +75,27 @@ export default function ForgotPasswordPage() {
             <Mail className="w-7 h-7 text-zinc-300" strokeWidth={1.5} />
           </div>
           <h1 className="text-2xl font-bold text-white mb-3">Check your email</h1>
-          <p className="text-zinc-400 text-sm leading-relaxed mb-8">
-            If an account with that email exists, we've sent a password reset link.
-            The link expires in <span className="text-white font-medium">15 minutes</span>.
+          <p className="text-zinc-400 text-sm leading-relaxed mb-2">
+            If an account with that email exists, we've sent a password reset link to{' '}
+            <span className="text-white font-medium">{email}</span>.
           </p>
+          <p className="text-zinc-500 text-xs mb-8">
+            The link expires in <span className="text-zinc-400 font-medium">15 minutes</span>.
+          </p>
+
+          <button
+            onClick={handleResend}
+            disabled={cooldown > 0 || loading}
+            className="w-full px-6 py-3 rounded-xl border border-zinc-700/50 text-zinc-300 text-sm font-medium hover:bg-zinc-800/60 transition-all disabled:opacity-40 disabled:cursor-not-allowed mb-4"
+          >
+            {cooldown > 0
+              ? `Resend in ${cooldown}s`
+              : loading ? 'Sending…' : 'Resend reset link'}
+          </button>
+
           <button
             onClick={() => navigate('/')}
-            className="text-sm text-zinc-400 hover:text-white transition-colors flex items-center gap-2 mx-auto"
+            className="text-sm text-zinc-500 hover:text-white transition-colors flex items-center gap-2 mx-auto"
           >
             <ArrowLeft className="w-4 h-4" strokeWidth={2} />
             Back to login
