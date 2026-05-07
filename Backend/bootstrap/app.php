@@ -24,12 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->prependToGroup('api', \App\Http\Middleware\ResolveTenantContext::class);
 
-        $middleware->redirectGuestsTo(function (Request $request) {
-            if ($request->expectsJson()) {
-                return null;
-            }
-            return route('login');
-        });
+        $middleware->redirectGuestsTo(fn (Request $request) => null);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

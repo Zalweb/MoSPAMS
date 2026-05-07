@@ -99,7 +99,9 @@ class ResolveTenantContext
             || $request->is('api/logout')
             || $request->is('api/webhooks/*')
             || $request->is('api/stats')
-            || $request->is('api/shop-registration');
+            || $request->is('api/shop-registration')
+            || $request->is('api/forgot-password')
+            || $request->is('api/reset-password');
         // NOTE: api/shop/info is intentionally NOT exempt so the shop can be resolved
         // and passed to ShopBrandingController. The shop-active check is skipped separately.
     }
