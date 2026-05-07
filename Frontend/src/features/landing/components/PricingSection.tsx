@@ -1,8 +1,12 @@
 import { useNavigate } from 'react-router';
 import { Check, DollarSign } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { useScrollAnimation } from '@/shared/hooks/useScrollAnimation';
 
 export default function PricingSection() {
   const navigate = useNavigate();
+  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.2 });
+  const { ref: cardsRef, isVisible: cardsVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.1 });
 
   const plans = [
     {
@@ -74,27 +78,50 @@ export default function PricingSection() {
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/50 backdrop-blur-sm border border-zinc-800/50 text-zinc-300 text-sm font-medium mb-6">
+        <div
+          ref={headerRef}
+          className={`text-center mb-16 transition-all duration-700 ${
+            headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={headerVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.1 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/50 backdrop-blur-sm border border-zinc-800/50 text-zinc-300 text-sm font-medium mb-6"
+          >
             <DollarSign className="w-4 h-4" strokeWidth={2} />
             Simple Pricing
-          </div>
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4 tracking-tight">
+          </motion.div>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={headerVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.2 }}
+            className="text-4xl sm:text-5xl font-bold text-white mb-4 tracking-tight"
+          >
             Choose your{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 via-zinc-400 to-zinc-600">
               perfect plan
             </span>
-          </h2>
-          <p className="text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto">
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={headerVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.3 }}
+            className="text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto"
+          >
             Flexible pricing for shops of all sizes. Start free, upgrade anytime.
-          </p>
+          </motion.p>
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {plans.map((plan) => (
-            <div
+        <div ref={cardsRef} className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          {plans.map((plan, index) => (
+            <motion.div
               key={plan.name}
+              initial={{ opacity: 0, y: 30 }}
+              animate={cardsVisible ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: 0.1 * index, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className={`relative group rounded-3xl p-8 transition-all duration-300 ${
                 plan.popular
                   ? 'bg-gradient-to-b from-zinc-800/80 to-zinc-900/80 border-2 border-zinc-700/50 shadow-2xl scale-105'
@@ -149,7 +176,7 @@ export default function PricingSection() {
                   Get Started
                 </button>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 

@@ -1,4 +1,6 @@
 import { Shield, User, Wrench, Handshake, Users as UsersIcon } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { useScrollAnimation } from '@/shared/hooks/useScrollAnimation';
 
 const ROLES = [
   {
@@ -72,34 +74,61 @@ const statusColorMap: Record<string, string> = {
 };
 
 export default function RolesSection() {
+  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.2 });
+  const { ref: cardsRef, isVisible: cardsVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.1 });
+  const { ref: noteRef, isVisible: noteVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.5 });
+
   return (
     <section id="roles" className="relative py-24 bg-black">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-semibold mb-4">
+        <div
+          ref={headerRef}
+          className={`text-center max-w-2xl mx-auto mb-16 transition-all duration-700 ${
+            headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={headerVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.1 }}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-semibold mb-4"
+          >
             <UsersIcon className="w-3.5 h-3.5" strokeWidth={2} />
             User Roles
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">
+          </motion.div>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={headerVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.2 }}
+            className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight"
+          >
             Designed for{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-300 to-zinc-500">
               real shop workflows
             </span>
-          </h2>
-          <p className="text-zinc-400 text-lg leading-relaxed">
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={headerVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.3 }}
+            className="text-zinc-400 text-lg leading-relaxed"
+          >
             Role-based access ensures every team member sees exactly what they need, nothing more
             and nothing less.
-          </p>
+          </motion.p>
         </div>
 
         {/* Role Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {ROLES.map((role) => (
-            <div
+        <div ref={cardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {ROLES.map((role, index) => (
+            <motion.div
               key={role.title}
+              initial={{ opacity: 0, y: 30 }}
+              animate={cardsVisible ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: 0.1 * index, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className={`relative rounded-2xl overflow-hidden border ${
                 role.featured
                   ? 'border-zinc-700 shadow-xl ' + role.shadow
@@ -156,12 +185,18 @@ export default function RolesSection() {
                   ))}
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 
         {/* Note banner */}
-        <div className="mt-10 p-4 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-start gap-3 max-w-3xl mx-auto">
+        <motion.div
+          ref={noteRef}
+          initial={{ opacity: 0, y: 20 }}
+          animate={noteVisible ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-10 p-4 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-start gap-3 max-w-3xl mx-auto"
+        >
           <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0 mt-0.5">
             <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -175,7 +210,7 @@ export default function RolesSection() {
               shop secure and organized.
             </p>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

@@ -1,4 +1,6 @@
+import { motion } from 'framer-motion';
 import { Target, Zap, TrendingUp, Bike, Wrench as WrenchIcon } from 'lucide-react';
+import { useScrollAnimation } from '@/shared/hooks/useScrollAnimation';
 
 const BENEFITS = [
   {
@@ -29,15 +31,21 @@ const STATS = [
 ];
 
 export default function AboutSection() {
+  const { ref: sectionRef, isVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.1 });
+
   return (
     <section id="about" className="relative py-24 bg-zinc-950">
       {/* Top border */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div ref={sectionRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Left Column */}
-          <div>
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={isVisible ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          >
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-semibold mb-5">
               <Bike className="w-3.5 h-3.5" strokeWidth={2} />
               About MoSPAMS
@@ -75,10 +83,15 @@ export default function AboutSection() {
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Right Column: Stats + Visual */}
-          <div className="space-y-6">
+          <motion.div
+            className="space-y-6"
+            initial={{ opacity: 0, x: 30 }}
+            animate={isVisible ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          >
             {/* Stats Grid */}
             <div className="grid grid-cols-2 gap-4">
               {STATS.map((stat) => (
@@ -119,7 +132,7 @@ export default function AboutSection() {
                 ))}
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

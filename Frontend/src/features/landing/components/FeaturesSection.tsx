@@ -1,4 +1,6 @@
+import { motion } from 'framer-motion';
 import { Package, Wrench, Receipt, BarChart3, Users, ClipboardList, Zap } from 'lucide-react';
+import { useScrollAnimation } from '@/shared/hooks/useScrollAnimation';
 
 const FEATURES = [
   {
@@ -91,6 +93,9 @@ const colorMap: Record<string, { card: string; icon: string; tag: string; dot: s
 };
 
 export default function FeaturesSection() {
+  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.2 });
+  const { ref: gridRef, isVisible: gridVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.1 });
+
   return (
     <section id="features" className="relative py-24">
       {/* Decorative glow */}
@@ -103,30 +108,53 @@ export default function FeaturesSection() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-semibold mb-4">
+        <div
+          ref={headerRef}
+          className={`text-center max-w-2xl mx-auto mb-16 transition-all duration-700 ${
+            headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={headerVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.1 }}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-semibold mb-4"
+          >
             <Zap className="w-3.5 h-3.5" strokeWidth={2} />
             Core Features
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">
+          </motion.div>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={headerVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.2 }}
+            className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight"
+          >
             Powerful features built for{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-300 to-zinc-500">
               motorcycle shop management
             </span>
-          </h2>
-          <p className="text-zinc-400 text-lg leading-relaxed">
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={headerVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.3 }}
+            className="text-zinc-400 text-lg leading-relaxed"
+          >
             Everything your shop needs — from tracking inventory and completing service jobs to
             managing your team and branding your storefront.
-          </p>
+          </motion.p>
         </div>
 
         {/* Feature Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {FEATURES.map((feature) => {
+        <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {FEATURES.map((feature, index) => {
             const c = colorMap[feature.color];
             return (
-              <div
+              <motion.div
                 key={feature.title}
+                initial={{ opacity: 0, y: 30 }}
+                animate={gridVisible ? { opacity: 1, y: 0 } : {}}
+                transition={{ delay: 0.1 * index, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 className={`group relative bg-zinc-900 rounded-2xl border border-zinc-800 p-6 shadow-sm hover:shadow-lg transition-all duration-300 ${c.card} hover:-translate-y-1 cursor-default`}
               >
                 {/* Icon */}
@@ -159,7 +187,7 @@ export default function FeaturesSection() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17L17 7M17 7H7M17 7v10" />
                   </svg>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
