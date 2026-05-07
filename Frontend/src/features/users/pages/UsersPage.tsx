@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Shield, UserCheck, Clock, Activity, Plus, Pencil, Trash2, Power, CheckCircle, XCircle } from 'lucide-react';
+import { Shield, UserCheck, Clock, Activity, Plus, Pencil, Trash2, Power, CheckCircle, XCircle, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -43,10 +43,11 @@ export default function Users() {
   const editForm = useForm<EditUserForm>({ resolver: zodResolver(editUserSchema) });
 
   const adminCount = users.filter(u => u.role === 'Owner').length;
-  const staffCount = users.filter(u => u.role === 'Staff').length;
+  const staffCount = users.filter(u => u.role === 'Staff' || u.role === 'Mechanic').length;
+  const customerCount = users.filter(u => u.role === 'Customer').length;
 
   const filteredLogs = useMemo(() => {
-    return logs.filter(l => (logFilter.user === 'All' || l.user === logFilter.user) && (!logFilter.query || l.action.toLowerCase().includes(logFilter.query.toLowerCase())));
+    return logs.filter(l => (logFilter.user === 'All' || l.user === logFilter.user) && (!logFilter.query || (l.action ?? '').toLowerCase().includes(logFilter.query.toLowerCase())));
   }, [logs, logFilter]);
 
   const fetchPendingRequests = useCallback(async () => {
@@ -129,10 +130,11 @@ export default function Users() {
 
       {tab === 'users' && (
         <>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-6">
         {[
           { title: 'Owners', desc: 'Full system access', count: adminCount, icon: Shield, accent: 'bg-white text-zinc-900' },
           { title: 'Staff / Mechanic', desc: 'Operational access', count: staffCount, icon: UserCheck, accent: 'bg-blue-500/20 text-blue-400' },
+          { title: 'Customers', desc: 'Registered clients', count: customerCount, icon: Users, accent: 'bg-emerald-500/20 text-emerald-400' },
           { title: 'Activity Logs', desc: 'Recorded actions', count: logs.length, icon: Activity, accent: 'bg-purple-500/20 text-purple-400' },
         ].map(card => (
           <div key={card.title} className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl p-5">
@@ -169,7 +171,7 @@ export default function Users() {
                   <td className="px-3 py-3 text-[12px] text-zinc-500">{u.email}</td>
                   <td className="px-3 py-3"><span className={`text-[10px] font-bold uppercase px-2 py-[3px] rounded-full ${u.role === 'Owner' ? 'bg-white text-zinc-900' : 'bg-blue-500/20 text-blue-400'}`}>{u.role}</span></td>
                   <td className="px-3 py-3"><span className={`text-[10px] font-medium px-2 py-[3px] rounded-full ${u.status === 'Active' ? 'bg-green-500/20 text-green-400' : 'bg-zinc-800 text-zinc-500'}`}>{u.status}</span></td>
-                  <td className="px-3 py-3 text-[11px] text-zinc-500 tabular-nums">{new Date(u.lastActive).toLocaleString()}</td>
+                  <td className="px-3 py-3 text-[11px] text-zinc-500 tabular-nums">{u.lastActive ? new Date(u.lastActive).toLocaleString() : '—'}</td>
                   <td className="px-3 py-3 text-right">
                     <div className="inline-flex items-center gap-0.5">
                       <button title={u.status === 'Active' ? 'Disable' : 'Enable'} onClick={() => setUserStatus(u.id, u.status === 'Active' ? 'Inactive' : 'Active')} disabled={me?.id === u.id} className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors disabled:opacity-30">
@@ -233,12 +235,12 @@ export default function Users() {
         <div className="space-y-0 max-h-[480px] overflow-y-auto">
           {filteredLogs.map((log, i) => (
             <div key={log.id} className={`flex items-start gap-3 py-3 ${i < filteredLogs.length - 1 ? 'border-b border-zinc-800' : ''}`}>
-              <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-[10px] font-bold ${log.user.includes('Owner') ? 'bg-white text-zinc-900' : 'bg-blue-500/20 text-blue-400'}`}>
-                {log.user.charAt(0)}
+              <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-[10px] font-bold ${(log.user ?? '').includes('Owner') ? 'bg-white text-zinc-900' : 'bg-blue-500/20 text-blue-400'}`}>
+                {(log.user ?? '?').charAt(0)}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-semibold text-zinc-200">{log.user}</p>
-                <p className="text-[11px] text-zinc-500">{log.action}</p>
+                <p className="text-[11px] font-semibold text-zinc-200">{log.user ?? 'System'}</p>
+                <p className="text-[11px] text-zinc-500">{log.action ?? ''}</p>
               </div>
               <span className="text-[10px] text-zinc-600 shrink-0 tabular-nums">{new Date(log.timestamp).toLocaleString()}</span>
             </div>
