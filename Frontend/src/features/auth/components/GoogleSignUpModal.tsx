@@ -49,7 +49,7 @@ export default function GoogleSignUpModal({ open, googleData, onClose, onSuccess
     setSubmitting(false);
 
     if (!result.ok) { setError(result.error); return; }
-    onSuccess(result.token);
+    if (result.ok) onSuccess(result.token);
   };
 
   return (
