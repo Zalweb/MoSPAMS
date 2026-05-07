@@ -199,7 +199,30 @@ export function TenantBrandingProvider({ children }: { children: React.ReactNode
 
     void loadBranding();
 
-    return () => { activeRef.current = false; };
+    // ── Auto-sync branding in the background ──
+    
+    // 1. Poll every 5 minutes
+    const intervalId = setInterval(() => {
+      void loadBranding();
+    }, 5 * 60 * 1000);
+
+    // 2. Refetch when window regains focus or becomes visible
+    const handleFocus = () => void loadBranding();
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        void loadBranding();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => { 
+      activeRef.current = false; 
+      clearInterval(intervalId);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [loadBranding]);
 
   const refreshBranding = useCallback(async () => {
