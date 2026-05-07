@@ -10,6 +10,7 @@ import { currentHostMode } from '@/shared/lib/hostMode';
 import type { Role } from '@/shared/types';
 
 // Layouts are NOT lazy — they render immediately on login
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import DashboardLayout from '@/features/layout/pages/DashboardLayout';
 import SuperAdminLayout from '@/features/superadmin/pages/SuperAdminLayout';
 import LoginPage from '@/features/auth/LoginPage';
@@ -160,6 +161,7 @@ function App() {
         <AuthProvider>
           <DataProvider>
             <Toaster position="top-right" richColors closeButton />
+            <ErrorBoundary>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 {hostMode === 'public' ? (
@@ -259,6 +261,7 @@ function App() {
                 )}
               </Routes>
             </Suspense>
+            </ErrorBoundary>
           </DataProvider>
         </AuthProvider>
       </BrowserRouter>
