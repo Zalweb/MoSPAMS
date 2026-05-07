@@ -52,7 +52,7 @@ function applyBranding(branding: TenantBranding) {
   root.style.setProperty('--color-primary', primaryHsl);
   root.style.setProperty('--color-secondary', secondaryHsl);
   
-  document.title = `${branding.shopName} | MoSPAMS`;
+  document.title = branding.shopName || 'MoSPAMS';
 
   let themeMeta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
   if (!themeMeta) {
