@@ -142,6 +142,14 @@ function RequireActiveShop() {
   return <Outlet />;
 }
 
+function DashboardIndexRedirect() {
+  const { user } = useAuth();
+  const role = normalizeRole(user?.role);
+  if (role === 'Customer') return <Navigate to="/dashboard/customer" replace />;
+  if (role === 'Mechanic') return <Navigate to="/dashboard/mechanic/jobs" replace />;
+  return <Suspense fallback={<PageLoader />}><NewDashboardWrapper /></Suspense>;
+}
+
 function LoginRoute() {
   const { user, ready } = useAuth();
   if (!ready) return null;
@@ -233,7 +241,7 @@ function App() {
                     <Route element={<RequireAuth />}>
                       <Route element={<RequireActiveShop />}>
                         <Route path="dashboard" element={<DashboardLayout />}>
-                          <Route index element={<NewDashboardWrapper />} />
+                          <Route index element={<DashboardIndexRedirect />} />
                           <Route path="inventory" element={<InventoryPage />} />
                           <Route path="services" element={<ServicesPage />} />
                           <Route path="sales" element={<SalesPage />} />
