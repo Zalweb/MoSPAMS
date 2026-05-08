@@ -20,17 +20,36 @@ export default function CustomerDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchServices = async () => {
+    let active = true;
+
+    const fetchServices = async (showLoader = false) => {
+      if (showLoader) {
+        setLoading(true);
+      }
+
       try {
         const data = await apiGet<{ data: CustomerService[] }>('/api/customer/services');
-        setServices(data.data);
+        if (active) {
+          setServices(data.data);
+        }
       } catch {
-        setServices([]);
+        if (active) {
+          setServices([]);
+        }
       } finally {
-        setLoading(false);
+        if (active && showLoader) {
+          setLoading(false);
+        }
       }
     };
-    void fetchServices();
+
+    void fetchServices(true);
+    const intervalId = window.setInterval(() => void fetchServices(), 10000);
+
+    return () => {
+      active = false;
+      window.clearInterval(intervalId);
+    };
   }, []);
 
   const handleCancel = async (id: string) => {

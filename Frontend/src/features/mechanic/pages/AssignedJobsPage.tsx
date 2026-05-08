@@ -25,21 +25,38 @@ export default function AssignedJobsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   useEffect(() => {
-    loadJobs();
-  }, []);
+    let active = true;
 
-  async function loadJobs() {
-    try {
-      setLoading(true);
-      const response = await apiGet<{ data: Job[] }>('/api/mechanic/jobs');
-      setJobs(response.data);
-    } catch (error) {
-      console.error('Failed to load jobs', error);
-      toast.error('Failed to load assigned jobs');
-    } finally {
-      setLoading(false);
-    }
-  }
+    const pollJobs = async (showLoader = false) => {
+      try {
+        if (showLoader) {
+          setLoading(true);
+        }
+
+        const response = await apiGet<{ data: Job[] }>('/api/mechanic/jobs');
+        if (active) {
+          setJobs(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to load jobs', error);
+        if (showLoader) {
+          toast.error('Failed to load assigned jobs');
+        }
+      } finally {
+        if (active && showLoader) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void pollJobs(true);
+    const intervalId = window.setInterval(() => void pollJobs(), 10000);
+
+    return () => {
+      active = false;
+      window.clearInterval(intervalId);
+    };
+  }, []);
 
   const filteredJobs = jobs.filter(job => {
     const matchesSearch = 

@@ -14,7 +14,6 @@ class ServiceJob extends Model
     protected $fillable = [
         'shop_id_fk',
         'customer_id_fk',
-        'assigned_mechanic_id_fk',
         'created_by_fk',
         'service_job_status_id_fk',
         'job_date',

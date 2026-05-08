@@ -15,9 +15,11 @@ class ServiceFlowTest extends TestCase
 
     private int $shopId;
     private int $adminId;
+    private int $mechanicUserId;
     private int $mechanicId;
     private int $partId;
     private string $token;
+    private string $mechanicToken;
 
     protected function setUp(): void
     {
@@ -46,9 +48,23 @@ class ServiceFlowTest extends TestCase
             'updated_at'        => now(),
         ]);
 
+        $mechanicRoleId = (int) DB::table('roles')->where('role_name', 'Mechanic')->value('role_id');
+        $this->mechanicUserId = (int) DB::table('users')->insertGetId([
+            'shop_id_fk'        => $this->shopId,
+            'role_id_fk'        => $mechanicRoleId,
+            'full_name'         => 'Pedro Santos',
+            'username'          => 'pedro.mechanic@test.com',
+            'email'             => 'pedro.mechanic@test.com',
+            'password_hash'     => Hash::make('password'),
+            'user_status_id_fk' => $activeStatus,
+            'created_at'        => now(),
+            'updated_at'        => now(),
+        ]);
+
         $mechanicStatus = (int) DB::table('mechanic_statuses')->where('status_code', 'available')->value('mechanic_status_id');
         $this->mechanicId = (int) DB::table('mechanics')->insertGetId([
             'shop_id_fk'            => $this->shopId,
+            'user_id_fk'            => $this->mechanicUserId,
             'full_name'             => 'Pedro Santos',
             'phone'                 => null,
             'email'                 => null,
@@ -90,6 +106,7 @@ class ServiceFlowTest extends TestCase
         ]);
 
         $this->token = $this->login('flowadmin@test.com');
+        $this->mechanicToken = $this->login('pedro.mechanic@test.com');
     }
 
     // --- storeService with mechanicIds ---
@@ -160,7 +177,7 @@ class ServiceFlowTest extends TestCase
 
     // --- billService ---
 
-    public function test_bill_service_creates_sale_and_deducts_stock(): void
+    public function test_bill_service_creates_sale_without_deducting_stock_again(): void
     {
         $jobId = $this->createJobWithPart();
         $stockBefore = (int) DB::table('parts')->where('part_id', $this->partId)->value('stock_quantity');
@@ -174,7 +191,7 @@ class ServiceFlowTest extends TestCase
             ->assertJsonStructure(['data' => ['id', 'type', 'items', 'total', 'paymentMethod']]);
 
         $stockAfter = (int) DB::table('parts')->where('part_id', $this->partId)->value('stock_quantity');
-        $this->assertEquals($stockBefore - 1, $stockAfter);
+        $this->assertEquals($stockBefore, $stockAfter);
 
         $this->assertDatabaseHas('sales', ['job_id_fk' => $jobId]);
         $this->assertDatabaseHas('payments', ['payment_method' => 'Cash']);
@@ -197,6 +214,62 @@ class ServiceFlowTest extends TestCase
         $this->withToken($this->token)
             ->postJson("http://default.mospams.local/api/services/{$jobId}/bill", ['paymentMethod' => 'Cash'])
             ->assertStatus(422);
+    }
+
+    public function test_mechanic_jobs_are_loaded_from_pivot_assignments(): void
+    {
+        $jobId = $this->createJob();
+
+        DB::table('service_job_mechanics')->insert([
+            'job_id_fk' => $jobId,
+            'mechanic_id_fk' => $this->mechanicId,
+            'shop_id_fk' => $this->shopId,
+            'assigned_at' => now(),
+        ]);
+
+        $this->withToken($this->mechanicToken)
+            ->getJson('http://default.mospams.local/api/mechanic/jobs')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', (string) $jobId)
+            ->assertJsonPath('data.0.mechanics.0.id', (string) $this->mechanicId);
+    }
+
+    public function test_mechanic_status_update_creates_customer_notification(): void
+    {
+        $customerUserId = (int) DB::table('users')->insertGetId([
+            'shop_id_fk' => $this->shopId,
+            'role_id_fk' => (int) DB::table('roles')->where('role_name', 'Customer')->value('role_id'),
+            'full_name' => 'Booked Customer',
+            'username' => 'booked.customer@test.com',
+            'email' => 'booked.customer@test.com',
+            'password_hash' => Hash::make('password'),
+            'user_status_id_fk' => (int) DB::table('user_statuses')->where('status_code', 'active')->value('user_status_id'),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $jobId = $this->createJob($customerUserId);
+
+        DB::table('service_job_mechanics')->insert([
+            'job_id_fk' => $jobId,
+            'mechanic_id_fk' => $this->mechanicId,
+            'shop_id_fk' => $this->shopId,
+            'assigned_at' => now(),
+        ]);
+
+        $this->withToken($this->mechanicToken)
+            ->patchJson("http://default.mospams.local/api/mechanic/jobs/{$jobId}/status", [
+                'status' => 'In Progress',
+            ])
+            ->assertOk();
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id_fk' => $customerUserId,
+            'notification_type' => 'job_status_update',
+            'reference_type' => 'service_job',
+            'reference_id' => $jobId,
+        ]);
     }
 
     // --- assign / remove mechanic ---
@@ -235,10 +308,11 @@ class ServiceFlowTest extends TestCase
 
     // --- helpers ---
 
-    private function createJob(): int
+    private function createJob(?int $customerUserId = null): int
     {
         $customerId = (int) DB::table('customers')->insertGetId([
             'shop_id_fk' => $this->shopId,
+            'user_id_fk' => $customerUserId,
             'full_name'  => 'Test Customer',
             'created_at' => now(),
             'updated_at' => now(),
@@ -272,6 +346,10 @@ class ServiceFlowTest extends TestCase
             'quantity'   => 1,
             'unit_price' => 220.00,
             'subtotal'   => 220.00,
+        ]);
+        DB::table('parts')->where('part_id', $this->partId)->update([
+            'stock_quantity' => 9,
+            'updated_at' => now(),
         ]);
         return $jobId;
     }

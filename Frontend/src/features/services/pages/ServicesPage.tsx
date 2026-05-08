@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
-import { Plus, Pencil, Trash2, Search, Clock, Wrench, CheckCircle2, History, X, Settings2, ChevronLeft, ChevronRight, Receipt } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Clock, Wrench, CheckCircle2, History, X, XCircle, Settings2, ChevronLeft, ChevronRight, Receipt } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,7 +15,7 @@ import { useAuth } from '@/features/auth/context/AuthContext';
 import { can } from '@/shared/lib/permissions';
 import type { Part, ServiceRecord } from '@/shared/types';
 
-type StatusFilter = 'All' | 'Pending' | 'Ongoing' | 'Completed';
+type StatusFilter = 'All' | 'Pending' | 'Ongoing' | 'Completed' | 'Cancelled';
 
 interface Mechanic { id: string; name: string }
 
@@ -45,7 +45,16 @@ const STATUS_STYLES = {
   Pending: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20', icon: Clock },
   Ongoing: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20', icon: Wrench },
   Completed: { bg: 'bg-green-500/10', text: 'text-green-400', border: 'border-green-500/20', icon: CheckCircle2 },
+  Cancelled: { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/20', icon: XCircle },
 };
+
+function getStatusStyle(status: ServiceRecord['status']) {
+  return STATUS_STYLES[status] ?? STATUS_STYLES.Pending;
+}
+
+function getEditableStatus(status: ServiceRecord['status']): 'Pending' | 'Ongoing' | 'Completed' {
+  return status === 'Cancelled' ? 'Pending' : status;
+}
 
 export default function Services() {
   const { addService, updateService, deleteService, serviceTypes, addServiceType, updateServiceType, deleteServiceType } = useData();
@@ -70,7 +79,7 @@ export default function Services() {
   const [billPaymentMethod, setBillPaymentMethod] = useState<'Cash' | 'GCash'>('Cash');
   const [billing, setBilling] = useState(false);
 
-  const { data: services, loading, meta, page, setPage, prependItem, updateItem, removeItem } = usePaginatedFetch<ServiceRecord>('/api/services');
+  const { data: services, loading, meta, page, setPage, prependItem, updateItem, removeItem } = usePaginatedFetch<ServiceRecord>('/api/services', 25, {}, 10000);
 
   useEffect(() => {
     if (!modalOpen) return;
@@ -105,6 +114,7 @@ export default function Services() {
     Pending: services.filter(s => s.status === 'Pending').length,
     Ongoing: services.filter(s => s.status === 'Ongoing').length,
     Completed: services.filter(s => s.status === 'Completed').length,
+    Cancelled: services.filter(s => s.status === 'Cancelled').length,
   }), [services]);
 
   const openAdd = () => {
@@ -116,7 +126,7 @@ export default function Services() {
   };
   const openEdit = (s: ServiceRecord) => {
     setEditing(s);
-    form.reset({ customerName: s.customerName, motorcycleModel: s.motorcycleModel, serviceType: s.serviceType, laborCost: s.laborCost, status: s.status, notes: s.notes });
+    form.reset({ customerName: s.customerName, motorcycleModel: s.motorcycleModel, serviceType: s.serviceType, laborCost: s.laborCost, status: getEditableStatus(s.status), notes: s.notes });
     setPartsUsed(s.partsUsed.map(p => ({ partId: p.partId, quantity: p.quantity })));
     setSelectedMechanicIds((s.mechanics ?? []).map(m => m.id));
     setModalOpen(true);
@@ -197,7 +207,7 @@ export default function Services() {
       </motion.div>
 
       <motion.div {...fadeUp(0.1)} className="flex gap-2 flex-wrap">
-        {(['All', 'Pending', 'Ongoing', 'Completed'] as StatusFilter[]).map(s => (
+        {(['All', 'Pending', 'Ongoing', 'Completed', 'Cancelled'] as StatusFilter[]).map(s => (
           <button key={s} onClick={() => setStatusFilter(s)} className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${statusFilter === s ? 'bg-white text-black' : 'bg-zinc-900/50 text-zinc-400 border border-zinc-800 hover:border-zinc-700 hover:text-white'}`}>
             {s} <span className="opacity-50 ml-1">{statusCounts[s]}</span>
           </button>
@@ -220,7 +230,7 @@ export default function Services() {
             <div key={i} className="h-20 bg-zinc-900/50 border border-zinc-800 rounded-2xl animate-pulse" />
           ))
         ) : filtered.map(service => {
-          const style = STATUS_STYLES[service.status];
+          const style = getStatusStyle(service.status);
           const StatusIcon = style.icon;
           return (
             <div key={service.id} className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl p-5 hover:border-zinc-700 transition-all duration-300 group">
@@ -243,12 +253,18 @@ export default function Services() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <select value={service.status} onChange={e => handleStatusChange(service, e.target.value)} className={`h-9 px-3 rounded-lg text-xs font-semibold border cursor-pointer focus:outline-none ${style.bg} ${style.text} ${style.border}`}>
-                    <option value="Pending">Pending</option>
-                    <option value="Ongoing">Ongoing</option>
-                    <option value="Completed">Completed</option>
-                  </select>
-                  <button title="Bill this Job" onClick={() => setBillJob(service)} className="p-2 rounded-lg hover:bg-emerald-500/10 text-zinc-500 hover:text-emerald-400 transition-colors">
+                  {service.status === 'Cancelled' ? (
+                    <span className={`inline-flex h-9 items-center px-3 rounded-lg text-xs font-semibold border ${style.bg} ${style.text} ${style.border}`}>
+                      Cancelled
+                    </span>
+                  ) : (
+                    <select value={service.status} onChange={e => handleStatusChange(service, e.target.value)} className={`h-9 px-3 rounded-lg text-xs font-semibold border cursor-pointer focus:outline-none ${style.bg} ${style.text} ${style.border}`}>
+                      <option value="Pending">Pending</option>
+                      <option value="Ongoing">Ongoing</option>
+                      <option value="Completed">Completed</option>
+                    </select>
+                  )}
+                  <button title="Bill this Job" disabled={service.status === 'Cancelled'} onClick={() => setBillJob(service)} className="p-2 rounded-lg hover:bg-emerald-500/10 text-zinc-500 hover:text-emerald-400 transition-colors disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-zinc-500">
                     <Receipt className="w-4 h-4" />
                   </button>
                   <button title="History" onClick={() => setHistoryCustomer({ name: service.customerName, model: service.motorcycleModel })} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-white transition-colors">
@@ -476,7 +492,7 @@ export default function Services() {
                   <li key={h.id} className="bg-zinc-800/50 rounded-xl p-4 border border-zinc-800">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-semibold text-white">{h.serviceType}</span>
-                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${STATUS_STYLES[h.status].bg} ${STATUS_STYLES[h.status].text}`}>{h.status}</span>
+                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${getStatusStyle(h.status).bg} ${getStatusStyle(h.status).text}`}>{h.status}</span>
                     </div>
                     <p className="text-xs text-zinc-500 mt-1">Labor ₱{h.laborCost.toLocaleString()}</p>
                     {h.notes && <p className="text-xs text-zinc-400 mt-1">{h.notes}</p>}

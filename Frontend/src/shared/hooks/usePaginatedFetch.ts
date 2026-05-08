@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { apiGet } from '@/shared/lib/api';
 
@@ -31,6 +31,7 @@ export function usePaginatedFetch<T>(
   path: string,
   perPage = 25,
   extraParams: Record<string, string> = {},
+  pollingMs?: number,
 ): UsePaginatedFetchResult<T> {
   const [page, setPage] = useState(1);
   const queryClient = useQueryClient();
@@ -38,7 +39,7 @@ export function usePaginatedFetch<T>(
   // Stable query key — React Query caches by key, so navigating back = instant
   const queryKey = ['paginated', path, page, perPage, extraParams] as const;
 
-  const { data: response, isFetching, error: queryError, refetch: tqRefetch } = useQuery<PaginatedResponse<T>>({
+  const { data: response, isLoading, error: queryError, refetch: tqRefetch } = useQuery<PaginatedResponse<T>>({
     queryKey,
     queryFn: () => {
       const params = new URLSearchParams({
@@ -53,10 +54,22 @@ export function usePaginatedFetch<T>(
 
   const data = response?.data ?? [];
   const meta = response?.meta ?? null;
-  const loading = isFetching;
+  const loading = isLoading;
   const error = queryError ? (queryError instanceof Error ? queryError.message : 'Failed to load data') : null;
 
   const refetch = useCallback(() => { void tqRefetch(); }, [tqRefetch]);
+
+  useEffect(() => {
+    if (!pollingMs || pollingMs <= 0) {
+      return undefined;
+    }
+
+    const intervalId = window.setInterval(() => {
+      void tqRefetch();
+    }, pollingMs);
+
+    return () => window.clearInterval(intervalId);
+  }, [pollingMs, tqRefetch]);
 
   // Optimistic helpers — mutate the cache directly, no refetch needed
   const prependItem = useCallback((item: T) => {

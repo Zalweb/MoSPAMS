@@ -80,6 +80,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/stock-movements', [MospamsController::class, 'storeStockMovement'])->middleware('role:Owner,Staff');
 
         Route::get('/services', [MospamsController::class, 'services'])->middleware('role:Owner,Staff');
+        Route::get('/services/{service}', [MospamsController::class, 'showService'])->middleware('role:Owner,Staff');
         Route::post('/services', [MospamsController::class, 'storeService'])->middleware('role:Owner,Staff');
         Route::patch('/services/{service}', [MospamsController::class, 'updateService'])->middleware('role:Owner,Staff');
         Route::delete('/services/{service}', [MospamsController::class, 'deleteService'])->middleware('role:Owner');

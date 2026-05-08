@@ -530,6 +530,11 @@ class MospamsController extends Controller
         ]);
     }
 
+    public function showService(int $service): JsonResponse
+    {
+        return response()->json(['data' => $this->serviceById($service)]);
+    }
+
     public function storeService(Request $request): JsonResponse
     {
         $data = $request->validate([
@@ -569,18 +574,7 @@ class MospamsController extends Controller
                 'remarks' => null,
             ]);
 
-            foreach ($data['partsUsed'] ?? [] as $used) {
-                $part = DB::table('parts')->where('part_id', $this->numericId($used['partId']))->first();
-                if ($part) {
-                    DB::table('service_job_parts')->insert([
-                        'job_id_fk' => $jobId,
-                        'part_id_fk' => $part->part_id,
-                        'quantity' => $used['quantity'],
-                        'unit_price' => $part->unit_price,
-                        'subtotal' => $part->unit_price * $used['quantity'],
-                    ]);
-                }
-            }
+            $this->syncServiceJobParts($jobId, $data['partsUsed'] ?? [], $request->user()->user_id);
 
             foreach ($data['mechanicIds'] ?? [] as $rawId) {
                 $mechId = $this->numericId($rawId);
@@ -656,19 +650,7 @@ class MospamsController extends Controller
             }
 
             if (array_key_exists('partsUsed', $data)) {
-                DB::table('service_job_parts')->where('job_id_fk', $service)->delete();
-                foreach ($data['partsUsed'] as $used) {
-                    $partId = $this->numericId($used['partId']);
-                    $part = DB::table('parts')->where('part_id', $partId)->where('shop_id_fk', $this->shopId())->first();
-                    if (! $part) continue;
-                    DB::table('service_job_parts')->insert([
-                        'job_id_fk'  => $service,
-                        'part_id_fk' => $partId,
-                        'quantity'   => $used['quantity'],
-                        'unit_price' => $part->unit_price,
-                        'subtotal'   => $part->unit_price * $used['quantity'],
-                    ]);
-                }
+                $this->syncServiceJobParts($service, $data['partsUsed'], $request->user()->user_id);
             }
 
             $this->log($request, 'Updated service #'.$service, 'service_jobs', $service);
@@ -760,12 +742,6 @@ class MospamsController extends Controller
                     'unit_price' => $p->unit_price,
                     'subtotal'   => $p->unit_price * $p->quantity,
                 ]);
-                $part = DB::table('parts')->where('part_id', $p->part_id_fk)->first();
-                DB::table('parts')->where('part_id', $p->part_id_fk)->update([
-                    'stock_quantity' => max(0, $part->stock_quantity - $p->quantity),
-                    'updated_at'     => now(),
-                ]);
-                $this->recordMovement($p->part_id_fk, $request->user()->user_id, 'out', $p->quantity, 'Sale '.$saleId, 'sale', $saleId);
             }
 
             DB::table('payments')->insert([
@@ -1504,6 +1480,111 @@ class MospamsController extends Controller
     private function statusId(string $table, string $key, string $code): int
     {
         return (int) DB::table($table)->where('status_code', $code)->value($key);
+    }
+
+    private function syncServiceJobParts(int $jobId, array $partsUsed, int $userId): void
+    {
+        $desiredParts = $this->normalizeServiceParts($partsUsed);
+
+        $existingParts = DB::table('service_job_parts')
+            ->where('job_id_fk', $jobId)
+            ->selectRaw('part_id_fk, SUM(quantity) as quantity')
+            ->groupBy('part_id_fk')
+            ->pluck('quantity', 'part_id_fk')
+            ->map(fn ($quantity) => (int) $quantity)
+            ->all();
+
+        $partIds = array_values(array_unique(array_map(
+            'intval',
+            array_merge(array_keys($existingParts), array_keys($desiredParts)),
+        )));
+
+        foreach ($partIds as $partId) {
+            $existingQty = (int) ($existingParts[$partId] ?? 0);
+            $desiredQty = (int) ($desiredParts[$partId] ?? 0);
+            $delta = $desiredQty - $existingQty;
+
+            if ($delta === 0) {
+                continue;
+            }
+
+            $part = DB::table('parts')
+                ->where('part_id', $partId)
+                ->where('shop_id_fk', $this->shopId())
+                ->lockForUpdate()
+                ->first();
+
+            if (! $part) {
+                abort(422, "Part #{$partId} is not available in this shop.");
+            }
+
+            if ($delta > 0 && $part->stock_quantity < $delta) {
+                abort(response()->json([
+                    'message' => 'Insufficient stock for selected parts.',
+                    'partId' => (string) $partId,
+                    'partName' => $part->part_name,
+                    'available' => (int) $part->stock_quantity,
+                    'requested' => $desiredQty,
+                ], 422));
+            }
+
+            $operator = $delta > 0 ? '-' : '+';
+            DB::table('parts')
+                ->where('part_id', $partId)
+                ->update([
+                    'stock_quantity' => DB::raw('stock_quantity ' . $operator . ' ' . abs($delta)),
+                    'updated_at' => now(),
+                ]);
+
+            $this->recordMovement(
+                $partId,
+                $userId,
+                $delta > 0 ? 'out' : 'in',
+                abs($delta),
+                $delta > 0 ? 'Used in service job #' . $jobId : 'Returned from service job #' . $jobId,
+                'service_job',
+                $jobId,
+            );
+        }
+
+        DB::table('service_job_parts')->where('job_id_fk', $jobId)->delete();
+
+        foreach ($desiredParts as $partId => $quantity) {
+            $part = DB::table('parts')
+                ->where('part_id', $partId)
+                ->where('shop_id_fk', $this->shopId())
+                ->first();
+
+            if (! $part) {
+                continue;
+            }
+
+            DB::table('service_job_parts')->insert([
+                'job_id_fk' => $jobId,
+                'part_id_fk' => $partId,
+                'quantity' => $quantity,
+                'unit_price' => $part->unit_price,
+                'subtotal' => $part->unit_price * $quantity,
+            ]);
+        }
+    }
+
+    private function normalizeServiceParts(array $partsUsed): array
+    {
+        $normalized = [];
+
+        foreach ($partsUsed as $used) {
+            $partId = $this->numericId($used['partId'] ?? null);
+            $quantity = (int) ($used['quantity'] ?? 0);
+
+            if ($partId === 0 || $quantity <= 0) {
+                continue;
+            }
+
+            $normalized[$partId] = ($normalized[$partId] ?? 0) + $quantity;
+        }
+
+        return $normalized;
     }
 
     private function recordMovement(int $partId, int $userId, string $type, int $quantity, string $remarks, ?string $referenceType = null, ?int $referenceId = null): void
