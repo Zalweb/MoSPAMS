@@ -165,7 +165,7 @@ export default function DashboardLayout() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 min-w-0 min-h-screen">
+      <main className="flex-1 min-w-0 min-h-screen bg-black">
         {/* Header */}
         <div className="sticky top-0 z-30 bg-black/80 backdrop-blur-xl border-b border-zinc-800/50">
           <div className="flex items-center gap-4 px-6 h-[64px]">
@@ -318,7 +318,7 @@ export default function DashboardLayout() {
         </div>
 
         {/* Page content */}
-        <div className="p-6 lg:p-8">
+        <div className="min-h-[calc(100vh-64px)] bg-black p-6 lg:p-8">
           <Outlet />
         </div>
       </main>
