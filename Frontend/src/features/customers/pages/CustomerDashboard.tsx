@@ -89,7 +89,7 @@ export default function CustomerDashboard() {
       {/* Quick Actions */}
       <motion.div {...fadeUp(0.25)} className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
         <button
-          onClick={() => navigate('/customer/book')}
+          onClick={() => navigate('book')}
           className="bg-white rounded-2xl border border-[#F5F5F4] shadow-[0_1px_2px_rgba(0,0,0,0.03)] p-5 text-left hover:shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:border-[#E7E5E4] transition-all duration-300 group"
         >
           <div className="flex items-center justify-between">
@@ -101,7 +101,7 @@ export default function CustomerDashboard() {
           </div>
         </button>
         <button
-          onClick={() => navigate('/customer/history')}
+          onClick={() => navigate('history')}
           className="bg-white rounded-2xl border border-[#F5F5F4] shadow-[0_1px_2px_rgba(0,0,0,0.03)] p-5 text-left hover:shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:border-[#E7E5E4] transition-all duration-300 group"
         >
           <div className="flex items-center justify-between">
@@ -122,7 +122,7 @@ export default function CustomerDashboard() {
             <h3 className="text-[13px] font-semibold text-[#1C1917]">Recent Services</h3>
           </div>
           <button
-            onClick={() => navigate('/customer/history')}
+            onClick={() => navigate('history')}
             className="text-[11px] text-[#1C1917] hover:text-[#292524] font-medium"
           >
             View all

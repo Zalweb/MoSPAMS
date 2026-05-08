@@ -56,7 +56,7 @@ export default function BookService() {
         <h2 className="text-[22px] font-bold text-[#1C1917] mb-2">Service Booked!</h2>
         <p className="text-[13px] text-[#A8A29E] mb-6">We'll contact you when your service is scheduled.</p>
         <Button
-          onClick={() => navigate('/customer')}
+          onClick={() => navigate('/dashboard/customer')}
           className="h-10 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-white text-sm"
         >
           Back to Dashboard
