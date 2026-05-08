@@ -1,8 +1,11 @@
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router';
 import { Sparkles, ArrowRight, Zap, Shield, TrendingUp } from 'lucide-react';
+import { useScrollAnimation } from '@/shared/hooks/useScrollAnimation';
 
 export default function HeroSection() {
   const navigate = useNavigate();
+  const { ref: heroRef, isVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.15 });
 
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
@@ -11,13 +14,11 @@ export default function HeroSection() {
 
   return (
     <section id="home" className="relative pt-32 pb-24 overflow-hidden">
-      {/* Decorative glow effects */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-20 left-1/4 w-96 h-96 bg-zinc-800/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-zinc-700/10 rounded-full blur-3xl" />
       </div>
 
-      {/* Floating sparkle decorations */}
       <div className="absolute top-40 right-20 opacity-20">
         <Sparkles className="w-8 h-8 text-zinc-400" strokeWidth={1.5} />
       </div>
@@ -25,16 +26,24 @@ export default function HeroSection() {
         <Sparkles className="w-6 h-6 text-zinc-400" strokeWidth={1.5} />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div ref={heroRef} className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-4xl mx-auto mb-16">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/50 backdrop-blur-sm border border-zinc-800/50 text-zinc-300 text-sm font-medium mb-8">
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={isVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/50 backdrop-blur-sm border border-zinc-800/50 text-zinc-300 text-sm font-medium mb-8"
+          >
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
             Multi-Tenant SaaS Platform
-          </div>
+          </motion.div>
 
-          {/* Hero Headline */}
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight mb-6">
+          <motion.h1
+            initial={{ opacity: 0, y: 28 }}
+            animate={isVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.08, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight mb-6"
+          >
             Transform your
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 via-zinc-400 to-zinc-600">
@@ -42,16 +51,24 @@ export default function HeroSection() {
             </span>
             <br />
             operations
-          </h1>
+          </motion.h1>
 
-          {/* Subtitle */}
-          <p className="text-lg sm:text-xl text-zinc-400 leading-relaxed mb-10 max-w-2xl mx-auto">
+          <motion.p
+            initial={{ opacity: 0, y: 24 }}
+            animate={isVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.16, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            className="text-lg sm:text-xl text-zinc-400 leading-relaxed mb-10 max-w-2xl mx-auto"
+          >
             All-in-one SaaS platform for inventory, service jobs, sales, reports, and team management.
-            Multi-tenant by design — each shop gets its own branded subdomain.
-          </p>
+            Multi-tenant by design - each shop gets its own branded subdomain.
+          </motion.p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={isVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.24, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
+          >
             <button
               onClick={() => navigate('/register-shop')}
               className="group px-8 py-4 rounded-2xl bg-white text-black font-semibold text-base hover:bg-zinc-100 transition-all duration-200 flex items-center gap-2 shadow-lg"
@@ -65,10 +82,14 @@ export default function HeroSection() {
             >
               View features
             </button>
-          </div>
+          </motion.div>
 
-          {/* Trust badges */}
-          <div className="flex flex-wrap items-center justify-center gap-8 text-zinc-500 text-sm">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={isVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.32, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="flex flex-wrap items-center justify-center gap-8 text-zinc-500 text-sm"
+          >
             <div className="flex items-center gap-2">
               <Shield className="w-4 h-4" strokeWidth={2} />
               <span>Secure & reliable</span>
@@ -81,16 +102,18 @@ export default function HeroSection() {
               <TrendingUp className="w-4 h-4" strokeWidth={2} />
               <span>Analytics included</span>
             </div>
-          </div>
+          </motion.div>
         </div>
 
-        {/* Dashboard Preview Card */}
-        <div className="relative max-w-5xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 36, scale: 0.98 }}
+          animate={isVisible ? { opacity: 1, y: 0, scale: 1 } : {}}
+          transition={{ delay: 0.22, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+          className="relative max-w-5xl mx-auto"
+        >
           <div className="relative bg-zinc-900/40 backdrop-blur-2xl rounded-3xl border border-zinc-800/50 shadow-2xl p-8 overflow-hidden">
-            {/* Decorative gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-zinc-800/5 to-transparent pointer-events-none" />
 
-            {/* Dashboard Header */}
             <div className="relative flex items-center justify-between mb-6 pb-4 border-b border-zinc-800/50">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-white/5 border border-zinc-700/50 flex items-center justify-center shadow-lg overflow-hidden">
@@ -107,20 +130,18 @@ export default function HeroSection() {
               </div>
             </div>
 
-            {/* Stats Grid */}
             <div className="relative grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <StatCard label="Revenue" value="₱48.2K" trend="+12%" />
+              <StatCard label="Revenue" value="PHP 48.2K" trend="+12%" />
               <StatCard label="Active Jobs" value="14" trend="+3" />
               <StatCard label="Parts Stock" value="1,247" trend="-8" />
               <StatCard label="Completed" value="128" trend="+8" />
             </div>
 
-            {/* Chart Preview */}
             <div className="relative bg-zinc-800/30 rounded-2xl border border-zinc-700/30 p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <p className="text-xs text-zinc-500 mb-1">Sales Performance</p>
-                  <p className="text-2xl font-bold text-white">₱125,450</p>
+                  <p className="text-2xl font-bold text-white">PHP 125,450</p>
                 </div>
                 <div className="px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-xs font-semibold">
                   +18.2%
@@ -143,7 +164,6 @@ export default function HeroSection() {
               </div>
             </div>
 
-            {/* Floating badge */}
             <div className="absolute -top-4 -right-4 bg-zinc-900/80 backdrop-blur-sm rounded-2xl border border-zinc-800/50 shadow-xl px-4 py-3 flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center">
                 <TrendingUp className="w-4 h-4 text-green-400" strokeWidth={2} />
@@ -154,7 +174,7 @@ export default function HeroSection() {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -162,6 +182,7 @@ export default function HeroSection() {
 
 function StatCard({ label, value, trend }: { label: string; value: string; trend: string }) {
   const isPositive = trend.startsWith('+');
+
   return (
     <div className="bg-zinc-800/30 backdrop-blur-sm rounded-2xl border border-zinc-700/30 p-4 hover:bg-zinc-800/40 transition-all">
       <p className="text-xs text-zinc-500 mb-2">{label}</p>
