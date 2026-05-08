@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Bike, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import GoogleSignUpModal from '@/features/auth/components/GoogleSignUpModal';
 import GoogleLoginButton from '@/features/auth/components/GoogleLoginButton';
@@ -99,8 +99,8 @@ export default function HeroLoginCard({ onBack }: HeroLoginCardProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center">
-            <Bike className="w-6 h-6 text-white" />
+          <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center overflow-hidden">
+            <img src="/images/logo.svg" alt="MoSPAMS" className="w-8 h-8 object-contain" />
           </div>
         </motion.div>
 

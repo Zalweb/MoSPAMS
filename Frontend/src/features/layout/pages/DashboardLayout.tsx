@@ -7,6 +7,7 @@ import {
   Home, Calendar, CreditCard, ScrollText, Settings, Bike, Bell,
 } from 'lucide-react';
 import { useAuth } from '@/features/auth/context/AuthContext';
+import { useTenantBranding } from '@/shared/contexts/TenantBrandingContext';
 import { NAV_ACCESS } from '@/shared/lib/permissions';
 import { normalizeRole } from '@/shared/lib/roles';
 import { apiGet, apiMutation } from '@/shared/lib/api';
@@ -31,6 +32,7 @@ const navItems: { label: string; to: string; icon: typeof LayoutDashboard; end?:
 
 export default function DashboardLayout() {
   const { user, logout } = useAuth();
+  const { branding } = useTenantBranding();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -107,18 +109,22 @@ export default function DashboardLayout() {
         {/* Logo */}
         <div className="flex items-center gap-3 px-5 h-[64px] border-b border-zinc-800">
           <motion.div
-            className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-lg"
+            className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-lg overflow-hidden"
             whileHover={{ rotate: 10 }}
             transition={{ type: 'spring', stiffness: 400 }}
           >
-            <Bike className="w-5 h-5 text-black" />
+            <img
+              src={branding?.logoUrl || '/images/logo.svg'}
+              alt={branding?.shopName || 'MoSPAMS'}
+              className="w-7 h-7 object-contain"
+            />
           </motion.div>
           <div>
             <span className="text-sm font-bold text-white tracking-tight leading-none">
               Mo<span className="text-zinc-500">SPAMS</span>
             </span>
             <span className="block text-[10px] text-zinc-600 font-medium leading-none mt-1">
-              {user?.shopName ? user.shopName.toUpperCase() : 'MANAGEMENT'}
+              {(branding?.shopName || user?.shopName || 'Management').toUpperCase()}
             </span>
           </div>
           <button

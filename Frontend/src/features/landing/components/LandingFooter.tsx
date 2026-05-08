@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Bike, Globe, Heart, LayoutDashboard, Package, Receipt, Server, Wrench } from 'lucide-react';
+import { Globe, Heart, LayoutDashboard, Package, Receipt, Server, Wrench } from 'lucide-react';
 import { useScrollAnimation } from '@/shared/hooks/useScrollAnimation';
 
 const QUICK_LINKS = [
@@ -76,7 +76,7 @@ export default function LandingFooter() {
                 whileHover={{ rotate: 10 }}
                 transition={{ type: 'spring', stiffness: 400 }}
               >
-                <Bike className="w-6 h-6 text-white" />
+                <img src="/images/logo.svg" alt="MoSPAMS" className="w-7 h-7 object-contain" />
               </motion.div>
               <span className="text-xl font-bold tracking-tight">
                 Mo<span className="text-zinc-400">SPAMS</span>
