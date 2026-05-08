@@ -109,7 +109,7 @@ export default function DashboardLayout() {
         {/* Logo */}
         <div className="flex items-center gap-3 px-5 h-[64px] border-b border-zinc-800">
           <motion.div
-            className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-lg overflow-hidden"
+            className="w-9 h-9 rounded-xl bg-transparent border border-zinc-800/80 flex items-center justify-center overflow-hidden"
             whileHover={{ rotate: 10 }}
             transition={{ type: 'spring', stiffness: 400 }}
           >
