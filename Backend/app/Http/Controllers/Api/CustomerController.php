@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class CustomerController extends Controller
 {
@@ -145,6 +146,337 @@ class CustomerController extends Controller
             ]);
 
         return response()->json(['data' => $payments]);
+    }
+
+    public function cancelService(Request $request, $jobId): JsonResponse
+    {
+        $user = auth()->user();
+        $customer = $this->tenantTable('customers')->where('user_id_fk', $user->user_id)->first();
+
+        if (!$customer) {
+            return response()->json(['error' => 'Customer not found'], 404);
+        }
+
+        $job = $this->tenantTable('service_jobs')
+            ->where('job_id', $jobId)
+            ->where('customer_id_fk', $customer->customer_id)
+            ->first();
+
+        if (!$job) {
+            return response()->json(['error' => 'Job not found'], 404);
+        }
+
+        $status = DB::table('service_job_statuses')->where('service_job_status_id', $job->service_job_status_id_fk)->first();
+        if (strtolower($status->status_code) !== 'pending') {
+            return response()->json(['error' => 'Only pending jobs can be cancelled'], 400);
+        }
+
+        $cancelledStatusId = DB::table('service_job_statuses')->where('status_code', 'cancelled')->value('service_job_status_id');
+
+        DB::table('service_jobs')->where('job_id', $jobId)->update([
+            'service_job_status_id_fk' => $cancelledStatusId,
+            'updated_at'               => now(),
+        ]);
+
+        $this->log($user->user_id, 'Cancelled service request', 'service_jobs', $jobId);
+
+        return response()->json(['message' => 'Service cancelled successfully']);
+    }
+
+    public function paymentDetails(Request $request, $paymentId): JsonResponse
+    {
+        $user = auth()->user();
+        $customer = $this->tenantTable('customers')->where('user_id_fk', $user->user_id)->first();
+
+        if (!$customer) {
+            return response()->json(['error' => 'Customer not found'], 404);
+        }
+
+        $sale = $this->tenantTable('sales')
+            ->where('sale_id', $paymentId)
+            ->where('customer_id_fk', $customer->customer_id)
+            ->first();
+
+        if (!$sale) {
+            return response()->json(['error' => 'Payment not found'], 404);
+        }
+
+        $items = $this->tenantTable('sale_items')
+            ->join('parts', 'parts.part_id', '=', 'sale_items.part_id_fk')
+            ->where('sale_items.sale_id_fk', $paymentId)
+            ->select('sale_items.*', 'parts.part_name')
+            ->get();
+            
+        $labor = [];
+        if ($sale->job_id_fk) {
+            $labor = $this->tenantTable('service_job_items')
+                ->join('service_types', 'service_types.service_type_id', '=', 'service_job_items.service_type_id_fk')
+                ->where('service_job_items.job_id_fk', $sale->job_id_fk)
+                ->select('service_job_items.*', 'service_types.service_name')
+                ->get();
+        }
+
+        $payment = $this->tenantTable('payments')
+            ->join('payment_statuses', 'payment_statuses.payment_status_id', '=', 'payments.payment_status_id_fk')
+            ->where('sale_id_fk', $paymentId)
+            ->select('payments.payment_method', 'payment_statuses.status_name as payment_status', 'payments.payment_date')
+            ->first();
+
+        return response()->json([
+            'sale' => $sale,
+            'payment' => $payment,
+            'items' => $items,
+            'labor' => $labor
+        ]);
+    }
+
+    public function getProfile(Request $request): JsonResponse
+    {
+        $user = auth()->user();
+        $customer = $this->tenantTable('customers')->where('user_id_fk', $user->user_id)->first();
+
+        return response()->json([
+            'full_name' => $customer->full_name ?? $user->full_name,
+            'phone' => $customer->phone ?? '',
+            'email' => $customer->email ?? $user->username,
+            'address' => $customer->address ?? ''
+        ]);
+    }
+
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $user = auth()->user();
+        
+        $request->validate([
+            'full_name' => ['required', 'string', 'max:100'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'email' => ['nullable', 'email', 'max:100'],
+            'address' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        DB::table('users')->where('user_id', $user->user_id)->update([
+            'full_name' => $request->full_name,
+            'updated_at' => now(),
+        ]);
+
+        $this->tenantTable('customers')->where('user_id_fk', $user->user_id)->update([
+            'full_name' => $request->full_name,
+            'phone' => $request->phone,
+            'email' => $request->email,
+            'address' => $request->address,
+            'updated_at' => now(),
+        ]);
+
+        $this->log($user->user_id, 'Updated profile', 'customers');
+
+        return response()->json(['message' => 'Profile updated successfully']);
+    }
+
+    public function updatePassword(Request $request): JsonResponse
+    {
+        $request->validate([
+            'current_password' => ['required', 'string'],
+            'new_password'     => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user = auth()->user();
+        $dbUser = DB::table('users')->where('user_id', $user->user_id)->first();
+
+        if (!Hash::check($request->current_password, $dbUser->password_hash)) {
+            return response()->json(['error' => 'Current password is incorrect'], 422);
+        }
+
+        DB::table('users')->where('user_id', $user->user_id)->update([
+            'password_hash' => Hash::make($request->new_password),
+            'updated_at'    => now(),
+        ]);
+
+        $this->log($user->user_id, 'Changed password', 'users', $user->user_id);
+
+        return response()->json(['message' => 'Password updated successfully']);
+    }
+
+    public function getVehicles(Request $request): JsonResponse
+    {
+        $user = auth()->user();
+        $customer = $this->tenantTable('customers')->where('user_id_fk', $user->user_id)->first();
+
+        if (!$customer) {
+            return response()->json(['data' => []]);
+        }
+
+        $vehicles = DB::table('customer_vehicles')
+            ->where('customer_id_fk', $customer->customer_id)
+            ->where('shop_id_fk', $user->shop_id_fk)
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(fn ($v) => [
+                'id'           => (string) $v->vehicle_id,
+                'make'         => $v->make,
+                'model'        => $v->model,
+                'year'         => $v->year,
+                'plateNumber'  => $v->plate_number,
+                'color'        => $v->color,
+                'notes'        => $v->notes,
+                'createdAt'    => $v->created_at,
+            ]);
+
+        return response()->json(['data' => $vehicles]);
+    }
+
+    public function storeVehicle(Request $request): JsonResponse
+    {
+        $request->validate([
+            'make'         => ['required', 'string', 'max:100'],
+            'model'        => ['required', 'string', 'max:100'],
+            'year'         => ['nullable', 'digits:4'],
+            'plate_number' => ['nullable', 'string', 'max:30'],
+            'color'        => ['nullable', 'string', 'max:50'],
+            'notes'        => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $user = auth()->user();
+        $customer = $this->tenantTable('customers')->where('user_id_fk', $user->user_id)->firstOrFail();
+
+        $vehicleId = DB::table('customer_vehicles')->insertGetId([
+            'customer_id_fk' => $customer->customer_id,
+            'shop_id_fk'     => $user->shop_id_fk,
+            'make'           => $request->make,
+            'model'          => $request->model,
+            'year'           => $request->year,
+            'plate_number'   => $request->plate_number,
+            'color'          => $request->color,
+            'notes'          => $request->notes,
+            'created_at'     => now(),
+            'updated_at'     => now(),
+        ]);
+
+        $this->log($user->user_id, 'Added vehicle', 'customer_vehicles', $vehicleId);
+
+        $vehicle = DB::table('customer_vehicles')->where('vehicle_id', $vehicleId)->first();
+
+        return response()->json([
+            'id'          => (string) $vehicle->vehicle_id,
+            'make'        => $vehicle->make,
+            'model'       => $vehicle->model,
+            'year'        => $vehicle->year,
+            'plateNumber' => $vehicle->plate_number,
+            'color'       => $vehicle->color,
+            'notes'       => $vehicle->notes,
+        ], 201);
+    }
+
+    public function updateVehicle(Request $request, $vehicleId): JsonResponse
+    {
+        $request->validate([
+            'make'         => ['required', 'string', 'max:100'],
+            'model'        => ['required', 'string', 'max:100'],
+            'year'         => ['nullable', 'digits:4'],
+            'plate_number' => ['nullable', 'string', 'max:30'],
+            'color'        => ['nullable', 'string', 'max:50'],
+            'notes'        => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $user = auth()->user();
+        $customer = $this->tenantTable('customers')->where('user_id_fk', $user->user_id)->firstOrFail();
+
+        $vehicle = DB::table('customer_vehicles')
+            ->where('vehicle_id', $vehicleId)
+            ->where('customer_id_fk', $customer->customer_id)
+            ->first();
+
+        if (!$vehicle) {
+            return response()->json(['error' => 'Vehicle not found'], 404);
+        }
+
+        DB::table('customer_vehicles')->where('vehicle_id', $vehicleId)->update([
+            'make'         => $request->make,
+            'model'        => $request->model,
+            'year'         => $request->year,
+            'plate_number' => $request->plate_number,
+            'color'        => $request->color,
+            'notes'        => $request->notes,
+            'updated_at'   => now(),
+        ]);
+
+        $this->log($user->user_id, 'Updated vehicle', 'customer_vehicles', (int) $vehicleId);
+
+        return response()->json(['message' => 'Vehicle updated successfully']);
+    }
+
+    public function deleteVehicle(Request $request, $vehicleId): JsonResponse
+    {
+        $user = auth()->user();
+        $customer = $this->tenantTable('customers')->where('user_id_fk', $user->user_id)->firstOrFail();
+
+        $deleted = DB::table('customer_vehicles')
+            ->where('vehicle_id', $vehicleId)
+            ->where('customer_id_fk', $customer->customer_id)
+            ->delete();
+
+        if (!$deleted) {
+            return response()->json(['error' => 'Vehicle not found'], 404);
+        }
+
+        $this->log($user->user_id, 'Deleted vehicle', 'customer_vehicles', (int) $vehicleId);
+
+        return response()->json(['message' => 'Vehicle deleted successfully']);
+    }
+
+    public function getNotifications(Request $request): JsonResponse
+    {
+        $user = auth()->user();
+
+        $notifications = DB::table('notifications')
+            ->where('user_id_fk', $user->user_id)
+            ->orderByDesc('created_at')
+            ->limit(50)
+            ->get()
+            ->map(fn ($n) => [
+                'id'            => (string) $n->notification_id,
+                'type'          => $n->notification_type,
+                'title'         => $n->title,
+                'message'       => $n->message,
+                'referenceType' => $n->reference_type,
+                'referenceId'   => $n->reference_id ? (string) $n->reference_id : null,
+                'isRead'        => (bool) $n->is_read,
+                'createdAt'     => $n->created_at,
+            ]);
+
+        $unreadCount = DB::table('notifications')
+            ->where('user_id_fk', $user->user_id)
+            ->where('is_read', false)
+            ->count();
+
+        return response()->json(['data' => $notifications, 'unread_count' => $unreadCount]);
+    }
+
+    public function markNotificationRead(Request $request, $notificationId): JsonResponse
+    {
+        $user = auth()->user();
+
+        $updated = DB::table('notifications')
+            ->where('notification_id', $notificationId)
+            ->where('user_id_fk', $user->user_id)
+            ->update(['is_read' => true, 'updated_at' => now()]);
+
+        if (!$updated) {
+            return response()->json(['error' => 'Notification not found'], 404);
+        }
+
+        return response()->json(['message' => 'Notification marked as read']);
+    }
+
+    public function markAllNotificationsRead(Request $request): JsonResponse
+    {
+        $user = auth()->user();
+
+        DB::table('notifications')
+            ->where('user_id_fk', $user->user_id)
+            ->where('is_read', false)
+            ->update(['is_read' => true, 'updated_at' => now()]);
+
+        return response()->json(['message' => 'All notifications marked as read']);
     }
 
     private function log(int $userId, string $action, ?string $table = null, ?int $recordId = null): void

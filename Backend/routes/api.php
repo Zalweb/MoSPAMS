@@ -128,7 +128,19 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Customer routes
         Route::get('/customer/services', [CustomerController::class, 'services']);
         Route::post('/customer/services', [CustomerController::class, 'createService']);
+        Route::delete('/customer/services/{jobId}', [CustomerController::class, 'cancelService']);
         Route::get('/customer/payments', [CustomerController::class, 'payments']);
+        Route::get('/customer/payments/{paymentId}', [CustomerController::class, 'paymentDetails']);
+        Route::get('/customer/profile', [CustomerController::class, 'getProfile']);
+        Route::patch('/customer/profile', [CustomerController::class, 'updateProfile']);
+        Route::patch('/customer/password', [CustomerController::class, 'updatePassword']);
+        Route::get('/customer/vehicles', [CustomerController::class, 'getVehicles']);
+        Route::post('/customer/vehicles', [CustomerController::class, 'storeVehicle']);
+        Route::patch('/customer/vehicles/{vehicleId}', [CustomerController::class, 'updateVehicle']);
+        Route::delete('/customer/vehicles/{vehicleId}', [CustomerController::class, 'deleteVehicle']);
+        Route::get('/customer/notifications', [CustomerController::class, 'getNotifications']);
+        Route::patch('/customer/notifications/read-all', [CustomerController::class, 'markAllNotificationsRead']);
+        Route::patch('/customer/notifications/{notificationId}/read', [CustomerController::class, 'markNotificationRead']);
 
         // Mechanic routes
         Route::middleware(['role:Mechanic'])->prefix('mechanic')->group(function () {
