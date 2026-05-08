@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
-import { Wrench, Clock, CheckCircle2, Calendar, ArrowRight } from 'lucide-react';
-import { apiGet } from '@/shared/lib/api';
+import { Wrench, Clock, CheckCircle2, Calendar, ArrowRight, XCircle } from 'lucide-react';
+import { apiGet, apiMutation } from '@/shared/lib/api';
 import { useAuth } from '@/features/auth/context/AuthContext';
 
 import type { CustomerService } from '@/shared/types';
@@ -32,6 +32,16 @@ export default function CustomerDashboard() {
     };
     void fetchServices();
   }, []);
+
+  const handleCancel = async (id: string) => {
+    if (!window.confirm('Are you sure you want to cancel this booking?')) return;
+    try {
+      await apiMutation(`/api/customer/services/${id}`, 'DELETE');
+      setServices(prev => prev.filter(s => s.id !== id));
+    } catch {
+      alert('Failed to cancel the booking. Please try again.');
+    }
+  };
 
   const pending = services.filter(s => s.status === 'Pending').length;
   const ongoing = services.filter(s => s.status === 'Ongoing').length;
@@ -140,9 +150,20 @@ export default function CustomerDashboard() {
                       <p className="text-[11px] text-[#A8A29E] mt-0.5">Parts: {service.partsUsed.map(p => `${p.name} x${p.quantity}`).join(', ')}</p>
                     )}
                   </div>
-                  <span className={`shrink-0 text-[10px] font-semibold px-2.5 py-[3px] rounded-full ml-3 ${style.bg} ${style.text}`}>
-                    {service.status}
-                  </span>
+                  <div className="text-right shrink-0">
+                    <span className={`text-[10px] font-semibold px-2.5 py-[3px] rounded-full ml-3 ${style.bg} ${style.text}`}>
+                      {service.status}
+                    </span>
+                    {service.status === 'Pending' && (
+                      <button
+                        onClick={() => handleCancel(service.id)}
+                        className="block mt-2 ml-auto text-[11px] font-medium text-red-500 hover:text-red-600 transition-colors flex items-center gap-1"
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                        Cancel
+                      </button>
+                    )}
+                  </div>
                 </div>
               );
             })

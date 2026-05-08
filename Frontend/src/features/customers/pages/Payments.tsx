@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { CreditCard, Calendar, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { apiGet } from '@/shared/lib/api';
+import InvoiceModal from '../components/InvoiceModal';
 
 interface Payment {
   id: string;
@@ -15,6 +16,7 @@ export default function Payments() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPayments = async () => {
@@ -84,9 +86,10 @@ export default function Payments() {
           </div>
         ) : (
           filtered.map(payment => (
-            <div
+            <button
               key={payment.id}
-              className="bg-white rounded-2xl border border-[#F5F5F4] shadow-[0_1px_2px_rgba(0,0,0,0.03)] p-4 hover:shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:border-[#E7E5E4] transition-all duration-300"
+              onClick={() => setSelectedPaymentId(payment.id)}
+              className="w-full text-left bg-white rounded-2xl border border-[#F5F5F4] shadow-[0_1px_2px_rgba(0,0,0,0.03)] p-4 hover:shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:border-[#E7E5E4] transition-all duration-300"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -106,10 +109,17 @@ export default function Payments() {
                   </div>
                 </div>
               </div>
-            </div>
+            </button>
           ))
         )}
       </div>
+
+      {selectedPaymentId && (
+        <InvoiceModal
+          paymentId={selectedPaymentId}
+          onClose={() => setSelectedPaymentId(null)}
+        />
+      )}
     </div>
   );
 }

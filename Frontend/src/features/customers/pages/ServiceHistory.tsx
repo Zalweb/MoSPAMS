@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Wrench, Clock, CheckCircle2, Search } from 'lucide-react';
+import { Wrench, Clock, CheckCircle2, Search, XCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { apiGet } from '@/shared/lib/api';
+import { apiGet, apiMutation } from '@/shared/lib/api';
 import type { CustomerService } from '@/shared/types';
 
 type StatusFilter = 'All' | 'Pending' | 'Ongoing' | 'Completed';
@@ -25,6 +25,16 @@ export default function ServiceHistory() {
     };
     void fetchServices();
   }, []);
+
+  const handleCancel = async (id: string) => {
+    if (!window.confirm('Are you sure you want to cancel this booking?')) return;
+    try {
+      await apiMutation(`/api/customer/services/${id}`, 'DELETE');
+      setServices(prev => prev.filter(s => s.id !== id));
+    } catch {
+      alert('Failed to cancel the booking. Please try again.');
+    }
+  };
 
   const filtered = services.filter(s => {
     const q = search.toLowerCase();
@@ -124,6 +134,15 @@ export default function ServiceHistory() {
                     <span className={`text-[10px] font-semibold px-2.5 py-[3px] rounded-full ${style.bg} ${style.text}`}>
                       {service.status}
                     </span>
+                    {service.status === 'Pending' && (
+                      <button
+                        onClick={() => handleCancel(service.id)}
+                        className="block mt-2 ml-auto text-[11px] font-medium text-red-500 hover:text-red-600 transition-colors flex items-center gap-1"
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                        Cancel
+                      </button>
+                    )}
                     <p className="text-[10px] text-[#D6D3D1] mt-2">
                       {new Date(service.createdAt).toLocaleDateString()}
                     </p>
