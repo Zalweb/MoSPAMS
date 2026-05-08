@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, Phone, MapPin, Mail, Loader2, CheckCircle2 } from 'lucide-react';
+import { User, Phone, MapPin, Mail, Lock, Loader2, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { apiGet, apiMutation } from '@/shared/lib/api';
+import { toast } from 'sonner';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 16 },
@@ -17,6 +18,10 @@ export default function CustomerSettings() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+
+  // Password form
+  const [pwForm, setPwForm] = useState({ current_password: '', new_password: '', confirm_password: '' });
+  const [pwSubmitting, setPwSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     full_name: '',
@@ -58,6 +63,32 @@ export default function CustomerSettings() {
       setError('Failed to update profile. Please try again.');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pwForm.new_password !== pwForm.confirm_password) {
+      toast.error('New passwords do not match.');
+      return;
+    }
+    if (pwForm.new_password.length < 8) {
+      toast.error('Password must be at least 8 characters.');
+      return;
+    }
+    setPwSubmitting(true);
+    try {
+      await apiMutation('/api/customer/password', 'PATCH', {
+        current_password: pwForm.current_password,
+        new_password: pwForm.new_password,
+        new_password_confirmation: pwForm.confirm_password,
+      });
+      toast.success('Password changed successfully!');
+      setPwForm({ current_password: '', new_password: '', confirm_password: '' });
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to change password.');
+    } finally {
+      setPwSubmitting(false);
     }
   };
 
@@ -145,6 +176,55 @@ export default function CustomerSettings() {
               {submitting ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
+        </form>
+      </motion.div>
+
+      {/* Change Password Card */}
+      <motion.div {...fadeUp(0.2)} className="bg-white rounded-2xl border border-[#F5F5F4] shadow-[0_1px_2px_rgba(0,0,0,0.03)] p-6 mt-4">
+        <div className="flex items-center gap-2 mb-5">
+          <Lock className="w-4 h-4 text-[#A8A29E]" />
+          <h3 className="text-[14px] font-bold text-[#1C1917]">Change Password</h3>
+        </div>
+        <form onSubmit={handlePasswordSubmit} className="space-y-4">
+          <div>
+            <Label className="text-[11px] font-medium text-[#78716C] mb-1.5 block">Current Password</Label>
+            <Input
+              type="password"
+              value={pwForm.current_password}
+              onChange={e => setPwForm({ ...pwForm, current_password: e.target.value })}
+              className="h-10 rounded-xl border-[#E7E5E4] text-[13px]"
+              required
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-[11px] font-medium text-[#78716C] mb-1.5 block">New Password</Label>
+              <Input
+                type="password"
+                value={pwForm.new_password}
+                onChange={e => setPwForm({ ...pwForm, new_password: e.target.value })}
+                className="h-10 rounded-xl border-[#E7E5E4] text-[13px]"
+                required
+              />
+            </div>
+            <div>
+              <Label className="text-[11px] font-medium text-[#78716C] mb-1.5 block">Confirm New Password</Label>
+              <Input
+                type="password"
+                value={pwForm.confirm_password}
+                onChange={e => setPwForm({ ...pwForm, confirm_password: e.target.value })}
+                className="h-10 rounded-xl border-[#E7E5E4] text-[13px]"
+                required
+              />
+            </div>
+          </div>
+          <Button
+            type="submit"
+            disabled={pwSubmitting}
+            className="w-full h-10 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-white text-sm font-medium disabled:opacity-50"
+          >
+            {pwSubmitting ? 'Changing...' : 'Change Password'}
+          </Button>
         </form>
       </motion.div>
     </div>

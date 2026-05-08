@@ -73,6 +73,7 @@ export const NAV_ACCESS: Record<string, Role[]> = {
   '/dashboard/customer/book': ['Customer'],
   '/dashboard/customer/history': ['Customer'],
   '/dashboard/customer/payments': ['Customer'],
+  '/dashboard/customer/vehicles': ['Customer'],
   '/dashboard/mechanic/jobs': ['Mechanic'],
   '/superadmin/analytics': ['SuperAdmin'],
   '/superadmin/shops': ['SuperAdmin'],

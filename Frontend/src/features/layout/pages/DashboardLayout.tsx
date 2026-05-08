@@ -1,14 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Package, Wrench, ShoppingCart,
   BarChart3, Shield, LogOut, Menu, X, ClipboardCheck,
-  Home, Calendar, CreditCard, ScrollText, Settings, Bike,
+  Home, Calendar, CreditCard, ScrollText, Settings, Bike, Bell,
 } from 'lucide-react';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { NAV_ACCESS } from '@/shared/lib/permissions';
 import { normalizeRole } from '@/shared/lib/roles';
+import { apiGet, apiMutation } from '@/shared/lib/api';
 
 const navItems: { label: string; to: string; icon: typeof LayoutDashboard; end?: boolean }[] = [
   { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard, end: true },
@@ -23,6 +24,7 @@ const navItems: { label: string; to: string; icon: typeof LayoutDashboard; end?:
   { label: 'Book', to: '/dashboard/customer/book', icon: Calendar },
   { label: 'History', to: '/dashboard/customer/history', icon: Wrench },
   { label: 'Payments', to: '/dashboard/customer/payments', icon: CreditCard },
+  { label: 'Garage', to: '/dashboard/customer/vehicles', icon: Bike },
   // Mechanic navigation
   { label: 'My Jobs', to: '/dashboard/mechanic/jobs', icon: Wrench },
 ];
@@ -33,8 +35,50 @@ export default function DashboardLayout() {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+
+  interface Notification {
+    id: string;
+    title: string;
+    message: string;
+    is_read: boolean;
+    created_at: string;
+  }
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const role = normalizeRole(user?.role);
+
+  useEffect(() => {
+    if (role !== 'Customer') return;
+    const fetchNotifs = async () => {
+      try {
+        const data = await apiGet<{ data: Notification[]; unread_count: number }>('/api/customer/notifications');
+        setNotifications(data.data);
+        setUnreadCount(data.unread_count);
+      } catch { /* silent */ }
+    };
+    void fetchNotifs();
+    const interval = setInterval(() => void fetchNotifs(), 30000);
+    return () => clearInterval(interval);
+  }, [role]);
+
+  const markAllRead = async () => {
+    try {
+      await apiMutation('/api/customer/notifications/read-all', 'PATCH');
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+      setUnreadCount(0);
+    } catch { /* silent */ }
+  };
+
+  const markOneRead = async (id: string) => {
+    try {
+      await apiMutation(`/api/customer/notifications/${id}/read`, 'PATCH');
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch { /* silent */ }
+  };
+
   const visibleNav = navItems.filter(item => role ? (NAV_ACCESS[item.to] ?? []).includes(role) : false);
 
   const currentLabel = navItems.find(n => n.end ? location.pathname === n.to : location.pathname.startsWith(n.to) && n.to !== '/dashboard')?.label
@@ -132,6 +176,65 @@ export default function DashboardLayout() {
 
             {/* Right side actions */}
             <div className="ml-auto flex items-center gap-2">
+              {/* Notification Bell — customers only */}
+              {role === 'Customer' && (
+                <div className="relative">
+                  <button
+                    onClick={() => { setNotifOpen(o => !o); setProfileOpen(false); }}
+                    className="relative p-2 rounded-xl hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+                  >
+                    <Bell className="w-5 h-5" />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
+                  </button>
+
+                  {notifOpen && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} />
+                      <motion.div
+                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        className="absolute right-0 top-full mt-2 w-[320px] bg-zinc-900/95 backdrop-blur-xl rounded-2xl border border-zinc-800 shadow-2xl shadow-black/50 z-50 overflow-hidden"
+                      >
+                        <div className="px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
+                          <p className="text-sm font-semibold text-white">Notifications</p>
+                          {unreadCount > 0 && (
+                            <button onClick={() => void markAllRead()} className="text-xs text-zinc-500 hover:text-white transition-colors">
+                              Mark all read
+                            </button>
+                          )}
+                        </div>
+                        <div className="max-h-[320px] overflow-y-auto">
+                          {notifications.length === 0 ? (
+                            <p className="text-center text-zinc-500 text-xs py-8">No notifications yet</p>
+                          ) : (
+                            notifications.map(n => (
+                              <button
+                                key={n.id}
+                                onClick={() => { if (!n.is_read) void markOneRead(n.id); }}
+                                className={`w-full text-left px-4 py-3 border-b border-zinc-800/50 hover:bg-zinc-800/30 transition-colors ${!n.is_read ? 'bg-zinc-800/20' : ''}`}
+                              >
+                                <div className="flex items-start gap-2">
+                                  {!n.is_read && <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />}
+                                  <div className={!n.is_read ? '' : 'pl-3.5'}>
+                                    <p className="text-xs font-semibold text-white">{n.title}</p>
+                                    <p className="text-xs text-zinc-500 mt-0.5 line-clamp-2">{n.message}</p>
+                                    <p className="text-[10px] text-zinc-600 mt-1">{new Date(n.created_at).toLocaleDateString()}</p>
+                                  </div>
+                                </div>
+                              </button>
+                            ))
+                          )}
+                        </div>
+                      </motion.div>
+                    </>
+                  )}
+                </div>
+              )}
+
               {/* Divider */}
               <div className="w-px h-6 bg-zinc-800" />
 
