@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Mechanic;
 use App\Models\RoleRequest;
+use App\Services\Identity\AccountProvisioner;
+use App\Support\Auth\AuthenticatedContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +16,7 @@ class RoleRequestController extends Controller
     public function index(Request $request): JsonResponse
     {
         $status = $request->query('status', 'pending');
-        $shopId = (int) $request->user()->shop_id_fk;
+        $shopId = (int) app(AuthenticatedContext::class)->shopId($request);
 
         $requests = RoleRequest::with(['user', 'requestedRole'])
             ->where('status', $status)
@@ -36,7 +38,8 @@ class RoleRequestController extends Controller
 
     public function approve(RoleRequest $roleRequest): JsonResponse
     {
-        abort_if((int) $roleRequest->user?->shop_id_fk !== (int) auth()->user()?->shop_id_fk, 404, 'Role request not found.');
+        $shopId = (int) app(AuthenticatedContext::class)->shopId(request());
+        abort_if((int) $roleRequest->shop_id_fk !== $shopId, 404, 'Role request not found.');
 
         if ($roleRequest->status !== 'pending') {
             return response()->json(['message' => 'Request already resolved.'], 422);
@@ -47,6 +50,10 @@ class RoleRequestController extends Controller
             $roleName = $roleRequest->requestedRole?->role_name;
 
             $user->update(['role_id_fk' => $roleRequest->requested_role_id_fk]);
+            $membership = app(AccountProvisioner::class)->membership((int) $user->account_id_fk, (int) $user->shop_id_fk);
+            if ($membership) {
+                $membership->update(['role_id_fk' => $roleRequest->requested_role_id_fk]);
+            }
 
             if ($roleName === 'Mechanic') {
                 $mechanicStatusId = DB::table('mechanic_statuses')
@@ -61,6 +68,7 @@ class RoleRequestController extends Controller
                     ['user_id_fk' => $user->user_id, 'shop_id_fk' => $user->shop_id_fk],
                     [
                         'shop_id_fk'             => $user->shop_id_fk,
+                        'account_id_fk'          => $user->account_id_fk,
                         'full_name'             => $user->full_name,
                         'email'                 => $user->email ?? $user->username,
                         'mechanic_status_id_fk' => $mechanicStatusId,
@@ -82,7 +90,8 @@ class RoleRequestController extends Controller
 
     public function deny(RoleRequest $roleRequest): JsonResponse
     {
-        abort_if((int) $roleRequest->user?->shop_id_fk !== (int) auth()->user()?->shop_id_fk, 404, 'Role request not found.');
+        $shopId = (int) app(AuthenticatedContext::class)->shopId(request());
+        abort_if((int) $roleRequest->shop_id_fk !== $shopId, 404, 'Role request not found.');
 
         if ($roleRequest->status !== 'pending') {
             return response()->json(['message' => 'Request already resolved.'], 422);
@@ -102,8 +111,9 @@ class RoleRequestController extends Controller
     private function log(int $userId, string $action, ?string $table = null, ?int $recordId = null): void
     {
         DB::table('activity_logs')->insert([
-            'shop_id_fk'  => auth()->user()?->shop_id_fk,
+            'shop_id_fk'  => app(AuthenticatedContext::class)->shopId(request()),
             'user_id_fk'  => $userId,
+            'account_id_fk' => auth()->user()?->account_id_fk,
             'action'      => $action,
             'table_name'  => $table,
             'record_id'   => $recordId,

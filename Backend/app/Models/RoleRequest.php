@@ -9,7 +9,7 @@ class RoleRequest extends Model
 {
     use BelongsToTenant;
 
-    protected $fillable = ['shop_id_fk', 'user_id_fk', 'requested_role_id_fk', 'status', 'reviewed_by_fk', 'reviewed_at'];
+    protected $fillable = ['shop_id_fk', 'user_id_fk', 'account_id_fk', 'membership_id_fk', 'requested_role_id_fk', 'status', 'reviewed_by_fk', 'reviewed_at'];
 
     protected function casts(): array
     {
@@ -24,6 +24,16 @@ class RoleRequest extends Model
     public function requestedRole()
     {
         return $this->belongsTo(Role::class, 'requested_role_id_fk', 'role_id');
+    }
+
+    public function account()
+    {
+        return $this->belongsTo(Account::class, 'account_id_fk', 'account_id');
+    }
+
+    public function membership()
+    {
+        return $this->belongsTo(ShopMembership::class, 'membership_id_fk', 'membership_id');
     }
 
     public function reviewer()

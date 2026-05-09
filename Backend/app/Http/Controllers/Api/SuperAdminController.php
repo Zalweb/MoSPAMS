@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Services\Identity\AccountProvisioner;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -179,7 +180,7 @@ class SuperAdminController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string', 'max:500'],
             'ownerName' => ['required', 'string', 'max:100'],
-            'ownerEmail' => ['required', 'email', 'max:100', 'unique:users,email'],
+            'ownerEmail' => ['required', 'email', 'max:100'],
         ]);
 
         $pendingStatusId = $this->shopStatusId('PENDING');
@@ -227,17 +228,12 @@ class SuperAdminController extends Controller
                 'updated_at' => now(),
             ]);
 
-            $ownerId = DB::table('users')->insertGetId([
-                'shop_id_fk' => $shopId,
-                'role_id_fk' => $ownerRoleId,
-                'full_name' => $data['ownerName'],
-                'username' => $data['ownerEmail'],
-                'email' => $data['ownerEmail'],
-                'password_hash' => Hash::make($tempPassword),
-                'user_status_id_fk' => $activeUserStatusId,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            $provisioner = app(AccountProvisioner::class);
+            $existingAccount = $provisioner->findAccountByLogin($data['ownerEmail']);
+            $account = $provisioner->createOrUpdateAccount($data['ownerName'], $data['ownerEmail'], $tempPassword, null, ! $existingAccount);
+            $provisioner->createOrUpdateMembership($account, (int) $shopId, (int) $ownerRoleId);
+            $owner = $provisioner->ensureTenantUser($account, (int) $shopId, (int) $ownerRoleId, $tempPassword);
+            $ownerId = $owner->user_id;
 
             $shopSubscriptionId = null;
             if ($basicPlanId) {
@@ -440,25 +436,17 @@ class SuperAdminController extends Controller
             return [(int) $existingOwner->user_id, null];
         }
 
-        $ownerEmail = strtolower((string) $shopRow->registration_owner_email);
-        $emailTaken = DB::table('users')->whereRaw('LOWER(email) = ?', [$ownerEmail])->exists();
-        abort_if($emailTaken, 422, 'Registration owner email is already used by another account.');
-
         $temporaryPassword = Str::random(12);
+        $ownerEmail = strtolower((string) $shopRow->registration_owner_email);
+        $provisioner = app(AccountProvisioner::class);
+        $existingAccount = $provisioner->findAccountByLogin($ownerEmail);
+        $account = $provisioner->createOrUpdateAccount((string) $shopRow->registration_owner_name, $ownerEmail, $temporaryPassword, null, ! $existingAccount);
+        abort_if($provisioner->membership($account, $shop), 422, 'Registration owner already has a membership in this shop.');
 
-        $ownerId = DB::table('users')->insertGetId([
-            'shop_id_fk' => $shop,
-            'role_id_fk' => $ownerRoleId,
-            'full_name' => (string) $shopRow->registration_owner_name,
-            'username' => $ownerEmail,
-            'email' => $ownerEmail,
-            'password_hash' => Hash::make($temporaryPassword),
-            'user_status_id_fk' => $activeUserStatusId,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $provisioner->createOrUpdateMembership($account, $shop, $ownerRoleId);
+        $owner = $provisioner->ensureTenantUser($account, $shop, $ownerRoleId, $temporaryPassword);
 
-        return [(int) $ownerId, $temporaryPassword];
+        return [(int) $owner->user_id, $existingAccount ? null : $temporaryPassword];
     }
 
     private function activateShopSubscription(int $shop, int $trialDays, Request $request): Carbon
@@ -976,7 +964,7 @@ class SuperAdminController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:100'],
-            'email' => ['required', 'email', 'max:100', 'unique:users,email'],
+            'email' => ['required', 'email', 'max:100'],
             'password' => ['nullable', 'string', 'min:8'],
         ]);
 
@@ -986,17 +974,12 @@ class SuperAdminController extends Controller
 
         $generatedPassword = $data['password'] ?? Str::random(12);
 
-        $userId = DB::table('users')->insertGetId([
-            'shop_id_fk' => null,
-            'role_id_fk' => $superAdminRoleId,
-            'full_name' => $data['name'],
-            'username' => $data['email'],
-            'email' => $data['email'],
-            'password_hash' => Hash::make($generatedPassword),
-            'user_status_id_fk' => $activeStatusId,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $provisioner = app(AccountProvisioner::class);
+        $existingAccount = $provisioner->findAccountByLogin($data['email']);
+        $account = $provisioner->createOrUpdateAccount($data['name'], $data['email'], $generatedPassword, null, ! $existingAccount);
+        $provisioner->createOrUpdatePlatformAdmin($account);
+        $user = $provisioner->ensurePlatformUser($account, $generatedPassword);
+        $userId = $user->user_id;
 
         $this->logPlatformAction($request, "Created platform admin {$data['email']}", 'users', $userId);
 
@@ -1005,7 +988,7 @@ class SuperAdminController extends Controller
                 'userId' => (int) $userId,
                 'name' => $data['name'],
                 'email' => $data['email'],
-                'temporaryPassword' => array_key_exists('password', $data) ? null : $generatedPassword,
+                'temporaryPassword' => ($existingAccount || array_key_exists('password', $data)) ? null : $generatedPassword,
             ],
         ], 201);
     }

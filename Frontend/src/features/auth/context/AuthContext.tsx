@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import type { User, GoogleData } from '@/shared/types';
+import type { Account, Membership, User, GoogleData } from '@/shared/types';
 import { apiGet, apiMutation, getAuthToken, setAuthToken } from '@/shared/lib/api';
 import { normalizeRole } from '@/shared/lib/roles';
 
 interface AuthContextType {
   user: User | null;
+  account: Account | null;
+  membership: Membership | null;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   googleLogin: (credential: string) => Promise<{ needsRegistration: true; googleData: GoogleData } | { needsRegistration: false }>;
   googleRegister: (payload: {
@@ -23,12 +25,14 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-interface LoginResponse { token: string; user: User }
+interface LoginResponse { token: string; user: User; account?: Account | null; membership?: Membership | null }
 interface GoogleLoginResponse {
   needs_registration?: true;
   google_data?: GoogleData;
   token?: string;
   user?: User;
+  account?: Account | null;
+  membership?: Membership | null;
 }
 
 function normalizeUserRole(user: User): User {
@@ -38,18 +42,24 @@ function normalizeUserRole(user: User): User {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [account, setAccount] = useState<Account | null>(null);
+  const [membership, setMembership] = useState<Membership | null>(null);
   const [ready, setReady] = useState(false);
 
   const refreshUser = useCallback(async () => {
-    const response = await apiGet<{ user: User }>('/api/me');
+    const response = await apiGet<{ user: User; account?: Account | null; membership?: Membership | null }>('/api/me');
     const normalizedUser = normalizeUserRole(response.user);
     setUser(normalizedUser);
+    setAccount(response.account ?? null);
+    setMembership(response.membership ?? null);
     return normalizedUser;
   }, []);
 
   useEffect(() => {
     if (!getAuthToken()) {
       setUser(null);
+      setAccount(null);
+      setMembership(null);
       setReady(true);
       return;
     }
@@ -58,6 +68,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .catch(() => {
         setAuthToken(null);
         setUser(null);
+        setAccount(null);
+        setMembership(null);
       })
       .finally(() => setReady(true));
   }, [refreshUser]);
@@ -67,10 +79,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await apiMutation<LoginResponse>('/api/login', 'POST', { email, password });
       setAuthToken(response.token);
       setUser(normalizeUserRole(response.user));
+      setAccount(response.account ?? null);
+      setMembership(response.membership ?? null);
       return { success: true };
     } catch (error) {
       setAuthToken(null);
       setUser(null);
+      setAccount(null);
+      setMembership(null);
       const errorMessage = error instanceof Error ? error.message : 'Login failed';
       if (errorMessage.includes('Failed to fetch') || errorMessage.includes('ERR_CONNECTION_REFUSED') || errorMessage.includes('NetworkError')) {
         return { success: false, error: 'Internal Server Error. Please check your connection.' };
@@ -88,6 +104,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (response.token && response.user) {
         setAuthToken(response.token);
         setUser(normalizeUserRole(response.user));
+        setAccount(response.account ?? null);
+        setMembership(response.membership ?? null);
       }
       return { needsRegistration: false as const };
     } catch {
@@ -108,6 +126,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await apiMutation<LoginResponse>('/api/auth/google/register', 'POST', payload);
       setAuthToken(response.token);
       setUser(normalizeUserRole(response.user));
+      setAccount(response.account ?? null);
+      setMembership(response.membership ?? null);
       return { ok: true as const, token: response.token };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Registration failed. Please try again.';
@@ -118,6 +138,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(async () => {
     setAuthToken(null);
     setUser(null);
+    setAccount(null);
+    setMembership(null);
     try {
       await apiMutation('/api/logout', 'POST');
     } catch {
@@ -128,6 +150,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider value={{
       user,
+      account,
+      membership,
       login,
       googleLogin,
       googleRegister,

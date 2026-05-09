@@ -15,6 +15,7 @@ class User extends Authenticatable
 
     protected $fillable = [
         'role_id_fk',
+        'account_id_fk',
         'shop_id_fk',
         'full_name',
         'username',
@@ -34,6 +35,17 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class, 'role_id_fk', 'role_id');
     }
 
+    public function account()
+    {
+        return $this->belongsTo(Account::class, 'account_id_fk', 'account_id');
+    }
+
+    public function membership()
+    {
+        return $this->hasOne(ShopMembership::class, 'account_id_fk', 'account_id_fk')
+            ->whereColumn('shop_memberships.shop_id_fk', 'users.shop_id_fk');
+    }
+
     public function status()
     {
         return $this->belongsTo(UserStatus::class, 'user_status_id_fk', 'user_status_id');
@@ -46,6 +58,10 @@ class User extends Authenticatable
 
     public function isSuperAdmin(): bool
     {
+        if ($this->relationLoaded('account') && $this->account?->relationLoaded('platformAdmin')) {
+            return $this->account?->platformAdmin !== null;
+        }
+
         return $this->role?->role_name === 'SuperAdmin';
     }
 

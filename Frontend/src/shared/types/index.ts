@@ -75,6 +75,22 @@ export interface User {
   lastActive: string;
 }
 
+export interface Account {
+  id: string;
+  name: string;
+  email: string;
+  status: string;
+}
+
+export interface Membership {
+  id: string;
+  shopId: string;
+  shopName: string | null;
+  role: Role;
+  status: string;
+  shopStatus: string | null;
+}
+
 export interface StoredUser extends User {
   passwordHash: string;
 }

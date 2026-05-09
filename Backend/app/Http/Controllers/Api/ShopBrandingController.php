@@ -22,8 +22,10 @@ class ShopBrandingController extends Controller
         if (!$shop) {
             return response()->json([
                 'data' => [
-                    'shopName' => 'MoSPAMS',
-                    'logoUrl' => null,
+                'shopName' => 'MoSPAMS',
+                'shopId' => null,
+                'subdomain' => null,
+                'logoUrl' => null,
                     'primaryColor' => '#ef4444',
                     'secondaryColor' => '#f97316',
                 ]
@@ -32,7 +34,9 @@ class ShopBrandingController extends Controller
         
         return response()->json([
             'data' => [
+                'shopId' => (int) $shop->shop_id,
                 'shopName' => $shop->shop_name,
+                'subdomain' => $shop->subdomain,
                 'logoUrl' => $shop->logo_url,
                 'primaryColor' => $shop->primary_color ?? '#ef4444',
                 'secondaryColor' => $shop->secondary_color ?? '#f97316',

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\Auth\AuthenticatedContext;
 use App\Support\Tenancy\TenantAuditLogger;
 use App\Support\Tenancy\TenantManager;
 use Closure;
@@ -13,6 +14,7 @@ class EnsureTenantUser
     public function __construct(
         private readonly TenantManager $tenantManager,
         private readonly TenantAuditLogger $audit,
+        private readonly AuthenticatedContext $authContext,
     ) {
     }
 
@@ -21,7 +23,7 @@ class EnsureTenantUser
         $user = $request->user();
         $effectiveHostMode = strtolower((string) $request->attributes->get('effective_host_mode', 'tenant'));
 
-        if ($user?->isSuperAdmin()) {
+        if ($this->authContext->isPlatformAdmin($request)) {
             abort(403, 'SuperAdmin must use dedicated platform endpoints.');
         }
 
@@ -29,13 +31,24 @@ class EnsureTenantUser
             abort(403, 'Tenant routes are only available from a tenant shop host.');
         }
 
-        if (! $user?->shop_id_fk) {
+        $membership = $this->authContext->membership($request);
+
+        if (! $membership && $this->tenantManager->isResolved() && $user?->shop_id_fk && (int) $user->shop_id_fk !== $this->tenantManager->requireId()) {
+            $this->audit->write('tenant_user_mismatch', 'warning', [
+                'resolvedShopId' => $this->tenantManager->id(),
+                'userShopId' => (int) $user->shop_id_fk,
+            ]);
+
+            abort(403, 'Tenant mismatch detected.');
+        }
+
+        if (! $membership) {
             abort(403, 'User has no tenant assignment.');
         }
 
         $token = $user->currentAccessToken();
         if ($token) {
-            $requiredAbility = sprintf('tenant:%d', (int) $user->shop_id_fk);
+            $requiredAbility = sprintf('tenant:%d', (int) $membership->shop_id_fk);
             if (! $token->can($requiredAbility)) {
                 $this->audit->write('tenant_token_mismatch', 'warning', [
                     'requiredAbility' => $requiredAbility,
@@ -46,10 +59,10 @@ class EnsureTenantUser
             }
         }
 
-        if ($effectiveHostMode !== 'local' && $this->tenantManager->isResolved() && (int) $user->shop_id_fk !== $this->tenantManager->requireId()) {
+        if ($effectiveHostMode !== 'local' && $this->tenantManager->isResolved() && (int) $membership->shop_id_fk !== $this->tenantManager->requireId()) {
             $this->audit->write('tenant_user_mismatch', 'warning', [
                 'resolvedShopId' => $this->tenantManager->id(),
-                'userShopId' => (int) $user->shop_id_fk,
+                'membershipShopId' => (int) $membership->shop_id_fk,
             ]);
 
             $mode = strtolower((string) config('tenancy.enforcement_mode', 'off'));

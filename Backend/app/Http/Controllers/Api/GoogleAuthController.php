@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Account;
 use App\Models\Customer;
 use App\Models\RoleRequest;
 use App\Models\Role;
+use App\Models\ShopMembership;
 use App\Models\User;
 use App\Models\UserStatus;
+use App\Services\Identity\AccountProvisioner;
 use App\Support\Tenancy\PlatformHostResolver;
 use App\Support\Tenancy\TenantAuditLogger;
 use Illuminate\Http\JsonResponse;
@@ -22,6 +25,7 @@ class GoogleAuthController extends Controller
     public function __construct(
         private readonly PlatformHostResolver $platformHosts,
         private readonly TenantAuditLogger $tenantAudit,
+        private readonly AccountProvisioner $accounts,
     ) {
     }
 
@@ -35,14 +39,19 @@ class GoogleAuthController extends Controller
             return response()->json(['message' => 'Invalid Google token.'], 401);
         }
 
-        $user = User::with(['role', 'status', 'shop.status'])
-            ->where(function ($q) use ($payload) {
-                $q->where('google_id', $payload['sub'])
-                  ->orWhere('email', $payload['email']);
-            })
-            ->first();
+        $account = $this->accounts->findAccountByGoogle($payload['sub'], $payload['email']);
 
-        if (!$user) {
+        if (! $account) {
+            $legacyUser = User::query()
+                ->where('google_id', $payload['sub'])
+                ->orWhereRaw('LOWER(email) = ?', [strtolower($payload['email'])])
+                ->first();
+            if ($legacyUser) {
+                $account = $this->accounts->syncUser($legacyUser)->account;
+            }
+        }
+
+        if (!$account) {
             return response()->json([
                 'needs_registration' => true,
                 'google_data' => [
@@ -53,64 +62,58 @@ class GoogleAuthController extends Controller
             ]);
         }
 
-        if ($user->google_id === null) {
-            $user->update(['google_id' => $payload['sub']]);
+        if ($account->google_id === null) {
+            $account->update(['google_id' => $payload['sub']]);
         }
 
         $shop = $request->attributes->get('shop');
         $isPlatformHost = $this->platformHosts->requestIsPlatformHost($request);
+        $platformAdmin = $account->platformAdmin;
 
-        if ($user->role?->role_name === 'SuperAdmin' && ! $isPlatformHost) {
+        if ($platformAdmin && ! $isPlatformHost) {
             $this->tenantAudit->write('superadmin_wrong_host_google_login', 'warning', [
                 'attemptedHost' => $request->getHost(),
-                'userId' => $user->user_id,
-                'shopId' => $user->shop_id_fk,
+                'accountId' => $account->account_id,
             ]);
             throw ValidationException::withMessages(['credential' => 'SuperAdmin accounts must log in through the platform portal.']);
         }
 
-        if ($user->role?->role_name !== 'SuperAdmin' && $isPlatformHost) {
+        if (! $platformAdmin && $isPlatformHost) {
             $this->tenantAudit->write('tenant_user_platform_host_google_login', 'warning', [
                 'attemptedHost' => $request->getHost(),
-                'userId' => $user->user_id,
-                'shopId' => $user->shop_id_fk,
+                'accountId' => $account->account_id,
             ]);
             throw ValidationException::withMessages(['credential' => 'Tenant users must log in from their shop domain.']);
         }
 
-        if ($shop && $user->role?->role_name !== 'SuperAdmin' && $user->shop_id_fk !== $shop->shop_id) {
-            $this->tenantAudit->write('tenant_cross_shop_google_login', 'warning', [
-                'attemptedHost' => $request->getHost(),
-                'userId' => $user->user_id,
-                'userShopId' => $user->shop_id_fk,
-                'resolvedShopId' => (int) $shop->shop_id,
-            ]);
-            throw ValidationException::withMessages(['credential' => 'Invalid credentials.']);
-        }
-
-        if (! $shop && $user->role?->role_name !== 'SuperAdmin') {
+        if (! $shop && ! $platformAdmin) {
             $this->tenantAudit->write('tenant_google_login_without_shop_context', 'warning', [
                 'attemptedHost' => $request->getHost(),
-                'userId' => $user->user_id,
-                'shopId' => $user->shop_id_fk,
+                'accountId' => $account->account_id,
             ]);
             throw ValidationException::withMessages(['credential' => 'This domain is not associated with your shop account.']);
         }
 
-        if ($user->status?->status_code !== 'active') {
+        if ($account->status?->status_code !== 'active') {
             throw ValidationException::withMessages(['credential' => 'This account is inactive.']);
         }
 
-        $this->log($user->user_id, $user->shop_id_fk, 'Logged in via Google', 'users', $user->user_id);
+        if ($platformAdmin) {
+            $user = $this->accounts->ensurePlatformUser($account);
+            $this->log($user->user_id, null, 'Logged in via Google', 'users', $user->user_id, (int) $account->account_id);
 
-        $abilities = $user->role?->role_name === 'SuperAdmin'
-            ? ['platform:*']
-            : ($user->shop_id_fk ? [sprintf('tenant:%d', (int) $user->shop_id_fk)] : ['public:guest']);
+            return response()->json($this->authPayload($user, null, ['platform:*']));
+        }
 
-        return response()->json([
-            'token' => $user->createToken('frontend', $abilities)->plainTextToken,
-            'user'  => $this->userResource($user->fresh(['role', 'status', 'shop.status'])),
-        ]);
+        $membership = $this->accounts->membership($account, (int) $shop->shop_id);
+        if (! $membership || $membership->status?->status_code !== 'active') {
+            throw ValidationException::withMessages(['credential' => 'Invalid credentials.']);
+        }
+
+        $user = $this->accounts->ensureTenantUser($account, (int) $shop->shop_id, (int) $membership->role_id_fk);
+        $this->log($user->user_id, (int) $shop->shop_id, 'Logged in via Google', 'users', $user->user_id, (int) $account->account_id);
+
+        return response()->json($this->authPayload($user, $membership, [sprintf('tenant:%d', (int) $shop->shop_id)]));
     }
 
     /**
@@ -177,14 +180,19 @@ class GoogleAuthController extends Controller
         }
 
         // ── Lookup user ─────────────────────────────────────────────────
-        $user = User::with(['role', 'status', 'shop.status'])
-            ->where(function ($q) use ($payload) {
-                $q->where('google_id', $payload['sub'])
-                  ->orWhere('email', $payload['email']);
-            })
-            ->first();
+        $account = $this->accounts->findAccountByGoogle($payload['sub'], $payload['email']);
 
-        if (! $user) {
+        if (! $account) {
+            $legacyUser = User::query()
+                ->where('google_id', $payload['sub'])
+                ->orWhereRaw('LOWER(email) = ?', [strtolower($payload['email'])])
+                ->first();
+            if ($legacyUser) {
+                $account = $this->accounts->syncUser($legacyUser)->account;
+            }
+        }
+
+        if (! $account) {
             return response()->json([
                 'needs_registration' => true,
                 'google_data' => [
@@ -197,43 +205,55 @@ class GoogleAuthController extends Controller
             ]);
         }
 
-        if ($user->google_id === null) {
-            $user->update(['google_id' => $payload['sub']]);
+        if ($account->google_id === null) {
+            $account->update(['google_id' => $payload['sub']]);
         }
 
         // ── Tenant isolation checks ─────────────────────────────────────
-        if ($shop && $user->role?->role_name !== 'SuperAdmin' && $user->shop_id_fk !== $shop->shop_id) {
+        $platformAdmin = $account->platformAdmin;
+        if ($shop && ! $platformAdmin && ! $this->accounts->membership($account, (int) $shop->shop_id)) {
             throw ValidationException::withMessages(['credential' => 'Invalid credentials.']);
         }
 
-        if (! $shop && $user->role?->role_name !== 'SuperAdmin') {
+        if (! $shop && ! $platformAdmin) {
             throw ValidationException::withMessages(['credential' => 'This domain is not associated with your shop account.']);
         }
 
-        if ($user->status?->status_code !== 'active') {
+        if ($account->status?->status_code !== 'active') {
             throw ValidationException::withMessages(['credential' => 'This account is inactive.']);
         }
 
         // ── Issue token ─────────────────────────────────────────────────
-        $this->log($user->user_id, $user->shop_id_fk, 'Logged in via Google (proxy)', 'users', $user->user_id);
+        if ($platformAdmin) {
+            $user = $this->accounts->ensurePlatformUser($account);
+            $this->log($user->user_id, null, 'Logged in via Google (proxy)', 'users', $user->user_id, (int) $account->account_id);
 
-        $abilities = $user->role?->role_name === 'SuperAdmin'
-            ? ['platform:*']
-            : ($user->shop_id_fk ? [sprintf('tenant:%d', (int) $user->shop_id_fk)] : ['public:guest']);
+            $payload = $this->authPayload($user, null, ['platform:*']);
+            $payload['return_to'] = $request->return_to;
 
-        return response()->json([
-            'token'     => $user->createToken('frontend', $abilities)->plainTextToken,
-            'user'      => $this->userResource($user->fresh(['role', 'status', 'shop.status'])),
-            'return_to' => $request->return_to,
-        ]);
+            return response()->json($payload);
+        }
+
+        $membership = $this->accounts->membership($account, (int) $shop->shop_id);
+        if (! $membership || $membership->status?->status_code !== 'active') {
+            throw ValidationException::withMessages(['credential' => 'Invalid credentials.']);
+        }
+
+        $user = $this->accounts->ensureTenantUser($account, (int) $shop->shop_id, (int) $membership->role_id_fk);
+        $this->log($user->user_id, (int) $shop->shop_id, 'Logged in via Google (proxy)', 'users', $user->user_id, (int) $account->account_id);
+
+        $payload = $this->authPayload($user, $membership, [sprintf('tenant:%d', (int) $shop->shop_id)]);
+        $payload['return_to'] = $request->return_to;
+
+        return response()->json($payload);
     }
 
     public function googleRegister(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'google_id'      => ['required', 'string', 'unique:users,google_id'],
+            'google_id'      => ['required', 'string'],
             'name'           => ['required', 'string', 'max:100'],
-            'email'          => ['required', 'email', 'max:100', 'unique:users,email'],
+            'email'          => ['required', 'email', 'max:100'],
             'phone'          => ['nullable', 'string', 'max:20'],
             'password'       => ['required', 'string', 'min:8'],
             'requested_role' => ['required', 'in:customer,staff,mechanic'],
@@ -256,20 +276,19 @@ class GoogleAuthController extends Controller
         }
         $shopId = $shop?->shop_id ?? null;
 
-        $user = DB::transaction(function () use ($data, $customerRole, $activeStatus, $shopId) {
-            $user = User::create([
-                'role_id_fk'        => $customerRole->role_id,
-                'shop_id_fk'        => $shopId,
-                'full_name'         => $data['name'],
-                'username'          => $data['email'],
-                'email'             => $data['email'],
-                'google_id'         => $data['google_id'],
-                'password_hash'     => Hash::make($data['password']),
-                'user_status_id_fk' => $activeStatus->user_status_id,
-            ]);
+        [$user, $membership] = DB::transaction(function () use ($data, $customerRole, $activeStatus, $shopId) {
+            abort_if(!$shopId, 422, 'Could not determine which shop this registration belongs to.');
+
+            $existingAccount = $this->accounts->findAccountByLogin($data['email']);
+            $account = $this->accounts->createOrUpdateAccount($data['name'], $data['email'], $data['password'], $data['google_id'], ! $existingAccount);
+            abort_if($this->accounts->membership($account, (int) $shopId), 422, 'This email already has an account in this shop.');
+
+            $membership = $this->accounts->createOrUpdateMembership($account, (int) $shopId, (int) $customerRole->role_id);
+            $user = $this->accounts->ensureTenantUser($account, (int) $shopId, (int) $customerRole->role_id, $data['password']);
 
             Customer::create([
                 'user_id_fk'  => $user->user_id,
+                'account_id_fk' => $account->account_id,
                 'shop_id_fk'  => $shopId,
                 'full_name'   => $data['name'],
                 'email'       => $data['email'],
@@ -280,25 +299,20 @@ class GoogleAuthController extends Controller
                 $requestedRole = Role::where('role_name', ucfirst($data['requested_role']))->firstOrFail();
                 RoleRequest::create([
                     'user_id_fk'           => $user->user_id,
+                    'account_id_fk'        => $account->account_id,
+                    'membership_id_fk'     => $membership->membership_id,
                     'shop_id_fk'           => $shopId,
                     'requested_role_id_fk' => $requestedRole->role_id,
                     'status'               => 'pending',
                 ]);
             }
 
-            return $user;
+            return [$user, $membership];
         });
 
-        $this->log($user->user_id, $shopId, 'Registered via Google', 'users', $user->user_id);
+        $this->log($user->user_id, $shopId, 'Registered via Google', 'users', $user->user_id, $user->account_id_fk);
 
-        $abilities = $user->role?->role_name === 'SuperAdmin'
-            ? ['platform:*']
-            : ($user->shop_id_fk ? [sprintf('tenant:%d', (int) $user->shop_id_fk)] : ['public:guest']);
-
-        return response()->json([
-            'token' => $user->createToken('frontend', $abilities)->plainTextToken,
-            'user'  => $this->userResource($user->load(['role', 'status'])),
-        ]);
+        return response()->json($this->authPayload($user, $membership, [sprintf('tenant:%d', (int) $shopId)]));
     }
 
     private function verifyGoogleToken(string $credential): ?array
@@ -320,26 +334,73 @@ class GoogleAuthController extends Controller
         return $payload;
     }
 
-    private function userResource(User $user): array
+    private function authPayload(User $user, ?ShopMembership $membership, array $abilities): array
     {
+        $token = $user->createToken('frontend', $abilities)->plainTextToken;
+        $user = $user->fresh(['account.status', 'role', 'status', 'shop.status']);
+
+        return [
+            'token' => $token,
+            'user' => $this->userResource($user, $membership),
+            'account' => $this->accountResource($user->account),
+            'membership' => $this->membershipResource($membership),
+        ];
+    }
+
+    private function userResource(User $user, ?ShopMembership $membership = null): array
+    {
+        $roleName = $membership?->role?->role_name ?? $user->role?->role_name;
+        $shop = $membership?->shop ?? $user->shop;
+
         return [
             'id' => (string) $user->user_id,
-            'name' => $user->full_name,
+            'name' => $user->account?->full_name ?? $user->full_name,
             'username' => $user->username,
-            'email' => $user->email ?? $user->username,
-            'role' => $user->role?->role_name,
+            'email' => $user->account?->email ?? $user->email ?? $user->username,
+            'role' => $roleName,
             'status' => $user->status?->status_name,
-            'shopId' => $user->shop_id_fk ? (string) $user->shop_id_fk : null,
-            'shopName' => $user->shop?->shop_name,
-            'shopStatus' => $user->shop?->status?->status_code,
+            'shopId' => $shop?->shop_id ? (string) $shop->shop_id : null,
+            'shopName' => $shop?->shop_name,
+            'shopStatus' => $shop?->status?->status_code,
             'lastActive' => optional($user->updated_at)->toISOString(),
         ];
     }
 
-    private function log(int $userId, ?int $shopId, string $action, ?string $table = null, ?int $recordId = null): void
+    private function accountResource(?Account $account): ?array
+    {
+        if (! $account) {
+            return null;
+        }
+
+        return [
+            'id' => (string) $account->account_id,
+            'name' => $account->full_name,
+            'email' => $account->email,
+            'status' => $account->status?->status_name,
+        ];
+    }
+
+    private function membershipResource(?ShopMembership $membership): ?array
+    {
+        if (! $membership) {
+            return null;
+        }
+
+        return [
+            'id' => (string) $membership->membership_id,
+            'shopId' => (string) $membership->shop_id_fk,
+            'shopName' => $membership->shop?->shop_name,
+            'role' => $membership->role?->role_name,
+            'status' => $membership->status?->status_name,
+            'shopStatus' => $membership->shop?->status?->status_code,
+        ];
+    }
+
+    private function log(int $userId, ?int $shopId, string $action, ?string $table = null, ?int $recordId = null, ?int $accountId = null): void
     {
         DB::table('activity_logs')->insert([
             'user_id_fk'  => $userId,
+            'account_id_fk' => $accountId,
             'shop_id_fk'  => $shopId,
             'action'      => $action,
             'table_name'  => $table,

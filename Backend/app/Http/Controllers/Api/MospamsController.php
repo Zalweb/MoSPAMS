@@ -3,7 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Account;
+use App\Models\ShopMembership;
 use App\Models\User;
+use App\Services\Identity\AccountProvisioner;
+use App\Support\Auth\AuthenticatedContext;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -209,13 +213,13 @@ class MospamsController extends Controller
         $paymentRows = DB::table('payments')
             ->join('sales', 'sales.sale_id', '=', 'payments.sale_id_fk')
             ->where('sales.shop_id_fk', $shopId)
-            ->selectRaw('LOWER(payment_method) as method, COUNT(*) as count')
+            ->selectRaw('LOWER(payment_method) as method, SUM(amount_paid) as total')
             ->groupByRaw('LOWER(payment_method)')
-            ->pluck('count', 'method');
+            ->pluck('total', 'method');
 
         $paymentMethods = [
-            'cash' => (int) ($paymentRows['cash'] ?? 0),
-            'gcash' => (int) ($paymentRows['gcash'] ?? 0),
+            'cash' => (float) ($paymentRows['cash'] ?? 0),
+            'gcash' => (float) ($paymentRows['gcash'] ?? 0),
         ];
 
         $topServiceTypes = DB::table('service_job_items')
@@ -881,52 +885,72 @@ class MospamsController extends Controller
 
     public function users(): JsonResponse
     {
-        return response()->json(['data' => User::query()->where('shop_id_fk', $this->shopId())->with(['role', 'status'])->orderBy('full_name')->get()->map(fn ($user) => $this->userResource($user))]);
+        $memberships = ShopMembership::query()
+            ->with(['account.status', 'role', 'status'])
+            ->where('shop_id_fk', $this->shopId())
+            ->orderBy(Account::query()->select('full_name')->whereColumn('accounts.account_id', 'shop_memberships.account_id_fk'))
+            ->get();
+
+        return response()->json(['data' => $memberships->map(fn ($membership) => $this->membershipUserResource($membership))]);
     }
 
     public function storeUser(Request $request): JsonResponse
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:100'],
-            'email' => ['required', 'string', 'max:100', 'unique:users,username'],
+            'email' => ['required', 'email', 'max:100'],
             'role' => ['required', Rule::in(['Owner', 'Staff', 'Mechanic', 'Customer'])],
             'password' => ['required', 'string', 'min:6'],
         ]);
 
-        $user = User::query()->create([
-            'shop_id_fk' => $this->shopId(),
-            'role_id_fk' => DB::table('roles')->where('role_name', $data['role'])->value('role_id'),
-            'full_name' => $data['name'],
-            'email' => $data['email'],
-            'password_hash' => Hash::make($data['password']),
-            'user_status_id_fk' => $this->statusId('user_statuses', 'user_status_id', 'active'),
-        ])->load(['role', 'status']);
+        $provisioner = app(AccountProvisioner::class);
+        $shopId = (int) $this->shopId();
+        $existingAccount = $provisioner->findAccountByLogin($data['email']);
+        abort_if($existingAccount && $provisioner->membership($existingAccount, $shopId), 422, 'This email already has a user in this shop.');
+
+        $account = $provisioner->createOrUpdateAccount($data['name'], $data['email'], $data['password'], null, ! $existingAccount);
+        $membership = $provisioner->createOrUpdateMembership($account, $shopId, $data['role']);
+        $user = $provisioner->ensureTenantUser($account, $shopId, $data['role'], $data['password']);
 
         $this->log($request, 'Created user '.$data['name'].' ('.$data['role'].')', 'users', $user->user_id);
 
-        return response()->json(['data' => $this->userResource($user)], 201);
+        return response()->json(['data' => $this->membershipUserResource($membership)], 201);
     }
 
     public function updateUser(Request $request, int $user): JsonResponse
     {
+        $target = User::query()->where('user_id', $user)->where('shop_id_fk', $this->shopId())->firstOrFail();
+
         $data = $request->validate([
             'name' => ['sometimes', 'string', 'max:100'],
-            'email' => ['sometimes', 'string', 'max:100', Rule::unique('users', 'email')->ignore($user, 'user_id')],
+            'email' => ['sometimes', 'email', 'max:100'],
             'role' => ['sometimes', Rule::in(['Owner', 'Staff', 'Mechanic', 'Customer'])],
             'password' => ['nullable', 'string', 'min:6'],
         ]);
 
-        $patch = [];
-        if (array_key_exists('name', $data)) $patch['full_name'] = $data['name'];
-        if (array_key_exists('email', $data)) $patch['email'] = $data['email'];
-        if (array_key_exists('role', $data)) $patch['role_id_fk'] = DB::table('roles')->where('role_name', $data['role'])->value('role_id');
-        if (! empty($data['password'])) $patch['password_hash'] = Hash::make($data['password']);
-        if ($patch) $patch['updated_at'] = now();
+        $provisioner = app(AccountProvisioner::class);
+        $account = $target->account ?: Account::query()->findOrFail($target->account_id_fk);
+        $shopId = (int) $this->shopId();
 
-        DB::table('users')->where('user_id', $user)->where('shop_id_fk', $this->shopId())->update($patch);
+        if (array_key_exists('email', $data)) {
+            $existing = $provisioner->findAccountByLogin($data['email']);
+            abort_if($existing && (int) $existing->account_id !== (int) $account->account_id && $provisioner->membership($existing, $shopId), 422, 'This email already has a user in this shop.');
+            $account->email = strtolower($data['email']);
+        }
+
+        if (array_key_exists('name', $data)) $account->full_name = $data['name'];
+        if (! empty($data['password'])) $account->password_hash = Hash::make($data['password']);
+        $account->save();
+
+        $membership = $provisioner->membership($account, $shopId);
+        if (array_key_exists('role', $data)) {
+            $membership = $provisioner->createOrUpdateMembership($account, $shopId, $data['role']);
+        }
+
+        $provisioner->ensureTenantUser($account->fresh(), $shopId, (int) $membership->role_id_fk, $data['password'] ?? null);
         $this->log($request, 'Updated user #'.$user, 'users', $user);
 
-        return response()->json(['data' => $this->userResource(User::query()->where('shop_id_fk', $this->shopId())->with(['role', 'status'])->findOrFail($user))]);
+        return response()->json(['data' => $this->membershipUserResource($membership->fresh(['account.status', 'role', 'status']))]);
     }
 
     public function updateUserStatus(Request $request, int $user): JsonResponse
@@ -934,18 +958,28 @@ class MospamsController extends Controller
         $data = $request->validate(['status' => ['required', Rule::in(['Active', 'Inactive'])]]);
         abort_if($request->user()->user_id === $user, 422, 'You cannot disable your own account.');
 
-        DB::table('users')->where('user_id', $user)->where('shop_id_fk', $this->shopId())->update([
+        $target = User::query()->where('user_id', $user)->where('shop_id_fk', $this->shopId())->firstOrFail();
+        $membership = app(AccountProvisioner::class)->membership((int) $target->account_id_fk, (int) $this->shopId());
+        abort_if(! $membership, 404, 'User not found.');
+
+        DB::table('shop_memberships')->where('membership_id', $membership->membership_id)->update([
+            'membership_status_id_fk' => (int) DB::table('membership_statuses')->where('status_code', strtolower($data['status']))->value('membership_status_id'),
+            'updated_at' => now(),
+        ]);
+        DB::table('users')->where('user_id', $user)->update([
             'user_status_id_fk' => $this->statusId('user_statuses', 'user_status_id', strtolower($data['status'])),
             'updated_at' => now(),
         ]);
         $this->log($request, 'Set user #'.$user.' status to '.$data['status'], 'users', $user);
 
-        return response()->json(['data' => $this->userResource(User::query()->with(['role', 'status'])->findOrFail($user))]);
+        return response()->json(['data' => $this->membershipUserResource($membership->fresh(['account.status', 'role', 'status']))]);
     }
 
     public function deleteUser(Request $request, int $user): JsonResponse
     {
         abort_if($request->user()->user_id === $user, 422, 'You cannot delete your own account.');
+        $target = User::query()->where('user_id', $user)->where('shop_id_fk', $this->shopId())->firstOrFail();
+        DB::table('shop_memberships')->where('account_id_fk', $target->account_id_fk)->where('shop_id_fk', $this->shopId())->delete();
         DB::table('users')->where('user_id', $user)->where('shop_id_fk', $this->shopId())->delete();
         $this->log($request, 'Deleted user #'.$user, 'users', $user);
 
@@ -1430,10 +1464,27 @@ class MospamsController extends Controller
         return [
             'id' => (string) $user->user_id,
             'name' => $user->full_name,
-            'email' => $user->username,
+            'email' => $user->email ?? $user->username,
             'role' => $user->role?->role_name,
             'status' => $user->status?->status_name,
             'lastActive' => optional($user->updated_at)->toISOString(),
+        ];
+    }
+
+    private function membershipUserResource(ShopMembership $membership): array
+    {
+        $userId = DB::table('users')
+            ->where('account_id_fk', $membership->account_id_fk)
+            ->where('shop_id_fk', $membership->shop_id_fk)
+            ->value('user_id');
+
+        return [
+            'id' => (string) $userId,
+            'name' => $membership->account?->full_name,
+            'email' => $membership->account?->email,
+            'role' => $membership->role?->role_name,
+            'status' => $membership->status?->status_name,
+            'lastActive' => optional($membership->updated_at)->toISOString(),
         ];
     }
 
@@ -1607,6 +1658,7 @@ class MospamsController extends Controller
         DB::table('activity_logs')->insert([
             'shop_id_fk' => $this->shopId(),
             'user_id_fk' => $request->user()?->user_id,
+            'account_id_fk' => $request->user()?->account_id_fk,
             'action' => mb_substr($action, 0, 100),
             'table_name' => $table,
             'record_id' => $recordId,
@@ -1623,14 +1675,21 @@ class MospamsController extends Controller
             abort(401, 'Unauthenticated');
         }
 
+        $authContext = app(AuthenticatedContext::class);
+
         // SuperAdmin can see all shops
-        if ($user->isSuperAdmin()) {
+        if ($authContext->isPlatformAdmin(request())) {
             return null;
         }
 
         $resolvedTenantId = $this->tenantManager()->id();
         if ($resolvedTenantId) {
             return $resolvedTenantId;
+        }
+
+        $membership = $authContext->membership(request());
+        if ($membership) {
+            return (int) $membership->shop_id_fk;
         }
 
         if (! $user->shop_id_fk) {

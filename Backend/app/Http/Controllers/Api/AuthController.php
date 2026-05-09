@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Mail\PasswordChangedMail;
 use App\Mail\PasswordResetMail;
+use App\Models\Account;
+use App\Models\ShopMembership;
 use App\Models\User;
+use App\Services\Identity\AccountProvisioner;
 use App\Support\Tenancy\PlatformHostResolver;
 use App\Support\Tenancy\TenantAuditLogger;
 use Illuminate\Http\JsonResponse;
@@ -22,6 +25,7 @@ class AuthController extends Controller
     public function __construct(
         private readonly PlatformHostResolver $platformHosts,
         private readonly TenantAuditLogger $tenantAudit,
+        private readonly AccountProvisioner $accounts,
     ) {
     }
 
@@ -32,15 +36,24 @@ class AuthController extends Controller
         // Always return the same message — never reveal whether email exists
         $genericMessage = 'If an account with that email exists, a reset link has been sent.';
 
-        $user = User::where('email', strtolower($request->email))->first();
+        $account = $this->accounts->findAccountByLogin(strtolower($request->email));
 
-        if (!$user || !$user->email) {
+        if (!$account || !$account->email) {
             return response()->json(['message' => $genericMessage]);
         }
 
         // Tenant isolation: only allow reset if user belongs to this shop
         $shop = $request->attributes->get('shop');
-        if ($shop && $user->shop_id_fk !== $shop->shop_id) {
+        $membership = $shop ? $this->accounts->membership($account, (int) $shop->shop_id) : null;
+        if ($shop && ! $membership) {
+            return response()->json(['message' => $genericMessage]);
+        }
+
+        $user = $shop
+            ? User::query()->where('account_id_fk', $account->account_id)->where('shop_id_fk', $shop->shop_id)->first()
+            : User::query()->where('account_id_fk', $account->account_id)->orderBy('user_id')->first();
+
+        if (! $user) {
             return response()->json(['message' => $genericMessage]);
         }
 
@@ -111,7 +124,9 @@ class AuthController extends Controller
         }
 
         DB::transaction(function () use ($user, $data, $record) {
-            $user->update(['password_hash' => Hash::make($data['password'])]);
+            $passwordHash = Hash::make($data['password']);
+            $user->account?->update(['password_hash' => $passwordHash]);
+            User::query()->where('account_id_fk', $user->account_id_fk)->update(['password_hash' => $passwordHash, 'updated_at' => now()]);
 
             DB::table('password_resets')
                 ->where('id', $record->id)
@@ -141,86 +156,103 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        $user = User::query()
-            ->with(['role', 'status', 'shop.status'])
-            ->where('email', $credentials['email'])
-            ->first();
+        $account = $this->accounts->findAccountByLogin($credentials['email']);
 
-        if (! $user || ! Hash::check($credentials['password'], $user->password_hash)) {
+        if (! $account) {
+            $legacyUser = User::query()
+                ->whereRaw('LOWER(email) = ?', [strtolower($credentials['email'])])
+                ->orWhereRaw('LOWER(username) = ?', [strtolower($credentials['email'])])
+                ->first();
+            if ($legacyUser) {
+                $account = $this->accounts->syncUser($legacyUser)->account;
+            }
+        }
+
+        if (! $account || ! $account->password_hash || ! Hash::check($credentials['password'], $account->password_hash)) {
             throw ValidationException::withMessages(['email' => 'Invalid credentials.']);
         }
 
         $shop = $request->attributes->get('shop');
         $isPlatformHost = $this->platformHosts->requestIsPlatformHost($request);
+        $platformAdmin = $account->platformAdmin;
 
         // SuperAdmin accounts are only allowed on dedicated platform hosts.
-        if ($user->role?->role_name === 'SuperAdmin' && ! $isPlatformHost) {
+        if ($platformAdmin && ! $isPlatformHost) {
             $this->tenantAudit->write('superadmin_wrong_host_login', 'warning', [
                 'attemptedHost' => $request->getHost(),
-                'userId' => $user->user_id,
-                'shopId' => $user->shop_id_fk,
+                'accountId' => $account->account_id,
             ]);
             throw ValidationException::withMessages(['email' => 'SuperAdmin accounts must log in through the platform portal.']);
         }
 
         // Tenant users are not allowed to log in on platform hosts.
-        if ($user->role?->role_name !== 'SuperAdmin' && $isPlatformHost) {
+        if (! $platformAdmin && $isPlatformHost) {
             $this->tenantAudit->write('tenant_user_platform_host_login', 'warning', [
                 'attemptedHost' => $request->getHost(),
-                'userId' => $user->user_id,
-                'shopId' => $user->shop_id_fk,
+                'accountId' => $account->account_id,
             ]);
             throw ValidationException::withMessages(['email' => 'Tenant users must log in from their shop domain.']);
         }
 
-        // Validate shop context for tenant users (non-SuperAdmin)
-        if ($shop && $user->role?->role_name !== 'SuperAdmin') {
-            if ($user->shop_id_fk !== $shop->shop_id) {
-                $this->tenantAudit->write('tenant_cross_shop_login', 'warning', [
-                    'attemptedHost' => $request->getHost(),
-                    'userId' => $user->user_id,
-                    'userShopId' => $user->shop_id_fk,
-                    'resolvedShopId' => (int) $shop->shop_id,
-                ]);
-                throw ValidationException::withMessages(['email' => 'Invalid credentials.']);
-            }
-        }
-
-        if (! $shop && $user->role?->role_name !== 'SuperAdmin') {
+        if (! $shop && ! $platformAdmin) {
             $this->tenantAudit->write('tenant_login_without_shop_context', 'warning', [
                 'attemptedHost' => $request->getHost(),
-                'userId' => $user->user_id,
-                'shopId' => $user->shop_id_fk,
+                'accountId' => $account->account_id,
             ]);
             throw ValidationException::withMessages(['email' => 'This domain is not associated with your shop account.']);
         }
 
-        if ($user->status?->status_code !== 'active') {
+        if ($account->status?->status_code !== 'active') {
             throw ValidationException::withMessages(['email' => 'This account is inactive.']);
         }
 
-        $this->log($user->user_id, $user->shop_id_fk, 'Logged in to the system', 'users', $user->user_id);
+        if ($platformAdmin) {
+            if ($platformAdmin->status?->status_code !== 'active') {
+                throw ValidationException::withMessages(['email' => 'This platform account is inactive.']);
+            }
 
-        $abilities = $user->role?->role_name === 'SuperAdmin'
-            ? ['platform:*']
-            : ($user->shop_id_fk ? [sprintf('tenant:%d', (int) $user->shop_id_fk)] : ['public:guest']);
+            $user = $this->accounts->ensurePlatformUser($account);
+            $this->log($user->user_id, null, 'Logged in to the platform', 'users', $user->user_id, (int) $account->account_id);
 
-        return response()->json([
-            'token' => $user->createToken('frontend', $abilities)->plainTextToken,
-            'user' => $this->userResource($user),
-        ]);
+            return response()->json($this->authPayload($user, null, ['platform:*']));
+        }
+
+        $membership = $this->accounts->membership($account, (int) $shop->shop_id);
+
+        if (! $membership || $membership->status?->status_code !== 'active') {
+            $this->tenantAudit->write('tenant_cross_shop_login', 'warning', [
+                'attemptedHost' => $request->getHost(),
+                'accountId' => $account->account_id,
+                'resolvedShopId' => (int) $shop->shop_id,
+            ]);
+            throw ValidationException::withMessages(['email' => 'Invalid credentials.']);
+        }
+
+        $user = $this->accounts->ensureTenantUser($account, (int) $shop->shop_id, (int) $membership->role_id_fk);
+        $this->log($user->user_id, (int) $shop->shop_id, 'Logged in to the system', 'users', $user->user_id, (int) $account->account_id);
+
+        return response()->json($this->authPayload($user, $membership, [sprintf('tenant:%d', (int) $shop->shop_id)]));
     }
 
     public function me(Request $request): JsonResponse
     {
-        return response()->json(['user' => $this->userResource($request->user()->load(['role', 'status', 'shop.status']))]);
+        $user = $request->user()->load(['account.status', 'role', 'status', 'shop.status']);
+        $membership = $user->account_id_fk && $user->shop_id_fk
+            ? $this->accounts->membership((int) $user->account_id_fk, (int) $user->shop_id_fk)
+            : null;
+
+        return response()->json([
+            'user' => $this->userResource($user, $membership),
+            'account' => $this->accountResource($user->account),
+            'membership' => $this->membershipResource($membership),
+        ]);
     }
 
     public function logout(Request $request): JsonResponse
     {
         $user = $request->user();
         $request->user()->currentAccessToken()?->delete();
-        $this->log($user->user_id, $user->shop_id_fk, 'Logged out of the system', 'users', $user->user_id);
+        $this->log($user->user_id, $user->shop_id_fk, 'Logged out of the system', 'users', $user->user_id, $user->account_id_fk);
 
         return response()->json(['message' => 'Logged out.']);
     }
@@ -238,7 +270,7 @@ class AuthController extends Controller
 
         $data = $request->validate([
             'fullName' => ['required', 'string', 'max:100'],
-            'email'    => ['required', 'email', 'max:100', 'unique:users,email'],
+            'email'    => ['required', 'email', 'max:100'],
             'password' => ['required', 'string', 'min:8'],
         ]);
 
@@ -257,48 +289,95 @@ class AuthController extends Controller
         $activeStatusId = DB::table('user_statuses')->where('status_code', 'active')->value('user_status_id');
 
         return DB::transaction(function () use ($data, $shop, $customerRoleId, $activeStatusId) {
-            $userId = DB::table('users')->insertGetId([
-                'shop_id_fk'          => $shop->shop_id,
-                'role_id_fk'          => $customerRoleId,
-                'full_name'           => $data['fullName'],
-                'email'               => strtolower($data['email']),
-                'password_hash'       => Hash::make($data['password']),
-                'user_status_id_fk'   => $activeStatusId,
-                'created_at'          => now(),
-                'updated_at'          => now(),
-            ]);
+            $existingAccount = $this->accounts->findAccountByLogin($data['email']);
+            abort_if($existingAccount && ! Hash::check($data['password'], (string) $existingAccount->password_hash), 422, 'This email already has an account. Use that account password to join this shop.');
 
-            $this->log($userId, $shop->shop_id, "Registered as Customer in shop {$shop->shop_name}", 'users', $userId);
+            $account = $this->accounts->createOrUpdateAccount($data['fullName'], $data['email'], $data['password'], null, ! $existingAccount);
+            abort_if($this->accounts->membership($account, (int) $shop->shop_id), 422, 'This email already has an account in this shop.');
+
+            $membership = $this->accounts->createOrUpdateMembership($account, (int) $shop->shop_id, (int) $customerRoleId);
+            $user = $this->accounts->ensureTenantUser($account, (int) $shop->shop_id, (int) $customerRoleId, $data['password']);
+
+            $this->log($user->user_id, $shop->shop_id, "Registered as Customer in shop {$shop->shop_name}", 'users', $user->user_id, (int) $account->account_id);
 
             return response()->json([
                 'message'       => 'Account created successfully! You can now log in.',
-                'userId'        => (string) $userId,
+                'userId'        => (string) $user->user_id,
+                'accountId'     => (string) $account->account_id,
+                'membershipId'  => (string) $membership->membership_id,
                 'shopName'      => $shop->shop_name,
                 'requestedRole' => 'Customer',
             ], 201);
         });
     }
 
-    private function userResource(User $user): array
+    private function authPayload(User $user, ?ShopMembership $membership, array $abilities): array
     {
+        $token = $user->createToken('frontend', $abilities)->plainTextToken;
+        $user = $user->fresh(['account.status', 'role', 'status', 'shop.status']);
+
+        return [
+            'token' => $token,
+            'user' => $this->userResource($user, $membership),
+            'account' => $this->accountResource($user->account),
+            'membership' => $this->membershipResource($membership),
+        ];
+    }
+
+    private function userResource(User $user, ?ShopMembership $membership = null): array
+    {
+        $roleName = $membership?->role?->role_name ?? $user->role?->role_name;
+        $shop = $membership?->shop ?? $user->shop;
+
         return [
             'id' => (string) $user->user_id,
-            'name' => $user->full_name,
-            'email' => $user->email,
-            'role' => $user->role?->role_name,
+            'name' => $user->account?->full_name ?? $user->full_name,
+            'email' => $user->account?->email ?? $user->email,
+            'role' => $roleName,
             'status' => $user->status?->status_name,
-            'shopId' => $user->shop_id_fk ? (string) $user->shop_id_fk : null,
-            'shopName' => $user->shop?->shop_name,
-            'shopStatus' => $user->shop?->status?->status_code,
+            'shopId' => $shop?->shop_id ? (string) $shop->shop_id : null,
+            'shopName' => $shop?->shop_name,
+            'shopStatus' => $shop?->status?->status_code,
             'lastActive' => optional($user->updated_at)->toISOString(),
         ];
     }
 
-    private function log(int $userId, ?int $shopId, string $action, ?string $table = null, ?int $recordId = null): void
+    private function accountResource(?Account $account): ?array
+    {
+        if (! $account) {
+            return null;
+        }
+
+        return [
+            'id' => (string) $account->account_id,
+            'name' => $account->full_name,
+            'email' => $account->email,
+            'status' => $account->status?->status_name,
+        ];
+    }
+
+    private function membershipResource(?ShopMembership $membership): ?array
+    {
+        if (! $membership) {
+            return null;
+        }
+
+        return [
+            'id' => (string) $membership->membership_id,
+            'shopId' => (string) $membership->shop_id_fk,
+            'shopName' => $membership->shop?->shop_name,
+            'role' => $membership->role?->role_name,
+            'status' => $membership->status?->status_name,
+            'shopStatus' => $membership->shop?->status?->status_code,
+        ];
+    }
+
+    private function log(int $userId, ?int $shopId, string $action, ?string $table = null, ?int $recordId = null, ?int $accountId = null): void
     {
         DB::table('activity_logs')->insert([
             'shop_id_fk' => $shopId,
             'user_id_fk' => $userId,
+            'account_id_fk' => $accountId,
             'action' => $action,
             'table_name' => $table,
             'record_id' => $recordId,
