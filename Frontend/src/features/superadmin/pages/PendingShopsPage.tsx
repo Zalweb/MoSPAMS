@@ -175,7 +175,7 @@ export default function PendingShopsPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-zinc-500">Email:</span>
-                    <span className="text-sm text-white">{selectedShop.email || 'N/A'}</span>
+                    <span className="text-sm text-white">{selectedShop.applicant?.email || selectedShop.owner?.email || 'N/A'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-zinc-500">Phone:</span>

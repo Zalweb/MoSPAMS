@@ -83,7 +83,7 @@ export default function SuspendedShopsPage() {
               <div className="space-y-2 mb-6">
                 <div className="flex items-center gap-2 text-sm text-zinc-400">
                   <Store className="w-4 h-4" strokeWidth={2} />
-                  <span>{shop.email || 'No email'}</span>
+                  <span>{shop.applicant?.email || shop.owner?.email || 'No email'}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-zinc-400">
                   <Calendar className="w-4 h-4" strokeWidth={2} />

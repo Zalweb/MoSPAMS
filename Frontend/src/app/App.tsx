@@ -68,9 +68,6 @@ const ShopGrowthPage = lazy(() => import('@/features/superadmin/pages/Placeholde
 const UserStatisticsPage = lazy(() => import('@/features/superadmin/pages/PlaceholderPages').then(m => ({ default: m.UserStatisticsPage })));
 
 // SettingsPlaceholders — all named exports
-const MaintenanceModePage = lazy(() => import('@/features/superadmin/pages/SettingsPlaceholders').then(m => ({ default: m.MaintenanceModePage })));
-const ApiKeysPage = lazy(() => import('@/features/superadmin/pages/SettingsPlaceholders').then(m => ({ default: m.ApiKeysPage })));
-const EmailTemplatesPage = lazy(() => import('@/features/superadmin/pages/SettingsPlaceholders').then(m => ({ default: m.EmailTemplatesPage })));
 const SupportTicketsPage = lazy(() => import('@/features/superadmin/pages/SettingsPlaceholders').then(m => ({ default: m.SupportTicketsPage })));
 const ShopFeedbackPage = lazy(() => import('@/features/superadmin/pages/SettingsPlaceholders').then(m => ({ default: m.ShopFeedbackPage })));
 
@@ -217,9 +214,6 @@ function App() {
                           <Route path="audit-logs" element={<SuperAdminAuditLogsPage />} />
 
                           <Route path="settings" element={<SuperAdminSettingsPage />} />
-                          <Route path="settings/maintenance" element={<MaintenanceModePage />} />
-                          <Route path="settings/api" element={<ApiKeysPage />} />
-                          <Route path="settings/email" element={<EmailTemplatesPage />} />
 
                           <Route path="support/tickets" element={<SupportTicketsPage />} />
                           <Route path="support/feedback" element={<ShopFeedbackPage />} />

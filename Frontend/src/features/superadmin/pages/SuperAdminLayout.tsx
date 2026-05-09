@@ -67,12 +67,9 @@ const NAV_SECTIONS = [
     ],
   },
   {
-    title: 'PLATFORM SETTINGS',
+    title: 'SETTINGS',
     items: [
       { to: '/superadmin/settings', label: 'Platform Settings', icon: Settings },
-      { to: '/superadmin/settings/maintenance', label: 'System Maintenance', icon: Wrench },
-      { to: '/superadmin/settings/api', label: 'API Keys', icon: Terminal },
-      { to: '/superadmin/settings/email', label: 'Email Templates', icon: Mail },
     ],
   },
   {

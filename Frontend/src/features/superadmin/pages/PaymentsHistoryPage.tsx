@@ -29,16 +29,42 @@ export default function PaymentsHistoryPage() {
     }
   }
 
+  function handleExportCsv() {
+    if (payments.length === 0) {
+      toast.error('No payments to export');
+      return;
+    }
+    const headers = ['ID', 'Shop', 'Amount', 'Method', 'Status', 'Due Date', 'Paid Date'];
+    const rows = payments.map(p => [
+      p.subscriptionPaymentId,
+      '"' + ((p as any).shopName || '').replace(/"/g, '""') + '"',
+      p.amount,
+      (p as any).paymentMethod || '',
+      (p as any).paymentStatus || p.status || '',
+      (p as any).dueAt ? new Date((p as any).dueAt).toISOString().split('T')[0] : '',
+      (p as any).paidAt ? new Date((p as any).paidAt).toISOString().split('T')[0] : '',
+    ]);
+    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'payments-export-' + new Date().toISOString().split('T')[0] + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success('CSV exported');
+  }
+
   const filteredPayments = filter === 'all' 
     ? payments 
-    : payments.filter(p => p.paymentStatus === filter);
+    : payments.filter(p => (p as any).paymentStatus === filter);
 
   const totalPaid = payments
-    .filter(p => p.paymentStatus === 'PAID')
+    .filter(p => (p as any).paymentStatus === 'PAID')
     .reduce((sum, p) => sum + p.amount, 0);
 
   const totalPending = payments
-    .filter(p => p.paymentStatus === 'PENDING')
+    .filter(p => (p as any).paymentStatus === 'PENDING')
     .reduce((sum, p) => sum + p.amount, 0);
 
   return (
@@ -49,7 +75,10 @@ export default function PaymentsHistoryPage() {
           <p className="text-[13px] sm:text-[14px] text-zinc-400 mt-1">Track all subscription payments</p>
         </div>
 
-        <button className="px-4 py-2 rounded-lg bg-white text-black text-sm font-semibold hover:bg-zinc-200 transition-colors flex items-center gap-2 w-fit">
+        <button
+          onClick={handleExportCsv}
+          className="px-4 py-2 rounded-lg bg-white text-black text-sm font-semibold hover:bg-zinc-200 transition-colors flex items-center gap-2 w-fit"
+        >
           <Download className="w-4 h-4" strokeWidth={2} />
           Export CSV
         </button>
@@ -166,22 +195,22 @@ export default function PaymentsHistoryPage() {
                       #{payment.subscriptionPaymentId}
                     </td>
                     <td className="px-6 py-4 text-sm text-white font-medium">
-                      {payment.shopName || `Shop #${payment.shopId}`}
+                      {(payment as any).shopName || `Shop #${(payment as any).shopId}`}
                     </td>
                     <td className="px-6 py-4 text-sm text-white font-semibold">
                       {CURRENCY_PREFIX}{payment.amount.toLocaleString()}
                     </td>
                     <td className="px-6 py-4 text-sm text-zinc-400">
-                      {payment.paymentMethod || 'N/A'}
+                      {(payment as any).paymentMethod || 'N/A'}
                     </td>
                     <td className="px-6 py-4">
-                      <StatusBadge status={payment.paymentStatus} />
+                      <StatusBadge status={(payment as any).paymentStatus || payment.status} />
                     </td>
                     <td className="px-6 py-4 text-sm text-zinc-400">
-                      {payment.dueAt ? new Date(payment.dueAt).toLocaleDateString() : 'N/A'}
+                      {(payment as any).dueAt ? new Date((payment as any).dueAt).toLocaleDateString() : 'N/A'}
                     </td>
                     <td className="px-6 py-4 text-sm text-zinc-400">
-                      {payment.paidAt ? new Date(payment.paidAt).toLocaleDateString() : '-'}
+                      {(payment as any).paidAt ? new Date((payment as any).paidAt).toLocaleDateString() : '-'}
                     </td>
                   </motion.tr>
                 ))}
