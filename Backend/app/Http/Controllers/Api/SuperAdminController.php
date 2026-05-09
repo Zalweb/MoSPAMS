@@ -38,6 +38,11 @@ class SuperAdminController extends Controller
 
         $shopGrowth = $this->buildGrowthSeries($period);
 
+        $revenueByDay = $this->buildRevenueChart(30);
+        $recentShops = $this->recentShops(10);
+        $recentActivity = $this->recentActivity(10);
+        $subscriptionDistribution = $this->subscriptionDistribution();
+
         return response()->json([
             'summary' => [
                 'platformSalesRevenue' => $platformSalesRevenue,
@@ -57,6 +62,10 @@ class SuperAdminController extends Controller
                 'series' => $shopGrowth,
                 'total' => array_sum(array_column($shopGrowth, 'count')),
             ],
+            'revenueChart' => $revenueByDay,
+            'recentShops' => $recentShops,
+            'recentActivity' => $recentActivity,
+            'subscriptionDistribution' => $subscriptionDistribution,
         ]);
     }
 
@@ -1173,6 +1182,87 @@ class SuperAdminController extends Controller
         }
 
         return array_values($labels);
+    }
+
+    private function buildRevenueChart(int $days): array
+    {
+        $start = now()->subDays($days - 1)->startOfDay();
+        $end = now()->endOfDay();
+
+        $rows = DB::table('sales')
+            ->selectRaw('DATE(sale_date) as date, SUM(net_amount) as amount')
+            ->whereBetween('sale_date', [$start, $end])
+            ->groupByRaw('DATE(sale_date)')
+            ->pluck('amount', 'date');
+
+        $chart = [];
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $chart[] = [
+                'date' => $date,
+                'amount' => (float) ($rows[$date] ?? 0),
+            ];
+        }
+
+        return $chart;
+    }
+
+    private function recentShops(int $limit): array
+    {
+        return DB::table('shops')
+            ->join('shop_statuses', 'shop_statuses.shop_status_id', '=', 'shops.shop_status_id_fk')
+            ->orderByDesc('shops.created_at')
+            ->limit($limit)
+            ->get(['shops.shop_id', 'shops.shop_name', 'shops.subdomain', 'shop_statuses.status_name', 'shops.created_at'])
+            ->map(fn ($s) => [
+                'shopId' => (int) $s->shop_id,
+                'shopName' => $s->shop_name,
+                'subdomain' => $s->subdomain,
+                'status' => $s->status_name,
+                'createdAt' => $this->iso($s->created_at),
+            ])
+            ->values()
+            ->toArray();
+    }
+
+    private function recentActivity(int $limit): array
+    {
+        return DB::table('activity_logs')
+            ->leftJoin('users', 'users.user_id', '=', 'activity_logs.user_id_fk')
+            ->leftJoin('shops', 'shops.shop_id', '=', 'activity_logs.shop_id_fk')
+            ->orderByDesc('activity_logs.log_date')
+            ->limit($limit)
+            ->get([
+                'activity_logs.log_id',
+                'activity_logs.action',
+                'activity_logs.log_date',
+                'users.full_name as user_name',
+                'shops.shop_name',
+            ])
+            ->map(fn ($a) => [
+                'logId' => (int) $a->log_id,
+                'action' => $a->action,
+                'userName' => $a->user_name ?? 'System',
+                'shopName' => $a->shop_name,
+                'timestamp' => $this->iso($a->log_date),
+            ])
+            ->values()
+            ->toArray();
+    }
+
+    private function subscriptionDistribution(): array
+    {
+        $rows = DB::table('shop_subscriptions')
+            ->join('subscription_plans', 'subscription_plans.plan_id', '=', 'shop_subscriptions.plan_id_fk')
+            ->selectRaw('subscription_plans.plan_code, subscription_plans.plan_name, COUNT(*) as count')
+            ->groupBy('subscription_plans.plan_code', 'subscription_plans.plan_name')
+            ->get();
+
+        return $rows->map(fn ($r) => [
+            'planCode' => $r->plan_code,
+            'planName' => $r->plan_name,
+            'count' => (int) $r->count,
+        ])->values()->toArray();
     }
 
     private function planResource(int $planId): array

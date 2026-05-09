@@ -5,7 +5,6 @@ import {
   Building2,
   CreditCard,
   Store,
-  TrendingDown,
   TrendingUp,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -47,6 +46,8 @@ export default function SuperAdminAnalyticsPage() {
     show: { opacity: 1, y: 0, transition: { type: 'spring' as const, bounce: 0.4 } },
   };
 
+  const hasRevenue = data?.revenueChart?.some((d: any) => d.amount > 0);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
@@ -64,8 +65,6 @@ export default function SuperAdminAnalyticsPage() {
               title="Total Active Shops"
               value={loading ? '...' : (data?.shopHealth.active ?? 0).toString()}
               subtitle="Active subscriptions running"
-              trend="+12% this month"
-              trendUp={true}
               icon={Building2}
             />
           </motion.div>
@@ -74,8 +73,6 @@ export default function SuperAdminAnalyticsPage() {
               title="MRR (Monthly Recurring)"
               value={loading ? '...' : `${CURRENCY_PREFIX}${(data?.summary.subscriptionRevenue ?? 0).toLocaleString()}`}
               subtitle="Subscription revenue"
-              trend="+8.4% vs last month"
-              trendUp={true}
               icon={CreditCard}
             />
           </motion.div>
@@ -84,8 +81,6 @@ export default function SuperAdminAnalyticsPage() {
               title="Total Shops"
               value={loading ? '...' : (data?.summary.totalShops ?? 0).toString()}
               subtitle="All registered shops"
-              trend="+4.2% growth"
-              trendUp={true}
               icon={Store}
             />
           </motion.div>
@@ -94,8 +89,6 @@ export default function SuperAdminAnalyticsPage() {
               title="Pending Approvals"
               value={loading ? '...' : (data?.shopHealth.pending ?? 0).toString()}
               subtitle="Awaiting activation"
-              trend="Requires attention"
-              trendUp={false}
               icon={AlertCircle}
               warning
             />
@@ -109,17 +102,39 @@ export default function SuperAdminAnalyticsPage() {
            <div className="flex items-center justify-between mb-6">
              <div>
                <h2 className="text-[16px] font-bold text-white">Platform Revenue Trends</h2>
-               <p className="text-[13px] text-zinc-400 mt-1">Monthly Recurring Revenue growth</p>
+               <p className="text-[13px] text-zinc-400 mt-1">Daily revenue — last 30 days</p>
              </div>
            </div>
 
-           <div className="h-[300px] w-full flex items-center justify-center">
-              <div className="text-center text-zinc-400">
-                <AlertCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p className="text-sm">No revenue data available</p>
-                <p className="text-xs mt-1">Data will appear once shops start generating revenue</p>
-              </div>
-           </div>
+           {hasRevenue ? (
+             <div className="h-[300px] w-full flex items-end gap-[2px] px-2">
+               {data?.revenueChart?.map((d: any, i: number) => {
+                 const maxAmount = Math.max(...data.revenueChart.map((x: any) => x.amount), 1);
+                 const height = (d.amount / maxAmount) * 100;
+                 return (
+                   <div
+                     key={i}
+                     className="flex-1 min-w-[6px] relative group"
+                     style={{ height: '100%' }}
+                   >
+                     <div
+                       className="absolute bottom-0 w-full rounded-t-sm bg-white/20 hover:bg-white/40 transition-colors"
+                       style={{ height: `${Math.max(height, 2)}%` }}
+                       title={`${d.date}: ${CURRENCY_PREFIX}${d.amount.toLocaleString()}`}
+                     />
+                   </div>
+                 );
+               })}
+             </div>
+           ) : (
+             <div className="h-[300px] w-full flex items-center justify-center">
+               <div className="text-center text-zinc-400">
+                 <AlertCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                 <p className="text-sm">No revenue data available</p>
+                 <p className="text-xs mt-1">Data will appear once shops start generating revenue</p>
+               </div>
+             </div>
+           )}
         </motion.div>
 
         {/* TWO COLUMN SECTION */}
@@ -129,13 +144,33 @@ export default function SuperAdminAnalyticsPage() {
             <h2 className="text-[16px] font-bold text-white mb-2">Subscription Distribution</h2>
             <p className="text-[13px] text-zinc-400 mb-6">Current active plans across all shops</p>
 
-            <div className="flex-1 flex flex-col items-center justify-center relative min-h-[200px]">
-              <div className="text-center text-zinc-400">
-                <Building2 className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p className="text-sm">No subscription data</p>
-                <p className="text-xs mt-1">Distribution will show once shops subscribe</p>
+            {(data?.subscriptionDistribution?.length ?? 0) > 0 ? (
+              <div className="flex-1 space-y-3">
+                {data?.subscriptionDistribution?.map((plan: any) => {
+                  const total = data.subscriptionDistribution.reduce((s: number, p: any) => s + p.count, 0);
+                  const pct = total > 0 ? Math.round((plan.count / total) * 100) : 0;
+                  return (
+                    <div key={plan.planCode}>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="text-zinc-300">{plan.planName}</span>
+                        <span className="text-white font-semibold">{plan.count} ({pct}%)</span>
+                      </div>
+                      <div className="h-2 w-full bg-zinc-900 rounded-full overflow-hidden">
+                        <div className="h-full bg-white/60 rounded-full" style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center relative min-h-[200px]">
+                <div className="text-center text-zinc-400">
+                  <Building2 className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p className="text-sm">No subscription data</p>
+                  <p className="text-xs mt-1">Distribution will show once shops subscribe</p>
+                </div>
+              </div>
+            )}
           </motion.div>
 
           {/* Right: Recent Shops */}
@@ -147,33 +182,49 @@ export default function SuperAdminAnalyticsPage() {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-zinc-800 text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
-                    <th className="pb-3 pr-4 font-medium">Shop Name</th>
-                    <th className="pb-3 px-4 font-medium">Owner</th>
-                    <th className="pb-3 px-4 font-medium">Status</th>
-                    <th className="pb-3 px-4 font-medium">Plan</th>
-                    <th className="pb-3 pl-4 font-medium text-right">Date</th>
-                  </tr>
-                </thead>
-                <tbody className="text-[13px]">
-                  <tr>
-                    <td colSpan={5} className="py-12 text-center">
-                      <Store className="w-12 h-12 mx-auto mb-3 text-zinc-600" />
-                      <p className="text-zinc-400 text-sm">No shops registered yet</p>
-                      <p className="text-zinc-500 text-xs mt-1">New shops will appear here</p>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            {(data?.recentShops?.length ?? 0) > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-zinc-800 text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
+                      <th className="pb-3 pr-4 font-medium">Shop Name</th>
+                      <th className="pb-3 px-4 font-medium">Subdomain</th>
+                      <th className="pb-3 px-4 font-medium">Status</th>
+                      <th className="pb-3 pl-4 font-medium text-right">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-[13px]">
+                    {data?.recentShops?.map((shop: any) => (
+                      <tr key={shop.shopId} className="border-b border-zinc-800/50">
+                        <td className="py-3 pr-4 text-white font-medium">{shop.shopName}</td>
+                        <td className="py-3 px-4 text-zinc-400">{shop.subdomain}</td>
+                        <td className="py-3 px-4">
+                          <span className={`px-2 py-0.5 rounded text-[11px] font-semibold ${
+                            shop.status === 'Active' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-zinc-500/10 text-zinc-400'
+                          }`}>
+                            {shop.status}
+                          </span>
+                        </td>
+                        <td className="py-3 pl-4 text-right text-zinc-400">
+                          {shop.createdAt ? new Date(shop.createdAt).toLocaleDateString() : '-'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="py-12 text-center">
+                <Store className="w-12 h-12 mx-auto mb-3 text-zinc-600" />
+                <p className="text-zinc-400 text-sm">No shops registered yet</p>
+                <p className="text-zinc-500 text-xs mt-1">New shops will appear here</p>
+              </div>
+            )}
           </motion.div>
         </div>
 
-        {/* BOTTOM ROW: Shop Health & Platform Activity & Top Shops */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* BOTTOM ROW: Shop Health & Platform Activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Shop Health Metrics */}
           <motion.div variants={itemVariants} className="bg-zinc-950 rounded-2xl border border-zinc-800 p-5 sm:p-6">
              <h2 className="text-[16px] font-bold text-white mb-1">Shop Health</h2>
@@ -188,27 +239,32 @@ export default function SuperAdminAnalyticsPage() {
           </motion.div>
 
           {/* Activity Feed */}
-          <motion.div variants={itemVariants} className="bg-zinc-950 rounded-2xl border border-zinc-800 p-5 sm:p-6 lg:col-span-1">
+          <motion.div variants={itemVariants} className="bg-zinc-950 rounded-2xl border border-zinc-800 p-5 sm:p-6">
              <h2 className="text-[16px] font-bold text-white mb-1">Activity Log</h2>
              <p className="text-[12px] text-zinc-400 mb-6">Recent system-wide actions</p>
 
-             <div className="py-12 text-center">
-               <Activity className="w-12 h-12 mx-auto mb-3 text-zinc-600" />
-               <p className="text-zinc-400 text-sm">No activity logs yet</p>
-               <p className="text-zinc-500 text-xs mt-1">Platform actions will be logged here</p>
-             </div>
-          </motion.div>
-
-          {/* Top Shops */}
-          <motion.div variants={itemVariants} className="bg-zinc-950 rounded-2xl border border-zinc-800 p-5 sm:p-6 lg:col-span-1">
-             <h2 className="text-[16px] font-bold text-white mb-1">Top Performers</h2>
-             <p className="text-[12px] text-zinc-400 mb-6">Leading shops by revenue</p>
-
-             <div className="py-12 text-center">
-               <TrendingUp className="w-12 h-12 mx-auto mb-3 text-zinc-600" />
-               <p className="text-zinc-400 text-sm">No shop performance data</p>
-               <p className="text-zinc-500 text-xs mt-1">Top shops will be ranked here</p>
-             </div>
+             {(data?.recentActivity?.length ?? 0) > 0 ? (
+               <div className="space-y-3 max-h-[260px] overflow-y-auto">
+                 {data?.recentActivity?.map((entry: any) => (
+                   <div key={entry.logId} className="flex gap-3 text-[13px] border-b border-zinc-800/50 pb-3 last:border-0">
+                     <Activity className="w-4 h-4 text-zinc-500 mt-0.5 shrink-0" />
+                     <div className="min-w-0">
+                       <p className="text-zinc-300 truncate">{entry.action}</p>
+                       <p className="text-[11px] text-zinc-500 mt-0.5">
+                         {entry.userName}{entry.shopName ? ` · ${entry.shopName}` : ''}
+                         {entry.timestamp ? ` · ${new Date(entry.timestamp).toLocaleString()}` : ''}
+                       </p>
+                     </div>
+                   </div>
+                 ))}
+               </div>
+             ) : (
+               <div className="py-12 text-center">
+                 <Activity className="w-12 h-12 mx-auto mb-3 text-zinc-600" />
+                 <p className="text-zinc-400 text-sm">No activity logs yet</p>
+                 <p className="text-zinc-500 text-xs mt-1">Platform actions will be logged here</p>
+               </div>
+             )}
           </motion.div>
         </div>
       </motion.div>
@@ -220,16 +276,12 @@ function KpiCard({
   title,
   value,
   subtitle,
-  trend,
-  trendUp,
   icon: Icon,
   warning,
 }: {
   title: string;
   value: string;
   subtitle: string;
-  trend: string;
-  trendUp: boolean;
   icon: any;
   warning?: boolean;
 }) {
@@ -251,14 +303,8 @@ function KpiCard({
         </div>
       </div>
       
-      <div className="flex items-center justify-between text-[11px] relative z-10">
-        <span className="text-zinc-500 truncate mr-2">{subtitle}</span>
-        <span className={`flex items-center shrink-0 font-medium ${
-          warning ? 'text-amber-500' : trendUp ? 'text-emerald-400' : 'text-red-400'
-        }`}>
-          {trendUp ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
-          {trend}
-        </span>
+      <div className="flex items-center text-[11px] relative z-10">
+        <span className="text-zinc-500">{subtitle}</span>
       </div>
     </div>
   );

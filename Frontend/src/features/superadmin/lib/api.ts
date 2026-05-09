@@ -29,6 +29,10 @@ export interface PlatformAnalytics {
     series: Array<{ label: string; count: number }>;
     total: number;
   };
+  revenueChart: Array<{ date: string; amount: number }>;
+  recentShops: Array<{ shopId: number; shopName: string; subdomain: string; status: string; createdAt: string | null }>;
+  recentActivity: Array<{ logId: number; action: string; userName: string; shopName: string | null; timestamp: string | null }>;
+  subscriptionDistribution: Array<{ planCode: string; planName: string; count: number }>;
 }
 
 export interface SystemHealth {
