@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { TrendingUp, Store, Activity, CheckCircle } from 'lucide-react';
 import { apiGet } from '@/shared/lib/api';
+import { toast } from 'sonner';
 
 export default function ShopGrowthPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>(null);
 
-  useEffect(() => { apiGet('/api/superadmin/shop-growth').then(setData).finally(() => setLoading(false)); }, []);
+  useEffect(() => { apiGet('/api/superadmin/shop-growth').then(setData).catch(() => toast.error('Failed to load data')).finally(() => setLoading(false)); }, []);
 
   if (loading) return <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div></div>;
 

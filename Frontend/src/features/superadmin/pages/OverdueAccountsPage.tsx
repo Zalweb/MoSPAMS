@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Calendar, AlertTriangle, Building2 } from 'lucide-react';
 import { apiGet } from '@/shared/lib/api';
+import { toast } from 'sonner';
 
 const CURRENCY_PREFIX = '\u20b1';
 
@@ -8,7 +9,7 @@ export default function OverdueAccountsPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any[]>([]);
 
-  useEffect(() => { apiGet<{ data: any[] }>('/api/superadmin/overdue-accounts').then(r => setData(r.data)).finally(() => setLoading(false)); }, []);
+  useEffect(() => { apiGet<{ data: any[] }>('/api/superadmin/overdue-accounts').then(r => setData(r.data)).catch(() => toast.error('Failed to load data')).finally(() => setLoading(false)); }, []);
 
   if (loading) return <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div></div>;
 

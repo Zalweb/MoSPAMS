@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getPlatformAnalytics, type PlatformAnalytics } from '@/features/superadmin/lib/api';
+import { toast } from 'sonner';
 
 const CURRENCY_PREFIX = '\u20b1';
 
@@ -23,7 +24,10 @@ export default function SuperAdminAnalyticsPage() {
       .then((result) => {
         if (!cancelled) setData(result);
       })
-      .catch((err) => console.error(err))
+      .catch((err) => {
+        if (!cancelled) toast.error('Failed to load analytics');
+        console.error(err);
+      })
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
@@ -117,7 +121,7 @@ export default function SuperAdminAnalyticsPage() {
                      style={{ height: '100%' }}
                    >
                      <div
-                       className="absolute bottom-0 w-full rounded-t-sm bg-white/20 hover:bg-white/40 transition-colors"
+                       className="absolute bottom-0 w-full rounded-t-sm bg-gradient-to-t from-blue-500/60 to-blue-400/40 hover:from-blue-400/80 hover:to-blue-300/60 transition-colors"
                        style={{ height: `${Math.max(height, 2)}%` }}
                        title={`${d.date}: ${CURRENCY_PREFIX}${d.amount.toLocaleString()}`}
                      />
