@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Traits\LogsActivity;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -10,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 
 class CustomerController extends Controller
 {
+    use LogsActivity;
     public function services(Request $request): JsonResponse
     {
         $user = auth()->user();
@@ -102,7 +104,7 @@ class CustomerController extends Controller
                 'remarks' => null,
             ]);
 
-            $this->log($user->user_id, 'Created service request', 'service_jobs', $jobId);
+            $this->logActivity($user->user_id, $user->shop_id_fk, 'Created service request', 'service_jobs', $jobId, $user->account_id_fk);
 
             return $jobId;
         });
@@ -178,7 +180,7 @@ class CustomerController extends Controller
             'updated_at'               => now(),
         ]);
 
-        $this->log($user->user_id, 'Cancelled service request', 'service_jobs', $jobId);
+        $this->logActivity($user->user_id, $user->shop_id_fk, 'Cancelled service request', 'service_jobs', $jobId, $user->account_id_fk);
 
         return response()->json(['message' => 'Service cancelled successfully']);
     }
@@ -267,7 +269,7 @@ class CustomerController extends Controller
             'updated_at' => now(),
         ]);
 
-        $this->log($user->user_id, 'Updated profile', 'customers');
+        $this->logActivity($user->user_id, $user->shop_id_fk, 'Updated profile', 'customers', null, $user->account_id_fk);
 
         return response()->json(['message' => 'Profile updated successfully']);
     }
@@ -291,7 +293,7 @@ class CustomerController extends Controller
             'updated_at'    => now(),
         ]);
 
-        $this->log($user->user_id, 'Changed password', 'users', $user->user_id);
+        $this->logActivity($user->user_id, $user->shop_id_fk, 'Changed password', 'users', $user->user_id, $user->account_id_fk);
 
         return response()->json(['message' => 'Password updated successfully']);
     }
@@ -351,7 +353,7 @@ class CustomerController extends Controller
             'updated_at'     => now(),
         ]);
 
-        $this->log($user->user_id, 'Added vehicle', 'customer_vehicles', $vehicleId);
+        $this->logActivity($user->user_id, $user->shop_id_fk, 'Added vehicle', 'customer_vehicles', $vehicleId, $user->account_id_fk);
 
         $vehicle = DB::table('customer_vehicles')->where('vehicle_id', $vehicleId)->first();
 
@@ -399,7 +401,7 @@ class CustomerController extends Controller
             'updated_at'   => now(),
         ]);
 
-        $this->log($user->user_id, 'Updated vehicle', 'customer_vehicles', (int) $vehicleId);
+        $this->logActivity($user->user_id, $user->shop_id_fk, 'Updated vehicle', 'customer_vehicles', (int) $vehicleId, $user->account_id_fk);
 
         return response()->json(['message' => 'Vehicle updated successfully']);
     }
@@ -418,7 +420,7 @@ class CustomerController extends Controller
             return response()->json(['error' => 'Vehicle not found'], 404);
         }
 
-        $this->log($user->user_id, 'Deleted vehicle', 'customer_vehicles', (int) $vehicleId);
+        $this->logActivity($user->user_id, $user->shop_id_fk, 'Deleted vehicle', 'customer_vehicles', (int) $vehicleId, $user->account_id_fk);
 
         return response()->json(['message' => 'Vehicle deleted successfully']);
     }
@@ -477,19 +479,5 @@ class CustomerController extends Controller
             ->update(['is_read' => true, 'updated_at' => now()]);
 
         return response()->json(['message' => 'All notifications marked as read']);
-    }
-
-    private function log(int $userId, string $action, ?string $table = null, ?int $recordId = null): void
-    {
-        $user = auth()->user();
-        DB::table('activity_logs')->insert([
-            'shop_id_fk'  => $user?->shop_id_fk,
-            'user_id_fk'  => $userId,
-            'action'      => $action,
-            'table_name'  => $table,
-            'record_id'   => $recordId,
-            'log_date'    => now(),
-            'description' => $action,
-        ]);
     }
 }

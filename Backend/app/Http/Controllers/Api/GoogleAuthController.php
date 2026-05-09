@@ -15,6 +15,7 @@ use App\Services\Identity\AccountProvisioner;
 use App\Services\Identity\JoinShopTokenBroker;
 use App\Support\Tenancy\PlatformHostResolver;
 use App\Support\Tenancy\TenantAuditLogger;
+use App\Traits\LogsActivity;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -24,6 +25,7 @@ use Illuminate\Validation\ValidationException;
 
 class GoogleAuthController extends Controller
 {
+    use LogsActivity;
     public function __construct(
         private readonly PlatformHostResolver $platformHosts,
         private readonly TenantAuditLogger $tenantAudit,
@@ -103,7 +105,7 @@ class GoogleAuthController extends Controller
 
         if ($platformAdmin) {
             $user = $this->accounts->ensurePlatformUser($account);
-            $this->log($user->user_id, null, 'Logged in via Google', 'users', $user->user_id, (int) $account->account_id);
+            $this->logActivity($user->user_id, null, 'Logged in via Google', 'users', $user->user_id, (int) $account->account_id);
 
             return response()->json($this->authPayload($user, null, ['platform:*']));
         }
@@ -114,7 +116,7 @@ class GoogleAuthController extends Controller
         }
 
         $user = $this->accounts->ensureTenantUser($account, (int) $shop->shop_id, (int) $membership->role_id_fk);
-        $this->log($user->user_id, (int) $shop->shop_id, 'Logged in via Google', 'users', $user->user_id, (int) $account->account_id);
+        $this->logActivity($user->user_id, (int) $shop->shop_id, 'Logged in via Google', 'users', $user->user_id, (int) $account->account_id);
 
         return response()->json($this->authPayload($user, $membership, [sprintf('tenant:%d', (int) $shop->shop_id)]));
     }
@@ -233,7 +235,7 @@ class GoogleAuthController extends Controller
         // ── Issue token ─────────────────────────────────────────────────
         if ($platformAdmin) {
             $user = $this->accounts->ensurePlatformUser($account);
-            $this->log($user->user_id, null, 'Logged in via Google (proxy)', 'users', $user->user_id, (int) $account->account_id);
+            $this->logActivity($user->user_id, null, 'Logged in via Google (proxy)', 'users', $user->user_id, (int) $account->account_id);
 
             $payload = $this->authPayload($user, null, ['platform:*']);
             $payload['return_to'] = $request->return_to;
@@ -251,7 +253,7 @@ class GoogleAuthController extends Controller
         }
 
         $user = $this->accounts->ensureTenantUser($account, (int) $shop->shop_id, (int) $membership->role_id_fk);
-        $this->log($user->user_id, (int) $shop->shop_id, 'Logged in via Google (proxy)', 'users', $user->user_id, (int) $account->account_id);
+        $this->logActivity($user->user_id, (int) $shop->shop_id, 'Logged in via Google (proxy)', 'users', $user->user_id, (int) $account->account_id);
 
         $payload = $this->authPayload($user, $membership, [sprintf('tenant:%d', (int) $shop->shop_id)]);
         $payload['return_to'] = $request->return_to;
@@ -322,7 +324,7 @@ class GoogleAuthController extends Controller
             return [$user, $membership];
         });
 
-        $this->log($user->user_id, $shopId, 'Registered via Google', 'users', $user->user_id, $user->account_id_fk);
+        $this->logActivity($user->user_id, $shopId, 'Registered via Google', 'users', $user->user_id, $user->account_id_fk);
 
         return response()->json($this->authPayload($user, $membership, [sprintf('tenant:%d', (int) $shopId)]));
     }
@@ -422,28 +424,5 @@ class GoogleAuthController extends Controller
             'status' => $membership->status?->status_name,
             'shopStatus' => $membership->shop?->status?->status_code,
         ];
-    }
-
-    private function log(int $userId, ?int $shopId, string $action, ?string $table = null, ?int $recordId = null, ?int $accountId = null): void
-    {
-        try {
-            DB::table('activity_logs')->insert([
-                'user_id_fk'  => $userId,
-                'account_id_fk' => $accountId,
-                'shop_id_fk'  => $shopId,
-                'action'      => $action,
-                'table_name'  => $table,
-                'record_id'   => $recordId,
-                'log_date'    => now(),
-                'description' => $action,
-            ]);
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('Activity log insert failed', [
-                'user_id' => $userId,
-                'shop_id' => $shopId,
-                'action' => $action,
-                'error' => $e->getMessage(),
-            ]);
-        }
     }
 }

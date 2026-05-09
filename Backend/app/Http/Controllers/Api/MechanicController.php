@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Traits\LogsActivity;
 use Illuminate\Support\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -11,6 +12,7 @@ use Illuminate\Validation\Rule;
 
 class MechanicController extends Controller
 {
+    use LogsActivity;
     public function assignedJobs(Request $request): JsonResponse
     {
         $mechanic = $this->findMechanicProfile($request);
@@ -115,15 +117,14 @@ class MechanicController extends Controller
                 ->where('job_id', $job)
                 ->update($patch);
 
-            DB::table('activity_logs')->insert([
-                'shop_id_fk' => $jobData->shop_id_fk,
-                'user_id_fk' => $request->user()->user_id,
-                'action' => 'Updated job #' . $job . ' status to ' . $data['status'],
-                'table_name' => 'service_jobs',
-                'record_id' => $job,
-                'log_date' => now(),
-                'description' => 'Mechanic updated job status',
-            ]);
+            $this->logActivity(
+                $request->user()->user_id,
+                $jobData->shop_id_fk,
+                'Updated job #' . $job . ' status to ' . $data['status'],
+                'service_jobs',
+                $job,
+                $request->user()->account_id_fk
+            );
 
             if ($jobData->customer_user_id) {
                 DB::table('notifications')->insert([
@@ -204,14 +205,14 @@ class MechanicController extends Controller
                 'remarks' => 'Used in service job #' . $job,
             ]);
 
-            DB::table('activity_logs')->insert([
-                'user_id_fk' => $request->user()->user_id,
-                'action' => 'Added ' . $data['quantity'] . 'x ' . $part->part_name . ' to job #' . $job,
-                'table_name' => 'service_job_parts',
-                'record_id' => $job,
-                'log_date' => now(),
-                'description' => 'Mechanic added part to job',
-            ]);
+            $this->logActivity(
+                $request->user()->user_id,
+                $request->user()->shop_id_fk,
+                'Added ' . $data['quantity'] . 'x ' . $part->part_name . ' to job #' . $job,
+                'service_job_parts',
+                $job,
+                $request->user()->account_id_fk
+            );
         });
 
         return $this->jobDetails($request, $job);
@@ -263,14 +264,14 @@ class MechanicController extends Controller
                 'remarks' => 'Returned from service job #' . $job,
             ]);
 
-            DB::table('activity_logs')->insert([
-                'user_id_fk' => $request->user()->user_id,
-                'action' => 'Removed ' . $jobPart->quantity . 'x ' . $jobPart->part_name . ' from job #' . $job,
-                'table_name' => 'service_job_parts',
-                'record_id' => $job,
-                'log_date' => now(),
-                'description' => 'Mechanic removed part from job',
-            ]);
+            $this->logActivity(
+                $request->user()->user_id,
+                $request->user()->shop_id_fk,
+                'Removed ' . $jobPart->quantity . 'x ' . $jobPart->part_name . ' from job #' . $job,
+                'service_job_parts',
+                $job,
+                $request->user()->account_id_fk
+            );
         });
 
         return $this->jobDetails($request, $job);

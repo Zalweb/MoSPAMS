@@ -17,6 +17,7 @@ export default function LoginPage() {
   const tenant = useTenantBranding();
   const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [joining, setJoining] = useState(false);
@@ -49,7 +50,8 @@ export default function LoginPage() {
   const handleGoogleProxy = () => {
     const subdomain = window.location.hostname.split('.')[0];
     const returnTo = encodeURIComponent(`${window.location.origin}/auth/callback`);
-    window.location.href = `https://mospams.shop/auth/google?tenant=${subdomain}&return_to=${returnTo}`;
+    const proxyHost = import.meta.env.VITE_GOOGLE_PROXY_HOST || 'mospams.shop';
+    window.location.href = `https://${proxyHost}/auth/google?tenant=${subdomain}&return_to=${returnTo}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -195,11 +197,14 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email Input */}
             <div>
+              <label htmlFor="login-email" className="sr-only">Email address</label>
               <input
+                id="login-email"
                 type="text"
                 value={emailOrUsername}
                 onChange={(e) => setEmailOrUsername(e.target.value)}
                 placeholder="Email address"
+                autoComplete="email"
                 className="w-full px-4 py-3.5 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-white placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
                 disabled={loading}
               />
@@ -207,11 +212,14 @@ export default function LoginPage() {
 
             {/* Password Input */}
             <div>
+              <label htmlFor="login-password" className="sr-only">Password</label>
               <input
+                id="login-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
+                autoComplete="current-password"
                 className="w-full px-4 py-3.5 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-white placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
                 disabled={loading}
               />
@@ -222,6 +230,8 @@ export default function LoginPage() {
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                   className="w-4 h-4 rounded bg-zinc-800 border-zinc-700 text-white focus:ring-2 focus:ring-zinc-600"
                 />
                 <span className="text-zinc-400">Remember me</span>
@@ -262,6 +272,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={handleGoogleProxy}
+                aria-label="Sign in with Google"
                 className="flex items-center gap-3 px-6 py-2.5 bg-white hover:bg-zinc-100 text-zinc-700 font-medium text-sm rounded-lg border border-zinc-300 transition-colors shadow-sm w-[320px] justify-center"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -299,14 +310,7 @@ export default function LoginPage() {
 
           {/* Footer Legal Text */}
           <p className="mt-8 text-center text-xs text-zinc-500 leading-relaxed">
-            By continuing, you agree to our{' '}
-            <button type="button" className="text-zinc-400 hover:text-white underline transition-colors">
-              Terms
-            </button>
-            {' '}and{' '}
-            <button type="button" className="text-zinc-400 hover:text-white underline transition-colors">
-              Privacy Policy
-            </button>
+            By continuing, you agree to our Terms and Privacy Policy.
           </p>
         </div>
       </div>

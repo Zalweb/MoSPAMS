@@ -7,6 +7,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class ShopBrandingController extends Controller
@@ -242,7 +243,7 @@ class ShopBrandingController extends Controller
         $user = $request->user();
         $shopId = $user->shop_id_fk;
         
-        $newCode = strtoupper(substr(md5(uniqid(rand(), true)), 0, 8));
+        $newCode = strtoupper(Str::random(8));
         
         DB::table('shops')->where('shop_id', $shopId)->update([
             'invitation_code' => $newCode,

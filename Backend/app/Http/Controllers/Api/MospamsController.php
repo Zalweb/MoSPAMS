@@ -8,6 +8,7 @@ use App\Models\ShopMembership;
 use App\Models\User;
 use App\Services\Identity\AccountProvisioner;
 use App\Support\Auth\AuthenticatedContext;
+use App\Traits\LogsActivity;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,6 +18,7 @@ use Illuminate\Validation\Rule;
 
 class MospamsController extends Controller
 {
+    use LogsActivity;
     public function parts(): JsonResponse
     {
         $query = DB::table('parts')
@@ -900,7 +902,7 @@ class MospamsController extends Controller
             'name' => ['required', 'string', 'max:100'],
             'email' => ['required', 'email', 'max:100'],
             'role' => ['required', Rule::in(['Staff', 'Mechanic', 'Customer'])],
-            'password' => ['required', 'string', 'min:6'],
+            'password' => ['required', 'string', 'min:8'],
         ]);
 
         $provisioner = app(AccountProvisioner::class);
@@ -925,7 +927,7 @@ class MospamsController extends Controller
             'name' => ['sometimes', 'string', 'max:100'],
             'email' => ['sometimes', 'email', 'max:100'],
             'role' => ['sometimes', Rule::in(['Staff', 'Mechanic', 'Customer'])],
-            'password' => ['nullable', 'string', 'min:6'],
+            'password' => ['nullable', 'string', 'min:8'],
         ]);
 
         $provisioner = app(AccountProvisioner::class);
@@ -1655,16 +1657,14 @@ class MospamsController extends Controller
 
     private function log(Request $request, string $action, ?string $table = null, ?int $recordId = null): void
     {
-        DB::table('activity_logs')->insert([
-            'shop_id_fk' => $this->shopId(),
-            'user_id_fk' => $request->user()?->user_id,
-            'account_id_fk' => $request->user()?->account_id_fk,
-            'action' => mb_substr($action, 0, 100),
-            'table_name' => $table,
-            'record_id' => $recordId,
-            'log_date' => now(),
-            'description' => $action,
-        ]);
+        $this->logActivity(
+            $request->user()?->user_id,
+            $this->shopId(),
+            mb_substr($action, 0, 100),
+            $table,
+            $recordId,
+            $request->user()?->account_id_fk
+        );
     }
 
     private function shopId(): ?int

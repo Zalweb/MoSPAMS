@@ -13,6 +13,7 @@ use App\Services\Identity\AccountProvisioner;
 use App\Services\Identity\JoinShopTokenBroker;
 use App\Support\Tenancy\PlatformHostResolver;
 use App\Support\Tenancy\TenantAuditLogger;
+use App\Traits\LogsActivity;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -24,6 +25,7 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    use LogsActivity;
     public function __construct(
         private readonly PlatformHostResolver $platformHosts,
         private readonly TenantAuditLogger $tenantAudit,
@@ -139,7 +141,7 @@ class AuthController extends Controller
             $user->tokens()->delete();
         });
 
-        $this->log($user->user_id, $user->shop_id_fk, 'Password reset via email link', 'users', $user->user_id);
+        $this->logActivity($user->user_id, $user->shop_id_fk, 'Password reset via email link', 'users', $user->user_id);
 
         try {
             if ($user->email) {
@@ -215,7 +217,7 @@ class AuthController extends Controller
             }
 
             $user = $this->accounts->ensurePlatformUser($account);
-            $this->log($user->user_id, null, 'Logged in to the platform', 'users', $user->user_id, (int) $account->account_id);
+            $this->logActivity($user->user_id, null, 'Logged in to the platform', 'users', $user->user_id, (int) $account->account_id);
 
             return response()->json($this->authPayload($user, null, ['platform:*']));
         }
@@ -233,7 +235,7 @@ class AuthController extends Controller
         }
 
         $user = $this->accounts->ensureTenantUser($account, (int) $shop->shop_id, (int) $membership->role_id_fk);
-        $this->log($user->user_id, (int) $shop->shop_id, 'Logged in to the system', 'users', $user->user_id, (int) $account->account_id);
+        $this->logActivity($user->user_id, (int) $shop->shop_id, 'Logged in to the system', 'users', $user->user_id, (int) $account->account_id);
 
         return response()->json($this->authPayload($user, $membership, [sprintf('tenant:%d', (int) $shop->shop_id)]));
     }
@@ -256,7 +258,7 @@ class AuthController extends Controller
     {
         $user = $request->user();
         $request->user()->currentAccessToken()?->delete();
-        $this->log($user->user_id, $user->shop_id_fk, 'Logged out of the system', 'users', $user->user_id, $user->account_id_fk);
+        $this->logActivity($user->user_id, $user->shop_id_fk, 'Logged out of the system', 'users', $user->user_id, $user->account_id_fk);
 
         return response()->json(['message' => 'Logged out.']);
     }
@@ -316,7 +318,7 @@ class AuthController extends Controller
                 $membership = $this->accounts->createOrUpdateMembership($existingAccount, (int) $shop->shop_id, (int) $customerRoleId);
                 $user = $this->accounts->ensureTenantUser($existingAccount, (int) $shop->shop_id, (int) $customerRoleId);
 
-                $this->log($user->user_id, $shop->shop_id, "Joined shop {$shop->shop_name} as Customer via registration form", 'users', $user->user_id, (int) $existingAccount->account_id);
+                $this->logActivity($user->user_id, $shop->shop_id, "Joined shop {$shop->shop_name} as Customer via registration form", 'users', $user->user_id, (int) $existingAccount->account_id);
 
                 return response()->json([
                     'message'       => 'Welcome back! You have joined this shop as a Customer.',
@@ -334,7 +336,7 @@ class AuthController extends Controller
             $membership = $this->accounts->createOrUpdateMembership($account, (int) $shop->shop_id, (int) $customerRoleId);
             $user = $this->accounts->ensureTenantUser($account, (int) $shop->shop_id, (int) $customerRoleId, $data['password']);
 
-            $this->log($user->user_id, $shop->shop_id, "Registered as Customer in shop {$shop->shop_name}", 'users', $user->user_id, (int) $account->account_id);
+            $this->logActivity($user->user_id, $shop->shop_id, "Registered as Customer in shop {$shop->shop_name}", 'users', $user->user_id, (int) $account->account_id);
 
             return response()->json([
                 'message'       => 'Account created successfully! You can now log in.',
@@ -398,7 +400,7 @@ class AuthController extends Controller
             return [$membership, $user];
         });
 
-        $this->log($user->user_id, (int) $shop->shop_id, "Joined shop {$shop->shop_name} as Customer", 'users', $user->user_id, (int) $account->account_id);
+        $this->logActivity($user->user_id, (int) $shop->shop_id, "Joined shop {$shop->shop_name} as Customer", 'users', $user->user_id, (int) $account->account_id);
 
         return response()->json($this->authPayload($user, $membership, [sprintf('tenant:%d', (int) $shop->shop_id)]));
     }
@@ -496,28 +498,5 @@ class AuthController extends Controller
         return $subdomain
             ? Shop::query()->where('subdomain', $subdomain)->first()
             : null;
-    }
-
-    private function log(int $userId, ?int $shopId, string $action, ?string $table = null, ?int $recordId = null, ?int $accountId = null): void
-    {
-        try {
-            DB::table('activity_logs')->insert([
-                'shop_id_fk' => $shopId,
-                'user_id_fk' => $userId,
-                'account_id_fk' => $accountId,
-                'action' => $action,
-                'table_name' => $table,
-                'record_id' => $recordId,
-                'log_date' => now(),
-                'description' => $action,
-            ]);
-        } catch (\Throwable $e) {
-            Log::error('Activity log insert failed', [
-                'user_id' => $userId,
-                'shop_id' => $shopId,
-                'action' => $action,
-                'error' => $e->getMessage(),
-            ]);
-        }
     }
 }
