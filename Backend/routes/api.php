@@ -68,6 +68,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/settings', [SuperAdminController::class, 'settings']);
         Route::patch('/settings', [SuperAdminController::class, 'updateSettings']);
         Route::get('/system-health', [SuperAdminController::class, 'systemHealth']);
+
+        Route::get('/revenue-reports', [SuperAdminController::class, 'revenueReports']);
+        Route::get('/overdue-accounts', [SuperAdminController::class, 'overdueAccounts']);
+        Route::get('/revenue-analytics', [SuperAdminController::class, 'revenueAnalytics']);
+        Route::get('/shop-growth', [SuperAdminController::class, 'shopGrowth']);
+        Route::get('/user-statistics', [SuperAdminController::class, 'userStatistics']);
+        Route::get('/support-tickets', [SuperAdminController::class, 'supportTickets']);
+        Route::get('/shop-feedback', [SuperAdminController::class, 'shopFeedback']);
     });
 
     Route::middleware(['shop.active', 'tenant.user', 'tenant.token'])->group(function () {

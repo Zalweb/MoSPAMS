@@ -61,11 +61,11 @@ const SuperAdminAuditLogsPage = lazy(() => import('@/features/superadmin/pages/S
 const SuperAdminSettingsPage = lazy(() => import('@/features/superadmin/pages/SuperAdminSettingsPage'));
 
 // PlaceholderPages — default + named exports
-const RevenueReportsPage = lazy(() => import('@/features/superadmin/pages/PlaceholderPages'));
-const OverdueAccountsPage = lazy(() => import('@/features/superadmin/pages/PlaceholderPages').then(m => ({ default: m.OverdueAccountsPage })));
-const RevenueAnalyticsPage = lazy(() => import('@/features/superadmin/pages/PlaceholderPages').then(m => ({ default: m.RevenueAnalyticsPage })));
-const ShopGrowthPage = lazy(() => import('@/features/superadmin/pages/PlaceholderPages').then(m => ({ default: m.ShopGrowthPage })));
-const UserStatisticsPage = lazy(() => import('@/features/superadmin/pages/PlaceholderPages').then(m => ({ default: m.UserStatisticsPage })));
+const RevenueReportsPage = lazy(() => import('@/features/superadmin/pages/RevenueReportsPage'));
+const OverdueAccountsPage = lazy(() => import('@/features/superadmin/pages/OverdueAccountsPage'));
+const RevenueAnalyticsPage = lazy(() => import('@/features/superadmin/pages/RevenueAnalyticsPage'));
+const ShopGrowthPage = lazy(() => import('@/features/superadmin/pages/ShopGrowthPage'));
+const UserStatisticsPage = lazy(() => import('@/features/superadmin/pages/UserStatisticsPage'));
 
 // SettingsPlaceholders — all named exports
 const SupportTicketsPage = lazy(() => import('@/features/superadmin/pages/SettingsPlaceholders').then(m => ({ default: m.SupportTicketsPage })));

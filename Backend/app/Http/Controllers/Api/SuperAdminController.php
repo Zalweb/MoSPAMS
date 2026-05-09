@@ -1184,6 +1184,149 @@ class SuperAdminController extends Controller
         return array_values($labels);
     }
 
+
+    public function revenueReports(Request $request): JsonResponse
+    {
+        $totalSales = (float) DB::table('sales')->sum('net_amount');
+        $totalSubscriptions = (float) DB::table('subscription_payments')
+            ->whereRaw('UPPER(payment_status) = ?', ['PAID'])
+            ->sum('amount');
+
+        $monthlySales = DB::table('sales')
+            ->selectRaw("DATE_FORMAT(sale_date, '%Y-%m') as month, SUM(net_amount) as total")
+            ->where('sale_date', '>=', now()->subMonths(12))
+            ->groupByRaw("DATE_FORMAT(sale_date, '%Y-%m')")
+            ->orderBy('month')
+            ->get()
+            ->map(fn ($r) => ['month' => $r->month, 'total' => (float) $r->total])
+            ->values();
+
+        $monthlySubscriptions = DB::table('subscription_payments')
+            ->selectRaw("DATE_FORMAT(payment_date, '%Y-%m') as month, SUM(amount) as total")
+            ->whereRaw('UPPER(payment_status) = ?', ['PAID'])
+            ->where('payment_date', '>=', now()->subMonths(12))
+            ->groupByRaw("DATE_FORMAT(payment_date, '%Y-%m')")
+            ->orderBy('month')
+            ->get()
+            ->map(fn ($r) => ['month' => $r->month, 'total' => (float) $r->total])
+            ->values();
+
+        $byPaymentMethod = DB::table('subscription_payments')
+            ->selectRaw('payment_method, COUNT(*) as count, SUM(amount) as total')
+            ->groupBy('payment_method')
+            ->get()
+            ->map(fn ($r) => ['method' => $r->payment_method ?? 'Unknown', 'count' => (int) $r->count, 'total' => (float) $r->total])
+            ->values();
+
+        return response()->json([
+            'summary' => [
+                'totalSales' => $totalSales,
+                'totalSubscriptions' => $totalSubscriptions,
+                'totalRevenue' => $totalSales + $totalSubscriptions,
+                'totalTransactions' => DB::table('sales')->count(),
+            ],
+            'monthlySales' => $monthlySales,
+            'monthlySubscriptions' => $monthlySubscriptions,
+            'byPaymentMethod' => $byPaymentMethod,
+        ]);
+    }
+
+    public function overdueAccounts(): JsonResponse
+    {
+        $overdue = DB::table('shop_subscriptions as ss')
+            ->join('shops as s', 's.shop_id', '=', 'ss.shop_id_fk')
+            ->join('subscription_plans as sp', 'sp.plan_id', '=', 'ss.plan_id_fk')
+            ->where('ss.ends_at', '<', now())
+            ->whereRaw('UPPER(ss.subscription_status) != ?', ['CANCELLED'])
+            ->orderBy('ss.ends_at')
+            ->get(['ss.shop_subscription_id', 's.shop_id', 's.shop_name', 's.subdomain', 'sp.plan_name', 'sp.monthly_price', 'ss.subscription_status', 'ss.ends_at'])
+            ->map(fn ($r) => [
+                'shopSubscriptionId' => (int) $r->shop_subscription_id,
+                'shopId' => (int) $r->shop_id,
+                'shopName' => $r->shop_name,
+                'subdomain' => $r->subdomain,
+                'planName' => $r->plan_name,
+                'monthlyPrice' => (float) $r->monthly_price,
+                'status' => $r->subscription_status,
+                'endsAt' => $this->iso($r->ends_at),
+                'daysOverdue' => now()->diffInDays($r->ends_at),
+            ])
+            ->values();
+
+        return response()->json(['data' => $overdue]);
+    }
+
+    public function revenueAnalytics(): JsonResponse
+    {
+        $now = now();
+        $thisMonth = (float) DB::table('sales')->whereMonth('sale_date', $now->month)->whereYear('sale_date', $now->year)->sum('net_amount');
+        $lastMonth = (float) DB::table('sales')->whereMonth('sale_date', $now->subMonth()->month)->whereYear('sale_date', $now->subMonth()->year)->sum('net_amount');
+
+        $topShops = DB::table('sales')
+            ->join('shops', 'shops.shop_id', '=', 'sales.shop_id_fk')
+            ->selectRaw('shops.shop_name, SUM(sales.net_amount) as revenue, COUNT(*) as transactions')
+            ->groupBy('shops.shop_id', 'shops.shop_name')
+            ->orderByDesc('revenue')
+            ->limit(10)
+            ->get()
+            ->map(fn ($r) => ['shopName' => $r->shop_name, 'revenue' => (float) $r->revenue, 'transactions' => (int) $r->transactions])
+            ->values();
+
+        return response()->json([
+            'summary' => [
+                'thisMonth' => $thisMonth,
+                'lastMonth' => $lastMonth,
+                'changePercent' => $lastMonth > 0 ? round((($thisMonth - $lastMonth) / $lastMonth) * 100, 1) : 0,
+                'avgPerTransaction' => DB::table('sales')->count() > 0 ? round((float) DB::table('sales')->avg('net_amount'), 2) : 0,
+            ],
+            'topShops' => $topShops,
+        ]);
+    }
+
+    public function shopGrowth(): JsonResponse
+    {
+        $monthlyGrowth = DB::table('shops')
+            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count")
+            ->where('created_at', '>=', now()->subMonths(12))
+            ->groupByRaw("DATE_FORMAT(created_at, '%Y-%m')")
+            ->orderBy('month')
+            ->get()
+            ->map(fn ($r) => ['month' => $r->month, 'count' => (int) $r->count])
+            ->values();
+
+        $totalShops = DB::table('shops')->count();
+        $activeShops = DB::table('shops')->join('shop_statuses', 'shop_statuses.shop_status_id', '=', 'shops.shop_status_id_fk')->whereRaw('UPPER(shop_statuses.status_code) = ?', ['ACTIVE'])->count();
+
+        return response()->json([
+            'summary' => ['totalShops' => $totalShops, 'activeShops' => $activeShops, 'thisMonthShops' => DB::table('shops')->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count(), 'activationRate' => $totalShops > 0 ? round(($activeShops / $totalShops) * 100, 1) : 0],
+            'monthlyGrowth' => $monthlyGrowth,
+        ]);
+    }
+
+    public function userStatistics(): JsonResponse
+    {
+        $byRole = DB::table('users')->join('roles', 'roles.role_id', '=', 'users.role_id_fk')->selectRaw('roles.role_name, COUNT(*) as count')->groupBy('roles.role_name')->get()->map(fn ($r) => ['role' => $r->role_name, 'count' => (int) $r->count])->values();
+        $byShop = DB::table('users')->join('shops', 'shops.shop_id', '=', 'users.shop_id_fk')->selectRaw('shops.shop_name, COUNT(*) as count')->groupBy('shops.shop_id', 'shops.shop_name')->orderByDesc('count')->limit(10)->get()->map(fn ($r) => ['shopName' => $r->shop_name, 'count' => (int) $r->count])->values();
+        $monthlySignups = DB::table('users')->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count")->where('created_at', '>=', now()->subMonths(12))->groupByRaw("DATE_FORMAT(created_at, '%Y-%m')")->orderBy('month')->get()->map(fn ($r) => ['month' => $r->month, 'count' => (int) $r->count])->values();
+
+        return response()->json([
+            'summary' => ['totalUsers' => DB::table('users')->count(), 'activeUsers' => DB::table('users')->join('user_statuses', 'user_statuses.user_status_id', '=', 'users.user_status_id_fk')->whereRaw('LOWER(user_statuses.status_code) = ?', ['active'])->count(), 'totalCustomers' => DB::table('customers')->count(), 'totalMechanics' => DB::table('mechanics')->count()],
+            'byRole' => $byRole, 'byShop' => $byShop, 'monthlySignups' => $monthlySignups,
+        ]);
+    }
+
+    public function supportTickets(): JsonResponse
+    {
+        $shops = DB::table('shops')->join('shop_statuses', 'shop_statuses.shop_status_id', '=', 'shops.shop_status_id_fk')->whereRaw('UPPER(shop_statuses.status_code) = ?', ['ACTIVE'])->orderBy('shops.shop_name')->get(['shops.shop_id', 'shops.shop_name', 'shops.subdomain', 'shops.phone', 'shops.created_at'])->map(fn ($s) => ['shopId' => (int) $s->shop_id, 'shopName' => $s->shop_name, 'subdomain' => $s->subdomain, 'phone' => $s->phone, 'createdAt' => $this->iso($s->created_at)])->values();
+
+        return response()->json(['data' => $shops, 'message' => 'Support ticket system coming soon. Below is a directory of active shops for reference.']);
+    }
+
+    public function shopFeedback(): JsonResponse
+    {
+        return response()->json(['data' => [], 'message' => 'Shop feedback system coming soon.']);
+    }
+
     private function buildRevenueChart(int $days): array
     {
         $start = now()->subDays($days - 1)->startOfDay();
