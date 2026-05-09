@@ -100,12 +100,20 @@ class ResolveTenantContext
             || $request->is('api/webhooks/*')
             || $request->is('api/stats')
             || $request->is('api/shop-registration')
-            || $request->is('api/reset-password');
+            || $request->is('api/reset-password')
+            || $request->is('api/auth/google/proxy');
         // NOTE: api/forgot-password is intentionally NOT exempt so shop context is
         // resolved and the controller can enforce tenant isolation (users can only
         // reset passwords via their own shop's subdomain).
         // NOTE: api/shop/info is intentionally NOT exempt so the shop can be resolved
         // and passed to ShopBrandingController. The shop-active check is skipped separately.
+        // NOTE: api/auth/google/proxy is exempt because it handles tenant context
+        // internally via explicit tenant_host parameter.
+        // NOTE: api/join-shop is intentionally NOT exempt — it relies on middleware
+        // shop resolution when called from tenant subdomains, and falls back to
+        // tenant_host in the body when called from the public host.
+        // NOTE: api/auth/google/register is intentionally NOT exempt — it relies on
+        // middleware shop resolution when called from tenant subdomains.
     }
 
     // Routes that bypass the shop-active (503) guard but still get shop resolution.
@@ -117,7 +125,12 @@ class ResolveTenantContext
 
     private function requiresTenantContextHeader(Request $request): bool
     {
-        if ($request->is('api/superadmin/*') || $request->is('api/webhooks/*') || $request->is('api/stats') || $request->is('api/shop-registration')) {
+        if ($request->is('api/superadmin/*')
+            || $request->is('api/webhooks/*')
+            || $request->is('api/stats')
+            || $request->is('api/shop-registration')
+            || $request->is('api/join-shop')
+            || $request->is('api/auth/google/*')) {
             return false;
         }
 

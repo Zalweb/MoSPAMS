@@ -349,6 +349,25 @@ class AuthController extends Controller
 
     public function joinShop(Request $request): JsonResponse
     {
+        try {
+            return $this->handleJoinShop($request);
+        } catch (\Illuminate\Validation\ValidationException | \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            Log::error('joinShop failed', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return response()->json([
+                'message' => 'Unable to join this shop. Please try again.',
+            ], 500);
+        }
+    }
+
+    private function handleJoinShop(Request $request): JsonResponse
+    {
         $data = $request->validate([
             'join_token' => ['required', 'string'],
             'tenant_host' => ['nullable', 'string', 'max:255'],
@@ -481,15 +500,24 @@ class AuthController extends Controller
 
     private function log(int $userId, ?int $shopId, string $action, ?string $table = null, ?int $recordId = null, ?int $accountId = null): void
     {
-        DB::table('activity_logs')->insert([
-            'shop_id_fk' => $shopId,
-            'user_id_fk' => $userId,
-            'account_id_fk' => $accountId,
-            'action' => $action,
-            'table_name' => $table,
-            'record_id' => $recordId,
-            'log_date' => now(),
-            'description' => $action,
-        ]);
+        try {
+            DB::table('activity_logs')->insert([
+                'shop_id_fk' => $shopId,
+                'user_id_fk' => $userId,
+                'account_id_fk' => $accountId,
+                'action' => $action,
+                'table_name' => $table,
+                'record_id' => $recordId,
+                'log_date' => now(),
+                'description' => $action,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Activity log insert failed', [
+                'user_id' => $userId,
+                'shop_id' => $shopId,
+                'action' => $action,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

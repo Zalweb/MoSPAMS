@@ -426,15 +426,24 @@ class GoogleAuthController extends Controller
 
     private function log(int $userId, ?int $shopId, string $action, ?string $table = null, ?int $recordId = null, ?int $accountId = null): void
     {
-        DB::table('activity_logs')->insert([
-            'user_id_fk'  => $userId,
-            'account_id_fk' => $accountId,
-            'shop_id_fk'  => $shopId,
-            'action'      => $action,
-            'table_name'  => $table,
-            'record_id'   => $recordId,
-            'log_date'    => now(),
-            'description' => $action,
-        ]);
+        try {
+            DB::table('activity_logs')->insert([
+                'user_id_fk'  => $userId,
+                'account_id_fk' => $accountId,
+                'shop_id_fk'  => $shopId,
+                'action'      => $action,
+                'table_name'  => $table,
+                'record_id'   => $recordId,
+                'log_date'    => now(),
+                'description' => $action,
+            ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Activity log insert failed', [
+                'user_id' => $userId,
+                'shop_id' => $shopId,
+                'action' => $action,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

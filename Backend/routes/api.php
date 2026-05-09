@@ -15,12 +15,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:auth');
 Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:auth');
-Route::post('/join-shop', [AuthController::class, 'joinShop'])->middleware('throttle:auth');
+Route::post('/join-shop', [AuthController::class, 'joinShop'])->middleware('throttle:auth', 'google.auth.headers');
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:forgot-password');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:6,1');
-Route::post('/auth/google', [GoogleAuthController::class, 'googleLogin']);
-Route::post('/auth/google/register', [GoogleAuthController::class, 'googleRegister']);
-Route::post('/auth/google/proxy', [GoogleAuthController::class, 'googleLoginProxy']);
+Route::post('/auth/google', [GoogleAuthController::class, 'googleLogin'])->middleware('google.auth.headers');
+Route::post('/auth/google/register', [GoogleAuthController::class, 'googleRegister'])->middleware('google.auth.headers');
+Route::post('/auth/google/proxy', [GoogleAuthController::class, 'googleLoginProxy'])->middleware('google.auth.headers');
 Route::get('/stats', [MospamsController::class, 'publicStats']);
 
 // Public shop registration

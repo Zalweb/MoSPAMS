@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'tenant.resolve' => \App\Http\Middleware\ResolveTenantContext::class,
             'tenant.token' => \App\Http\Middleware\EnforceTenantToken::class,
             'platform.token' => \App\Http\Middleware\EnforcePlatformToken::class,
+            'google.auth.headers' => \App\Http\Middleware\AddGoogleAuthHeaders::class,
         ]);
 
         $middleware->prependToGroup('api', \App\Http\Middleware\ResolveTenantContext::class);
