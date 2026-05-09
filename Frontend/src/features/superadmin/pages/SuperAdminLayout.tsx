@@ -12,17 +12,14 @@ import {
   LayoutDashboard,
   LifeBuoy,
   LogOut,
-  Mail,
   Menu,
   MessageSquare,
   Search,
   Settings,
   Shield,
   Store,
-  Terminal,
   TrendingUp,
   Users,
-  Wrench,
   X,
 } from 'lucide-react';
 import { useAuth } from '@/features/auth/context/AuthContext';

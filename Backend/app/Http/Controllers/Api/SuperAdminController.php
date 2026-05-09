@@ -1035,10 +1035,36 @@ class SuperAdminController extends Controller
     {
         $limit = max(20, min(500, (int) $request->query('limit', 100)));
 
-        $data = DB::table('activity_logs as al')
+        $query = DB::table('activity_logs as al')
             ->leftJoin('users as u', 'u.user_id', '=', 'al.user_id_fk')
-            ->leftJoin('shops as s', 's.shop_id', '=', 'al.shop_id_fk')
-            ->orderByDesc('al.log_date')
+            ->leftJoin('shops as s', 's.shop_id', '=', 'al.shop_id_fk');
+
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('al.action', 'like', "%{$search}%")
+                  ->orWhere('al.description', 'like', "%{$search}%")
+                  ->orWhere('u.full_name', 'like', "%{$search}%")
+                  ->orWhere('s.shop_name', 'like', "%{$search}%");
+            });
+        }
+
+        if ($action = $request->query('action')) {
+            $query->where('al.action', 'like', "%{$action}%");
+        }
+
+        if ($shopId = $request->query('shopId')) {
+            $query->where('al.shop_id_fk', (int) $shopId);
+        }
+
+        if ($dateFrom = $request->query('dateFrom')) {
+            $query->where('al.log_date', '>=', $dateFrom);
+        }
+
+        if ($dateTo = $request->query('dateTo')) {
+            $query->where('al.log_date', '<=', $dateTo . ' 23:59:59');
+        }
+
+        $data = $query->orderByDesc('al.log_date')
             ->limit($limit)
             ->get([
                 'al.log_id',
