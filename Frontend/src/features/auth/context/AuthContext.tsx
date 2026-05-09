@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import type { Account, Membership, User, GoogleData } from '@/shared/types';
+import type { Account, Membership, PendingShopJoin, TenantShopSummary, User, GoogleData } from '@/shared/types';
 import { apiGet, apiMutation, getAuthToken, setAuthToken } from '@/shared/lib/api';
 import { normalizeRole } from '@/shared/lib/roles';
 
@@ -7,8 +7,9 @@ interface AuthContextType {
   user: User | null;
   account: Account | null;
   membership: Membership | null;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  googleLogin: (credential: string) => Promise<{ needsRegistration: true; googleData: GoogleData } | { needsRegistration: false }>;
+  pendingJoin: PendingShopJoin | null;
+  login: (email: string, password: string) => Promise<{ success: true } | { success: false; error?: string } | { needsMembership: true }>;
+  googleLogin: (credential: string) => Promise<{ needsRegistration: true; googleData: GoogleData } | { needsMembership: true } | { needsRegistration: false }>;
   googleRegister: (payload: {
     google_id: string;
     name: string;
@@ -18,6 +19,8 @@ interface AuthContextType {
     requested_role: 'customer' | 'staff' | 'mechanic';
     tenant_host?: string;
   }) => Promise<{ ok: true; token: string } | { ok: false; error: string }>;
+  joinShop: (joinToken: string, tenantHost?: string) => Promise<{ success: true } | { success: false; error: string }>;
+  clearPendingJoin: () => void;
   refreshUser: () => Promise<User>;
   logout: () => void;
   ready: boolean;
@@ -25,10 +28,23 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-interface LoginResponse { token: string; user: User; account?: Account | null; membership?: Membership | null }
+interface AuthResponse {
+  token?: string;
+  user?: User;
+  account?: Account | null;
+  membership?: Membership | null;
+  needs_membership?: true;
+  allowed_join_role?: 'Customer';
+  join_token?: string;
+  shop?: TenantShopSummary;
+}
 interface GoogleLoginResponse {
   needs_registration?: true;
   google_data?: GoogleData;
+  needs_membership?: true;
+  allowed_join_role?: 'Customer';
+  join_token?: string;
+  shop?: TenantShopSummary;
   token?: string;
   user?: User;
   account?: Account | null;
@@ -44,7 +60,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [account, setAccount] = useState<Account | null>(null);
   const [membership, setMembership] = useState<Membership | null>(null);
+  const [pendingJoin, setPendingJoin] = useState<PendingShopJoin | null>(null);
   const [ready, setReady] = useState(false);
+
+  const clearPendingJoin = useCallback(() => setPendingJoin(null), []);
+
+  const applyAuthResponse = useCallback((response: AuthResponse) => {
+    if (!response.token || !response.user) return;
+
+    setAuthToken(response.token);
+    setUser(normalizeUserRole(response.user));
+    setAccount(response.account ?? null);
+    setMembership(response.membership ?? null);
+    setPendingJoin(null);
+  }, []);
+
+  const applyPendingJoin = useCallback((response: AuthResponse) => {
+    if (!response.needs_membership || !response.join_token || !response.shop) return;
+
+    setAuthToken(null);
+    setUser(null);
+    setMembership(null);
+    setAccount(null);
+    setPendingJoin({
+      joinToken: response.join_token,
+      allowedJoinRole: response.allowed_join_role ?? 'Customer',
+      account: response.account ?? null,
+      shop: response.shop,
+    });
+  }, []);
 
   const refreshUser = useCallback(async () => {
     const response = await apiGet<{ user: User; account?: Account | null; membership?: Membership | null }>('/api/me');
@@ -52,6 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(normalizedUser);
     setAccount(response.account ?? null);
     setMembership(response.membership ?? null);
+    setPendingJoin(null);
     return normalizedUser;
   }, []);
 
@@ -60,6 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       setAccount(null);
       setMembership(null);
+      setPendingJoin(null);
       setReady(true);
       return;
     }
@@ -70,23 +116,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
         setAccount(null);
         setMembership(null);
+        setPendingJoin(null);
       })
       .finally(() => setReady(true));
   }, [refreshUser]);
 
   const login = useCallback(async (email: string, password: string) => {
     try {
-      const response = await apiMutation<LoginResponse>('/api/login', 'POST', { email, password });
-      setAuthToken(response.token);
-      setUser(normalizeUserRole(response.user));
-      setAccount(response.account ?? null);
-      setMembership(response.membership ?? null);
-      return { success: true };
+      const response = await apiMutation<AuthResponse>('/api/login', 'POST', { email, password });
+      if (response.needs_membership) {
+        applyPendingJoin(response);
+        return { needsMembership: true as const };
+      }
+      applyAuthResponse(response);
+      return { success: true as const };
     } catch (error) {
       setAuthToken(null);
       setUser(null);
       setAccount(null);
       setMembership(null);
+      setPendingJoin(null);
       const errorMessage = error instanceof Error ? error.message : 'Login failed';
       if (errorMessage.includes('Failed to fetch') || errorMessage.includes('ERR_CONNECTION_REFUSED') || errorMessage.includes('NetworkError')) {
         return { success: false, error: 'Internal Server Error. Please check your connection.' };
@@ -101,17 +150,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (response.needs_registration && response.google_data) {
         return { needsRegistration: true as const, googleData: response.google_data };
       }
-      if (response.token && response.user) {
-        setAuthToken(response.token);
-        setUser(normalizeUserRole(response.user));
-        setAccount(response.account ?? null);
-        setMembership(response.membership ?? null);
+      if (response.needs_membership) {
+        applyPendingJoin(response);
+        return { needsMembership: true as const };
       }
+      applyAuthResponse(response);
       return { needsRegistration: false as const };
     } catch {
       return { needsRegistration: false as const };
     }
-  }, []);
+  }, [applyAuthResponse, applyPendingJoin]);
 
   const googleRegister = useCallback(async (payload: {
     google_id: string;
@@ -123,23 +171,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     tenant_host?: string;
   }) => {
     try {
-      const response = await apiMutation<LoginResponse>('/api/auth/google/register', 'POST', payload);
-      setAuthToken(response.token);
-      setUser(normalizeUserRole(response.user));
-      setAccount(response.account ?? null);
-      setMembership(response.membership ?? null);
-      return { ok: true as const, token: response.token };
+      const response = await apiMutation<AuthResponse>('/api/auth/google/register', 'POST', payload);
+      applyAuthResponse(response);
+      return { ok: true as const, token: response.token as string };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Registration failed. Please try again.';
       return { ok: false as const, error: message };
     }
-  }, []);
+  }, [applyAuthResponse]);
+
+  const joinShop = useCallback(async (joinToken: string, tenantHost?: string) => {
+    try {
+      const response = await apiMutation<AuthResponse>('/api/join-shop', 'POST', {
+        join_token: joinToken,
+        tenant_host: tenantHost,
+      });
+      applyAuthResponse(response);
+      return { success: true as const };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to join this shop.';
+      return { success: false as const, error: message };
+    }
+  }, [applyAuthResponse]);
 
   const logout = useCallback(async () => {
     setAuthToken(null);
     setUser(null);
     setAccount(null);
     setMembership(null);
+    setPendingJoin(null);
     try {
       await apiMutation('/api/logout', 'POST');
     } catch {
@@ -152,9 +212,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       account,
       membership,
+      pendingJoin,
       login,
       googleLogin,
       googleRegister,
+      joinShop,
+      clearPendingJoin,
       refreshUser,
       logout: () => { void logout(); },
       ready,

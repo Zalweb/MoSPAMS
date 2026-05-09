@@ -50,8 +50,12 @@ export default function HeroLoginCard({ onBack }: HeroLoginCardProps) {
     setSubmitting(true);
     const result = await login(email.trim().toLowerCase(), password.trim());
     setSubmitting(false);
-    if (!result.success) {
-      setError(result.error || 'Invalid email or password.');
+    if ('needsMembership' in result && result.needsMembership) {
+      setError('This account can join the current shop as Customer. Use the shop login screen to continue.');
+      return;
+    }
+    if (!('success' in result) || !result.success) {
+      setError(('error' in result && result.error) || 'Invalid email or password.');
       return;
     }
     navigate(dest(), { replace: true });
@@ -60,9 +64,11 @@ export default function HeroLoginCard({ onBack }: HeroLoginCardProps) {
   const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
     if (!credentialResponse.credential) return;
     const result = await googleLogin(credentialResponse.credential);
-    if (result.needsRegistration) {
+    if ('needsRegistration' in result && result.needsRegistration) {
       setGoogleData(result.googleData);
       setSignUpOpen(true);
+    } else if ('needsMembership' in result && result.needsMembership) {
+      setError('This account can join the current shop as Customer. Use the shop login screen to continue.');
     } else {
       navigate(dest(), { replace: true });
     }

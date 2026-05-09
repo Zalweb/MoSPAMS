@@ -8,9 +8,11 @@ use App\Models\Customer;
 use App\Models\RoleRequest;
 use App\Models\Role;
 use App\Models\ShopMembership;
+use App\Models\Shop;
 use App\Models\User;
 use App\Models\UserStatus;
 use App\Services\Identity\AccountProvisioner;
+use App\Services\Identity\JoinShopTokenBroker;
 use App\Support\Tenancy\PlatformHostResolver;
 use App\Support\Tenancy\TenantAuditLogger;
 use Illuminate\Http\JsonResponse;
@@ -26,6 +28,7 @@ class GoogleAuthController extends Controller
         private readonly PlatformHostResolver $platformHosts,
         private readonly TenantAuditLogger $tenantAudit,
         private readonly AccountProvisioner $accounts,
+        private readonly JoinShopTokenBroker $joinTokens,
     ) {
     }
 
@@ -107,7 +110,7 @@ class GoogleAuthController extends Controller
 
         $membership = $this->accounts->membership($account, (int) $shop->shop_id);
         if (! $membership || $membership->status?->status_code !== 'active') {
-            throw ValidationException::withMessages(['credential' => 'Invalid credentials.']);
+            return response()->json($this->membershipRequiredPayload($account, $shop));
         }
 
         $user = $this->accounts->ensureTenantUser($account, (int) $shop->shop_id, (int) $membership->role_id_fk);
@@ -212,7 +215,11 @@ class GoogleAuthController extends Controller
         // ── Tenant isolation checks ─────────────────────────────────────
         $platformAdmin = $account->platformAdmin;
         if ($shop && ! $platformAdmin && ! $this->accounts->membership($account, (int) $shop->shop_id)) {
-            throw ValidationException::withMessages(['credential' => 'Invalid credentials.']);
+            $payload = $this->membershipRequiredPayload($account, $shop);
+            $payload['return_to'] = $request->return_to;
+            $payload['tenant_host'] = $tenantHost;
+
+            return response()->json($payload);
         }
 
         if (! $shop && ! $platformAdmin) {
@@ -236,7 +243,11 @@ class GoogleAuthController extends Controller
 
         $membership = $this->accounts->membership($account, (int) $shop->shop_id);
         if (! $membership || $membership->status?->status_code !== 'active') {
-            throw ValidationException::withMessages(['credential' => 'Invalid credentials.']);
+            $payload = $this->membershipRequiredPayload($account, $shop);
+            $payload['return_to'] = $request->return_to;
+            $payload['tenant_host'] = $tenantHost;
+
+            return response()->json($payload);
         }
 
         $user = $this->accounts->ensureTenantUser($account, (int) $shop->shop_id, (int) $membership->role_id_fk);
@@ -280,6 +291,7 @@ class GoogleAuthController extends Controller
             abort_if(!$shopId, 422, 'Could not determine which shop this registration belongs to.');
 
             $existingAccount = $this->accounts->findAccountByLogin($data['email']);
+            abort_if($existingAccount, 422, 'This Google account already exists. Sign in first, then join this shop as Customer.');
             $account = $this->accounts->createOrUpdateAccount($data['name'], $data['email'], $data['password'], $data['google_id'], ! $existingAccount);
             abort_if($this->accounts->membership($account, (int) $shopId), 422, 'This email already has an account in this shop.');
 
@@ -313,6 +325,22 @@ class GoogleAuthController extends Controller
         $this->log($user->user_id, $shopId, 'Registered via Google', 'users', $user->user_id, $user->account_id_fk);
 
         return response()->json($this->authPayload($user, $membership, [sprintf('tenant:%d', (int) $shopId)]));
+    }
+
+    private function membershipRequiredPayload(Account $account, Shop $shop): array
+    {
+        return [
+            'needs_membership' => true,
+            'allowed_join_role' => 'Customer',
+            'join_token' => $this->joinTokens->issue($account, (int) $shop->shop_id),
+            'account' => $this->accountResource($account),
+            'membership' => null,
+            'shop' => [
+                'shopId' => (string) $shop->shop_id,
+                'shopName' => $shop->shop_name,
+                'shopStatus' => $shop->status?->status_code ?? DB::table('shop_statuses')->where('shop_status_id', $shop->shop_status_id_fk)->value('status_code'),
+            ],
+        ];
     }
 
     private function verifyGoogleToken(string $credential): ?array

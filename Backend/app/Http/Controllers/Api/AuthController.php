@@ -7,8 +7,10 @@ use App\Mail\PasswordChangedMail;
 use App\Mail\PasswordResetMail;
 use App\Models\Account;
 use App\Models\ShopMembership;
+use App\Models\Shop;
 use App\Models\User;
 use App\Services\Identity\AccountProvisioner;
+use App\Services\Identity\JoinShopTokenBroker;
 use App\Support\Tenancy\PlatformHostResolver;
 use App\Support\Tenancy\TenantAuditLogger;
 use Illuminate\Http\JsonResponse;
@@ -26,6 +28,7 @@ class AuthController extends Controller
         private readonly PlatformHostResolver $platformHosts,
         private readonly TenantAuditLogger $tenantAudit,
         private readonly AccountProvisioner $accounts,
+        private readonly JoinShopTokenBroker $joinTokens,
     ) {
     }
 
@@ -225,7 +228,8 @@ class AuthController extends Controller
                 'accountId' => $account->account_id,
                 'resolvedShopId' => (int) $shop->shop_id,
             ]);
-            throw ValidationException::withMessages(['email' => 'Invalid credentials.']);
+
+            return response()->json($this->membershipRequiredPayload($account, $shop));
         }
 
         $user = $this->accounts->ensureTenantUser($account, (int) $shop->shop_id, (int) $membership->role_id_fk);
@@ -290,7 +294,7 @@ class AuthController extends Controller
 
         return DB::transaction(function () use ($data, $shop, $customerRoleId, $activeStatusId) {
             $existingAccount = $this->accounts->findAccountByLogin($data['email']);
-            abort_if($existingAccount && ! Hash::check($data['password'], (string) $existingAccount->password_hash), 422, 'This email already has an account. Use that account password to join this shop.');
+            abort_if($existingAccount, 422, 'This email already has an account. Sign in first, then join this shop as Customer.');
 
             $account = $this->accounts->createOrUpdateAccount($data['fullName'], $data['email'], $data['password'], null, ! $existingAccount);
             abort_if($this->accounts->membership($account, (int) $shop->shop_id), 422, 'This email already has an account in this shop.');
@@ -309,6 +313,43 @@ class AuthController extends Controller
                 'requestedRole' => 'Customer',
             ], 201);
         });
+    }
+
+    public function joinShop(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'join_token' => ['required', 'string'],
+            'tenant_host' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $shop = $this->resolveJoinShop($request, $data['tenant_host'] ?? null);
+        abort_if(! $shop, 422, 'Could not determine which shop you are joining.');
+
+        $joinContext = $this->joinTokens->resolve($data['join_token']);
+        abort_if((int) $joinContext['shop_id'] !== (int) $shop->shop_id, 422, 'This join request does not match the current shop.');
+
+        $shopStatus = DB::table('shop_statuses')
+            ->where('shop_status_id', $shop->shop_status_id_fk)
+            ->value('status_code');
+
+        abort_if(strtoupper((string) $shopStatus) !== 'ACTIVE', 403, 'This shop is not currently accepting new members.');
+
+        $account = Account::query()->with(['status', 'platformAdmin.status'])->find($joinContext['account_id']);
+        abort_if(! $account, 422, 'This join request is invalid.');
+        abort_if($account->status?->status_code !== 'active', 422, 'This account is inactive.');
+
+        $customerRoleId = (int) DB::table('roles')->where('role_name', 'Customer')->value('role_id');
+
+        [$membership, $user] = DB::transaction(function () use ($account, $shop, $customerRoleId) {
+            $membership = $this->accounts->createOrUpdateMembership($account, (int) $shop->shop_id, $customerRoleId);
+            $user = $this->accounts->ensureTenantUser($account, (int) $shop->shop_id, $customerRoleId);
+
+            return [$membership, $user];
+        });
+
+        $this->log($user->user_id, (int) $shop->shop_id, "Joined shop {$shop->shop_name} as Customer", 'users', $user->user_id, (int) $account->account_id);
+
+        return response()->json($this->authPayload($user, $membership, [sprintf('tenant:%d', (int) $shop->shop_id)]));
     }
 
     private function authPayload(User $user, ?ShopMembership $membership, array $abilities): array
@@ -370,6 +411,40 @@ class AuthController extends Controller
             'status' => $membership->status?->status_name,
             'shopStatus' => $membership->shop?->status?->status_code,
         ];
+    }
+
+    private function membershipRequiredPayload(Account $account, object $shop): array
+    {
+        return [
+            'needs_membership' => true,
+            'allowed_join_role' => 'Customer',
+            'join_token' => $this->joinTokens->issue($account, (int) $shop->shop_id),
+            'account' => $this->accountResource($account),
+            'membership' => null,
+            'shop' => [
+                'shopId' => (string) $shop->shop_id,
+                'shopName' => $shop->shop_name,
+                'shopStatus' => $shop->status?->status_code ?? DB::table('shop_statuses')->where('shop_status_id', $shop->shop_status_id_fk)->value('status_code'),
+            ],
+        ];
+    }
+
+    private function resolveJoinShop(Request $request, ?string $tenantHost = null): ?Shop
+    {
+        $shop = $request->attributes->get('shop');
+        if ($shop instanceof Shop) {
+            return $shop;
+        }
+
+        if (! $tenantHost) {
+            return null;
+        }
+
+        $subdomain = explode('.', $this->platformHosts->normalizeHost($tenantHost))[0] ?? '';
+
+        return $subdomain
+            ? Shop::query()->where('subdomain', $subdomain)->first()
+            : null;
     }
 
     private function log(int $userId, ?int $shopId, string $action, ?string $table = null, ?int $recordId = null, ?int $accountId = null): void

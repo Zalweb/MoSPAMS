@@ -48,12 +48,10 @@ class RoleRequestController extends Controller
         DB::transaction(function () use ($roleRequest) {
             $user     = $roleRequest->user;
             $roleName = $roleRequest->requestedRole?->role_name;
-
+            $provisioner = app(AccountProvisioner::class);
+            $membership = $provisioner->createOrUpdateMembership((int) $user->account_id_fk, (int) $user->shop_id_fk, (int) $roleRequest->requested_role_id_fk);
             $user->update(['role_id_fk' => $roleRequest->requested_role_id_fk]);
-            $membership = app(AccountProvisioner::class)->membership((int) $user->account_id_fk, (int) $user->shop_id_fk);
-            if ($membership) {
-                $membership->update(['role_id_fk' => $roleRequest->requested_role_id_fk]);
-            }
+            $provisioner->ensureTenantUser($user->account_id_fk, (int) $user->shop_id_fk, (int) $roleRequest->requested_role_id_fk);
 
             if ($roleName === 'Mechanic') {
                 $mechanicStatusId = DB::table('mechanic_statuses')

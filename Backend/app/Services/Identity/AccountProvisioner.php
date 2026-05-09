@@ -91,8 +91,17 @@ class AccountProvisioner
     public function createOrUpdateMembership(Account|int $account, int $shopId, string|int $role, string $statusCode = 'active'): ShopMembership
     {
         $accountId = $account instanceof Account ? (int) $account->account_id : $account;
-        $roleId = is_int($role) ? $role : (int) DB::table('roles')->where('role_name', $role)->value('role_id');
+        $guard = app(MembershipRoleGuard::class);
+        $roleId = $guard->roleId($role);
         $statusId = (int) DB::table('membership_statuses')->where('status_code', strtolower($statusCode))->value('membership_status_id');
+        $existingMembershipId = (int) ShopMembership::query()
+            ->where('account_id_fk', $accountId)
+            ->where('shop_id_fk', $shopId)
+            ->value('membership_id');
+
+        if (strtolower($statusCode) === 'active') {
+            $guard->assertCanAssignRole($accountId, $shopId, $roleId, $existingMembershipId ?: null);
+        }
 
         ShopMembership::query()->updateOrCreate(
             ['account_id_fk' => $accountId, 'shop_id_fk' => $shopId],

@@ -9,6 +9,14 @@ interface ProxyLoginResponse {
   token?: string;
   return_to?: string;
   needs_registration?: boolean;
+  needs_membership?: boolean;
+  allowed_join_role?: 'Customer';
+  join_token?: string;
+  shop?: {
+    shopId: string;
+    shopName: string;
+    shopStatus: string | null;
+  };
   google_data?: GoogleData;
   tenant_host?: string;
 }
@@ -38,6 +46,13 @@ export default function GoogleAuthProxyPage() {
     googleData: GoogleData;
     returnTo: string;
     tenantHost: string;
+  } | null>(null);
+  const [joinData, setJoinData] = useState<{
+    joinToken: string;
+    returnTo: string;
+    tenantHost: string;
+    shopName: string;
+    email: string | null;
   } | null>(null);
 
   // Validate required params
@@ -74,6 +89,18 @@ export default function GoogleAuthProxyPage() {
         return;
       }
 
+      if (result.needs_membership && result.join_token && result.shop) {
+        setJoinData({
+          joinToken: result.join_token,
+          returnTo: result.return_to || returnTo,
+          tenantHost: result.tenant_host || `${tenant}.mospams.shop`,
+          shopName: result.shop.shopName,
+          email: result.google_data?.email ?? null,
+        });
+        setStatus('idle');
+        return;
+      }
+
       if (result.token && result.return_to) {
         setStatus('redirecting');
         // Redirect back to tenant with token
@@ -86,6 +113,27 @@ export default function GoogleAuthProxyPage() {
       setStatus('error');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Google sign-in failed. Please try again.';
+      setError(message);
+      setStatus('error');
+    }
+  };
+
+  const handleJoinShop = async () => {
+    if (!joinData) return;
+
+    setStatus('loading');
+    setError('');
+
+    try {
+      const result = await apiMutation<{ token: string }>('/api/join-shop', 'POST', {
+        join_token: joinData.joinToken,
+        tenant_host: joinData.tenantHost,
+      });
+
+      const separator = joinData.returnTo.includes('?') ? '&' : '?';
+      window.location.href = `${joinData.returnTo}${separator}token=${encodeURIComponent(result.token)}`;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unable to join this shop.';
       setError(message);
       setStatus('error');
     }
@@ -140,26 +188,44 @@ export default function GoogleAuthProxyPage() {
             </div>
           ) : (
             <>
-              <p className="text-zinc-400 text-sm text-center mb-6">
-                Click below to continue with your Google account
-              </p>
+              {joinData ? (
+                <>
+                  <p className="text-zinc-400 text-sm text-center mb-6">
+                    {joinData.email ?? 'Your account'} is verified. Confirm to join <span className="text-white">{joinData.shopName}</span> as Customer.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleJoinShop}
+                    className="w-full rounded-xl bg-white px-4 py-3 text-sm font-semibold text-black transition hover:bg-zinc-100 disabled:opacity-60"
+                    disabled={status === 'loading'}
+                  >
+                    {status === 'loading' ? 'Joining...' : 'Join this shop'}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="text-zinc-400 text-sm text-center mb-6">
+                    Click below to continue with your Google account
+                  </p>
 
-              {/* Google Sign-In Button */}
-              <div className={`flex justify-center transition-opacity ${status === 'loading' ? 'opacity-50 pointer-events-none' : ''}`}>
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={() => {
-                    setError('Google sign-in failed. Please try again.');
-                    setStatus('error');
-                  }}
-                  useOneTap={false}
-                  shape="rectangular"
-                  theme="outline"
-                  size="large"
-                  width="320"
-                  text="signin_with"
-                />
-              </div>
+                  {/* Google Sign-In Button */}
+                  <div className={`flex justify-center transition-opacity ${status === 'loading' ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <GoogleLogin
+                      onSuccess={handleGoogleSuccess}
+                      onError={() => {
+                        setError('Google sign-in failed. Please try again.');
+                        setStatus('error');
+                      }}
+                      useOneTap={false}
+                      shape="rectangular"
+                      theme="outline"
+                      size="large"
+                      width="320"
+                      text="signin_with"
+                    />
+                  </div>
+                </>
+              )}
 
               {/* Loading indicator */}
               {status === 'loading' && (

@@ -15,13 +15,13 @@ import type { RoleRequest, User } from '@/shared/types';
 const newUserSchema = z.object({
   name: z.string().min(2, 'Required'),
   email: z.string().email(),
-  role: z.enum(['Owner', 'Staff', 'Mechanic', 'Customer']),
+  role: z.enum(['Staff', 'Mechanic', 'Customer']),
   password: z.string().min(6, 'Min 6 characters'),
 });
 const editUserSchema = z.object({
   name: z.string().min(2, 'Required'),
   email: z.string().email(),
-  role: z.enum(['Owner', 'Staff', 'Mechanic', 'Customer']),
+  role: z.enum(['Staff', 'Mechanic', 'Customer']),
   password: z.string().optional(),
 });
 type NewUserForm = z.infer<typeof newUserSchema>;
@@ -70,7 +70,7 @@ export default function Users() {
 
   const openAdd = () => { setEditing(null); addForm.reset({ name: '', email: '', role: 'Staff', password: '' }); setModalOpen(true); };
   const asEditableRole = (role: User['role']): EditableRole => {
-    return role === 'Owner' || role === 'Staff' || role === 'Mechanic' || role === 'Customer' ? role : 'Staff';
+    return role === 'Staff' || role === 'Mechanic' || role === 'Customer' ? role : 'Staff';
   };
 
   const openEdit = (u: User) => { setEditing(u); editForm.reset({ name: u.name, email: u.email, role: asEditableRole(u.role), password: '' }); setModalOpen(true); };
@@ -174,7 +174,7 @@ export default function Users() {
                       <button title={u.status === 'Active' ? 'Disable' : 'Enable'} onClick={() => setUserStatus(u.id, u.status === 'Active' ? 'Inactive' : 'Active')} disabled={me?.id === u.id} className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors disabled:opacity-30">
                         <Power className="w-3.5 h-3.5" />
                       </button>
-                      <button title="Edit" onClick={() => openEdit(u)} className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
+                      <button title="Edit" onClick={() => openEdit(u)} disabled={u.role === 'Owner'} className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-zinc-500"><Pencil className="w-3.5 h-3.5" /></button>
                       <button title="Delete" onClick={() => setConfirmDelete(u)} disabled={me?.id === u.id} className="p-1.5 rounded-lg hover:bg-red-500/10 text-zinc-500 hover:text-red-400 transition-colors disabled:opacity-30"><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
                   </td>
@@ -288,7 +288,6 @@ export default function Users() {
               <div>
                 <Label className="text-[11px] font-medium text-zinc-400">Role</Label>
                 <select {...editForm.register('role')} className="w-full mt-1.5 h-9 px-3 rounded-xl border border-zinc-700 text-[13px] bg-zinc-800 text-zinc-200">
-                  <option value="Owner">Owner</option>
                   <option value="Staff">Staff</option>
                   <option value="Mechanic">Mechanic</option>
                   <option value="Customer">Customer</option>
@@ -319,7 +318,6 @@ export default function Users() {
                 <Label className="text-[11px] font-medium text-zinc-400">Role</Label>
                 <select {...addForm.register('role')} className="w-full mt-1.5 h-9 px-3 rounded-xl border border-zinc-700 text-[13px] bg-zinc-800 text-zinc-200">
                   <option value="Staff">Staff</option>
-                  <option value="Owner">Owner</option>
                   <option value="Mechanic">Mechanic</option>
                   <option value="Customer">Customer</option>
                 </select>

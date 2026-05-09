@@ -12,13 +12,14 @@ import type { GoogleData } from '@/shared/types';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login, googleLogin } = useAuth();
+  const { login, googleLogin, pendingJoin, joinShop, clearPendingJoin } = useAuth();
   const hostMode = currentHostMode();
   const tenant = useTenantBranding();
   const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [joining, setJoining] = useState(false);
   const [signUpModal, setSignUpModal] = useState<{ open: boolean; googleData: GoogleData | null }>({ open: false, googleData: null });
 
   const handleGoogleSuccess = async (response: CredentialResponse) => {
@@ -26,8 +27,10 @@ export default function LoginPage() {
     setGoogleLoading(true);
     try {
       const result = await googleLogin(response.credential);
-      if (result.needsRegistration) {
+      if ('needsRegistration' in result && result.needsRegistration) {
         setSignUpModal({ open: true, googleData: result.googleData });
+      } else if ('needsMembership' in result && result.needsMembership) {
+        toast.message('Sign-in verified. Confirm to join this shop as Customer.');
       } else {
         toast.success('Signed in with Google!');
       }
@@ -60,16 +63,34 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const result = await login(emailOrUsername, password);
-      if (result.success) {
+      if ('success' in result && result.success) {
         toast.success('Login successful!');
         // Navigation handled by AuthContext
+      } else if ('needsMembership' in result && result.needsMembership) {
+        toast.message('Account found. Confirm to join this shop as Customer.');
       } else {
-        toast.error(result.error || 'Invalid credentials');
+        toast.error(('error' in result && result.error) || 'Invalid credentials');
       }
     } catch (error) {
       toast.error('An error occurred during login');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleJoinShop = async () => {
+    if (!pendingJoin) return;
+
+    setJoining(true);
+    try {
+      const result = await joinShop(pendingJoin.joinToken);
+      if (result.success) {
+        toast.success(`Joined ${pendingJoin.shop.shopName} as Customer.`);
+      } else {
+        toast.error(result.error);
+      }
+    } finally {
+      setJoining(false);
     }
   };
 
@@ -142,6 +163,33 @@ export default function LoginPage() {
               )}
             </p>
           </div>
+
+          {pendingJoin && (
+            <div className="mb-6 rounded-2xl border border-zinc-700/50 bg-zinc-800/40 p-4">
+              <p className="text-sm font-medium text-white">Join {pendingJoin.shop.shopName} as Customer</p>
+              <p className="mt-1 text-xs text-zinc-400">
+                {pendingJoin.account?.email ?? 'This account'} is verified and can be added to this shop with Customer access.
+              </p>
+              <div className="mt-4 flex gap-3">
+                <button
+                  type="button"
+                  onClick={handleJoinShop}
+                  disabled={joining}
+                  className="flex-1 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-zinc-100 disabled:opacity-60"
+                >
+                  {joining ? 'Joining...' : 'Join this shop'}
+                </button>
+                <button
+                  type="button"
+                  onClick={clearPendingJoin}
+                  disabled={joining}
+                  className="rounded-xl border border-zinc-700 px-4 py-2.5 text-sm text-zinc-300 transition hover:border-zinc-500 hover:text-white"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-4">

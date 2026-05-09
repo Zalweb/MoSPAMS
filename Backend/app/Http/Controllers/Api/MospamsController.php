@@ -899,7 +899,7 @@ class MospamsController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:100'],
             'email' => ['required', 'email', 'max:100'],
-            'role' => ['required', Rule::in(['Owner', 'Staff', 'Mechanic', 'Customer'])],
+            'role' => ['required', Rule::in(['Staff', 'Mechanic', 'Customer'])],
             'password' => ['required', 'string', 'min:6'],
         ]);
 
@@ -924,7 +924,7 @@ class MospamsController extends Controller
         $data = $request->validate([
             'name' => ['sometimes', 'string', 'max:100'],
             'email' => ['sometimes', 'email', 'max:100'],
-            'role' => ['sometimes', Rule::in(['Owner', 'Staff', 'Mechanic', 'Customer'])],
+            'role' => ['sometimes', Rule::in(['Staff', 'Mechanic', 'Customer'])],
             'password' => ['nullable', 'string', 'min:6'],
         ]);
 

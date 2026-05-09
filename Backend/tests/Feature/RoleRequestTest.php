@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Services\Identity\AccountProvisioner;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class RoleRequestTest extends TestCase
@@ -25,17 +25,23 @@ class RoleRequestTest extends TestCase
 
     private function createUser(array $seed, string $role, array $extra = []): object
     {
-        $id = DB::table('users')->insertGetId(array_merge([
-            'shop_id_fk'        => $seed['shopId'],
-            'full_name'         => 'Test User',
-            'username'          => 'user_' . uniqid(),
-            'password_hash'     => Hash::make('password'),
-            'role_id_fk'        => $seed['roles'][$role],
-            'user_status_id_fk' => $seed['activeId'],
-            'created_at'        => now(),
-            'updated_at'        => now(),
-        ], $extra));
-        return DB::table('users')->where('user_id', $id)->first();
+        $email = $extra['email'] ?? ('user_' . uniqid() . '@example.com');
+        $name = $extra['full_name'] ?? 'Test User';
+
+        $provisioner = app(AccountProvisioner::class);
+        $account = $provisioner->createOrUpdateAccount($name, $email, 'password');
+        $membership = $provisioner->createOrUpdateMembership($account, (int) $seed['shopId'], $role);
+        $user = $provisioner->ensureTenantUser($account, (int) $seed['shopId'], $role, 'password');
+
+        if (array_key_exists('user_status_id_fk', $extra)) {
+            DB::table('users')->where('user_id', $user->user_id)->update([
+                'user_status_id_fk' => $extra['user_status_id_fk'],
+                'updated_at' => now(),
+            ]);
+            $user = DB::table('users')->where('user_id', $user->user_id)->first();
+        }
+
+        return $user;
     }
 
     private function actingAsAdmin(array $seed): static

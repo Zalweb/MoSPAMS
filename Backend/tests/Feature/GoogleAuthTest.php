@@ -91,6 +91,44 @@ class GoogleAuthTest extends TestCase
         $response->assertOk()->assertJsonStructure(['token', 'user']);
     }
 
+    public function test_google_login_returns_join_flow_for_existing_account_without_shop_membership(): void
+    {
+        $seed = $this->seedBase();
+        config(['services.google.client_id' => 'test-client-id']);
+
+        $this->createUser($seed, 'Customer', [
+            'email' => 'existing@example.com',
+            'google_id' => 'google_sub_existing',
+        ]);
+
+        $activeShopStatusId = (int) DB::table('shop_statuses')->where('status_code', 'ACTIVE')->value('shop_status_id');
+        DB::table('shops')->insert([
+            'shop_name' => 'Second Shop',
+            'subdomain' => 'second-shop',
+            'invitation_code' => 'SECOND01',
+            'shop_status_id_fk' => $activeShopStatusId,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        Http::fake([
+            'oauth2.googleapis.com/*' => Http::response([
+                'sub'   => 'google_sub_existing',
+                'email' => 'existing@example.com',
+                'name'  => 'Existing User',
+                'aud'   => 'test-client-id',
+            ], 200),
+        ]);
+
+        $response = $this->postJson('http://second-shop.mospams.local/api/auth/google', ['credential' => 'fake-token']);
+
+        $response->assertOk()->assertJson([
+            'needs_membership' => true,
+            'allowed_join_role' => 'Customer',
+            'shop' => ['shopName' => 'Second Shop'],
+        ]);
+    }
+
     public function test_google_register_creates_customer_and_returns_token(): void
     {
         $seed = $this->seedBase();

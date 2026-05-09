@@ -67,8 +67,18 @@ Rules:
 
 - `SuperAdmin` accounts must log in from platform hosts only.
 - Non-SuperAdmin users must log in from tenant shop hosts only.
-- Non-SuperAdmin users must match resolved tenant (`user.shop_id_fk === resolved shop_id`).
+- Existing tenant memberships must match the resolved tenant.
+- If credentials are valid but the account has no membership in the resolved tenant, the API returns an explicit join flow payload instead of a generic auth failure.
 - Blocked attempts are written to `tenant_audit_events`.
+
+### Customer join flow
+
+- `POST /api/register` is now for new account creation only.
+- Existing accounts that want Customer access in another shop must:
+  - authenticate on that shop host
+  - receive `needs_membership: true`
+  - complete `POST /api/join-shop`
+- `POST /api/join-shop` creates Customer access only. It does not allow cross-shop `Owner`, `Staff`, or `Mechanic` escalation.
 
 ## Registration Lifecycle Changes
 

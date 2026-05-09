@@ -91,6 +91,19 @@ export interface Membership {
   shopStatus: string | null;
 }
 
+export interface TenantShopSummary {
+  shopId: string;
+  shopName: string;
+  shopStatus: string | null;
+}
+
+export interface PendingShopJoin {
+  joinToken: string;
+  allowedJoinRole: 'Customer';
+  account: Account | null;
+  shop: TenantShopSummary;
+}
+
 export interface StoredUser extends User {
   passwordHash: string;
 }
