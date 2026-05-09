@@ -5,7 +5,7 @@ import { useAuth } from '@/features/auth/context/AuthContext';
 import { defaultRouteForUser } from '@/shared/lib/roles';
 
 /**
- * GoogleAuthCallbackPage — Rendered on tenant subdomains at /auth/callback
+ * GoogleAuthCallbackPage - Rendered on tenant subdomains at /auth/callback
  *
  * This page receives the auth token from the centralized Google OAuth proxy
  * (mospams.shop/auth/google) and completes the login on the tenant subdomain.
@@ -18,31 +18,40 @@ import { defaultRouteForUser } from '@/shared/lib/roles';
 export default function GoogleAuthCallbackPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user, ready } = useAuth();
+  const { refreshUser } = useAuth();
   const [error, setError] = useState('');
 
   const token = searchParams.get('token');
 
   useEffect(() => {
-    if (!token) {
-      setError('No authentication token received. Please try signing in again.');
-      return;
+    let cancelled = false;
+
+    async function completeSignIn() {
+      if (!token) {
+        setError('No authentication token received. Please try signing in again.');
+        return;
+      }
+
+      try {
+        setAuthToken(token);
+        const signedInUser = await refreshUser();
+        if (!cancelled) {
+          navigate(defaultRouteForUser(signedInUser), { replace: true });
+        }
+      } catch {
+        setAuthToken(null);
+        if (!cancelled) {
+          setError('Unable to complete Google sign-in. Please try signing in again.');
+        }
+      }
     }
 
-    // Store the token — this triggers AuthContext to re-hydrate via /api/me
-    setAuthToken(token);
+    void completeSignIn();
 
-    // Force a page reload so AuthProvider picks up the new token from localStorage
-    // This is the simplest reliable approach since we're arriving from an external redirect
-    window.location.replace('/');
-  }, [token]);
-
-  // If already logged in (e.g., after reload), navigate to dashboard
-  useEffect(() => {
-    if (ready && user) {
-      navigate(defaultRouteForUser(user), { replace: true });
-    }
-  }, [ready, user, navigate]);
+    return () => {
+      cancelled = true;
+    };
+  }, [token, refreshUser, navigate]);
 
   if (error) {
     return (
@@ -70,7 +79,7 @@ export default function GoogleAuthCallbackPage() {
     <div className="min-h-screen bg-black flex items-center justify-center">
       <div className="text-center">
         <div className="w-10 h-10 border-2 border-zinc-700 border-t-white rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-zinc-400 text-sm">Completing sign-in…</p>
+        <p className="text-zinc-400 text-sm">Completing sign-in...</p>
       </div>
     </div>
   );

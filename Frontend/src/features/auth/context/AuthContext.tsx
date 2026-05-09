@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import type { User, GoogleData } from '@/shared/types';
-import { apiGet, apiMutation, setAuthToken } from '@/shared/lib/api';
+import { apiGet, apiMutation, getAuthToken, setAuthToken } from '@/shared/lib/api';
 import { normalizeRole } from '@/shared/lib/roles';
 
 interface AuthContextType {
@@ -16,6 +16,7 @@ interface AuthContextType {
     requested_role: 'customer' | 'staff' | 'mechanic';
     tenant_host?: string;
   }) => Promise<{ ok: true; token: string } | { ok: false; error: string }>;
+  refreshUser: () => Promise<User>;
   logout: () => void;
   ready: boolean;
 }
@@ -39,15 +40,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(false);
 
+  const refreshUser = useCallback(async () => {
+    const response = await apiGet<{ user: User }>('/api/me');
+    const normalizedUser = normalizeUserRole(response.user);
+    setUser(normalizedUser);
+    return normalizedUser;
+  }, []);
+
   useEffect(() => {
-    apiGet<{ user: User }>('/api/me')
-      .then(response => setUser(normalizeUserRole(response.user)))
+    if (!getAuthToken()) {
+      setUser(null);
+      setReady(true);
+      return;
+    }
+
+    refreshUser()
       .catch(() => {
         setAuthToken(null);
         setUser(null);
       })
       .finally(() => setReady(true));
-  }, []);
+  }, [refreshUser]);
 
   const login = useCallback(async (email: string, password: string) => {
     try {
@@ -118,6 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       login,
       googleLogin,
       googleRegister,
+      refreshUser,
       logout: () => { void logout(); },
       ready,
     }}>

@@ -9,6 +9,10 @@ let authToken: string | null =
 
 const REQUEST_HOST = typeof window !== 'undefined' ? window.location.host : null;
 
+export function getAuthToken(): string | null {
+  return authToken;
+}
+
 export function setAuthToken(token: string | null) {
   authToken = token;
   if (typeof window !== 'undefined') {
