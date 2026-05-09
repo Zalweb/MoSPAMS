@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
-import { ArrowLeft, Loader2, UserPlus, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Loader2, UserPlus, CheckCircle2, Eye, EyeOff, LogIn } from 'lucide-react';
 import { apiMutation } from '@/shared/lib/api';
 
 interface RegistrationForm {
@@ -18,11 +18,14 @@ interface RegistrationResult {
   requestedRole: string;
 }
 
+type RegistrationHint = 'sign_in_first' | 'already_member' | null;
+
 export default function UserRegistrationPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'form' | 'success'>('form');
   const [result, setResult] = useState<RegistrationResult | null>(null);
+  const [hint, setHint] = useState<RegistrationHint>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -55,8 +58,9 @@ export default function UserRegistrationPage() {
     }
 
     setLoading(true);
+    setHint(null);
     try {
-      const data = await apiMutation<RegistrationResult>('/api/register', 'POST', {
+      const data = await apiMutation<RegistrationResult & { hint?: RegistrationHint }>('/api/register', 'POST', {
         fullName: form.fullName,
         email: form.email,
         password: form.password,
@@ -64,7 +68,22 @@ export default function UserRegistrationPage() {
       setResult(data);
       setStep('success');
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Registration failed. Please try again.');
+      const message = error instanceof Error ? error.message : 'Registration failed. Please try again.';
+      toast.error(message);
+
+      // Surface the backend hint so the UI can show an actionable inline tip.
+      try {
+        const raw = (error as { hint?: string } | null);
+        if (raw?.hint === 'sign_in_first' || raw?.hint === 'already_member') {
+          setHint(raw.hint as RegistrationHint);
+        } else if (message.toLowerCase().includes('wrong password') || message.toLowerCase().includes('sign in first')) {
+          setHint('sign_in_first');
+        } else if (message.toLowerCase().includes('already have an account in this shop') || message.toLowerCase().includes('already belong')) {
+          setHint('already_member');
+        }
+      } catch {
+        // ignore hint-parse errors
+      }
     } finally {
       setLoading(false);
     }
@@ -86,9 +105,13 @@ export default function UserRegistrationPage() {
               </div>
             </div>
 
-            <h1 className="text-2xl font-bold text-white mb-2">Welcome aboard!</h1>
+            <h1 className="text-2xl font-bold text-white mb-2">
+              {result?.message?.startsWith('Welcome back') ? 'Welcome back!' : 'Welcome aboard!'}
+            </h1>
             <p className="text-zinc-400 text-sm mb-6">
-              Your account has been created. You can log in right away.
+              {result?.message?.startsWith('Welcome back')
+                ? 'You have joined this shop as a Customer. You can log in right away.'
+                : 'Your account has been created. You can log in right away.'}
             </p>
 
             <div className="bg-zinc-800/40 rounded-2xl border border-zinc-700/40 p-5 text-left mb-6 space-y-3">
@@ -248,6 +271,42 @@ export default function UserRegistrationPage() {
               )}
             </button>
           </form>
+
+          {/* Inline hint banner */}
+          {hint === 'sign_in_first' && (
+            <div className="mt-4 flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3">
+              <LogIn className="mt-0.5 w-4 h-4 shrink-0 text-amber-400" />
+              <div className="flex-1">
+                <p className="text-xs font-medium text-amber-300">This email already has an account.</p>
+                <p className="mt-0.5 text-xs text-amber-400/80">
+                  Sign in with your existing credentials, then you will be prompted to join this shop automatically.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => navigate('/login')}
+                  className="mt-2 text-xs font-semibold text-white underline hover:text-zinc-200 transition-colors"
+                >
+                  Go to Sign In →
+                </button>
+              </div>
+            </div>
+          )}
+
+          {hint === 'already_member' && (
+            <div className="mt-4 flex items-start gap-3 rounded-xl border border-blue-500/20 bg-blue-500/10 px-4 py-3">
+              <CheckCircle2 className="mt-0.5 w-4 h-4 shrink-0 text-blue-400" />
+              <div className="flex-1">
+                <p className="text-xs font-medium text-blue-300">You already belong to this shop.</p>
+                <button
+                  type="button"
+                  onClick={() => navigate('/login')}
+                  className="mt-2 text-xs font-semibold text-white underline hover:text-zinc-200 transition-colors"
+                >
+                  Sign in instead →
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Footer */}
           <p className="mt-6 text-center text-xs text-zinc-500">

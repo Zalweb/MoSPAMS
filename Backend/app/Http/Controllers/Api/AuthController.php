@@ -294,10 +294,42 @@ class AuthController extends Controller
 
         return DB::transaction(function () use ($data, $shop, $customerRoleId, $activeStatusId) {
             $existingAccount = $this->accounts->findAccountByLogin($data['email']);
-            abort_if($existingAccount, 422, 'This email already has an account. Sign in first, then join this shop as Customer.');
 
-            $account = $this->accounts->createOrUpdateAccount($data['fullName'], $data['email'], $data['password'], null, ! $existingAccount);
-            abort_if($this->accounts->membership($account, (int) $shop->shop_id), 422, 'This email already has an account in this shop.');
+            if ($existingAccount) {
+                // Smart hybrid: existing email — verify the supplied password before joining.
+                if (! $existingAccount->password_hash || ! Hash::check($data['password'], $existingAccount->password_hash)) {
+                    return response()->json([
+                        'message' => 'Wrong password. Please sign in first to join this shop as a Customer.',
+                        'hint'    => 'sign_in_first',
+                    ], 422);
+                }
+
+                // Correct password — check they are not already a member.
+                if ($this->accounts->membership($existingAccount, (int) $shop->shop_id)) {
+                    return response()->json([
+                        'message' => 'You already have an account in this shop. Please sign in.',
+                        'hint'    => 'already_member',
+                    ], 422);
+                }
+
+                // All good — join the shop with the existing global account.
+                $membership = $this->accounts->createOrUpdateMembership($existingAccount, (int) $shop->shop_id, (int) $customerRoleId);
+                $user = $this->accounts->ensureTenantUser($existingAccount, (int) $shop->shop_id, (int) $customerRoleId);
+
+                $this->log($user->user_id, $shop->shop_id, "Joined shop {$shop->shop_name} as Customer via registration form", 'users', $user->user_id, (int) $existingAccount->account_id);
+
+                return response()->json([
+                    'message'       => 'Welcome back! You have joined this shop as a Customer.',
+                    'userId'        => (string) $user->user_id,
+                    'accountId'     => (string) $existingAccount->account_id,
+                    'membershipId'  => (string) $membership->membership_id,
+                    'shopName'      => $shop->shop_name,
+                    'requestedRole' => 'Customer',
+                ], 201);
+            }
+
+            // New email — create a fresh global account and join the shop.
+            $account = $this->accounts->createOrUpdateAccount($data['fullName'], $data['email'], $data['password'], null, true);
 
             $membership = $this->accounts->createOrUpdateMembership($account, (int) $shop->shop_id, (int) $customerRoleId);
             $user = $this->accounts->ensureTenantUser($account, (int) $shop->shop_id, (int) $customerRoleId, $data['password']);
