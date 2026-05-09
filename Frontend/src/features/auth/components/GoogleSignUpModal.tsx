@@ -11,6 +11,7 @@ type RequestedRole = 'customer' | 'staff' | 'mechanic';
 interface Props {
   open: boolean;
   googleData: GoogleData;
+  tenantHost?: string;
   onClose: () => void;
   onSuccess: (token: string) => void;
 }
@@ -21,7 +22,7 @@ const ROLE_OPTIONS: { value: RequestedRole; label: string; desc: string; instant
   { value: 'mechanic', label: 'Mechanic',  desc: 'Handle assigned service jobs.',           instant: false },
 ];
 
-export default function GoogleSignUpModal({ open, googleData, onClose, onSuccess }: Props) {
+export default function GoogleSignUpModal({ open, googleData, tenantHost, onClose, onSuccess }: Props) {
   const { googleRegister } = useAuth();
   const [name, setName]             = useState(googleData.name);
   const [phone, setPhone]           = useState('');
@@ -45,6 +46,7 @@ export default function GoogleSignUpModal({ open, googleData, onClose, onSuccess
       phone:          phone.trim() || undefined,
       password,
       requested_role: role,
+      tenant_host:    tenantHost,
     });
     setSubmitting(false);
 

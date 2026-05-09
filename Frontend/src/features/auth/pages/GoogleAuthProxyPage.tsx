@@ -188,6 +188,7 @@ export default function GoogleAuthProxyPage() {
         <GoogleSignUpModal
           open={true}
           googleData={signUpData.googleData}
+          tenantHost={signUpData.tenantHost}
           onClose={() => setSignUpData(null)}
           onSuccess={handleRegistrationSuccess}
         />

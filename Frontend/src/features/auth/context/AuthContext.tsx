@@ -14,6 +14,7 @@ interface AuthContextType {
     phone?: string;
     password: string;
     requested_role: 'customer' | 'staff' | 'mechanic';
+    tenant_host?: string;
   }) => Promise<{ ok: true; token: string } | { ok: false; error: string }>;
   logout: () => void;
   ready: boolean;
@@ -88,6 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     phone?: string;
     password: string;
     requested_role: 'customer' | 'staff' | 'mechanic';
+    tenant_host?: string;
   }) => {
     try {
       const response = await apiMutation<LoginResponse>('/api/auth/google/register', 'POST', payload);

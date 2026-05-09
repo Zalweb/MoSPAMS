@@ -237,12 +237,23 @@ class GoogleAuthController extends Controller
             'phone'          => ['nullable', 'string', 'max:20'],
             'password'       => ['required', 'string', 'min:8'],
             'requested_role' => ['required', 'in:customer,staff,mechanic'],
+            'tenant_host'    => ['nullable', 'string', 'max:255'],
         ]);
 
         $customerRole  = Role::where('role_name', 'Customer')->firstOrFail();
         $activeStatus  = UserStatus::whereRaw('LOWER(status_code) = ?', ['active'])->firstOrFail();
 
-        $shop   = $request->attributes->get('shop');
+        // Shop context: prefer the explicit tenant_host from the proxy registration flow
+        // (registration happens on mospams.shop so the request host gives no shop context).
+        $shop = $request->attributes->get('shop');
+        if (! $shop && ! empty($data['tenant_host'])) {
+            $subdomain = explode('.', $this->platformHosts->normalizeHost($data['tenant_host']))[0] ?? '';
+            if ($subdomain) {
+                $shop = \App\Models\Shop::whereHas('status', fn ($q) => $q->whereRaw('LOWER(status_code) = ?', ['active']))
+                    ->where('subdomain', $subdomain)
+                    ->first();
+            }
+        }
         $shopId = $shop?->shop_id ?? null;
 
         $user = DB::transaction(function () use ($data, $customerRole, $activeStatus, $shopId) {
