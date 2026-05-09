@@ -86,7 +86,7 @@ export default function SuperAdminSubscriptionsPage() {
   const saveEditSub = async () => {
     if (!editingSubId) return;
     try {
-      await updateShopSubscription(editingSubId, { status: editingSubStatus, endsAt: editingSubEndsAt || undefined });
+      await updateShopSubscription(editingSubId, { status: editingSubStatus as any, endsAt: editingSubEndsAt || undefined });
       toast.success('Subscription updated'); setEditingSubId(null); await load();
     } catch (error) { toast.error(error instanceof Error ? error.message : 'Failed to update'); }
   };

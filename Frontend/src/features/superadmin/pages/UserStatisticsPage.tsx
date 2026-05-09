@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Users, UserCheck, Wrench, UserPlus, BarChart3 } from 'lucide-react';
+import { Users, UserCheck, Wrench, UserPlus } from 'lucide-react';
 import { apiGet } from '@/shared/lib/api';
 
 export default function UserStatisticsPage() {

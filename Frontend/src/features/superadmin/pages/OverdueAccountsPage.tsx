@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Calendar, AlertTriangle, Building2, CreditCard } from 'lucide-react';
+import { Calendar, AlertTriangle, Building2 } from 'lucide-react';
 import { apiGet } from '@/shared/lib/api';
 
 const CURRENCY_PREFIX = '\u20b1';

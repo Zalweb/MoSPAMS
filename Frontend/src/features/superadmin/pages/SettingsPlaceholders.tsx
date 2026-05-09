@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { LifeBuoy, Phone, Building2, ExternalLink } from 'lucide-react';
+import { Building2, ExternalLink } from 'lucide-react';
 import { apiGet } from '@/shared/lib/api';
 
 export function SupportTicketsPage() {

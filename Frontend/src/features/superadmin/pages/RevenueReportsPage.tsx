@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { TrendingUp, DollarSign, CreditCard, Receipt, BarChart3 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { DollarSign, CreditCard, Receipt, BarChart3 } from 'lucide-react';
 import { apiGet } from '@/shared/lib/api';
 
 const CURRENCY_PREFIX = '\u20b1';

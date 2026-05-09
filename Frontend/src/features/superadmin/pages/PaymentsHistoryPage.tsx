@@ -40,7 +40,7 @@ export default function PaymentsHistoryPage() {
       '"' + ((p as any).shopName || '').replace(/"/g, '""') + '"',
       p.amount,
       (p as any).paymentMethod || '',
-      (p as any).paymentStatus || p.status || '',
+      (p as any).paymentStatus || '',
       (p as any).dueAt ? new Date((p as any).dueAt).toISOString().split('T')[0] : '',
       (p as any).paidAt ? new Date((p as any).paidAt).toISOString().split('T')[0] : '',
     ]);
@@ -204,7 +204,7 @@ export default function PaymentsHistoryPage() {
                       {(payment as any).paymentMethod || 'N/A'}
                     </td>
                     <td className="px-6 py-4">
-                      <StatusBadge status={(payment as any).paymentStatus || payment.status} />
+                      <StatusBadge status={(payment as any).paymentStatus} />
                     </td>
                     <td className="px-6 py-4 text-sm text-zinc-400">
                       {(payment as any).dueAt ? new Date((payment as any).dueAt).toLocaleDateString() : 'N/A'}

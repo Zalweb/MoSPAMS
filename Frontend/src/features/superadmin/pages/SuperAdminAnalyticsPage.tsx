@@ -5,7 +5,6 @@ import {
   Building2,
   CreditCard,
   Store,
-  TrendingUp,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getPlatformAnalytics, type PlatformAnalytics } from '@/features/superadmin/lib/api';

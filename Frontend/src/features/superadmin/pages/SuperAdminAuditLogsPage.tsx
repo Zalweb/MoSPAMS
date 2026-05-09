@@ -1,15 +1,7 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Search, Filter, Calendar } from 'lucide-react';
+import { Search, Calendar } from 'lucide-react';
 import { apiGet } from '@/shared/lib/api';
-
-interface AuditLogFilter {
-  search?: string;
-  action?: string;
-  dateFrom?: string;
-  dateTo?: string;
-  limit?: number;
-}
 
 export default function SuperAdminAuditLogsPage() {
   const [logs, setLogs] = useState<any[]>([]);
