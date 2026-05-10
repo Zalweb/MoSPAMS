@@ -1,5 +1,5 @@
 import { ShopProvider } from '@/shared/contexts/ShopContext';
-import { ThemeProvider } from '@/shared/contexts/ThemeContext';
+import { ThemeProvider } from '@/theme/ThemeProvider';
 import NewDashboardPage from './NewDashboardPage';
 
 export default function NewDashboardWrapper() {

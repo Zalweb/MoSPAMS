@@ -173,7 +173,7 @@ export default function DashboardLayout() {
                       onClick={() => setSidebarOpen(false)}
                       className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 group ${
                         isActive
-                          ? 'bg-zinc-800 text-white border-l-2 border-white'
+                          ? 'bg-zinc-800 text-white border-white'
                           : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
                       }`}
                     >

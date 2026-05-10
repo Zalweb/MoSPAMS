@@ -4,42 +4,72 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
     --radius: 0.625rem;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --accent: 0 84% 60%;
+    --accent-foreground: 0 0% 100%;
+    --accent-hex: #EF4444;
     --tenant-primary: #3B82F6;
     --tenant-secondary: #10B981;
-    
-    /* Dashboard theme colors (overridden by ShopContext) */
+
+    /* Legacy dashboard theme colors */
     --color-primary: 0 84% 60%;
     --color-secondary: 25 95% 53%;
     --color-primary-rgb: 239 68 68;
     --color-secondary-rgb: 249 115 22;
+  }
+
+  /* ---- DARK MODE (default) ---- */
+  .dark {
+    --bg: 0 0% 2%;
+    --bg-sidebar: 240 5% 3%;
+    --bg-card: 240 3% 8%;
+    --bg-card-hover: 240 3% 11%;
+    --bg-input: 240 3% 10%;
+    --bg-overlay: 0 0% 0% / 0.6;
+    --border: 0 0% 100% / 0.06;
+    --border-hover: 0 0% 100% / 0.1;
+    --border-input: 240 4% 16%;
+    --text-primary: 0 0% 100%;
+    --text-secondary: 240 5% 65%;
+    --text-muted: 240 4% 46%;
+    --text-inverse: 0 0% 0%;
+
+    --scrollbar-track: 240 5% 6%;
+    --scrollbar-thumb: 240 4% 16%;
+    --scrollbar-thumb-hover: 240 4% 22%;
+
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-card: 0 1px 3px rgb(0 0 0 / 0.3), 0 1px 2px rgb(0 0 0 / 0.2);
+
+    background-color: hsl(var(--bg));
+    color: hsl(var(--text-secondary));
+  }
+
+  /* ---- LIGHT MODE ---- */
+  .light {
+    --bg: 220 20% 97%;
+    --bg-sidebar: 0 0% 100%;
+    --bg-card: 0 0% 100%;
+    --bg-card-hover: 220 20% 95%;
+    --bg-input: 220 20% 97%;
+    --bg-overlay: 0 0% 0% / 0.15;
+    --border: 220 13% 91%;
+    --border-hover: 220 13% 85%;
+    --border-input: 220 13% 91%;
+    --text-primary: 222 47% 11%;
+    --text-secondary: 215 16% 47%;
+    --text-muted: 215 14% 64%;
+    --text-inverse: 0 0% 100%;
+
+    --scrollbar-track: 220 20% 95%;
+    --scrollbar-thumb: 220 13% 85%;
+    --scrollbar-thumb-hover: 220 13% 75%;
+
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.05);
+    --shadow-card: 0 1px 3px rgb(0 0 0 / 0.06), 0 1px 2px rgb(0 0 0 / 0.04);
+
+    background-color: hsl(var(--bg));
+    color: hsl(var(--text-secondary));
   }
 
   * {
@@ -47,8 +77,11 @@
   }
 
   body {
-    @apply bg-black text-zinc-300 antialiased;
+    @apply antialiased;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: hsl(var(--bg));
+    color: hsl(var(--text-secondary));
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   html {
@@ -57,55 +90,48 @@
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+  .text-balance { text-wrap: balance; }
 
-  /* Glassmorphism utilities */
   .glass {
-    @apply bg-zinc-900/90 backdrop-blur-xl border border-zinc-800/50;
+    @apply backdrop-blur-xl border;
+    background-color: hsl(var(--bg-card) / 0.9);
+    border-color: hsl(var(--border));
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
   }
 
   .glass-hover {
-    @apply hover:border-zinc-700/50 transition-all duration-300;
+    @apply transition-all duration-300;
+  }
+  .glass-hover:hover {
+    border-color: hsl(var(--border-hover));
   }
 
-  /* Gradient text */
   .gradient-text {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))];
+    background: linear-gradient(to right, hsl(var(--accent)), hsl(var(--color-secondary)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
-  /* Gradient background */
   .gradient-bg {
-    @apply bg-gradient-to-br from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))];
+    background: linear-gradient(to bottom right, hsl(var(--accent)), hsl(var(--color-secondary)));
   }
 
-  /* Animated gradient */
-  .animated-gradient {
-    background: linear-gradient(
-      -45deg,
-      rgb(var(--color-primary-rgb)),
-      rgb(var(--color-secondary-rgb)),
-      rgb(var(--color-primary-rgb)),
-      rgb(var(--color-secondary-rgb))
-    );
-    background-size: 400% 400%;
-    animation: gradient 15s ease infinite;
+  .transition-smooth {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  @keyframes gradient {
-    0% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-    100% {
-      background-position: 0% 50%;
-    }
+  .skeleton {
+    background: linear-gradient(90deg, hsl(var(--bg-card)) 0%, hsl(var(--bg-card-hover)) 50%, hsl(var(--bg-card)) 100%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
   }
 
-  /* Shimmer effect */
+  @keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
   .shimmer {
     position: relative;
     overflow: hidden;
@@ -114,105 +140,104 @@
   .shimmer::after {
     content: '';
     position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
+    top: 0; right: 0; bottom: 0; left: 0;
     transform: translateX(-100%);
-    background: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0) 0,
-      rgba(255, 255, 255, 0.05) 20%,
-      rgba(255, 255, 255, 0.1) 60%,
-      rgba(255, 255, 255, 0)
-    );
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%);
     animation: shimmer 2s infinite;
   }
 
-  @keyframes shimmer {
-    100% {
-      transform: translateX(100%);
-    }
-  }
+  @keyframes shimmer { 100% { transform: translateX(100%); } }
 
-  /* Glow effect */
   .glow {
-    box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.3),
-                0 0 40px rgba(var(--color-primary-rgb), 0.2),
-                0 0 60px rgba(var(--color-primary-rgb), 0.1);
-  }
-
-  /* Smooth transitions */
-  .transition-smooth {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* Loading skeleton */
-  .skeleton {
-    background: linear-gradient(
-      90deg,
-      #18181b 0%,
-      #27272a 50%,
-      #18181b 100%
-    );
-    background-size: 200% 100%;
-    animation: skeleton-loading 1.5s ease-in-out infinite;
-  }
-
-  @keyframes skeleton-loading {
-    0% {
-      background-position: 200% 0;
-    }
-    100% {
-      background-position: -200% 0;
-    }
-  }
-
-  /* Float animation */
-  @keyframes float {
-    0%, 100% {
-      transform: translateY(0px);
-    }
-    50% {
-      transform: translateY(-10px);
-    }
+    box-shadow: 0 0 20px hsl(var(--accent) / 0.3), 0 0 40px hsl(var(--accent) / 0.15);
   }
 
   .animate-float {
     animation: float 3s ease-in-out infinite;
   }
 
-  /* Custom scrollbar */
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
   }
 
-  ::-webkit-scrollbar-track {
-    @apply bg-zinc-950;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    @apply bg-zinc-800 rounded-full;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-zinc-700;
-  }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background-color: hsl(var(--scrollbar-track)); }
+  ::-webkit-scrollbar-thumb { background-color: hsl(var(--scrollbar-thumb)); border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background-color: hsl(var(--scrollbar-thumb-hover)); }
 }
 
-/* Light mode overrides */
-html.light body { background-color: #fafafa; color: #27272a; }
-html.light .bg-black { background-color: #fafafa; }
-html.light .bg-zinc-950 { background-color: #fafafa; }
-html.light .bg-zinc-900 { background-color: #ffffff; }
-html.light .border-zinc-800 { border-color: #e4e4e7; }
-html.light .text-white { color: #18181b; }
-html.light .text-zinc-400 { color: #52525b; }
-html.light .text-zinc-500 { color: #71717a; }
-html.light .from-zinc-900 { --tw-gradient-from: #ffffff; }
-html.light .to-zinc-950 { --tw-gradient-to: #f4f4f5; }
-html.light .hover\:bg-zinc-800:hover { background-color: #f4f4f5; }
-html.light .bg-zinc-800 { background-color: #f4f4f5; }
-html.light .border-zinc-700 { border-color: #d4d4d8; }
-html.light .divide-zinc-800 > :not([hidden]) ~ :not([hidden]) { border-color: #e4e4e7; }
+/* ============================================
+   DARK MODE — Hardcoded class overrides
+   (maps existing bg-zinc/text-white classes to CSS variables)
+   ============================================ */
+.dark .bg-black { background-color: hsl(var(--bg)); }
+.dark .bg-zinc-950 { background-color: hsl(var(--bg-sidebar)); }
+.dark .bg-zinc-900 { background-color: hsl(var(--bg-card)); }
+.dark .bg-zinc-900\/50 { background-color: hsl(var(--bg-card) / 0.5); }
+.dark .bg-zinc-900\/90 { background-color: hsl(var(--bg-card) / 0.9); }
+.dark .bg-zinc-800 { background-color: hsl(var(--bg-card-hover)); }
+.dark .bg-zinc-800\/50 { background-color: hsl(var(--bg-card-hover) / 0.5); }
+.dark .bg-zinc-800\/30 { background-color: hsl(var(--bg-card-hover) / 0.3); }
+.dark .border-zinc-800 { border-color: hsl(var(--border)); }
+.dark .border-zinc-800\/50 { border-color: hsl(var(--border) / 0.5); }
+.dark .border-zinc-700 { border-color: hsl(var(--border-hover)); }
+.dark .text-white { color: hsl(var(--text-primary)); }
+.dark .text-zinc-200 { color: hsl(var(--text-secondary)); }
+.dark .text-zinc-300 { color: hsl(var(--text-secondary)); }
+.dark .text-zinc-400 { color: hsl(var(--text-muted)); }
+.dark .text-zinc-500 { color: hsl(var(--text-muted)); }
+.dark .text-zinc-600 { color: hsl(var(--text-muted) / 0.6); }
+.dark .divide-zinc-800 > :not([hidden]) ~ :not([hidden]) { border-color: hsl(var(--border)); }
+.dark .divide-zinc-800\/50 > :not([hidden]) ~ :not([hidden]) { border-color: hsl(var(--border) / 0.5); }
+.dark .hover\:bg-zinc-800:hover { background-color: hsl(var(--bg-card-hover)); }
+.dark .hover\:bg-zinc-800\/30:hover { background-color: hsl(var(--bg-card-hover) / 0.3); }
+.dark .hover\:bg-zinc-800\/50:hover { background-color: hsl(var(--bg-card-hover) / 0.5); }
+.dark .from-zinc-900 { --tw-gradient-from: hsl(var(--bg-card)); }
+.dark .to-zinc-950 { --tw-gradient-to: hsl(var(--bg-sidebar)); }
+.dark .placeholder\:text-zinc-500::placeholder { color: hsl(var(--text-muted)); }
+.dark .placeholder\:text-zinc-600::placeholder { color: hsl(var(--text-muted) / 0.7); }
+
+/* ============================================
+   LIGHT MODE — Hardcoded class overrides
+   ============================================ */
+.light .bg-black { background-color: hsl(var(--bg)); }
+.light .bg-zinc-950 { background-color: hsl(var(--bg-sidebar)); }
+.light .bg-zinc-900 { background-color: hsl(var(--bg-card)); }
+.light .bg-zinc-900\/50 { background-color: hsl(var(--bg-card) / 0.5); }
+.light .bg-zinc-900\/90 { background-color: hsl(var(--bg-card) / 0.9); }
+.light .bg-zinc-800 { background-color: hsl(var(--bg-card-hover)); }
+.light .bg-zinc-800\/50 { background-color: hsl(var(--bg-card-hover) / 0.5); }
+.light .bg-zinc-800\/30 { background-color: hsl(var(--bg-card-hover) / 0.3); }
+.light .border-zinc-800 { border-color: hsl(var(--border)); }
+.light .border-zinc-800\/50 { border-color: hsl(var(--border) / 0.5); }
+.light .border-zinc-700 { border-color: hsl(var(--border-hover)); }
+.light .text-white { color: hsl(var(--text-primary)); }
+.light .text-zinc-200 { color: hsl(var(--text-secondary)); }
+.light .text-zinc-300 { color: hsl(var(--text-secondary)); }
+.light .text-zinc-400 { color: hsl(var(--text-muted)); }
+.light .text-zinc-500 { color: hsl(var(--text-muted)); }
+.light .text-zinc-600 { color: hsl(var(--text-muted) / 0.6); }
+.light .divide-zinc-800 > :not([hidden]) ~ :not([hidden]) { border-color: hsl(var(--border)); }
+.light .divide-zinc-800\/50 > :not([hidden]) ~ :not([hidden]) { border-color: hsl(var(--border) / 0.5); }
+.light .hover\:bg-zinc-800:hover { background-color: hsl(var(--bg-card-hover)); }
+.light .hover\:bg-zinc-800\/30:hover { background-color: hsl(var(--bg-card-hover) / 0.3); }
+.light .hover\:bg-zinc-800\/50:hover { background-color: hsl(var(--bg-card-hover) / 0.5); }
+.light .from-zinc-900 { --tw-gradient-from: hsl(var(--bg-card)); }
+.light .to-zinc-950 { --tw-gradient-to: hsl(var(--bg-sidebar)); }
+.light .placeholder\:text-zinc-500::placeholder { color: hsl(var(--text-muted)); }
+.light .placeholder\:text-zinc-600::placeholder { color: hsl(var(--text-muted) / 0.7); }
+
+/* ============================================
+   ACCENT — Hardcoded component overrides
+   ============================================ */
+.accent-glow {
+  box-shadow: 0 0 12px hsl(var(--accent) / 0.25);
+}
+.accent-ring:focus {
+  box-shadow: 0 0 0 2px hsl(var(--accent) / 0.3);
+  border-color: hsl(var(--accent));
+}
+.accent-border {
+  border-color: hsl(var(--accent) / 0.3);
+}
