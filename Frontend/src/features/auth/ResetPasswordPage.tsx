@@ -60,7 +60,7 @@ export default function ResetPasswordPage() {
 
   if (done) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-black to-zinc-900 flex items-center justify-center px-6">
+      <div className="dark text-foreground min-h-screen bg-gradient-to-br from-zinc-950 via-black to-zinc-900 flex items-center justify-center px-6">
         <div className="w-full max-w-md bg-muted/40 backdrop-blur-2xl rounded-3xl border border-border/50 shadow-2xl p-10 text-center">
           <div className="w-14 h-14 bg-zinc-800/60 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <ShieldCheck className="w-7 h-7 text-green-400" strokeWidth={1.5} />
@@ -81,7 +81,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-black to-zinc-900 flex items-center justify-center relative overflow-hidden px-6">
+    <div className="dark text-foreground min-h-screen bg-gradient-to-br from-zinc-950 via-black to-zinc-900 flex items-center justify-center relative overflow-hidden px-6">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-zinc-800/5 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-zinc-700/5 rounded-full blur-3xl" />

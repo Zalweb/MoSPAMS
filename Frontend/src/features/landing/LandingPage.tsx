@@ -11,7 +11,7 @@ import AnimatedBackground from '@/shared/components/AnimatedBackground';
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-background overflow-x-clip selection:bg-zinc-800 selection:text-foreground">
+    <div className="dark text-foreground min-h-screen bg-background overflow-x-clip selection:bg-zinc-800 selection:text-foreground">
       <AnimatedBackground />
       <div className="relative z-10">
         <LandingNavbar />
