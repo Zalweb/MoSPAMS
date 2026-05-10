@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowUpRight, ArrowDownRight, MoreHorizontal, Search, Filter, Download } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, MoreHorizontal, Search, Filter, Download, FileText } from 'lucide-react';
 import type { Transaction } from '@/shared/types/shop';
 
 interface TransactionTableProps {
@@ -56,8 +56,12 @@ export function TransactionTable({ transactions, loading }: TransactionTableProp
               <div className="w-12 h-12 border-4 border-border dark:border-zinc-700 border-t-[rgb(var(--color-primary-rgb))] rounded-full animate-spin" />
             </div>
           ) : transactions.length === 0 ? (
-            <div className="p-12 text-center text-muted-foreground">
-              <p>No transactions yet</p>
+            <div className="p-16 flex flex-col items-center justify-center text-center">
+              <div className="w-16 h-16 rounded-full bg-muted/50 dark:bg-zinc-800/50 flex items-center justify-center mb-4">
+                <FileText className="w-8 h-8 text-muted-foreground/50" strokeWidth={1.5} />
+              </div>
+              <p className="text-base font-semibold text-foreground mb-1">No transactions yet</p>
+              <p className="text-sm text-muted-foreground max-w-[250px]">When you start making sales or paying expenses, they will appear here.</p>
             </div>
           ) : (
             <table className="w-full">
@@ -79,7 +83,7 @@ export function TransactionTable({ transactions, loading }: TransactionTableProp
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05, duration: 0.3 }}
-                    className="hover:bg-secondary dark:bg-zinc-800/20 transition-colors group/row"
+                    className="hover:bg-muted/50 dark:hover:bg-white/5 transition-colors group/row"
                   >
                     <td className="px-6 py-4">
                       <p className="text-sm text-muted-foreground tabular-nums">
