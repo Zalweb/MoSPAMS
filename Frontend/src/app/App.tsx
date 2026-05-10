@@ -16,6 +16,7 @@ import SuperAdminLayout from '@/features/superadmin/pages/SuperAdminLayout';
 import { ThemeProvider } from '@/shared/contexts/ThemeContext';
 import ForgotPasswordPage from '@/features/auth/ForgotPasswordPage';
 import ResetPasswordPage from '@/features/auth/ResetPasswordPage';
+import LoginPage from '@/features/auth/LoginPage';
 import LandingPage from '@/features/landing/LandingPage';
 import ShopNotFoundPage from '@/features/common/ShopNotFoundPage';
 
