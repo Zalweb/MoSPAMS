@@ -150,11 +150,11 @@ export default function SuperAdminLayout() {
                       onClick={() => setSidebarOpen(false)}
                       className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 group ${
                         isActive
-                          ? 'bg-zinc-100 dark:bg-zinc-800 text-foreground border-l-2 border-primary dark:border-white'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
+                          ? 'bg-accent dark:bg-zinc-800 text-accent-foreground dark:text-foreground border-l-2 border-primary dark:border-white'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-secondary dark:hover:bg-zinc-800/50'
                       }`}
                     >
-                      <item.icon className={`w-[16px] h-[16px] transition-colors ${isActive ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`} strokeWidth={1.75} />
+                      <item.icon className={`w-[16px] h-[16px] transition-colors ${isActive ? 'text-accent-foreground dark:text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`} strokeWidth={1.75} />
                       <span>{item.label}</span>
                     </NavLink>
                   );

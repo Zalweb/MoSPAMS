@@ -178,7 +178,7 @@ export default function DashboardPage() {
           {/* Top Service Types */}
           <motion.div
             {...fadeUp(0.25)}
-            className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-border/50 rounded-2xl overflow-hidden hover:border-zinc-700/50 transition-all duration-300"
+            className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300"
           >
             <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -186,7 +186,7 @@ export default function DashboardPage() {
                   <Wrench className="w-5 h-5 text-blue-400" strokeWidth={2} />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-white">Top Service Types</h3>
+                  <h3 className="text-base font-semibold text-card-foreground">Top Service Types</h3>
                   <p className="text-xs text-muted-foreground">By revenue this month</p>
                 </div>
               </div>
@@ -205,10 +205,10 @@ export default function DashboardPage() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-bold text-zinc-600 w-5">#{idx + 1}</span>
-                          <span className="text-sm font-medium text-white">{service.name}</span>
+                          <span className="text-sm font-medium text-card-foreground">{service.name}</span>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-bold text-white">₱{service.revenue.toLocaleString()}</p>
+                          <p className="text-sm font-bold text-card-foreground">₱{service.revenue.toLocaleString()}</p>
                           <p className="text-xs text-muted-foreground">{service.count} jobs</p>
                         </div>
                       </div>
@@ -231,7 +231,7 @@ export default function DashboardPage() {
           {/* Payment Methods Breakdown */}
           <motion.div
             {...fadeUp(0.3)}
-            className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-border/50 rounded-2xl overflow-hidden hover:border-zinc-700/50 transition-all duration-300"
+            className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300"
           >
             <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -239,7 +239,7 @@ export default function DashboardPage() {
                   <DollarSign className="w-5 h-5 text-green-400" strokeWidth={2} />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-white">Payment Methods</h3>
+                  <h3 className="text-base font-semibold text-card-foreground">Payment Methods</h3>
                   <p className="text-xs text-muted-foreground">Transaction breakdown</p>
                 </div>
               </div>
@@ -249,9 +249,9 @@ export default function DashboardPage() {
                 {/* Cash */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-white">Cash</span>
+                    <span className="text-sm font-medium text-card-foreground">Cash</span>
                     <div className="text-right">
-                      <p className="text-lg font-bold text-white">{metrics.paymentMethods.cash}</p>
+                      <p className="text-lg font-bold text-card-foreground">{metrics.paymentMethods.cash}</p>
                       <p className="text-xs text-muted-foreground">
                         {((metrics.paymentMethods.cash / (metrics.paymentMethods.cash + metrics.paymentMethods.gcash)) * 100).toFixed(0)}%
                       </p>
@@ -270,9 +270,9 @@ export default function DashboardPage() {
                 {/* GCash */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-white">GCash</span>
+                    <span className="text-sm font-medium text-card-foreground">GCash</span>
                     <div className="text-right">
-                      <p className="text-lg font-bold text-white">{metrics.paymentMethods.gcash}</p>
+                      <p className="text-lg font-bold text-card-foreground">{metrics.paymentMethods.gcash}</p>
                       <p className="text-xs text-muted-foreground">
                         {((metrics.paymentMethods.gcash / (metrics.paymentMethods.cash + metrics.paymentMethods.gcash)) * 100).toFixed(0)}%
                       </p>
@@ -292,7 +292,7 @@ export default function DashboardPage() {
                 <div className="pt-4 border-t border-border/50">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-muted-foreground">Total Transactions</span>
-                    <span className="text-2xl font-bold text-white">
+                    <span className="text-2xl font-bold text-card-foreground">
                       {metrics.paymentMethods.cash + metrics.paymentMethods.gcash}
                     </span>
                   </div>
@@ -310,7 +310,7 @@ export default function DashboardPage() {
           {/* Low Stock Alert */}
           <motion.div
             {...fadeUp(0.35)}
-            className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-border/50 rounded-2xl overflow-hidden hover:border-zinc-700/50 transition-all duration-300"
+            className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300"
           >
             <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -318,7 +318,7 @@ export default function DashboardPage() {
                   <AlertTriangle className="w-5 h-5 text-amber-400" strokeWidth={2} />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-white">Low Stock Alerts</h3>
+                  <h3 className="text-base font-semibold text-card-foreground">Low Stock Alerts</h3>
                   <p className="text-xs text-muted-foreground">Items need restocking</p>
                 </div>
               </div>
@@ -350,7 +350,7 @@ export default function DashboardPage() {
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <p className="text-sm font-medium text-white truncate">{part.name}</p>
+                          <p className="text-sm font-medium text-card-foreground truncate">{part.name}</p>
                           {urgency === 'critical' && (
                             <span className="text-[10px] font-bold text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/20">
                               CRITICAL
@@ -381,7 +381,7 @@ export default function DashboardPage() {
           {/* Recent Services */}
           <motion.div
             {...fadeUp(0.4)}
-            className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-border/50 rounded-2xl overflow-hidden hover:border-zinc-700/50 transition-all duration-300"
+            className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300"
           >
             <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -389,7 +389,7 @@ export default function DashboardPage() {
                   <Wrench className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-white">Recent Services</h3>
+                  <h3 className="text-base font-semibold text-card-foreground">Recent Services</h3>
                   <p className="text-xs text-muted-foreground">Latest service jobs</p>
                 </div>
               </div>
@@ -412,7 +412,7 @@ export default function DashboardPage() {
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <p className="text-sm font-medium text-white truncate">{service.customerName}</p>
+                          <p className="text-sm font-medium text-card-foreground truncate">{service.customerName}</p>
                           <span className={`shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
                             service.status === 'Completed'
                               ? 'bg-green-500/10 text-green-400 border-green-500/20'
@@ -453,15 +453,15 @@ export default function DashboardPage() {
       {(user?.role === 'Owner' || user?.role === 'Staff') && (
         <motion.div
           {...fadeUp(0.45)}
-          className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-border/50 rounded-2xl p-6 hover:border-zinc-700/50 transition-all duration-300"
+          className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 dark:hover:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300"
         >
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-base font-semibold text-white mb-1">Service Pipeline</h3>
+              <h3 className="text-base font-semibold text-card-foreground mb-1">Service Pipeline</h3>
               <p className="text-xs text-muted-foreground">Job status breakdown</p>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold text-white">{totalJobs}</p>
+              <p className="text-2xl font-bold text-card-foreground">{totalJobs}</p>
               <p className="text-xs text-muted-foreground">Total jobs</p>
             </div>
           </div>
@@ -499,7 +499,7 @@ export default function DashboardPage() {
                   <span className="text-xs font-bold text-muted-foreground">{item.percentage}%</span>
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-white leading-none mb-1">{item.count}</p>
+                  <p className="text-3xl font-bold text-card-foreground leading-none mb-1">{item.count}</p>
                   <p className="text-xs font-medium text-muted-foreground">{item.label}</p>
                 </div>
               </motion.div>
@@ -518,7 +518,7 @@ export default function DashboardPage() {
       {/* Additional Stats for Owner/Staff */}
       {(user?.role === 'Owner' || user?.role === 'Staff') && metrics && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <motion.div {...fadeUp(0.5)} className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-border/50 rounded-2xl p-6 hover:border-zinc-700/50 transition-all duration-300">
+          <motion.div {...fadeUp(0.5)} className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 dark:hover:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
@@ -526,7 +526,7 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-wide">Inventory Value</p>
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-2xl font-bold text-card-foreground">
                     ₱{(metrics.inventoryValue ?? 0).toLocaleString()}
                   </p>
                 </div>
@@ -535,7 +535,7 @@ export default function DashboardPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">Total Parts</span>
-                <span className="font-semibold text-white">{metrics.totalParts}</span>
+                <span className="font-semibold text-card-foreground">{metrics.totalParts}</span>
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">In Stock</span>
@@ -555,7 +555,7 @@ export default function DashboardPage() {
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           </motion.div>
 
-          <motion.div {...fadeUp(0.55)} className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-border/50 rounded-2xl p-6 hover:border-zinc-700/50 transition-all duration-300">
+          <motion.div {...fadeUp(0.55)} className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 dark:hover:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
@@ -563,7 +563,7 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-wide">Customer Base</p>
-                  <p className="text-2xl font-bold text-white">{metrics.totalCustomers}</p>
+                  <p className="text-2xl font-bold text-card-foreground">{metrics.totalCustomers}</p>
                 </div>
               </div>
             </div>
@@ -574,7 +574,7 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">Avg Revenue/Customer</span>
-                <span className="font-semibold text-white">
+                <span className="font-semibold text-card-foreground">
                   ₱{(metrics.avgRevenuePerCustomer ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                 </span>
               </div>
@@ -589,7 +589,7 @@ export default function DashboardPage() {
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           </motion.div>
 
-          <motion.div {...fadeUp(0.6)} className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-border/50 rounded-2xl p-6 hover:border-zinc-700/50 transition-all duration-300">
+          <motion.div {...fadeUp(0.6)} className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 dark:hover:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center border border-green-500/20">
@@ -597,7 +597,7 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-wide">Performance</p>
-                  <p className="text-2xl font-bold text-white">{completionRate.toFixed(0)}%</p>
+                  <p className="text-2xl font-bold text-card-foreground">{completionRate.toFixed(0)}%</p>
                 </div>
               </div>
             </div>
@@ -608,7 +608,7 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">Avg Job Time</span>
-                <span className="font-semibold text-white">{avgJobTime}</span>
+                <span className="font-semibold text-card-foreground">{avgJobTime}</span>
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">Revenue Growth</span>
