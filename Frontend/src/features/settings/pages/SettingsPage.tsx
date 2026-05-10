@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Store, Palette, Globe, Upload, Copy, RefreshCw, Check, AlertCircle, User, Lock, Plus, ExternalLink } from 'lucide-react';
+import { Store, Palette, Globe, Upload, Copy, RefreshCw, Check, AlertCircle, User, Lock, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiGet, apiMutation } from '@/shared/lib/api';
 import { useAuth } from '@/features/auth/context/AuthContext';

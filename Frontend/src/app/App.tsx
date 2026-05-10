@@ -33,7 +33,6 @@ const UsersPage = lazy(() => import('@/features/users/pages/UsersPage'));
 const ApprovalsPage = lazy(() => import('@/features/users/pages/ApprovalsPage'));
 const CustomerDashboard = lazy(() => import('@/features/customers/pages/CustomerDashboard'));
 const CustomerManagementPage = lazy(() => import('@/features/customers/pages/CustomerManagementPage'));
-                            <Route path="mechanics" element={<MechanicManagementPage />} />
 const BookService = lazy(() => import('@/features/customers/pages/BookService'));
 const ServiceHistory = lazy(() => import('@/features/customers/pages/ServiceHistory'));
 const Payments = lazy(() => import('@/features/customers/pages/Payments'));
@@ -250,6 +249,7 @@ function App() {
                             <Route path="activity-logs" element={<ActivityLogsPage />} />
                             <Route path="settings" element={<SettingsPage />} />
                             <Route path="customers" element={<CustomerManagementPage />} />
+                            <Route path="mechanics" element={<MechanicManagementPage />} />
                           </Route>
                           <Route element={<RequireCustomer />}>
                             <Route path="customer" element={<CustomerDashboard />} />

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Package, Wrench, ShoppingCart,
   BarChart3, Shield, LogOut, Menu, X, ClipboardCheck,
-  Home, Calendar, CreditCard, ScrollText, Settings, Bike, Bell,
+  Home, Calendar, CreditCard, ScrollText, Settings, Bike, Bell, Users,
 } from 'lucide-react';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { useTenantBranding } from '@/shared/contexts/TenantBrandingContext';
@@ -31,6 +31,7 @@ const navGroups = [
     title: 'REPORTS & USERS',
     items: [
       { label: 'Reports', to: '/dashboard/reports', icon: BarChart3 },
+      { label: 'Users', to: '/dashboard/users', icon: Shield },
       { label: 'Customers', to: '/dashboard/customers', icon: Users },
       { label: 'Mechanics', to: '/dashboard/mechanics', icon: Wrench },
       { label: 'Approvals', to: '/dashboard/approvals', icon: ClipboardCheck },
