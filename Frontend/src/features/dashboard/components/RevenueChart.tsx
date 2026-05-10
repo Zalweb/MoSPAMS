@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { useState, useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface RevenueChartProps {
