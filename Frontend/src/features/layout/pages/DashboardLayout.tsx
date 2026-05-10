@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Package, Wrench, ShoppingCart,
   BarChart3, Shield, LogOut, Menu, X, ClipboardCheck,
-  Home, Calendar, CreditCard, ScrollText, Settings, Bike, Bell, Users,
+  Home, Calendar, CreditCard, ScrollText, Settings, Bike, Bell, Users, Sun, Moon
 } from 'lucide-react';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { useTenantBranding } from '@/shared/contexts/TenantBrandingContext';
@@ -220,6 +220,14 @@ export default function DashboardLayout() {
 
             {/* Right side actions */}
             <div className="ml-auto flex items-center gap-2">
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-xl hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors mr-1"
+                title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              >
+                {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+
               {/* Notification Bell — customers only */}
               {role === 'Customer' || role === 'Owner' ? (
                 <div className="relative">
