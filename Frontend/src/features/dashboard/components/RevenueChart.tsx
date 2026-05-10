@@ -49,7 +49,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
       <div className="relative bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-border/50 rounded-2xl p-6 overflow-hidden hover:border-zinc-700/50 transition-all duration-300">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-foreground mb-1">Your Assets</h3>
+            <h3 className="text-lg font-semibold text-card-foreground mb-1">Your Assets</h3>
             <p className="text-sm text-muted-foreground">Revenue trend</p>
           </div>
 
@@ -77,7 +77,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
             <div className="flex items-center gap-6 mb-4">
               <div>
                 <p className="text-xs text-muted-foreground mb-1">Total Revenue</p>
-                <p className="text-2xl font-bold text-foreground">₱{total.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-card-foreground">₱{total.toLocaleString()}</p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground mb-1">Daily Average</p>

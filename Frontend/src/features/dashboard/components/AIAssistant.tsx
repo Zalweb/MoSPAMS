@@ -58,7 +58,7 @@ export function AIAssistant({ metrics }: AIAssistantProps) {
               <Sparkles className="w-5 h-5 text-[rgb(var(--color-primary-rgb))]" />
             </div>
             <div>
-              <h3 className="text-base font-semibold text-foreground">AI Assistant</h3>
+              <h3 className="text-base font-semibold text-card-foreground">AI Assistant</h3>
               <p className="text-xs text-muted-foreground">Shop insights</p>
             </div>
           </div>

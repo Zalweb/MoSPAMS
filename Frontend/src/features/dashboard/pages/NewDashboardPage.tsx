@@ -186,7 +186,7 @@ export default function DashboardPage() {
                   <Wrench className="w-5 h-5 text-blue-400" strokeWidth={2} />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-foreground">Top Service Types</h3>
+                  <h3 className="text-base font-semibold text-white">Top Service Types</h3>
                   <p className="text-xs text-muted-foreground">By revenue this month</p>
                 </div>
               </div>
@@ -205,10 +205,10 @@ export default function DashboardPage() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-bold text-zinc-600 w-5">#{idx + 1}</span>
-                          <span className="text-sm font-medium text-foreground">{service.name}</span>
+                          <span className="text-sm font-medium text-white">{service.name}</span>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-bold text-foreground">₱{service.revenue.toLocaleString()}</p>
+                          <p className="text-sm font-bold text-white">₱{service.revenue.toLocaleString()}</p>
                           <p className="text-xs text-muted-foreground">{service.count} jobs</p>
                         </div>
                       </div>
@@ -239,7 +239,7 @@ export default function DashboardPage() {
                   <DollarSign className="w-5 h-5 text-green-400" strokeWidth={2} />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-foreground">Payment Methods</h3>
+                  <h3 className="text-base font-semibold text-white">Payment Methods</h3>
                   <p className="text-xs text-muted-foreground">Transaction breakdown</p>
                 </div>
               </div>
@@ -249,9 +249,9 @@ export default function DashboardPage() {
                 {/* Cash */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-foreground">Cash</span>
+                    <span className="text-sm font-medium text-white">Cash</span>
                     <div className="text-right">
-                      <p className="text-lg font-bold text-foreground">{metrics.paymentMethods.cash}</p>
+                      <p className="text-lg font-bold text-white">{metrics.paymentMethods.cash}</p>
                       <p className="text-xs text-muted-foreground">
                         {((metrics.paymentMethods.cash / (metrics.paymentMethods.cash + metrics.paymentMethods.gcash)) * 100).toFixed(0)}%
                       </p>
@@ -270,9 +270,9 @@ export default function DashboardPage() {
                 {/* GCash */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-foreground">GCash</span>
+                    <span className="text-sm font-medium text-white">GCash</span>
                     <div className="text-right">
-                      <p className="text-lg font-bold text-foreground">{metrics.paymentMethods.gcash}</p>
+                      <p className="text-lg font-bold text-white">{metrics.paymentMethods.gcash}</p>
                       <p className="text-xs text-muted-foreground">
                         {((metrics.paymentMethods.gcash / (metrics.paymentMethods.cash + metrics.paymentMethods.gcash)) * 100).toFixed(0)}%
                       </p>
@@ -292,7 +292,7 @@ export default function DashboardPage() {
                 <div className="pt-4 border-t border-border/50">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-muted-foreground">Total Transactions</span>
-                    <span className="text-2xl font-bold text-foreground">
+                    <span className="text-2xl font-bold text-white">
                       {metrics.paymentMethods.cash + metrics.paymentMethods.gcash}
                     </span>
                   </div>
@@ -318,7 +318,7 @@ export default function DashboardPage() {
                   <AlertTriangle className="w-5 h-5 text-amber-400" strokeWidth={2} />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-foreground">Low Stock Alerts</h3>
+                  <h3 className="text-base font-semibold text-white">Low Stock Alerts</h3>
                   <p className="text-xs text-muted-foreground">Items need restocking</p>
                 </div>
               </div>
@@ -350,7 +350,7 @@ export default function DashboardPage() {
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <p className="text-sm font-medium text-foreground truncate">{part.name}</p>
+                          <p className="text-sm font-medium text-white truncate">{part.name}</p>
                           {urgency === 'critical' && (
                             <span className="text-[10px] font-bold text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/20">
                               CRITICAL
@@ -389,7 +389,7 @@ export default function DashboardPage() {
                   <Wrench className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-foreground">Recent Services</h3>
+                  <h3 className="text-base font-semibold text-white">Recent Services</h3>
                   <p className="text-xs text-muted-foreground">Latest service jobs</p>
                 </div>
               </div>
@@ -412,7 +412,7 @@ export default function DashboardPage() {
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <p className="text-sm font-medium text-foreground truncate">{service.customerName}</p>
+                          <p className="text-sm font-medium text-white truncate">{service.customerName}</p>
                           <span className={`shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
                             service.status === 'Completed'
                               ? 'bg-green-500/10 text-green-400 border-green-500/20'
@@ -457,11 +457,11 @@ export default function DashboardPage() {
         >
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-base font-semibold text-foreground mb-1">Service Pipeline</h3>
+              <h3 className="text-base font-semibold text-white mb-1">Service Pipeline</h3>
               <p className="text-xs text-muted-foreground">Job status breakdown</p>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold text-foreground">{totalJobs}</p>
+              <p className="text-2xl font-bold text-white">{totalJobs}</p>
               <p className="text-xs text-muted-foreground">Total jobs</p>
             </div>
           </div>
@@ -499,7 +499,7 @@ export default function DashboardPage() {
                   <span className="text-xs font-bold text-muted-foreground">{item.percentage}%</span>
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-foreground leading-none mb-1">{item.count}</p>
+                  <p className="text-3xl font-bold text-white leading-none mb-1">{item.count}</p>
                   <p className="text-xs font-medium text-muted-foreground">{item.label}</p>
                 </div>
               </motion.div>
@@ -526,7 +526,7 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-wide">Inventory Value</p>
-                  <p className="text-2xl font-bold text-foreground">
+                  <p className="text-2xl font-bold text-white">
                     ₱{(metrics.inventoryValue ?? 0).toLocaleString()}
                   </p>
                 </div>
@@ -535,7 +535,7 @@ export default function DashboardPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">Total Parts</span>
-                <span className="font-semibold text-foreground">{metrics.totalParts}</span>
+                <span className="font-semibold text-white">{metrics.totalParts}</span>
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">In Stock</span>
@@ -563,7 +563,7 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-wide">Customer Base</p>
-                  <p className="text-2xl font-bold text-foreground">{metrics.totalCustomers}</p>
+                  <p className="text-2xl font-bold text-white">{metrics.totalCustomers}</p>
                 </div>
               </div>
             </div>
@@ -574,7 +574,7 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">Avg Revenue/Customer</span>
-                <span className="font-semibold text-foreground">
+                <span className="font-semibold text-white">
                   ₱{(metrics.avgRevenuePerCustomer ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                 </span>
               </div>
@@ -597,7 +597,7 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-wide">Performance</p>
-                  <p className="text-2xl font-bold text-foreground">{completionRate.toFixed(0)}%</p>
+                  <p className="text-2xl font-bold text-white">{completionRate.toFixed(0)}%</p>
                 </div>
               </div>
             </div>
@@ -608,7 +608,7 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">Avg Job Time</span>
-                <span className="font-semibold text-foreground">{avgJobTime}</span>
+                <span className="font-semibold text-white">{avgJobTime}</span>
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">Revenue Growth</span>

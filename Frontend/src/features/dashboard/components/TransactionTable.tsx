@@ -32,18 +32,18 @@ export function TransactionTable({ transactions, loading }: TransactionTableProp
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border/50">
           <div>
-            <h3 className="text-lg font-semibold text-foreground mb-1">Transaction History</h3>
+            <h3 className="text-lg font-semibold text-card-foreground mb-1">Transaction History</h3>
             <p className="text-sm text-muted-foreground">Recent financial activity</p>
           </div>
           
           <div className="flex items-center gap-2">
-            <button className="p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 text-muted-foreground hover:text-foreground transition-colors">
+            <button className="p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 text-muted-foreground hover:text-card-foreground transition-colors">
               <Search className="w-4 h-4" />
             </button>
-            <button className="p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 text-muted-foreground hover:text-foreground transition-colors">
+            <button className="p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 text-muted-foreground hover:text-card-foreground transition-colors">
               <Filter className="w-4 h-4" />
             </button>
-            <button className="p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 text-muted-foreground hover:text-foreground transition-colors">
+            <button className="p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 text-muted-foreground hover:text-card-foreground transition-colors">
               <Download className="w-4 h-4" />
             </button>
           </div>
@@ -91,7 +91,7 @@ export function TransactionTable({ transactions, loading }: TransactionTableProp
                       </p>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-sm font-medium text-foreground">{transaction.description}</p>
+                      <p className="text-sm font-medium text-card-foreground">{transaction.description}</p>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
@@ -123,7 +123,7 @@ export function TransactionTable({ transactions, loading }: TransactionTableProp
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button className="p-1.5 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors opacity-0 group-hover/row:opacity-100">
+                      <button className="p-1.5 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-card-foreground transition-colors opacity-0 group-hover/row:opacity-100">
                         <MoreHorizontal className="w-4 h-4" />
                       </button>
                     </td>

@@ -54,7 +54,7 @@ export function KPICard({ title, value, change, comparison, trend, icon: Icon, l
               <div className="h-8 w-32 bg-zinc-800/50 rounded animate-pulse" />
             ) : (
               <>
-                <p className="text-3xl font-bold text-foreground tracking-tight mb-1">
+                <p className="text-3xl font-bold text-card-foreground tracking-tight mb-1">
                   {typeof value === 'number' ? value.toLocaleString() : value}
                 </p>
                 {comparison && (
