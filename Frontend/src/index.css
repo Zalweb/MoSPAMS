@@ -73,12 +73,27 @@
   }
 
   * {
-    @apply border-border transition-colors duration-500;
+    @apply border-border;
   }
 
   body {
-    @apply bg-background text-foreground antialiased transition-colors duration-500;
+    @apply bg-background text-foreground antialiased transition-colors duration-500 ease-in-out;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  /* Smooth Theme Transitions */
+  .dark,
+  .light,
+  .dark body,
+  .light body {
+    transition: background-color 0.5s ease-in-out, border-color 0.5s ease-in-out, color 0.5s ease-in-out !important;
+  }
+
+  /* View Transition API - Root Animation */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.5s;
+    animation-timing-function: ease-in-out;
   }
 
   html {

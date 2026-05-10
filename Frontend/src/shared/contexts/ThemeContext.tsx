@@ -43,7 +43,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [theme]);
 
   const toggleTheme = () => {
-    setThemeState(prev => prev === 'dark' ? 'light' : 'dark');
+    // Smooth transition using View Transition API if supported
+    if (!document.startViewTransition) {
+      setThemeState(prev => prev === 'dark' ? 'light' : 'dark');
+      return;
+    }
+
+    document.startViewTransition(() => {
+      setThemeState(prev => prev === 'dark' ? 'light' : 'dark');
+    });
   };
 
   const setTheme = (newTheme: Theme) => {
