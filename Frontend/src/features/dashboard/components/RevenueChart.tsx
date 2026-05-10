@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { useState, useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { useTheme } from '@/theme/ThemeProvider';
 
 interface RevenueChartProps {
   data: Array<{ date: string; amount: number }>;
@@ -12,7 +12,6 @@ type ChartPeriod = 'daily' | 'weekly' | 'monthly';
 
 export function RevenueChart({ data, loading }: RevenueChartProps) {
   const [period, setPeriod] = useState<ChartPeriod>('daily');
-  const { accentHex } = useTheme();
 
   const filteredData = useMemo(() => {
     const now = new Date();
@@ -68,7 +67,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
 
         {loading ? (
           <div className="h-64 flex items-center justify-center">
-            <div className="w-12 h-12 border-4 border-zinc-700 rounded-full animate-spin" style={{ borderTopColor: accentHex }} />
+            <div className="w-12 h-12 border-4 border-zinc-700 border-t-[rgb(var(--color-primary-rgb))] rounded-full animate-spin" />
           </div>
         ) : filteredData.length === 0 ? (
           <div className="h-64 flex items-center justify-center text-zinc-500">
@@ -92,8 +91,8 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                 <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={accentHex} stopOpacity={0.3} />
-                      <stop offset="95%" stopColor={accentHex} stopOpacity={0} />
+                      <stop offset="5%" stopColor="rgb(var(--color-primary-rgb))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="rgb(var(--color-primary-rgb))" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
@@ -125,7 +124,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                   <Area
                     type="monotone"
                     dataKey="amount"
-                    stroke={accentHex}
+                    stroke="rgb(var(--color-primary-rgb))"
                     strokeWidth={2}
                     fill="url(#colorRevenue)"
                     animationDuration={1000}
@@ -136,7 +135,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
           </>
         )}
 
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ background: `linear-gradient(to bottom right, ${accentHex}0D, transparent)` }} />
+        <div className="absolute inset-0 bg-gradient-to-br from-[rgb(var(--color-primary-rgb))]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
       </div>
     </motion.div>
   );
