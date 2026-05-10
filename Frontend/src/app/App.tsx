@@ -59,6 +59,7 @@ const SuperAdminSubscriptionsPage = lazy(() => import('@/features/superadmin/pag
 const SuperAdminAccessControlPage = lazy(() => import('@/features/superadmin/pages/SuperAdminAccessControlPage'));
 const SuperAdminAuditLogsPage = lazy(() => import('@/features/superadmin/pages/SuperAdminAuditLogsPage'));
 const SuperAdminSettingsPage = lazy(() => import('@/features/superadmin/pages/SuperAdminSettingsPage'));
+const SuperAdminProfilePage = lazy(() => import('@/features/superadmin/pages/SuperAdminProfilePage'));
 
 // PlaceholderPages — default + named exports
 const RevenueReportsPage = lazy(() => import('@/features/superadmin/pages/RevenueReportsPage'));
@@ -213,7 +214,7 @@ function App() {
 
                           <Route path="audit-logs" element={<SuperAdminAuditLogsPage />} />
 
-                          <Route path="settings" element={<SuperAdminSettingsPage />} />
+                          <Route path="settings" element={<SuperAdminSettingsPage />} />`r`n                          <Route path="profile" element={<SuperAdminProfilePage />} />
 
                           <Route path="support/tickets" element={<SupportTicketsPage />} />
                           <Route path="support/feedback" element={<ShopFeedbackPage />} />

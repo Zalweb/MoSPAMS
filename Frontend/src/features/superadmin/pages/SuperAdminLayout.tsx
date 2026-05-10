@@ -13,11 +13,11 @@ import {
   LogOut,
   Menu,
   MessageSquare,
-  Settings,
   Shield,
   Store,
   TrendingUp,
   Users,
+  User,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/features/auth/context/AuthContext';
@@ -64,7 +64,6 @@ const NAV_SECTIONS = [
   {
     title: 'SETTINGS',
     items: [
-      { to: '/superadmin/settings', label: 'Platform Settings', icon: Settings },
       { to: '/superadmin/audit-logs', label: 'Audit Logs', icon: Activity },
     ],
   },
@@ -151,7 +150,12 @@ export default function SuperAdminLayout() {
 
           <div className="flex-1" />
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <button className="relative p-2 rounded-xl hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors">
+              <Bell className="w-5 h-5" />
+            </button>
+
+            <div className="w-px h-6 bg-zinc-800" />
             <div className="relative">
               <motion.button
                 onClick={() => setProfileOpen(o => !o)}
@@ -178,6 +182,15 @@ export default function SuperAdminLayout() {
                     <div className="px-4 py-3 border-b border-zinc-800">
                       <p className="text-sm font-semibold text-white truncate">{user?.name}</p>
                       <p className="text-xs text-zinc-500 mt-0.5">{user?.email}</p>
+                    </div>
+                    <div className="py-1">
+                      <button
+                        onClick={() => { setProfileOpen(false); navigate('/superadmin/profile'); }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors"
+                      >
+                        <User className="w-[18px] h-[18px]" strokeWidth={1.5} />
+                        User Profile
+                      </button>
                     </div>
                     <button
                       onClick={() => { setProfileOpen(false); handleLogout(); }}
