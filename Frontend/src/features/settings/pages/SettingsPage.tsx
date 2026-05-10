@@ -3,6 +3,7 @@ import { Store, Palette, Globe, Upload, Copy, RefreshCw, Check, AlertCircle, Use
 import { toast } from 'sonner';
 import { apiGet, apiMutation } from '@/shared/lib/api';
 import { useAuth } from '@/features/auth/context/AuthContext';
+import { useTenantBranding } from '@/shared/contexts/TenantBrandingContext';
 
 interface ShopBranding {
   shopName: string;
@@ -22,6 +23,7 @@ type TabType = 'user' | 'password' | 'shop' | 'branding' | 'domain';
 
 export default function SettingsPage() {
   const { user } = useAuth();
+  const { refreshBranding } = useTenantBranding();
   const [activeTab, setActiveTab] = useState<TabType>('user');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -178,8 +180,7 @@ export default function SettingsPage() {
         secondaryColor: branding.secondaryColor,
       });
       toast.success('Branding updated successfully');
-      document.documentElement.style.setProperty('--color-primary-rgb', hexToRgb(branding.primaryColor));
-      document.documentElement.style.setProperty('--color-secondary-rgb', hexToRgb(branding.secondaryColor));
+      await refreshBranding(); // Update global branding state and CSS variables
     } catch (error) {
       console.error('Failed to save branding:', error);
       toast.error('Failed to save branding');
@@ -194,6 +195,7 @@ export default function SettingsPage() {
       formData.append('logo', file);
       await apiMutation('/api/shop/logo', 'POST', formData);
       toast.success('Logo uploaded successfully');
+      await refreshBranding();
       loadBranding();
     } catch (error) {
       console.error('Failed to upload logo:', error);
@@ -205,6 +207,7 @@ export default function SettingsPage() {
     try {
       await apiMutation('/api/shop/logo', 'DELETE');
       toast.success('Logo deleted successfully');
+      await refreshBranding();
       loadBranding();
     } catch (error) {
       console.error('Failed to delete logo:', error);

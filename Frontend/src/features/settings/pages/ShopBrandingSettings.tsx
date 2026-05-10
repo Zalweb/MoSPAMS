@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { apiGet, apiMutation } from '@/shared/lib/api';
 import { useShop } from '@/shared/contexts/ShopContext';
+import { useTenantBranding } from '@/shared/contexts/TenantBrandingContext';
 import { toast } from 'sonner';
 
 interface ShopBranding {
@@ -21,6 +22,7 @@ interface ShopBranding {
 
 export default function ShopBrandingSettings() {
   const { refetch } = useShop();
+  const { refreshBranding } = useTenantBranding();
   const [branding, setBranding] = useState<ShopBranding | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -58,6 +60,7 @@ export default function ShopBrandingSettings() {
       setSaving(true);
       await apiMutation('/api/shop/branding', 'PATCH', formData);
       toast.success('Shop branding updated successfully');
+      await refreshBranding(); // Update global branding state
       await refetch(); // Refresh global shop context
       await fetchBranding();
     } catch (error) {
@@ -91,6 +94,7 @@ export default function ShopBrandingSettings() {
 
       if (!response.ok) throw new Error('Upload failed');
       toast.success('Logo uploaded successfully');
+      await refreshBranding();
       await refetch();
       await fetchBranding();
     } catch (error) {
@@ -103,6 +107,7 @@ export default function ShopBrandingSettings() {
     try {
       await apiMutation('/api/shop/logo', 'DELETE');
       toast.success('Logo deleted successfully');
+      await refreshBranding();
       await refetch();
       await fetchBranding();
     } catch (error) {
