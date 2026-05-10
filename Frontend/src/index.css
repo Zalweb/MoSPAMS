@@ -77,23 +77,22 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased transition-colors duration-500 ease-in-out;
+    @apply bg-background text-foreground antialiased;
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 
-  /* Smooth Theme Transitions */
+  /* Optimize theme transition */
   .dark,
-  .light,
-  .dark body,
-  .light body {
-    transition: background-color 0.5s ease-in-out, border-color 0.5s ease-in-out, color 0.5s ease-in-out !important;
+  .light {
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* View Transition API - Root Animation */
+  /* View Transition API - Optimized Root Animation */
   ::view-transition-old(root),
   ::view-transition-new(root) {
-    animation-duration: 0.5s;
-    animation-timing-function: ease-in-out;
+    animation-duration: 0.3s;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   html {
