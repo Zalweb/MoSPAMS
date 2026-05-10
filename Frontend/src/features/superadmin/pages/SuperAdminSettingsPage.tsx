@@ -68,12 +68,12 @@ export default function SuperAdminSettingsPage() {
             <h3 className="text-[13px] font-semibold text-foreground mb-4">Configuration</h3>
 
             <label className="flex items-center justify-between mb-4">
-                <span className="text-[12px] text-zinc-300">Maintenance Mode</span>
+                <span className="text-[12px] text-muted-foreground dark:text-zinc-300">Maintenance Mode</span>
               <input
                 type="checkbox"
                 checked={settings.maintenanceMode}
                 onChange={(event) => setSettings((prev) => (prev ? { ...prev, maintenanceMode: event.target.checked } : prev))}
-                className="w-4 h-4 accent-white border-zinc-700 bg-muted"
+                className="w-4 h-4 accent-white border-border dark:border-zinc-700 bg-muted"
               />
             </label>
 
@@ -83,7 +83,7 @@ export default function SuperAdminSettingsPage() {
                 <Input
                   value={settings.weatherApiKey ?? ''}
                   onChange={(event) => setSettings((prev) => (prev ? { ...prev, weatherApiKey: event.target.value } : prev))}
-                  className="mt-1.5 h-9 rounded-xl border-zinc-700 bg-muted text-zinc-200 placeholder:text-muted-foreground"
+                  className="mt-1.5 h-9 rounded-xl border-border dark:border-zinc-700 bg-muted text-foreground dark:text-zinc-200 placeholder:text-muted-foreground"
                 />
               </label>
 
@@ -92,7 +92,7 @@ export default function SuperAdminSettingsPage() {
                 <Input
                   value={settings.smsApiKey ?? ''}
                   onChange={(event) => setSettings((prev) => (prev ? { ...prev, smsApiKey: event.target.value } : prev))}
-                  className="mt-1.5 h-9 rounded-xl border-zinc-700 bg-muted text-zinc-200 placeholder:text-muted-foreground"
+                  className="mt-1.5 h-9 rounded-xl border-border dark:border-zinc-700 bg-muted text-foreground dark:text-zinc-200 placeholder:text-muted-foreground"
                 />
               </label>
             </div>
@@ -105,7 +105,7 @@ export default function SuperAdminSettingsPage() {
           <section className="space-y-4">
             <div className="bg-card rounded-2xl border border-border p-5">
               <h3 className="text-[13px] font-semibold text-foreground mb-3">Database Health</h3>
-              <p className="text-[12px] text-zinc-300">
+              <p className="text-[12px] text-muted-foreground dark:text-zinc-300">
                 Status:{' '}
                 <span className={health.database.ok ? 'text-green-400 font-semibold' : 'text-red-400 font-semibold'}>
                   {health.database.ok ? 'Healthy' : 'Issue Detected'}
@@ -137,7 +137,7 @@ export default function SuperAdminSettingsPage() {
 function Metric({ label, value }: { label: string; value: number }) {
   return (
     <div className="flex items-center justify-between py-2 border-b border-border last:border-b-0">
-      <span className="text-[12px] text-zinc-300">{label}</span>
+      <span className="text-[12px] text-muted-foreground dark:text-zinc-300">{label}</span>
       <span className="text-[12px] font-semibold text-foreground">{value}</span>
     </div>
   );

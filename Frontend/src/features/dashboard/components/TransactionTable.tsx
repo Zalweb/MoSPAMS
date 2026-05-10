@@ -28,7 +28,7 @@ export function TransactionTable({ transactions, loading }: TransactionTableProp
       transition={{ delay: 0.3, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className="relative group"
     >
-      <div className="relative bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300">
+      <div className="relative bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-border dark:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border/50">
           <div>
@@ -37,13 +37,13 @@ export function TransactionTable({ transactions, loading }: TransactionTableProp
           </div>
           
           <div className="flex items-center gap-2">
-            <button className="p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 text-muted-foreground hover:text-card-foreground transition-colors">
+            <button className="p-2 rounded-lg bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 hover:bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700/50 text-muted-foreground hover:text-card-foreground transition-colors">
               <Search className="w-4 h-4" />
             </button>
-            <button className="p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 text-muted-foreground hover:text-card-foreground transition-colors">
+            <button className="p-2 rounded-lg bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 hover:bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700/50 text-muted-foreground hover:text-card-foreground transition-colors">
               <Filter className="w-4 h-4" />
             </button>
-            <button className="p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 text-muted-foreground hover:text-card-foreground transition-colors">
+            <button className="p-2 rounded-lg bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 hover:bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700/50 text-muted-foreground hover:text-card-foreground transition-colors">
               <Download className="w-4 h-4" />
             </button>
           </div>
@@ -53,7 +53,7 @@ export function TransactionTable({ transactions, loading }: TransactionTableProp
         <div className="overflow-x-auto">
           {loading ? (
             <div className="p-12 flex items-center justify-center">
-              <div className="w-12 h-12 border-4 border-zinc-700 border-t-[rgb(var(--color-primary-rgb))] rounded-full animate-spin" />
+              <div className="w-12 h-12 border-4 border-border dark:border-zinc-700 border-t-[rgb(var(--color-primary-rgb))] rounded-full animate-spin" />
             </div>
           ) : transactions.length === 0 ? (
             <div className="p-12 text-center text-muted-foreground">
@@ -72,14 +72,14 @@ export function TransactionTable({ transactions, loading }: TransactionTableProp
                   <th className="text-right px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800/30">
+              <tbody className="divide-y divide-border dark:divide-zinc-800/30">
                 {transactions.map((transaction, index) => (
                   <motion.tr
                     key={transaction.id}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05, duration: 0.3 }}
-                    className="hover:bg-zinc-800/20 transition-colors group/row"
+                    className="hover:bg-secondary dark:bg-zinc-800/20 transition-colors group/row"
                   >
                     <td className="px-6 py-4">
                       <p className="text-sm text-muted-foreground tabular-nums">
@@ -123,7 +123,7 @@ export function TransactionTable({ transactions, loading }: TransactionTableProp
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button className="p-1.5 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-card-foreground transition-colors opacity-0 group-hover/row:opacity-100">
+                      <button className="p-1.5 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-card-foreground transition-colors opacity-0 group-hover/row:opacity-100">
                         <MoreHorizontal className="w-4 h-4" />
                       </button>
                     </td>

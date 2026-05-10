@@ -70,11 +70,11 @@ export default function AddPlatformAdminPage() {
                       type="text"
                       value={formData.email}
                       readOnly
-                      className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-foreground"
+                      className="flex-1 bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-lg px-3 py-2 text-sm text-foreground"
                     />
                     <button
                       onClick={() => copyToClipboard(formData.email)}
-                      className="p-2 rounded-lg bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 transition-colors"
+                      className="p-2 rounded-lg bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 hover:bg-muted dark:bg-zinc-700 transition-colors"
                     >
                       <Copy className="w-4 h-4 text-muted-foreground" strokeWidth={2} />
                     </button>
@@ -88,11 +88,11 @@ export default function AddPlatformAdminPage() {
                       type="text"
                       value={credentials.temporaryPassword}
                       readOnly
-                      className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-foreground font-mono"
+                      className="flex-1 bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-lg px-3 py-2 text-sm text-foreground font-mono"
                     />
                     <button
                       onClick={() => copyToClipboard(credentials.temporaryPassword!)}
-                      className="p-2 rounded-lg bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 transition-colors"
+                      className="p-2 rounded-lg bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 hover:bg-muted dark:bg-zinc-700 transition-colors"
                     >
                       <Copy className="w-4 h-4 text-muted-foreground" strokeWidth={2} />
                     </button>
@@ -119,7 +119,7 @@ export default function AddPlatformAdminPage() {
           <div className="flex gap-3">
             <button
               onClick={() => navigate('/superadmin/access-control')}
-              className="flex-1 px-6 py-3 rounded-lg bg-zinc-800 border border-zinc-700 text-foreground font-semibold hover:bg-zinc-700 transition-colors"
+              className="flex-1 px-6 py-3 rounded-lg bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 text-foreground font-semibold hover:bg-muted dark:bg-zinc-700 transition-colors"
             >
               View All Admins
             </button>
@@ -144,7 +144,7 @@ export default function AddPlatformAdminPage() {
       <div className="flex items-center gap-4">
         <button
           onClick={() => navigate('/superadmin/access-control')}
-          className="p-2 rounded-lg bg-muted border border-border hover:bg-zinc-800 transition-colors"
+          className="p-2 rounded-lg bg-muted border border-border hover:bg-secondary dark:bg-zinc-800 transition-colors"
         >
           <ArrowLeft className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
         </button>
@@ -162,7 +162,7 @@ export default function AddPlatformAdminPage() {
           </h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2">
+              <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">
                 Full Name <span className="text-red-400">*</span>
               </label>
               <div className="relative">
@@ -173,13 +173,13 @@ export default function AddPlatformAdminPage() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="Enter full name"
-                  className="w-full bg-muted border border-border rounded-lg pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-zinc-700 focus:ring-1 focus:ring-zinc-700"
+                  className="w-full bg-muted border border-border rounded-lg pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border dark:border-zinc-700 focus:ring-1 focus:ring-zinc-700"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2">
+              <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">
                 Email Address <span className="text-red-400">*</span>
               </label>
               <div className="relative">
@@ -190,14 +190,14 @@ export default function AddPlatformAdminPage() {
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   placeholder="admin@example.com"
-                  className="w-full bg-muted border border-border rounded-lg pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-zinc-700 focus:ring-1 focus:ring-zinc-700"
+                  className="w-full bg-muted border border-border rounded-lg pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border dark:border-zinc-700 focus:ring-1 focus:ring-zinc-700"
                 />
               </div>
               <p className="text-xs text-muted-foreground mt-1">This will be used as the login email</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2">
+              <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">
                 Password <span className="text-muted-foreground">(Optional)</span>
               </label>
               <div className="relative">
@@ -207,7 +207,7 @@ export default function AddPlatformAdminPage() {
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   placeholder="Leave empty to auto-generate"
-                  className="w-full bg-muted border border-border rounded-lg pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-zinc-700 focus:ring-1 focus:ring-zinc-700"
+                  className="w-full bg-muted border border-border rounded-lg pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border dark:border-zinc-700 focus:ring-1 focus:ring-zinc-700"
                 />
               </div>
               <p className="text-xs text-muted-foreground mt-1">
@@ -234,7 +234,7 @@ export default function AddPlatformAdminPage() {
           <button
             type="button"
             onClick={() => navigate('/superadmin/access-control')}
-            className="flex-1 px-6 py-3 rounded-lg bg-muted border border-border text-foreground font-semibold hover:bg-zinc-800 transition-colors"
+            className="flex-1 px-6 py-3 rounded-lg bg-muted border border-border text-foreground font-semibold hover:bg-secondary dark:bg-zinc-800 transition-colors"
           >
             Cancel
           </button>

@@ -43,7 +43,7 @@ export default function SuperAdminAuditLogsPage() {
             placeholder="Search actions, users, shops..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full bg-muted border border-border rounded-lg pl-9 pr-4 py-2 text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-zinc-700"
+            className="w-full bg-muted border border-border rounded-lg pl-9 pr-4 py-2 text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border dark:border-zinc-700"
           />
         </div>
         <input
@@ -51,7 +51,7 @@ export default function SuperAdminAuditLogsPage() {
           placeholder="Filter by action..."
           value={actionFilter}
           onChange={e => setActionFilter(e.target.value)}
-          className="bg-muted border border-border rounded-lg px-4 py-2 text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-zinc-700 min-w-[160px]"
+          className="bg-muted border border-border rounded-lg px-4 py-2 text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border dark:border-zinc-700 min-w-[160px]"
         />
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4 text-muted-foreground" />
@@ -59,14 +59,14 @@ export default function SuperAdminAuditLogsPage() {
             type="date"
             value={dateFrom}
             onChange={e => setDateFrom(e.target.value)}
-            className="bg-muted border border-border rounded-lg px-3 py-2 text-[13px] text-foreground focus:outline-none focus:border-zinc-700"
+            className="bg-muted border border-border rounded-lg px-3 py-2 text-[13px] text-foreground focus:outline-none focus:border-border dark:border-zinc-700"
           />
           <span className="text-muted-foreground text-[13px]">to</span>
           <input
             type="date"
             value={dateTo}
             onChange={e => setDateTo(e.target.value)}
-            className="bg-muted border border-border rounded-lg px-3 py-2 text-[13px] text-foreground focus:outline-none focus:border-zinc-700"
+            className="bg-muted border border-border rounded-lg px-3 py-2 text-[13px] text-foreground focus:outline-none focus:border-border dark:border-zinc-700"
           />
         </div>
       </div>
@@ -82,7 +82,7 @@ export default function SuperAdminAuditLogsPage() {
               <th className="text-left px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Resource</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-800">
+          <tbody className="divide-y divide-border dark:divide-zinc-800">
             {loading ? (
               <tr><td colSpan={5} className="px-4 py-10 text-center text-[12px] text-muted-foreground">Loading logs...</td></tr>
             ) : logs.length === 0 ? (
@@ -92,7 +92,7 @@ export default function SuperAdminAuditLogsPage() {
                 <tr key={log.logId} className="hover:bg-muted/50">
                   <td className="px-4 py-3 text-[12px] text-muted-foreground">{log.loggedAt ? new Date(log.loggedAt).toLocaleString() : 'N/A'}</td>
                   <td className="px-4 py-3 text-[12px] text-foreground">{log.actorName ?? 'System'}</td>
-                  <td className="px-4 py-3 text-[12px] text-zinc-300">{log.shopName ?? 'Platform'}</td>
+                  <td className="px-4 py-3 text-[12px] text-muted-foreground dark:text-zinc-300">{log.shopName ?? 'Platform'}</td>
                   <td className="px-4 py-3 text-[12px] text-foreground">{log.action}</td>
                   <td className="px-4 py-3 text-[12px] text-muted-foreground">{log.tableName ?? 'N/A'}#{log.recordId ?? 'N/A'}</td>
                 </tr>

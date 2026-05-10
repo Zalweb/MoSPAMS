@@ -196,7 +196,7 @@ export default function Services() {
         </div>
         <div className="flex gap-3">
           {canManageTypes && (
-            <Button onClick={() => setTypesOpen(true)} variant="outline" size="sm" className="h-10 rounded-xl text-sm border-zinc-700 text-muted-foreground hover:bg-zinc-800 hover:text-foreground">
+            <Button onClick={() => setTypesOpen(true)} variant="outline" size="sm" className="h-10 rounded-xl text-sm border-border dark:border-zinc-700 text-muted-foreground hover:bg-secondary dark:bg-zinc-800 hover:text-foreground">
               <Settings2 className="w-4 h-4 mr-2" /> Service Types
             </Button>
           )}
@@ -208,7 +208,7 @@ export default function Services() {
 
       <motion.div {...fadeUp(0.1)} className="flex gap-2 flex-wrap">
         {(['All', 'Pending', 'Ongoing', 'Completed', 'Cancelled'] as StatusFilter[]).map(s => (
-          <button key={s} onClick={() => setStatusFilter(s)} className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${statusFilter === s ? 'bg-white text-black' : 'bg-muted/50 text-muted-foreground border border-border hover:border-zinc-700 hover:text-foreground'}`}>
+          <button key={s} onClick={() => setStatusFilter(s)} className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${statusFilter === s ? 'bg-white text-black' : 'bg-muted/50 text-muted-foreground border border-border hover:border-border dark:border-zinc-700 hover:text-foreground'}`}>
             {s} <span className="opacity-50 ml-1">{statusCounts[s]}</span>
           </button>
         ))}
@@ -220,7 +220,7 @@ export default function Services() {
           placeholder="Search customer or motorcycle…"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full h-11 pl-11 pr-4 rounded-xl bg-muted/50 border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-zinc-700 focus:ring-2 focus:ring-white/10"
+          className="w-full h-11 pl-11 pr-4 rounded-xl bg-muted/50 border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border dark:border-zinc-700 focus:ring-2 focus:ring-white/10"
         />
       </motion.div>
 
@@ -233,7 +233,7 @@ export default function Services() {
           const style = getStatusStyle(service.status);
           const StatusIcon = style.icon;
           return (
-            <div key={service.id} className="bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5 hover:border-zinc-700 transition-all duration-300 group">
+            <div key={service.id} className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5 hover:border-border dark:border-zinc-700 transition-all duration-300 group">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-start gap-4">
                   <div className={`w-11 h-11 rounded-xl ${style.bg} border ${style.border} flex items-center justify-center shrink-0`}>
@@ -244,10 +244,10 @@ export default function Services() {
                       {service.customerName}
                     </button>
                     <p className="text-xs text-muted-foreground">{service.motorcycleModel} — {service.serviceType}</p>
-                    <p className="text-xs text-zinc-600 mt-0.5">Labor ₱{service.laborCost.toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground dark:text-zinc-600 mt-0.5">Labor ₱{service.laborCost.toLocaleString()}</p>
                     {(service.mechanics ?? []).length > 0 && (
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        <span className="text-zinc-600">Mechanic:</span> {service.mechanics.map(m => m.name).join(', ')}
+                        <span className="text-muted-foreground dark:text-zinc-600">Mechanic:</span> {service.mechanics.map(m => m.name).join(', ')}
                       </p>
                     )}
                   </div>
@@ -267,10 +267,10 @@ export default function Services() {
                   <button title="Bill this Job" disabled={service.status === 'Cancelled'} onClick={() => setBillJob(service)} className="p-2 rounded-lg hover:bg-emerald-500/10 text-muted-foreground hover:text-emerald-400 transition-colors disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted-foreground">
                     <Receipt className="w-4 h-4" />
                   </button>
-                  <button title="History" onClick={() => setHistoryCustomer({ name: service.customerName, model: service.motorcycleModel })} className="p-2 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors">
+                  <button title="History" onClick={() => setHistoryCustomer({ name: service.customerName, model: service.motorcycleModel })} className="p-2 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors">
                     <History className="w-4 h-4" />
                   </button>
-                  <button title="Edit" onClick={() => openEdit(service)} className="p-2 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors"><Pencil className="w-4 h-4" /></button>
+                  <button title="Edit" onClick={() => openEdit(service)} className="p-2 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors"><Pencil className="w-4 h-4" /></button>
                   {canDeleteService && (
                     <button title="Delete" onClick={() => setConfirmDelete(service.id)} className="p-2 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-400 transition-colors"><Trash2 className="w-4 h-4" /></button>
                   )}
@@ -279,7 +279,7 @@ export default function Services() {
               {service.partsUsed.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-border flex flex-wrap gap-2">
                   {service.partsUsed.map(pu => (
-                    <span key={pu.partId} className="text-xs font-medium text-muted-foreground bg-zinc-800/50 px-2.5 py-1 rounded-lg border border-zinc-700">
+                    <span key={pu.partId} className="text-xs font-medium text-muted-foreground bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 px-2.5 py-1 rounded-lg border border-border dark:border-zinc-700">
                       {pu.name ?? `Part #${pu.partId}`} x{pu.quantity}
                     </span>
                   ))}
@@ -289,9 +289,9 @@ export default function Services() {
           );
         })}
         {!loading && filtered.length === 0 && (
-          <div className="text-center py-16 text-sm text-muted-foreground bg-muted/50 backdrop-blur-sm border border-border rounded-2xl">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-zinc-800/50 flex items-center justify-center">
-              <Wrench className="w-8 h-8 text-zinc-600" />
+          <div className="text-center py-16 text-sm text-muted-foreground bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 flex items-center justify-center">
+              <Wrench className="w-8 h-8 text-muted-foreground dark:text-zinc-600" />
             </div>
             No service records found
           </div>
@@ -302,10 +302,10 @@ export default function Services() {
         <div className="flex items-center justify-between">
           <p className="text-xs text-muted-foreground">Page {meta.currentPage} of {meta.lastPage} — {meta.total} total</p>
           <div className="flex items-center gap-1">
-            <button onClick={() => setPage(page - 1)} disabled={page <= 1} className="p-1.5 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+            <button onClick={() => setPage(page - 1)} disabled={page <= 1} className="p-1.5 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <button onClick={() => setPage(page + 1)} disabled={page >= meta.lastPage} className="p-1.5 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+            <button onClick={() => setPage(page + 1)} disabled={page >= meta.lastPage} className="p-1.5 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
@@ -320,30 +320,30 @@ export default function Services() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="text-xs font-medium text-muted-foreground">Customer Name</Label>
-                <Input {...form.register('customerName')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-zinc-600" placeholder="Juan Dela Cruz" />
+                <Input {...form.register('customerName')} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="Juan Dela Cruz" />
                 {form.formState.errors.customerName && <p className="text-xs text-red-400 mt-1">{form.formState.errors.customerName.message}</p>}
               </div>
               <div>
                 <Label className="text-xs font-medium text-muted-foreground">Motorcycle Model</Label>
-                <Input {...form.register('motorcycleModel')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-zinc-600" placeholder="Honda Click 150i" />
+                <Input {...form.register('motorcycleModel')} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="Honda Click 150i" />
                 {form.formState.errors.motorcycleModel && <p className="text-xs text-red-400 mt-1">{form.formState.errors.motorcycleModel.message}</p>}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="text-xs font-medium text-muted-foreground">Service Type</Label>
-                <select onChange={e => handleTypeChange(e.target.value)} defaultValue="" className="w-full mt-1.5 h-10 px-3 rounded-xl bg-zinc-800/50 border border-zinc-700 text-sm text-foreground">
+                <select onChange={e => handleTypeChange(e.target.value)} defaultValue="" className="w-full mt-1.5 h-10 px-3 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border border-border dark:border-zinc-700 text-sm text-foreground">
                   <option value="">Pick from catalog…</option>
                   {serviceTypes.map(st => <option key={st.id} value={st.id}>{st.name} (₱{st.defaultLaborCost})</option>)}
                 </select>
-                <Input {...form.register('serviceType')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-zinc-600" placeholder="Or type custom service" />
+                <Input {...form.register('serviceType')} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="Or type custom service" />
                 {form.formState.errors.serviceType && <p className="text-xs text-red-400 mt-1">{form.formState.errors.serviceType.message}</p>}
               </div>
               <div>
                 <Label className="text-xs font-medium text-muted-foreground">Labor Cost (₱)</Label>
-                <Input type="number" {...form.register('laborCost', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground focus:border-zinc-600" />
+                <Input type="number" {...form.register('laborCost', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground focus:border-border dark:border-zinc-600" />
                 <Label className="text-xs font-medium text-muted-foreground mt-3 block">Status</Label>
-                <select {...form.register('status')} className="w-full mt-1.5 h-10 px-3 rounded-xl bg-zinc-800/50 border border-zinc-700 text-sm text-foreground">
+                <select {...form.register('status')} className="w-full mt-1.5 h-10 px-3 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border border-border dark:border-zinc-700 text-sm text-foreground">
                   <option value="Pending">Pending</option>
                   <option value="Ongoing">Ongoing</option>
                   <option value="Completed">Completed</option>
@@ -352,7 +352,7 @@ export default function Services() {
             </div>
             <div>
               <Label className="text-xs font-medium text-muted-foreground">Notes</Label>
-              <Input {...form.register('notes')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-zinc-600" placeholder="Special instructions…" />
+              <Input {...form.register('notes')} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="Special instructions…" />
             </div>
 
             {availableMechanics.length > 0 && (
@@ -364,7 +364,7 @@ export default function Services() {
                       type="button"
                       key={m.id}
                       onClick={() => toggleMechanic(m.id)}
-                      className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors ${selectedMechanicIds.includes(m.id) ? 'bg-blue-500/20 border-blue-500/40 text-blue-300' : 'bg-zinc-800/50 border-zinc-700 text-muted-foreground hover:bg-zinc-800'}`}
+                      className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors ${selectedMechanicIds.includes(m.id) ? 'bg-blue-500/20 border-blue-500/40 text-blue-300' : 'bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-muted-foreground hover:bg-secondary dark:bg-zinc-800'}`}
                     >
                       {m.name}
                     </button>
@@ -377,7 +377,7 @@ export default function Services() {
               <Label className="text-xs font-medium text-muted-foreground">Parts Used</Label>
               <div className="mt-1.5 flex flex-wrap gap-2">
                 {availableParts.filter(p => p.stock > 0).map(part => (
-                  <button type="button" key={part.id} onClick={() => addPartToService(part.id)} className="text-xs font-medium bg-zinc-800/50 hover:bg-zinc-800 text-muted-foreground px-3 py-1.5 rounded-lg border border-zinc-700 transition-colors">+ {part.name}</button>
+                  <button type="button" key={part.id} onClick={() => addPartToService(part.id)} className="text-xs font-medium bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 hover:bg-secondary dark:bg-zinc-800 text-muted-foreground px-3 py-1.5 rounded-lg border border-border dark:border-zinc-700 transition-colors">+ {part.name}</button>
                 ))}
               </div>
               {partsUsed.length > 0 && (
@@ -385,7 +385,7 @@ export default function Services() {
                   {partsUsed.map(pu => {
                     const part = availableParts.find(p => p.id === pu.partId);
                     return (
-                      <div key={pu.partId} className="flex items-center justify-between text-sm bg-zinc-800/50 px-3 py-2 rounded-lg border border-zinc-700">
+                      <div key={pu.partId} className="flex items-center justify-between text-sm bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 px-3 py-2 rounded-lg border border-border dark:border-zinc-700">
                         <span className="text-foreground">{part ? `${part.name} x${pu.quantity}` : `Part #${pu.partId} x${pu.quantity}`}</span>
                         <button type="button" onClick={() => removePartFromService(pu.partId)} className="text-muted-foreground hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
                       </div>
@@ -397,7 +397,7 @@ export default function Services() {
 
             <div className="flex gap-3 pt-2">
               <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold transition-opacity">{editing ? 'Save Changes' : 'Create Record'}</Button>
-              <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-10 rounded-xl text-sm border-zinc-700 text-muted-foreground">Cancel</Button>
+              <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-10 rounded-xl text-sm border-border dark:border-zinc-700 text-muted-foreground">Cancel</Button>
             </div>
           </form>
         </DialogContent>
@@ -409,26 +409,26 @@ export default function Services() {
           <DialogHeader><DialogTitle className="text-base font-semibold text-foreground">Bill this Job</DialogTitle></DialogHeader>
           {billJob && (
             <div className="mt-3 space-y-4">
-              <div className="bg-zinc-800/50 rounded-xl p-4 border border-zinc-700 space-y-2">
+              <div className="bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 rounded-xl p-4 border border-border dark:border-zinc-700 space-y-2">
                 <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Summary</p>
-                <div className="flex justify-between text-sm text-zinc-300">
+                <div className="flex justify-between text-sm text-muted-foreground dark:text-zinc-300">
                   <span>{billJob.serviceType}</span>
                   <span>₱{billJob.laborCost.toLocaleString()}</span>
                 </div>
                 {billJob.partsUsed.map(p => (
-                  <div key={p.partId} className="flex justify-between text-sm text-zinc-300">
+                  <div key={p.partId} className="flex justify-between text-sm text-muted-foreground dark:text-zinc-300">
                     <span>{p.name ?? `Part #${p.partId}`} x{p.quantity}</span>
                     <span>{p.unitPrice != null ? `₱${(p.unitPrice * p.quantity).toLocaleString()}` : '—'}</span>
                   </div>
                 ))}
-                <div className="pt-2 border-t border-zinc-700 flex justify-between text-sm font-semibold text-foreground">
+                <div className="pt-2 border-t border-border dark:border-zinc-700 flex justify-between text-sm font-semibold text-foreground">
                   <span>Total</span>
                   <span>₱{(billJob.laborCost + billJob.partsUsed.reduce((s, p) => s + (p.unitPrice ?? 0) * p.quantity, 0)).toLocaleString()}</span>
                 </div>
               </div>
               <div>
                 <Label className="text-xs font-medium text-muted-foreground">Payment Method</Label>
-                <select value={billPaymentMethod} onChange={e => setBillPaymentMethod(e.target.value as 'Cash' | 'GCash')} className="w-full mt-1.5 h-10 px-3 rounded-xl bg-zinc-800/50 border border-zinc-700 text-sm text-foreground">
+                <select value={billPaymentMethod} onChange={e => setBillPaymentMethod(e.target.value as 'Cash' | 'GCash')} className="w-full mt-1.5 h-10 px-3 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border border-border dark:border-zinc-700 text-sm text-foreground">
                   <option value="Cash">Cash</option>
                   <option value="GCash">GCash</option>
                 </select>
@@ -437,7 +437,7 @@ export default function Services() {
                 <Button onClick={handleBill} disabled={billing} className="flex-1 h-10 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:opacity-90 text-foreground text-sm font-semibold transition-opacity">
                   {billing ? 'Processing…' : 'Confirm & Bill'}
                 </Button>
-                <Button variant="outline" onClick={() => setBillJob(null)} className="h-10 rounded-xl text-sm border-zinc-700 text-muted-foreground">Cancel</Button>
+                <Button variant="outline" onClick={() => setBillJob(null)} className="h-10 rounded-xl text-sm border-border dark:border-zinc-700 text-muted-foreground">Cancel</Button>
               </div>
             </div>
           )}
@@ -449,7 +449,7 @@ export default function Services() {
           <DialogHeader><DialogTitle className="text-base font-semibold text-foreground">Service Type Catalog</DialogTitle></DialogHeader>
           <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
             {serviceTypes.map(st => (
-              <div key={st.id} className="flex items-center gap-2 bg-zinc-800/50 rounded-xl px-3 py-2 border border-zinc-700">
+              <div key={st.id} className="flex items-center gap-2 bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 rounded-xl px-3 py-2 border border-border dark:border-zinc-700">
                 <Input
                   defaultValue={st.name}
                   onBlur={e => e.target.value !== st.name && updateServiceType(st.id, { name: e.target.value })}
@@ -466,8 +466,8 @@ export default function Services() {
             ))}
           </div>
           <form onSubmit={stForm.handleSubmit(values => { addServiceType(values); stForm.reset({ name: '', defaultLaborCost: 0 }); })} className="flex gap-2 pt-4 mt-4 border-t border-border">
-            <Input {...stForm.register('name')} placeholder="Type name" className="flex-1 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground" />
-            <Input type="number" {...stForm.register('defaultLaborCost', { valueAsNumber: true })} placeholder="₱" className="w-24 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground" />
+            <Input {...stForm.register('name')} placeholder="Type name" className="flex-1 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground" />
+            <Input type="number" {...stForm.register('defaultLaborCost', { valueAsNumber: true })} placeholder="₱" className="w-24 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground" />
             <Button type="submit" className="h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold px-5 transition-opacity">Add</Button>
           </form>
         </DialogContent>
@@ -483,20 +483,20 @@ export default function Services() {
                 <p className="text-sm font-semibold text-foreground">{historyCustomer.name}</p>
                 <p className="text-xs text-muted-foreground">{historyCustomer.model}</p>
               </div>
-              <button onClick={() => setHistoryCustomer(null)} className="p-2 rounded-lg hover:bg-zinc-800 text-muted-foreground"><X className="w-5 h-5" /></button>
+              <button onClick={() => setHistoryCustomer(null)} className="p-2 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground"><X className="w-5 h-5" /></button>
             </div>
             <div className="flex-1 overflow-y-auto px-5 py-4">
               {customerHistory.length === 0 && <p className="text-sm text-muted-foreground text-center py-12">No prior records.</p>}
               <ul className="space-y-2">
                 {customerHistory.map(h => (
-                  <li key={h.id} className="bg-zinc-800/50 rounded-xl p-4 border border-border">
+                  <li key={h.id} className="bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 rounded-xl p-4 border border-border">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-semibold text-foreground">{h.serviceType}</span>
                       <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${getStatusStyle(h.status).bg} ${getStatusStyle(h.status).text}`}>{h.status}</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">Labor ₱{h.laborCost.toLocaleString()}</p>
                     {h.notes && <p className="text-xs text-muted-foreground mt-1">{h.notes}</p>}
-                    <p className="text-xs text-zinc-600 mt-1 tabular-nums">{new Date(h.createdAt).toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground dark:text-zinc-600 mt-1 tabular-nums">{new Date(h.createdAt).toLocaleString()}</p>
                   </li>
                 ))}
               </ul>
@@ -511,7 +511,7 @@ export default function Services() {
           <p className="text-sm text-muted-foreground mt-1">This will permanently remove this service record.</p>
           <div className="flex gap-3 pt-4">
             <Button onClick={async () => { if (confirmDelete) { await deleteService(confirmDelete); removeItem(confirmDelete, 'id'); setConfirmDelete(null); } }} variant="destructive" className="flex-1 h-10 rounded-xl text-sm font-semibold">Delete</Button>
-            <Button variant="outline" onClick={() => setConfirmDelete(null)} className="h-10 rounded-xl text-sm border-zinc-700 text-muted-foreground">Cancel</Button>
+            <Button variant="outline" onClick={() => setConfirmDelete(null)} className="h-10 rounded-xl text-sm border-border dark:border-zinc-700 text-muted-foreground">Cancel</Button>
           </div>
         </DialogContent>
       </Dialog>

@@ -114,11 +114,11 @@ export default function CustomerManagementPage() {
           value={search}
           onChange={e => { setSearch(e.target.value); }}
           onKeyDown={e => e.key === 'Enter' && fetchCustomers()}
-          className="w-full h-11 pl-11 pr-4 rounded-xl bg-muted/50 border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-zinc-700 focus:ring-2 focus:ring-white/10"
+          className="w-full h-11 pl-11 pr-4 rounded-xl bg-muted/50 border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border dark:border-zinc-700 focus:ring-2 focus:ring-white/10"
         />
       </div>
 
-      <div className="bg-muted/50 backdrop-blur-sm border border-border rounded-2xl overflow-hidden">
+      <div className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -130,16 +130,16 @@ export default function CustomerManagementPage() {
                 <th className="text-right px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-800/50">
+            <tbody className="divide-y divide-border dark:divide-zinc-800/50">
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i}><td colSpan={5} className="px-5 py-4"><div className="h-4 bg-zinc-800/60 rounded animate-pulse w-full" /></td></tr>
+                  <tr key={i}><td colSpan={5} className="px-5 py-4"><div className="h-4 bg-secondary dark:bg-zinc-800/60 rounded animate-pulse w-full" /></td></tr>
                 ))
               ) : customers.map(c => (
-                <tr key={c.id} className="hover:bg-zinc-800/30 transition-colors group">
+                <tr key={c.id} className="hover:bg-secondary dark:bg-zinc-800/30 transition-colors group">
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-zinc-800/50 flex items-center justify-center shrink-0 group-hover:bg-zinc-800 transition-colors">
+                      <div className="w-10 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 flex items-center justify-center shrink-0 group-hover:bg-secondary dark:bg-zinc-800 transition-colors">
                         <Users className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
                       </div>
                       <p className="text-sm font-medium text-foreground">{c.name}</p>
@@ -149,7 +149,7 @@ export default function CustomerManagementPage() {
                     <div className="space-y-1">
                       {c.phone && <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Phone className="w-3 h-3" />{c.phone}</p>}
                       {c.email && <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Mail className="w-3 h-3" />{c.email}</p>}
-                      {!c.phone && !c.email && <span className="text-xs text-zinc-600">—</span>}
+                      {!c.phone && !c.email && <span className="text-xs text-muted-foreground dark:text-zinc-600">—</span>}
                     </div>
                   </td>
                   <td className="px-5 py-4 hidden md:table-cell">
@@ -163,7 +163,7 @@ export default function CustomerManagementPage() {
                   </td>
                   <td className="px-5 py-4 text-right">
                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => openEdit(c)} className="p-2 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors">
+                      <button onClick={() => openEdit(c)} className="p-2 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors">
                         <Pencil className="w-4 h-4" />
                       </button>
                       <button onClick={() => setConfirmDelete(c)} className="p-2 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-400 transition-colors">
@@ -175,8 +175,8 @@ export default function CustomerManagementPage() {
               ))}
               {!loading && customers.length === 0 && (
                 <tr><td colSpan={5} className="px-5 py-16 text-center text-sm text-muted-foreground">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-zinc-800/50 flex items-center justify-center">
-                    <Users className="w-8 h-8 text-zinc-600" />
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 flex items-center justify-center">
+                    <Users className="w-8 h-8 text-muted-foreground dark:text-zinc-600" />
                   </div>
                   {search ? 'No customers match your search' : 'No customers yet'}
                 </td></tr>
@@ -189,10 +189,10 @@ export default function CustomerManagementPage() {
           <div className="flex items-center justify-between px-5 py-3 border-t border-border">
             <p className="text-xs text-muted-foreground">Page {meta.currentPage} of {meta.lastPage} — {meta.total} total</p>
             <div className="flex items-center gap-1">
-              <button onClick={() => fetchCustomers(page - 1)} disabled={page <= 1} className="p-1.5 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+              <button onClick={() => fetchCustomers(page - 1)} disabled={page <= 1} className="p-1.5 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <button onClick={() => fetchCustomers(page + 1)} disabled={page >= meta.lastPage} className="p-1.5 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+              <button onClick={() => fetchCustomers(page + 1)} disabled={page >= meta.lastPage} className="p-1.5 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -208,27 +208,27 @@ export default function CustomerManagementPage() {
           <form onSubmit={onSubmit} className="space-y-4 pt-2">
             <div>
               <Label className="text-xs font-medium text-muted-foreground">Full Name</Label>
-              <Input {...form.register('name')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-zinc-600" placeholder="Juan Dela Cruz" />
+              <Input {...form.register('name')} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="Juan Dela Cruz" />
               {form.formState.errors.name && <p className="text-xs text-red-400 mt-1">{form.formState.errors.name.message}</p>}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label className="text-xs font-medium text-muted-foreground">Phone</Label>
-                <Input {...form.register('phone')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-zinc-600" placeholder="+63..." />
+                <Input {...form.register('phone')} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="+63..." />
               </div>
               <div>
                 <Label className="text-xs font-medium text-muted-foreground">Email</Label>
-                <Input type="email" {...form.register('email')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-zinc-600" placeholder="customer@email.com" />
+                <Input type="email" {...form.register('email')} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="customer@email.com" />
                 {form.formState.errors.email && <p className="text-xs text-red-400 mt-1">{form.formState.errors.email.message}</p>}
               </div>
             </div>
             <div>
               <Label className="text-xs font-medium text-muted-foreground">Address</Label>
-              <Input {...form.register('address')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-zinc-600" placeholder="Full address" />
+              <Input {...form.register('address')} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="Full address" />
             </div>
             <div className="flex gap-3 pt-2">
               <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold transition-opacity">{editing ? 'Save Changes' : 'Add Customer'}</Button>
-              <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-10 rounded-xl text-sm border-zinc-700 text-muted-foreground hover:bg-zinc-800">Cancel</Button>
+              <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-10 rounded-xl text-sm border-border dark:border-zinc-700 text-muted-foreground hover:bg-secondary dark:bg-zinc-800">Cancel</Button>
             </div>
           </form>
         </DialogContent>
@@ -240,7 +240,7 @@ export default function CustomerManagementPage() {
           <p className="text-sm text-muted-foreground mt-1">{confirmDelete?.name} will be permanently removed.</p>
           <div className="flex gap-3 pt-4">
             <Button onClick={handleDelete} variant="destructive" className="flex-1 h-10 rounded-xl text-sm font-semibold">Delete</Button>
-            <Button variant="outline" onClick={() => setConfirmDelete(null)} className="h-10 rounded-xl text-sm border-zinc-700 text-muted-foreground">Cancel</Button>
+            <Button variant="outline" onClick={() => setConfirmDelete(null)} className="h-10 rounded-xl text-sm border-border dark:border-zinc-700 text-muted-foreground">Cancel</Button>
           </div>
         </DialogContent>
       </Dialog>

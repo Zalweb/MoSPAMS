@@ -30,7 +30,7 @@ export function DashboardHeader() {
       <div className="flex items-center gap-3">
         <button
           onClick={toggleTheme}
-          className="w-10 h-10 rounded-xl bg-muted/50 border border-border/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-zinc-700 transition-all"
+          className="w-10 h-10 rounded-xl bg-muted/50 border border-border/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-border dark:border-zinc-700 transition-all"
           title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
         >
           {theme === 'dark' ? (

@@ -46,7 +46,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
       transition={{ delay: 0.2, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className="relative group"
     >
-      <div className="relative bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 overflow-hidden dark:hover:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300">
+      <div className="relative bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 overflow-hidden dark:hover:border-border dark:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-lg font-semibold text-card-foreground mb-1">Your Assets</h3>
@@ -56,7 +56,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
           <select
             value={period}
             onChange={(e) => setPeriod(e.target.value as ChartPeriod)}
-            className="h-9 px-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50 text-sm text-zinc-300 focus:outline-none focus:border-zinc-600 cursor-pointer"
+            className="h-9 px-3 rounded-lg bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border border-border dark:border-zinc-700/50 text-sm text-muted-foreground dark:text-zinc-300 focus:outline-none focus:border-border dark:border-zinc-600 cursor-pointer"
           >
             <option value="daily">Daily</option>
             <option value="weekly">Weekly</option>
@@ -66,7 +66,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
 
         {loading ? (
           <div className="h-64 flex items-center justify-center">
-            <div className="w-12 h-12 border-4 border-zinc-700 border-t-[rgb(var(--color-primary-rgb))] rounded-full animate-spin" />
+            <div className="w-12 h-12 border-4 border-border dark:border-zinc-700 border-t-[rgb(var(--color-primary-rgb))] rounded-full animate-spin" />
           </div>
         ) : filteredData.length === 0 ? (
           <div className="h-64 flex items-center justify-center text-muted-foreground">

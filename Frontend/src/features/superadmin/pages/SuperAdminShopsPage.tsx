@@ -125,7 +125,7 @@ export default function SuperAdminShopsPage() {
             void onSearch(event.target.value);
           }}
           placeholder="Search shops or owners..."
-          className="pl-9 h-9 rounded-xl border-zinc-700 bg-card text-zinc-200 placeholder:text-muted-foreground text-[13px]"
+          className="pl-9 h-9 rounded-xl border-border dark:border-zinc-700 bg-card text-foreground dark:text-zinc-200 placeholder:text-muted-foreground text-[13px]"
         />
       </div>
 
@@ -140,7 +140,7 @@ export default function SuperAdminShopsPage() {
               <th className="text-right px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-800">
+          <tbody className="divide-y divide-border dark:divide-zinc-800">
             {loading ? (
               <tr>
                 <td colSpan={5} className="px-4 py-10 text-center text-[12px] text-muted-foreground">Loading shops...</td>
@@ -159,7 +159,7 @@ export default function SuperAdminShopsPage() {
                     </p>
                     <p className="text-[11px] text-muted-foreground">Registration: {shop.registration.status}</p>
                   </td>
-                  <td className="px-4 py-3 text-[12px] text-zinc-300">
+                  <td className="px-4 py-3 text-[12px] text-muted-foreground dark:text-zinc-300">
                     <p>{shop.owner.name ?? 'Unassigned'}</p>
                     {!shop.owner.name && shop.applicant.name ? (
                       <p className="text-[11px] text-muted-foreground">Applicant: {shop.applicant.name} ({shop.applicant.email ?? 'No email'})</p>
@@ -168,7 +168,7 @@ export default function SuperAdminShopsPage() {
                       <p className="text-[11px] text-red-400">Rejected: {shop.registration.rejectionReason}</p>
                     ) : null}
                   </td>
-                  <td className="px-4 py-3 text-[12px] text-zinc-300">
+                  <td className="px-4 py-3 text-[12px] text-muted-foreground dark:text-zinc-300">
                     {shop.subscription ? `${shop.subscription.plan.planName} (${shop.subscription.status})` : 'No subscription'}
                   </td>
                   <td className="px-4 py-3">
@@ -178,21 +178,21 @@ export default function SuperAdminShopsPage() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="inline-flex items-center gap-2">
-                      <Button variant="outline" className="h-8 px-3 text-[11px] border-zinc-700 bg-muted hover:bg-zinc-800 hover:border-zinc-700" onClick={() => void onOpenDiagnostics(shop.shopId)}>
+                      <Button variant="outline" className="h-8 px-3 text-[11px] border-border dark:border-zinc-700 bg-muted hover:bg-secondary dark:bg-zinc-800 hover:border-border dark:border-zinc-700" onClick={() => void onOpenDiagnostics(shop.shopId)}>
                         Diagnostics
                       </Button>
                       {shop.registration.status === 'PENDING' ? (
                         <>
                           <Button
                             variant="outline"
-                            className="h-8 px-3 text-[11px] border-zinc-700 bg-muted hover:bg-zinc-800 hover:border-zinc-700"
+                            className="h-8 px-3 text-[11px] border-border dark:border-zinc-700 bg-muted hover:bg-secondary dark:bg-zinc-800 hover:border-border dark:border-zinc-700"
                             onClick={() => void onApproveRegistration(shop)}
                           >
                             Approve
                           </Button>
                           <Button
                             variant="outline"
-                            className="h-8 px-3 text-[11px] border-zinc-700 bg-muted hover:bg-zinc-800 hover:border-zinc-700"
+                            className="h-8 px-3 text-[11px] border-border dark:border-zinc-700 bg-muted hover:bg-secondary dark:bg-zinc-800 hover:border-border dark:border-zinc-700"
                             onClick={() => void onRejectRegistration(shop)}
                           >
                             Reject
@@ -201,7 +201,7 @@ export default function SuperAdminShopsPage() {
                       ) : null}
                       <Button
                         variant="outline"
-                        className="h-8 px-3 text-[11px] border-zinc-700 bg-muted hover:bg-zinc-800 hover:border-zinc-700"
+                        className="h-8 px-3 text-[11px] border-border dark:border-zinc-700 bg-muted hover:bg-secondary dark:bg-zinc-800 hover:border-border dark:border-zinc-700"
                         onClick={() => void onToggleStatus(shop)}
                       >
                         {shop.statusCode === 'SUSPENDED' ? 'Activate' : 'Suspend'}
@@ -216,7 +216,7 @@ export default function SuperAdminShopsPage() {
       </div>
 
       <Dialog open={diagOpen} onOpenChange={setDiagOpen}>
-        <DialogContent className="sm:max-w-2xl rounded-[20px] border-border bg-card text-zinc-300 p-6">
+        <DialogContent className="sm:max-w-2xl rounded-[20px] border-border bg-card text-muted-foreground dark:text-zinc-300 p-6">
           <DialogHeader>
             <DialogTitle className="text-[15px] font-semibold text-foreground">Shop Diagnostics</DialogTitle>
           </DialogHeader>
@@ -246,7 +246,7 @@ export default function SuperAdminShopsPage() {
 
               <div>
                 <p className="text-[12px] font-semibold text-foreground mb-2">Recent Activity</p>
-                <div className="max-h-48 overflow-y-auto border border-border rounded-xl divide-y divide-zinc-800">
+                <div className="max-h-48 overflow-y-auto border border-border rounded-xl divide-y divide-border dark:divide-zinc-800">
                   {diag.recentLogs.length === 0 ? (
                     <p className="px-3 py-4 text-[12px] text-muted-foreground">No activity yet.</p>
                   ) : (
@@ -281,7 +281,7 @@ function statusTone(code: string) {
 }
 
 function Stat({ label, value, icon: Icon, tone }: { label: string; value: number; icon: typeof Wrench; tone: 'slate' | 'amber' | 'green' }) {
-  const bg = tone === 'amber' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' : tone === 'green' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-muted text-zinc-300 border-zinc-700';
+  const bg = tone === 'amber' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' : tone === 'green' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-muted text-muted-foreground dark:text-zinc-300 border-border dark:border-zinc-700';
 
   return (
     <div className="bg-card rounded-2xl border border-border p-4">

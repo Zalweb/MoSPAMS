@@ -117,7 +117,7 @@ export default function ActivityLogsPage() {
     if (lower.includes('updated') || lower.includes('set')) return 'text-blue-400';
     if (lower.includes('login') || lower.includes('logged in')) return 'text-violet-400';
     if (lower.includes('logout') || lower.includes('logged out')) return 'text-muted-foreground';
-    return 'text-zinc-300';
+    return 'text-muted-foreground dark:text-zinc-300';
   };
 
   return (
@@ -133,7 +133,7 @@ export default function ActivityLogsPage() {
         <button
           onClick={() => void fetchLogs(true)}
           disabled={refreshing}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-800 border border-zinc-700 text-sm font-medium text-zinc-300 hover:text-foreground hover:bg-zinc-700 transition-all disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 text-sm font-medium text-muted-foreground dark:text-zinc-300 hover:text-foreground hover:bg-muted dark:bg-zinc-700 transition-all disabled:opacity-50"
         >
           <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
           Refresh
@@ -197,14 +197,14 @@ export default function ActivityLogsPage() {
           />
           <button
             onClick={handleDateFilter}
-            className="px-3 py-2 rounded-xl bg-zinc-800 border border-zinc-700 text-sm text-zinc-300 hover:text-foreground hover:bg-zinc-700 transition-colors"
+            className="px-3 py-2 rounded-xl bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 text-sm text-muted-foreground dark:text-zinc-300 hover:text-foreground hover:bg-muted dark:bg-zinc-700 transition-colors"
           >
             Filter
           </button>
           {(dateFrom || dateTo) && (
             <button
               onClick={handleClearDates}
-              className="px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-zinc-300 transition-colors"
+              className="px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-muted-foreground dark:text-zinc-300 transition-colors"
             >
               Clear
             </button>
@@ -213,7 +213,7 @@ export default function ActivityLogsPage() {
         <button
           onClick={handleExport}
           disabled={logs.length === 0}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-800 border border-zinc-700 text-sm font-medium text-zinc-300 hover:text-foreground hover:bg-zinc-700 transition-all disabled:opacity-50 sm:ml-auto"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 text-sm font-medium text-muted-foreground dark:text-zinc-300 hover:text-foreground hover:bg-muted dark:bg-zinc-700 transition-all disabled:opacity-50 sm:ml-auto"
         >
           <Download className="w-4 h-4" />
           Export CSV
@@ -224,12 +224,12 @@ export default function ActivityLogsPage() {
       <div className="bg-card rounded-2xl border border-border overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-border dark:border-zinc-700 border-t-white rounded-full animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-14 h-14 rounded-2xl bg-muted border border-border flex items-center justify-center mb-4">
-              <ScrollText className="w-6 h-6 text-zinc-600" strokeWidth={1.5} />
+              <ScrollText className="w-6 h-6 text-muted-foreground dark:text-zinc-600" strokeWidth={1.5} />
             </div>
             <h3 className="text-sm font-semibold text-foreground mb-1">
               {search ? 'No matching logs' : 'No activity yet'}
@@ -256,7 +256,7 @@ export default function ActivityLogsPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800/50">
+              <tbody className="divide-y divide-border dark:divide-zinc-800/50">
                 {filtered.map((log) => (
                   <tr
                     key={log.id}
@@ -264,7 +264,7 @@ export default function ActivityLogsPage() {
                   >
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-lg bg-zinc-800 flex items-center justify-center shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-secondary dark:bg-zinc-800 flex items-center justify-center shrink-0">
                           <span className="text-[10px] font-bold text-muted-foreground">
                             {log.user
                               .split(' ')
@@ -299,14 +299,14 @@ export default function ActivityLogsPage() {
               <button
                 onClick={() => handlePageChange(page - 1)}
                 disabled={page <= 1}
-                className="p-1.5 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="p-1.5 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={() => handlePageChange(page + 1)}
                 disabled={page >= meta.lastPage}
-                className="p-1.5 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="p-1.5 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>

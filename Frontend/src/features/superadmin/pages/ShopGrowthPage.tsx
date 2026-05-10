@@ -30,7 +30,7 @@ export default function ShopGrowthPage() {
               return <div key={i} className="flex-1 min-w-[8px] relative" style={{ height: '100%' }} title={`${m.month}: ${m.count}`}><div className="absolute bottom-0 w-full rounded-t-sm bg-white/20 hover:bg-white/40 transition-colors" style={{ height: `${Math.max((m.count / maxVal) * 100, 2)}%` }} /></div>;
             })}
           </div>
-          <div className="flex justify-between mt-2 text-[10px] text-zinc-600"><span>{d.monthlyGrowth[0]?.month}</span><span>{d.monthlyGrowth[d.monthlyGrowth.length - 1]?.month}</span></div>
+          <div className="flex justify-between mt-2 text-[10px] text-muted-foreground dark:text-zinc-600"><span>{d.monthlyGrowth[0]?.month}</span><span>{d.monthlyGrowth[d.monthlyGrowth.length - 1]?.month}</span></div>
         </div>
       )}
     </div>
@@ -38,6 +38,6 @@ export default function ShopGrowthPage() {
 }
 
 function StatCard({ icon: Icon, label, value, color = 'zinc' }: any) {
-  const colors: any = { emerald: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400', blue: 'bg-blue-500/10 border-blue-500/20 text-blue-400', amber: 'bg-amber-500/10 border-amber-500/20 text-amber-400', zinc: 'bg-zinc-800 border-zinc-700 text-foreground' };
+  const colors: any = { emerald: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400', blue: 'bg-blue-500/10 border-blue-500/20 text-blue-400', amber: 'bg-amber-500/10 border-amber-500/20 text-amber-400', zinc: 'bg-secondary dark:bg-zinc-800 border-border dark:border-zinc-700 text-foreground' };
   return <div className="bg-card rounded-xl border border-border p-5"><div className="flex items-center gap-3"><div className={`w-10 h-10 rounded-lg flex items-center justify-center border ${colors[color]}`}><Icon className="w-5 h-5" /></div><div><p className="text-xs text-muted-foreground">{label}</p><p className="text-xl font-bold text-foreground">{value}</p></div></div></div>;
 }

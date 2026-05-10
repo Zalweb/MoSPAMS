@@ -178,7 +178,7 @@ export default function DashboardPage() {
           {/* Top Service Types */}
           <motion.div
             {...fadeUp(0.25)}
-            className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300"
+            className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-border dark:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300"
           >
             <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -204,7 +204,7 @@ export default function DashboardPage() {
                     <div key={service.name} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-zinc-600 w-5">#{idx + 1}</span>
+                          <span className="text-xs font-bold text-muted-foreground dark:text-zinc-600 w-5">#{idx + 1}</span>
                           <span className="text-sm font-medium text-card-foreground">{service.name}</span>
                         </div>
                         <div className="text-right">
@@ -212,7 +212,7 @@ export default function DashboardPage() {
                           <p className="text-xs text-muted-foreground">{service.count} jobs</p>
                         </div>
                       </div>
-                      <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                      <div className="h-2 bg-secondary dark:bg-zinc-800 rounded-full overflow-hidden">
                         <motion.div
                           initial={{ width: 0 }}
                           animate={{ width: `${percentage}%` }}
@@ -231,7 +231,7 @@ export default function DashboardPage() {
           {/* Payment Methods Breakdown */}
           <motion.div
             {...fadeUp(0.3)}
-            className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300"
+            className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-border dark:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300"
           >
             <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -257,7 +257,7 @@ export default function DashboardPage() {
                       </p>
                     </div>
                   </div>
-                  <div className="h-3 bg-zinc-800 rounded-full overflow-hidden">
+                  <div className="h-3 bg-secondary dark:bg-zinc-800 rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${(metrics.paymentMethods.cash / (metrics.paymentMethods.cash + metrics.paymentMethods.gcash)) * 100}%` }}
@@ -278,7 +278,7 @@ export default function DashboardPage() {
                       </p>
                     </div>
                   </div>
-                  <div className="h-3 bg-zinc-800 rounded-full overflow-hidden">
+                  <div className="h-3 bg-secondary dark:bg-zinc-800 rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${(metrics.paymentMethods.gcash / (metrics.paymentMethods.cash + metrics.paymentMethods.gcash)) * 100}%` }}
@@ -310,7 +310,7 @@ export default function DashboardPage() {
           {/* Low Stock Alert */}
           <motion.div
             {...fadeUp(0.35)}
-            className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300"
+            className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-border dark:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300"
           >
             <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -328,7 +328,7 @@ export default function DashboardPage() {
                 </span>
               )}
             </div>
-            <div className="divide-y divide-zinc-800/30 max-h-80 overflow-y-auto">
+            <div className="divide-y divide-border dark:divide-zinc-800/30 max-h-80 overflow-y-auto">
               {lowStock.length === 0 ? (
                 <div className="py-12 text-center">
                   <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-green-500/10 flex items-center justify-center border border-green-500/20">
@@ -346,7 +346,7 @@ export default function DashboardPage() {
                   return (
                     <div
                       key={part.id}
-                      className="flex items-center justify-between px-5 py-4 hover:bg-zinc-800/30 transition-colors group/item"
+                      className="flex items-center justify-between px-5 py-4 hover:bg-secondary dark:bg-zinc-800/30 transition-colors group/item"
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1">
@@ -366,9 +366,9 @@ export default function DashboardPage() {
                           }`}>
                             {part.stock} left
                           </p>
-                          <p className="text-xs text-zinc-600">min {part.minStock}</p>
+                          <p className="text-xs text-muted-foreground dark:text-zinc-600">min {part.minStock}</p>
                         </div>
-                        <ArrowUpRight className="w-4 h-4 text-zinc-600 group-hover/item:text-muted-foreground transition-colors" />
+                        <ArrowUpRight className="w-4 h-4 text-muted-foreground dark:text-zinc-600 group-hover/item:text-muted-foreground transition-colors" />
                       </div>
                     </div>
                   );
@@ -381,11 +381,11 @@ export default function DashboardPage() {
           {/* Recent Services */}
           <motion.div
             {...fadeUp(0.4)}
-            className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300"
+            className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-border dark:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300"
           >
             <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-secondary dark:bg-zinc-800 flex items-center justify-center">
                   <Wrench className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
                 </div>
                 <div>
@@ -397,7 +397,7 @@ export default function DashboardPage() {
                 {totalJobs} total
               </span>
             </div>
-            <div className="divide-y divide-zinc-800/30 max-h-80 overflow-y-auto">
+            <div className="divide-y divide-border dark:divide-zinc-800/30 max-h-80 overflow-y-auto">
               {recentServices.length === 0 ? (
                 <div className="py-12 text-center">
                   <p className="text-sm text-muted-foreground">No recent services</p>
@@ -408,7 +408,7 @@ export default function DashboardPage() {
                   return (
                     <div
                       key={service.id}
-                      className="flex items-center justify-between px-5 py-4 hover:bg-zinc-800/30 transition-colors group/item"
+                      className="flex items-center justify-between px-5 py-4 hover:bg-secondary dark:bg-zinc-800/30 transition-colors group/item"
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1">
@@ -426,7 +426,7 @@ export default function DashboardPage() {
                         <p className="text-xs text-muted-foreground mb-1">
                           {service.motorcycleModel} • {service.serviceType}
                         </p>
-                        <div className="flex items-center gap-3 text-xs text-zinc-600">
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground dark:text-zinc-600">
                           <span>₱{service.laborCost.toLocaleString()}</span>
                           <span>•</span>
                           <span>{timeAgo}</span>
@@ -438,7 +438,7 @@ export default function DashboardPage() {
                           )}
                         </div>
                       </div>
-                      <ArrowUpRight className="w-4 h-4 text-zinc-600 group-hover/item:text-muted-foreground transition-colors ml-3 shrink-0" />
+                      <ArrowUpRight className="w-4 h-4 text-muted-foreground dark:text-zinc-600 group-hover/item:text-muted-foreground transition-colors ml-3 shrink-0" />
                     </div>
                   );
                 })
@@ -453,7 +453,7 @@ export default function DashboardPage() {
       {(user?.role === 'Owner' || user?.role === 'Staff') && (
         <motion.div
           {...fadeUp(0.45)}
-          className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 dark:hover:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300"
+          className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 dark:hover:border-border dark:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300"
         >
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -518,7 +518,7 @@ export default function DashboardPage() {
       {/* Additional Stats for Owner/Staff */}
       {(user?.role === 'Owner' || user?.role === 'Staff') && metrics && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <motion.div {...fadeUp(0.5)} className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 dark:hover:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300">
+          <motion.div {...fadeUp(0.5)} className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 dark:hover:border-border dark:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
@@ -546,7 +546,7 @@ export default function DashboardPage() {
                 <span className="font-semibold text-amber-400">{metrics.lowStockCount ?? 0}</span>
               </div>
             </div>
-            <div className="mt-4 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+            <div className="mt-4 h-1.5 bg-secondary dark:bg-zinc-800 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-gradient-to-r from-blue-500 to-blue-400" 
                 style={{ width: `${metrics.inventoryHealth ?? 100}%` }} 
@@ -555,7 +555,7 @@ export default function DashboardPage() {
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           </motion.div>
 
-          <motion.div {...fadeUp(0.55)} className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 dark:hover:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300">
+          <motion.div {...fadeUp(0.55)} className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 dark:hover:border-border dark:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
@@ -583,13 +583,13 @@ export default function DashboardPage() {
                 <span className="font-semibold text-green-400">{repeatRate}%</span>
               </div>
             </div>
-            <div className="mt-4 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+            <div className="mt-4 h-1.5 bg-secondary dark:bg-zinc-800 rounded-full overflow-hidden">
               <div className="h-full bg-gradient-to-r from-purple-500 to-purple-400" style={{ width: `${Math.min(100, repeatRate)}%` }} />
             </div>
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           </motion.div>
 
-          <motion.div {...fadeUp(0.6)} className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 dark:hover:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300">
+          <motion.div {...fadeUp(0.6)} className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 dark:hover:border-border dark:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center border border-green-500/20">
@@ -617,7 +617,7 @@ export default function DashboardPage() {
                 </span>
               </div>
             </div>
-            <div className="mt-4 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+            <div className="mt-4 h-1.5 bg-secondary dark:bg-zinc-800 rounded-full overflow-hidden">
               <div className="h-full bg-gradient-to-r from-green-500 to-green-400" style={{ width: `${completionRate}%` }} />
             </div>
             <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />

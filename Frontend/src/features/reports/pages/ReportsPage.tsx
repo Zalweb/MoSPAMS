@@ -147,14 +147,14 @@ export default function Reports() {
           <h2 className="text-[22px] font-bold text-foreground tracking-tight">Reports & Analytics</h2>
           <p className="text-[13px] text-muted-foreground mt-0.5">Track your shop's performance — {PERIOD_LABEL[period]}</p>
         </div>
-        <button onClick={onExport} className="inline-flex items-center gap-1.5 h-9 px-4 rounded-xl bg-zinc-800 border border-zinc-700 text-[12px] font-medium text-zinc-200 hover:bg-zinc-700 transition-colors">
+        <button onClick={onExport} className="inline-flex items-center gap-1.5 h-9 px-4 rounded-xl bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 text-[12px] font-medium text-foreground dark:text-zinc-200 hover:bg-muted dark:bg-zinc-700 transition-colors">
           <Download className="w-3.5 h-3.5" /> Export CSV
         </button>
       </div>
 
       <div className="flex gap-2 mb-5 flex-wrap">
         {tabs.map(r => (
-          <button key={r.key} onClick={() => setReportType(r.key)} className={`flex items-center gap-2 px-4 py-[9px] rounded-xl text-[12px] font-medium transition-all ${reportType === r.key ? 'bg-white text-zinc-900 shadow-sm' : 'bg-muted text-muted-foreground border border-border hover:border-zinc-700 hover:text-zinc-200'}`}>
+          <button key={r.key} onClick={() => setReportType(r.key)} className={`flex items-center gap-2 px-4 py-[9px] rounded-xl text-[12px] font-medium transition-all ${reportType === r.key ? 'bg-white text-zinc-900 shadow-sm' : 'bg-muted text-muted-foreground border border-border hover:border-border dark:border-zinc-700 hover:text-foreground dark:text-zinc-200'}`}>
             <r.icon className="w-3.5 h-3.5" strokeWidth={1.5} />
             {r.label}
           </button>
@@ -163,7 +163,7 @@ export default function Reports() {
 
       <div className="flex gap-1 mb-6 flex-wrap items-center">
         {(['daily', 'weekly', 'monthly', 'yearly', 'custom'] as const).map(p => (
-          <button key={p} onClick={() => setPeriod(p)} className={`px-3 py-[6px] rounded-full text-[12px] font-medium capitalize transition-all ${period === p ? 'bg-zinc-800 text-zinc-100' : 'text-muted-foreground hover:text-zinc-300'}`}>{p}</button>
+          <button key={p} onClick={() => setPeriod(p)} className={`px-3 py-[6px] rounded-full text-[12px] font-medium capitalize transition-all ${period === p ? 'bg-secondary dark:bg-zinc-800 text-zinc-100' : 'text-muted-foreground hover:text-muted-foreground dark:text-zinc-300'}`}>{p}</button>
         ))}
 
       {period === 'custom' && (
@@ -192,19 +192,19 @@ export default function Reports() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            <div className="p-5 bg-muted/50 backdrop-blur-sm border border-border rounded-2xl">
+            <div className="p-5 bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl">
               <p className="text-[11px] text-muted-foreground">Parts Revenue</p>
               <p className="text-xl font-bold text-foreground mt-1 tracking-tight">₱{partsRevenue.toLocaleString()}</p>
               <p className="text-[10px] text-muted-foreground mt-1">From {filteredTx.reduce((s, t) => s + t.items.length, 0)} line items</p>
             </div>
-            <div className="p-5 bg-muted/50 backdrop-blur-sm border border-border rounded-2xl">
+            <div className="p-5 bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl">
               <p className="text-[11px] text-muted-foreground">Labor Revenue (paid)</p>
               <p className="text-xl font-bold text-foreground mt-1 tracking-tight">₱{laborRevenueTx.toLocaleString()}</p>
               <p className="text-[10px] text-muted-foreground mt-1">Across linked service+parts transactions</p>
             </div>
           </div>
 
-          <div className="bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5">
+          <div className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5">
             <h3 className="text-[13px] font-semibold text-foreground mb-4">Top Selling Parts</h3>
             {partsUsed.length === 0 ? <p className="text-[12px] text-muted-foreground text-center py-6">No data for this period</p> : (
               <div className="space-y-3">
@@ -212,8 +212,8 @@ export default function Reports() {
                   <div key={i} className="flex items-center gap-3">
                     <span className="text-[10px] font-bold text-muted-foreground w-5 text-right">#{i + 1}</span>
                     <div className="flex-1">
-                      <div className="flex justify-between mb-1"><span className="text-[12px] font-medium text-zinc-200">{p.name}</span><span className="text-[11px] text-muted-foreground">{p.count} sold — ₱{p.revenue.toLocaleString()}</span></div>
-                      <div className="h-[3px] bg-zinc-800 rounded-full overflow-hidden"><div className="h-full bg-white rounded-full transition-all" style={{ width: `${Math.min(100, (p.count / (partsUsed[0]?.count || 1)) * 100)}%` }} /></div>
+                      <div className="flex justify-between mb-1"><span className="text-[12px] font-medium text-foreground dark:text-zinc-200">{p.name}</span><span className="text-[11px] text-muted-foreground">{p.count} sold — ₱{p.revenue.toLocaleString()}</span></div>
+                      <div className="h-[3px] bg-secondary dark:bg-zinc-800 rounded-full overflow-hidden"><div className="h-full bg-white rounded-full transition-all" style={{ width: `${Math.min(100, (p.count / (partsUsed[0]?.count || 1)) * 100)}%` }} /></div>
                     </div>
                   </div>
                 ))}
@@ -238,19 +238,19 @@ export default function Reports() {
             ))}
           </div>
 
-          <div className="bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5">
+          <div className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5">
             <h3 className="text-[13px] font-semibold text-foreground mb-4">Inventory by Category</h3>
-            <div className="divide-y divide-zinc-800">
+            <div className="divide-y divide-border dark:divide-zinc-800">
               {Array.from(new Set(parts.map(p => p.category))).sort().map(cat => {
                 const catParts = parts.filter(p => p.category === cat);
                 const totalStock = catParts.reduce((s, p) => s + p.stock, 0);
                 return (
                   <div key={cat} className="flex items-center justify-between py-3">
                     <div className="flex items-center gap-3">
-                      <span className="text-[11px] font-medium text-muted-foreground bg-zinc-800 px-2.5 py-[3px] rounded-full">{cat}</span>
+                      <span className="text-[11px] font-medium text-muted-foreground bg-secondary dark:bg-zinc-800 px-2.5 py-[3px] rounded-full">{cat}</span>
                       <span className="text-[11px] text-muted-foreground">{catParts.length} parts</span>
                     </div>
-                    <span className="text-[13px] font-semibold text-zinc-200 tabular-nums">{totalStock} units</span>
+                    <span className="text-[13px] font-semibold text-foreground dark:text-zinc-200 tabular-nums">{totalStock} units</span>
                   </div>
                 );
               })}
@@ -275,12 +275,12 @@ export default function Reports() {
 
       {reportType === 'services' && (
         <div className="space-y-4">
-          <div className="bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5">
+          <div className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5">
             <h3 className="text-[13px] font-semibold text-foreground mb-4">Service Status Overview</h3>
             <div className="flex items-end gap-6 h-36">
               {Object.entries(serviceStatusCounts).map(([status, count]) => (
                 <div key={status} className="flex-1 flex flex-col items-center justify-end gap-2">
-                  <span className="text-[11px] font-bold text-zinc-200">{count}</span>
+                  <span className="text-[11px] font-bold text-foreground dark:text-zinc-200">{count}</span>
                   <div className={`w-full rounded-t-xl transition-all ${status === 'Completed' ? 'bg-green-400' : status === 'Ongoing' ? 'bg-blue-400' : 'bg-yellow-400'}`} style={{ height: `${Math.max(16, (count / maxServiceCount) * 100)}%` }} />
                   <span className="text-[10px] font-medium text-muted-foreground">{status}</span>
                 </div>
@@ -288,7 +288,7 @@ export default function Reports() {
             </div>
           </div>
 
-          <div className="bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5">
+          <div className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5">
             <h3 className="text-[13px] font-semibold text-foreground mb-4">Most Requested Services</h3>
             {serviceTypeBreakdown.length === 0 ? <p className="text-[12px] text-muted-foreground text-center py-6">No data for this period</p> : (
               <div className="space-y-3">
@@ -296,8 +296,8 @@ export default function Reports() {
                   <div key={type} className="flex items-center gap-3">
                     <span className="text-[10px] font-bold text-muted-foreground w-5 text-right">#{i + 1}</span>
                     <div className="flex-1">
-                      <div className="flex justify-between mb-1"><span className="text-[12px] font-medium text-zinc-200">{type}</span><span className="text-[11px] text-muted-foreground">{count} jobs</span></div>
-                      <div className="h-[3px] bg-zinc-800 rounded-full overflow-hidden"><div className="h-full bg-white rounded-full" style={{ width: `${Math.min(100, (count / (serviceTypeBreakdown[0]?.[1] || 1)) * 100)}%` }} /></div>
+                      <div className="flex justify-between mb-1"><span className="text-[12px] font-medium text-foreground dark:text-zinc-200">{type}</span><span className="text-[11px] text-muted-foreground">{count} jobs</span></div>
+                      <div className="h-[3px] bg-secondary dark:bg-zinc-800 rounded-full overflow-hidden"><div className="h-full bg-white rounded-full" style={{ width: `${Math.min(100, (count / (serviceTypeBreakdown[0]?.[1] || 1)) * 100)}%` }} /></div>
                     </div>
                   </div>
                 ))}
@@ -305,18 +305,18 @@ export default function Reports() {
             )}
           </div>
 
-          <div className="bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5">
+          <div className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5">
             <h3 className="text-[13px] font-semibold text-foreground mb-4">Income Summary ({PERIOD_LABEL[period]})</h3>
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-              <div className="p-4 bg-zinc-800/50 rounded-xl border border-border">
+              <div className="p-4 bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 rounded-xl border border-border">
                 <p className="text-[11px] text-muted-foreground">Parts Revenue</p>
                 <p className="text-xl font-bold text-foreground mt-1 tracking-tight">₱{partsRevenue.toLocaleString()}</p>
               </div>
-              <div className="p-4 bg-zinc-800/50 rounded-xl border border-border">
+              <div className="p-4 bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 rounded-xl border border-border">
                 <p className="text-[11px] text-muted-foreground">Labor Revenue (paid)</p>
                 <p className="text-xl font-bold text-foreground mt-1 tracking-tight">₱{laborRevenueTx.toLocaleString()}</p>
               </div>
-              <div className="p-4 bg-zinc-800/50 rounded-xl border border-border">
+              <div className="p-4 bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 rounded-xl border border-border">
                 <p className="text-[11px] text-muted-foreground">Labor Invoiced</p>
                 <p className="text-xl font-bold text-foreground mt-1 tracking-tight">₱{laborInvoiced.toLocaleString()}</p>
               </div>

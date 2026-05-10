@@ -240,7 +240,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-border dark:border-zinc-700 border-t-white rounded-full animate-spin" />
       </div>
     );
   }
@@ -265,7 +265,7 @@ export default function SettingsPage() {
         <button
           onClick={() => setActiveTab('user')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${
-            activeTab === 'user' ? 'text-foreground border-white' : 'text-muted-foreground border-transparent hover:text-zinc-300'
+            activeTab === 'user' ? 'text-foreground border-white' : 'text-muted-foreground border-transparent hover:text-muted-foreground dark:text-zinc-300'
           }`}
         >
           <User className="w-4 h-4" strokeWidth={2} />
@@ -274,7 +274,7 @@ export default function SettingsPage() {
         <button
           onClick={() => setActiveTab('password')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${
-            activeTab === 'password' ? 'text-foreground border-white' : 'text-muted-foreground border-transparent hover:text-zinc-300'
+            activeTab === 'password' ? 'text-foreground border-white' : 'text-muted-foreground border-transparent hover:text-muted-foreground dark:text-zinc-300'
           }`}
         >
           <Lock className="w-4 h-4" strokeWidth={2} />
@@ -283,7 +283,7 @@ export default function SettingsPage() {
         <button
           onClick={() => setActiveTab('shop')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${
-            activeTab === 'shop' ? 'text-foreground border-white' : 'text-muted-foreground border-transparent hover:text-zinc-300'
+            activeTab === 'shop' ? 'text-foreground border-white' : 'text-muted-foreground border-transparent hover:text-muted-foreground dark:text-zinc-300'
           }`}
         >
           <Store className="w-4 h-4" strokeWidth={2} />
@@ -292,7 +292,7 @@ export default function SettingsPage() {
         <button
           onClick={() => setActiveTab('branding')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${
-            activeTab === 'branding' ? 'text-foreground border-white' : 'text-muted-foreground border-transparent hover:text-zinc-300'
+            activeTab === 'branding' ? 'text-foreground border-white' : 'text-muted-foreground border-transparent hover:text-muted-foreground dark:text-zinc-300'
           }`}
         >
           <Palette className="w-4 h-4" strokeWidth={2} />
@@ -301,7 +301,7 @@ export default function SettingsPage() {
         <button
           onClick={() => setActiveTab('domain')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${
-            activeTab === 'domain' ? 'text-foreground border-white' : 'text-muted-foreground border-transparent hover:text-zinc-300'
+            activeTab === 'domain' ? 'text-foreground border-white' : 'text-muted-foreground border-transparent hover:text-muted-foreground dark:text-zinc-300'
           }`}
         >
           <Globe className="w-4 h-4" strokeWidth={2} />
@@ -316,45 +316,45 @@ export default function SettingsPage() {
               <h3 className="text-lg font-semibold text-foreground mb-4">Personal Information</h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">Full Name</label>
+                  <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">Full Name</label>
                   <input
                     type="text"
                     value={userName}
                     onChange={(e) => setUserName(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="w-full px-4 py-2.5 bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
                     placeholder="Enter your full name"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">Email Address</label>
+                  <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">Email Address</label>
                   <input
                     type="email"
                     value={user?.email || ''}
                     disabled
-                    className="w-full px-4 py-2.5 bg-zinc-800/50 border border-zinc-700 rounded-xl text-muted-foreground text-sm cursor-not-allowed"
+                    className="w-full px-4 py-2.5 bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border border-border dark:border-zinc-700 rounded-xl text-muted-foreground text-sm cursor-not-allowed"
                   />
                   <p className="text-xs text-muted-foreground mt-1">Email is linked to your Google account and cannot be changed</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">Role</label>
+                  <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">Role</label>
                   <input
                     type="text"
                     value={user?.role || ''}
                     disabled
-                    className="w-full px-4 py-2.5 bg-zinc-800/50 border border-zinc-700 rounded-xl text-muted-foreground text-sm cursor-not-allowed"
+                    className="w-full px-4 py-2.5 bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border border-border dark:border-zinc-700 rounded-xl text-muted-foreground text-sm cursor-not-allowed"
                   />
                   <p className="text-xs text-muted-foreground mt-1">Your role determines your access level in the system</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">Shop</label>
+                  <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">Shop</label>
                   <input
                     type="text"
                     value={user?.shopName || 'N/A'}
                     disabled
-                    className="w-full px-4 py-2.5 bg-zinc-800/50 border border-zinc-700 rounded-xl text-muted-foreground text-sm cursor-not-allowed"
+                    className="w-full px-4 py-2.5 bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border border-border dark:border-zinc-700 rounded-xl text-muted-foreground text-sm cursor-not-allowed"
                   />
                 </div>
               </div>
@@ -381,32 +381,32 @@ export default function SettingsPage() {
                   </div>
                 )}
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">Current Password</label>
+                  <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">Current Password</label>
                   <input
                     type="password"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="w-full px-4 py-2.5 bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
                     placeholder="Enter current password"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">New Password</label>
+                  <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">New Password</label>
                   <input
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="w-full px-4 py-2.5 bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
                     placeholder="Enter new password (min 6 characters)"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">Confirm New Password</label>
+                  <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">Confirm New Password</label>
                   <input
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="w-full px-4 py-2.5 bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
                     placeholder="Re-enter new password"
                   />
                 </div>
@@ -428,59 +428,59 @@ export default function SettingsPage() {
               <h3 className="text-lg font-semibold text-foreground mb-4">Shop Information</h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">Shop Name</label>
+                  <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">Shop Name</label>
                   <input
                     type="text"
                     value={branding.shopName}
                     onChange={(e) => setBranding({ ...branding, shopName: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="w-full px-4 py-2.5 bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
                     placeholder="Enter shop name"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">Description</label>
+                  <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">Description</label>
                   <textarea
                     value={branding.shopDescription || ''}
                     onChange={(e) => setBranding({ ...branding, shopDescription: e.target.value })}
                     rows={3}
-                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="w-full px-4 py-2.5 bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
                     placeholder="Brief description of your shop"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">Contact Email</label>
+                    <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">Contact Email</label>
                     <input
                       type="email"
                       value={branding.contactEmail || ''}
                       disabled
-                      className="w-full px-4 py-2.5 bg-zinc-800/50 border border-zinc-700 rounded-xl text-muted-foreground text-sm cursor-not-allowed"
+                      className="w-full px-4 py-2.5 bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border border-border dark:border-zinc-700 rounded-xl text-muted-foreground text-sm cursor-not-allowed"
                       placeholder="shop@example.com"
                     />
                     <p className="text-xs text-muted-foreground mt-1">Email is linked to your Google account</p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">Contact Phone</label>
+                    <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">Contact Phone</label>
                     <input
                       type="tel"
                       value={branding.contactPhone || ''}
                       onChange={(e) => setBranding({ ...branding, contactPhone: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                      className="w-full px-4 py-2.5 bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
                       placeholder="+63 XXX XXX XXXX"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">Address</label>
+                  <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">Address</label>
                   <input
                     type="text"
                     value={branding.address || ''}
                     onChange={(e) => setBranding({ ...branding, address: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="w-full px-4 py-2.5 bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
                     placeholder="Shop address"
                   />
                 </div>
@@ -503,38 +503,38 @@ export default function SettingsPage() {
               <h3 className="text-lg font-semibold text-foreground mb-4">Brand Colors</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">Primary Color</label>
+                  <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">Primary Color</label>
                   <div className="flex gap-3">
                     <input
                       type="color"
                       value={branding.primaryColor}
                       onChange={(e) => setBranding({ ...branding, primaryColor: e.target.value })}
-                      className="w-16 h-12 rounded-xl cursor-pointer bg-zinc-800 border border-zinc-700"
+                      className="w-16 h-12 rounded-xl cursor-pointer bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700"
                     />
                     <input
                       type="text"
                       value={branding.primaryColor}
                       onChange={(e) => setBranding({ ...branding, primaryColor: e.target.value })}
-                      className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                      className="flex-1 px-4 py-2.5 bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
                       placeholder="#000000"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">Secondary Color</label>
+                  <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">Secondary Color</label>
                   <div className="flex gap-3">
                     <input
                       type="color"
                       value={branding.secondaryColor}
                       onChange={(e) => setBranding({ ...branding, secondaryColor: e.target.value })}
-                      className="w-16 h-12 rounded-xl cursor-pointer bg-zinc-800 border border-zinc-700"
+                      className="w-16 h-12 rounded-xl cursor-pointer bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700"
                     />
                     <input
                       type="text"
                       value={branding.secondaryColor}
                       onChange={(e) => setBranding({ ...branding, secondaryColor: e.target.value })}
-                      className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                      className="flex-1 px-4 py-2.5 bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
                       placeholder="#000000"
                     />
                   </div>
@@ -550,7 +550,7 @@ export default function SettingsPage() {
                     <img
                       src={branding.logoUrl}
                       alt="Shop logo"
-                      className="w-24 h-24 rounded-xl object-cover border border-zinc-700"
+                      className="w-24 h-24 rounded-xl object-cover border border-border dark:border-zinc-700"
                     />
                     <button
                       onClick={handleDeleteLogo}
@@ -560,8 +560,8 @@ export default function SettingsPage() {
                     </button>
                   </div>
                 ) : (
-                  <div className="w-24 h-24 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center">
-                    <Store className="w-8 h-8 text-zinc-600" />
+                  <div className="w-24 h-24 rounded-xl bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 flex items-center justify-center">
+                    <Store className="w-8 h-8 text-muted-foreground dark:text-zinc-600" />
                   </div>
                 )}
 
@@ -573,7 +573,7 @@ export default function SettingsPage() {
                       onChange={(e) => e.target.files?.[0] && handleLogoUpload(e.target.files[0])}
                       className="hidden"
                     />
-                    <span className="inline-flex items-center gap-2 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm font-medium hover:bg-zinc-700 transition-colors cursor-pointer">
+                    <span className="inline-flex items-center gap-2 px-4 py-2.5 bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-xl text-foreground text-sm font-medium hover:bg-muted dark:bg-zinc-700 transition-colors cursor-pointer">
                       <Upload className="w-4 h-4" strokeWidth={2} />
                       Upload Logo
                     </span>
@@ -601,18 +601,18 @@ export default function SettingsPage() {
                 Share this code with staff and mechanics to join your shop
               </p>
               <div className="flex gap-3">
-                <div className="flex-1 px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground font-mono text-lg">
+                <div className="flex-1 px-4 py-3 bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-xl text-foreground font-mono text-lg">
                   {branding.invitationCode}
                 </div>
                 <button
                   onClick={handleCopyCode}
-                  className="px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground hover:bg-zinc-700 transition-colors"
+                  className="px-4 py-3 bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-xl text-foreground hover:bg-muted dark:bg-zinc-700 transition-colors"
                 >
                   {copied ? <Check className="w-5 h-5 text-green-400" /> : <Copy className="w-5 h-5" />}
                 </button>
                 <button
                   onClick={handleRegenerateCode}
-                  className="px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground hover:bg-zinc-700 transition-colors"
+                  className="px-4 py-3 bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-xl text-foreground hover:bg-muted dark:bg-zinc-700 transition-colors"
                 >
                   <RefreshCw className="w-5 h-5" />
                 </button>
@@ -624,7 +624,7 @@ export default function SettingsPage() {
               {branding.customDomain ? (
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
-                    <div className="flex-1 px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground">
+                    <div className="flex-1 px-4 py-3 bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-xl text-foreground">
                       {branding.customDomain}
                     </div>
                     <span
@@ -647,7 +647,7 @@ export default function SettingsPage() {
                       <div className="flex gap-2">
                         <button
                           onClick={handleFetchDnsInstructions}
-                          className="px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-xl text-sm text-zinc-300 hover:bg-zinc-700 transition-colors"
+                          className="px-4 py-2 bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-xl text-sm text-muted-foreground dark:text-zinc-300 hover:bg-muted dark:bg-zinc-700 transition-colors"
                         >
                           View DNS Instructions
                         </button>
@@ -660,7 +660,7 @@ export default function SettingsPage() {
                         </button>
                       </div>
                       {dnsInstructions && (
-                        <div className="p-4 bg-zinc-800/50 border border-zinc-700 rounded-xl text-xs text-muted-foreground font-mono whitespace-pre-wrap">
+                        <div className="p-4 bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border border-border dark:border-zinc-700 rounded-xl text-xs text-muted-foreground font-mono whitespace-pre-wrap">
                           {dnsInstructions}
                         </div>
                       )}
@@ -699,7 +699,7 @@ export default function SettingsPage() {
                       value={domainInput}
                       onChange={(e) => setDomainInput(e.target.value)}
                       placeholder="e.g. myshop.com"
-                      className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                      className="flex-1 px-4 py-2.5 bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
                     />
                     <button
                       onClick={handleRequestDomain}

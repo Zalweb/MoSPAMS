@@ -104,7 +104,7 @@ export default function Sales() {
 
       <motion.div {...fadeUp(0.1)} className="flex flex-wrap gap-2">
         {(['daily', 'weekly', 'monthly', 'yearly', 'all'] as const).map(p => (
-          <button key={p} onClick={() => setPeriod(p)} className={`px-4 py-2 rounded-xl text-sm font-medium capitalize transition-all ${period === p ? 'bg-white text-black' : 'bg-muted/50 text-muted-foreground border border-border hover:border-zinc-700 hover:text-foreground'}`}>
+          <button key={p} onClick={() => setPeriod(p)} className={`px-4 py-2 rounded-xl text-sm font-medium capitalize transition-all ${period === p ? 'bg-white text-black' : 'bg-muted/50 text-muted-foreground border border-border hover:border-border dark:border-zinc-700 hover:text-foreground'}`}>
             {PERIOD_LABEL[p]}
           </button>
         ))}
@@ -112,7 +112,7 @@ export default function Sales() {
 
       <motion.div {...fadeUp(0.15)} className="flex flex-wrap gap-2">
         {(['All', 'Cash', 'GCash'] as PaymentFilter[]).map(p => (
-          <button key={p} onClick={() => setPaymentFilter(p)} className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${paymentFilter === p ? 'bg-zinc-700 text-foreground' : 'bg-muted/50 text-muted-foreground border border-border'}`}>
+          <button key={p} onClick={() => setPaymentFilter(p)} className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${paymentFilter === p ? 'bg-muted dark:bg-zinc-700 text-foreground' : 'bg-muted/50 text-muted-foreground border border-border'}`}>
             {p}
           </button>
         ))}
@@ -132,7 +132,7 @@ export default function Sales() {
         ))}
       </motion.div>
 
-      <motion.div {...fadeUp(0.25)} className="bg-muted/50 backdrop-blur-sm border border-border rounded-2xl overflow-hidden">
+      <motion.div {...fadeUp(0.25)} className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl overflow-hidden">
         <div className="px-5 py-4 border-b border-border flex items-center justify-between">
           <h3 className="text-sm font-semibold text-foreground">Transactions ({filteredTx.length})</h3>
           <span className="text-xs text-muted-foreground">{PERIOD_LABEL[period]}{paymentFilter !== 'All' && ` · ${paymentFilter}`}</span>
@@ -147,14 +147,14 @@ export default function Sales() {
               <th className="text-right px-5 py-4 text-xs font-semibold text-muted-foreground uppercase">Total</th>
               <th className="text-right px-5 py-4 text-xs font-semibold text-muted-foreground uppercase"></th>
             </tr></thead>
-            <tbody className="divide-y divide-zinc-800/50">
+            <tbody className="divide-y divide-border dark:divide-zinc-800/50">
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i}><td colSpan={6} className="px-5 py-4"><div className="h-4 bg-zinc-800/60 rounded animate-pulse" /></td></tr>
+                  <tr key={i}><td colSpan={6} className="px-5 py-4"><div className="h-4 bg-secondary dark:bg-zinc-800/60 rounded animate-pulse" /></td></tr>
                 ))
               ) : filteredTx.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(tx => (
-                <tr key={tx.id} className="hover:bg-zinc-800/30 transition-colors">
-                  <td className="px-5 py-4 text-xs text-muted-foreground tabular-nums whitespace-nowrap">{new Date(tx.createdAt).toLocaleDateString()} <span className="text-zinc-600">{new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></td>
+                <tr key={tx.id} className="hover:bg-secondary dark:bg-zinc-800/30 transition-colors">
+                  <td className="px-5 py-4 text-xs text-muted-foreground tabular-nums whitespace-nowrap">{new Date(tx.createdAt).toLocaleDateString()} <span className="text-muted-foreground dark:text-zinc-600">{new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></td>
                   <td className="px-5 py-4"><span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${tx.type === 'service+parts' ? 'bg-violet-500/10 text-violet-400' : 'bg-blue-500/10 text-blue-400'}`}>{tx.type}</span></td>
                   <td className="px-5 py-4 text-sm text-muted-foreground max-w-[200px] truncate">{tx.items.map(i => i.name).join(', ') || '—'}</td>
                   <td className="px-5 py-4">
@@ -165,14 +165,14 @@ export default function Sales() {
                   </td>
                   <td className="px-5 py-4 text-right text-sm font-semibold text-foreground tabular-nums">₱{tx.total.toLocaleString()}</td>
                   <td className="px-5 py-4 text-right">
-                    <button onClick={() => setReceiptTx(tx)} className="p-2 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors"><Receipt className="w-4 h-4" /></button>
+                    <button onClick={() => setReceiptTx(tx)} className="p-2 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors"><Receipt className="w-4 h-4" /></button>
                   </td>
                 </tr>
               ))}
               {!loading && filteredTx.length === 0 && (
                 <tr><td colSpan={6} className="px-5 py-16 text-center text-sm text-muted-foreground">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-zinc-800/50 flex items-center justify-center">
-                    <Receipt className="w-8 h-8 text-zinc-600" />
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 flex items-center justify-center">
+                    <Receipt className="w-8 h-8 text-muted-foreground dark:text-zinc-600" />
                   </div>
                   No transactions for this filter
                 </td></tr>
@@ -185,10 +185,10 @@ export default function Sales() {
           <div className="flex items-center justify-between px-5 py-3 border-t border-border">
             <p className="text-xs text-muted-foreground">Page {meta.currentPage} of {meta.lastPage} — {meta.total} total</p>
             <div className="flex items-center gap-1">
-              <button onClick={() => setPage(page - 1)} disabled={page <= 1} className="p-1.5 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+              <button onClick={() => setPage(page - 1)} disabled={page <= 1} className="p-1.5 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <button onClick={() => setPage(page + 1)} disabled={page >= meta.lastPage} className="p-1.5 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+              <button onClick={() => setPage(page + 1)} disabled={page >= meta.lastPage} className="p-1.5 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -204,11 +204,11 @@ export default function Sales() {
               <Label className="text-xs font-medium text-muted-foreground">Search Parts (or scan barcode)</Label>
               <div className="relative mt-1.5 mb-3">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input autoFocus value={search} onChange={e => setSearch(e.target.value)} className="pl-11 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-zinc-600" placeholder="Search…" />
+                <Input autoFocus value={search} onChange={e => setSearch(e.target.value)} className="pl-11 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="Search…" />
               </div>
               <div className="space-y-1 max-h-56 overflow-y-auto pr-1">
                 {filteredParts.map(part => (
-                  <button key={part.id} onClick={() => addToCart(part)} className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-zinc-800/50 border border-transparent hover:border-zinc-700 transition-all text-left group">
+                  <button key={part.id} onClick={() => addToCart(part)} className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border border-transparent hover:border-border dark:border-zinc-700 transition-all text-left group">
                     <div><p className="text-sm font-medium text-foreground">{part.name}</p><p className="text-xs text-muted-foreground">{part.category} — {part.stock} in stock</p></div>
                     <div className="flex items-center gap-2"><span className="text-sm font-semibold text-muted-foreground">₱{part.price.toLocaleString()}</span><Plus className="w-4 h-4 text-muted-foreground group-hover:text-foreground" /></div>
                   </button>
@@ -221,14 +221,14 @@ export default function Sales() {
                   setSelectedService(e.target.value);
                   const s = modalServices.find(sv => sv.id === e.target.value);
                   if (s) setServiceLabor(s.laborCost); else setServiceLabor(0);
-                }} className="w-full mt-1.5 h-10 px-3 rounded-xl bg-zinc-800/50 border border-zinc-700 text-sm text-foreground">
+                }} className="w-full mt-1.5 h-10 px-3 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border border-border dark:border-zinc-700 text-sm text-foreground">
                   <option value="">No service</option>
                   {pendingServices.map(s => <option key={s.id} value={s.id}>{s.customerName} — {s.serviceType}</option>)}
                 </select>
               </div>
             </div>
 
-            <div className="bg-zinc-800/30 rounded-2xl p-4 border border-border">
+            <div className="bg-secondary dark:bg-zinc-800/30 rounded-2xl p-4 border border-border">
               <h4 className="text-sm font-semibold text-foreground mb-3">Cart</h4>
               <AnimatePresence>
                 {cart.length === 0 && !selectedService ? (
@@ -236,12 +236,12 @@ export default function Sales() {
                 ) : (
                   <div className="space-y-2">
                     {cart.map(item => (
-                      <motion.div key={item.partId} layout initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -8 }} className="flex items-center justify-between bg-zinc-800/50 rounded-xl p-3 border border-zinc-700">
+                      <motion.div key={item.partId} layout initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -8 }} className="flex items-center justify-between bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 rounded-xl p-3 border border-border dark:border-zinc-700">
                         <div className="flex-1 min-w-0"><p className="text-sm font-medium text-foreground truncate">{item.name}</p><p className="text-xs text-muted-foreground">₱{item.price.toLocaleString()} each</p></div>
                         <div className="flex items-center gap-2 ml-3">
-                          <button onClick={() => updateQty(item.partId, item.quantity - 1)} className="w-7 h-7 rounded-lg bg-zinc-700/50 flex items-center justify-center text-muted-foreground text-xs font-bold hover:bg-zinc-700">-</button>
+                          <button onClick={() => updateQty(item.partId, item.quantity - 1)} className="w-7 h-7 rounded-lg bg-muted/50 dark:bg-muted dark:bg-zinc-700/50 flex items-center justify-center text-muted-foreground text-xs font-bold hover:bg-muted dark:bg-zinc-700">-</button>
                           <span className="text-sm font-semibold w-5 text-center tabular-nums text-foreground">{item.quantity}</span>
-                          <button onClick={() => updateQty(item.partId, item.quantity + 1)} className="w-7 h-7 rounded-lg bg-zinc-700/50 flex items-center justify-center text-muted-foreground text-xs font-bold hover:bg-zinc-700">+</button>
+                          <button onClick={() => updateQty(item.partId, item.quantity + 1)} className="w-7 h-7 rounded-lg bg-muted/50 dark:bg-muted dark:bg-zinc-700/50 flex items-center justify-center text-muted-foreground text-xs font-bold hover:bg-muted dark:bg-zinc-700">+</button>
                           <button onClick={() => removeFromCart(item.partId)} className="p-1 text-muted-foreground hover:text-red-400 ml-1"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       </motion.div>
@@ -257,10 +257,10 @@ export default function Sales() {
                 )}
               </AnimatePresence>
 
-              <div className="mt-4 pt-4 border-t border-zinc-700">
+              <div className="mt-4 pt-4 border-t border-border dark:border-zinc-700">
                 <div className="flex gap-2 mb-4">
-                  <button onClick={() => setPaymentMethod('Cash')} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all ${paymentMethod === 'Cash' ? 'bg-green-500 text-foreground' : 'bg-zinc-800/50 text-muted-foreground border border-zinc-700'}`}><Banknote className="w-4 h-4" />Cash</button>
-                  <button onClick={() => setPaymentMethod('GCash')} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all ${paymentMethod === 'GCash' ? 'bg-violet-500 text-foreground' : 'bg-zinc-800/50 text-muted-foreground border border-zinc-700'}`}><Smartphone className="w-4 h-4" />GCash</button>
+                  <button onClick={() => setPaymentMethod('Cash')} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all ${paymentMethod === 'Cash' ? 'bg-green-500 text-foreground' : 'bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 text-muted-foreground border border-border dark:border-zinc-700'}`}><Banknote className="w-4 h-4" />Cash</button>
+                  <button onClick={() => setPaymentMethod('GCash')} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all ${paymentMethod === 'GCash' ? 'bg-violet-500 text-foreground' : 'bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 text-muted-foreground border border-border dark:border-zinc-700'}`}><Smartphone className="w-4 h-4" />GCash</button>
                 </div>
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-sm text-muted-foreground">Total</span>
@@ -278,12 +278,12 @@ export default function Sales() {
           <DialogHeader>
             <DialogTitle className="text-base font-semibold text-center flex items-center justify-center gap-2 text-foreground">
               Receipt
-              <button onClick={() => window.print()} className="p-1.5 rounded hover:bg-zinc-800 text-muted-foreground" title="Print"><Printer className="w-4 h-4" /></button>
+              <button onClick={() => window.print()} className="p-1.5 rounded hover:bg-secondary dark:bg-zinc-800 text-muted-foreground" title="Print"><Printer className="w-4 h-4" /></button>
             </DialogTitle>
           </DialogHeader>
           {receiptTx && (
             <div className="space-y-3 mt-2">
-              <div className="text-center border-b border-dashed border-zinc-700 pb-4">
+              <div className="text-center border-b border-dashed border-border dark:border-zinc-700 pb-4">
                 <p className="text-sm text-muted-foreground">MoSPAMS Motorcycle Shop</p>
                 <p className="text-xs text-muted-foreground mt-1">{new Date(receiptTx.createdAt).toLocaleString()}</p>
                 <p className="text-xs font-mono text-muted-foreground mt-0.5">TXN-{receiptTx.id.slice(-8).toUpperCase()}</p>
@@ -292,7 +292,7 @@ export default function Sales() {
                 <div key={i} className="flex justify-between text-sm"><span className="text-muted-foreground">{item.name} x{item.quantity}</span><span className="font-medium text-foreground tabular-nums">₱{(item.price * item.quantity).toLocaleString()}</span></div>
               ))}
               {receiptTx.serviceLaborCost && <div className="flex justify-between text-sm font-medium text-violet-400"><span>Service Labor</span><span className="tabular-nums">₱{receiptTx.serviceLaborCost.toLocaleString()}</span></div>}
-              <div className="border-t border-dashed border-zinc-700 pt-4">
+              <div className="border-t border-dashed border-border dark:border-zinc-700 pt-4">
                 <div className="flex justify-between text-base font-bold text-foreground"><span>Total</span><span className="tabular-nums">₱{receiptTx.total.toLocaleString()}</span></div>
                 <div className="flex justify-between text-xs text-muted-foreground mt-2"><span>Payment</span><span className="flex items-center gap-1">{receiptTx.paymentMethod === 'GCash' ? <Smartphone className="w-3.5 h-3.5" /> : <Banknote className="w-3.5 h-3.5" />}{receiptTx.paymentMethod}</span></div>
               </div>

@@ -74,9 +74,9 @@ export default function SuperAdminAccessControlPage() {
       <section className="bg-card rounded-2xl border border-border p-4 mb-4">
         <h3 className="text-[13px] font-semibold text-foreground mb-3">Create Platform Admin</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-          <Input placeholder="Full name" value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} className="bg-muted border-zinc-700 text-zinc-200 placeholder:text-muted-foreground" />
-          <Input placeholder="Email" value={form.email} onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))} className="bg-muted border-zinc-700 text-zinc-200 placeholder:text-muted-foreground" />
-          <Input placeholder="Password (optional)" value={form.password} onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))} className="bg-muted border-zinc-700 text-zinc-200 placeholder:text-muted-foreground" />
+          <Input placeholder="Full name" value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} className="bg-muted border-border dark:border-zinc-700 text-foreground dark:text-zinc-200 placeholder:text-muted-foreground" />
+          <Input placeholder="Email" value={form.email} onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))} className="bg-muted border-border dark:border-zinc-700 text-foreground dark:text-zinc-200 placeholder:text-muted-foreground" />
+          <Input placeholder="Password (optional)" value={form.password} onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))} className="bg-muted border-border dark:border-zinc-700 text-foreground dark:text-zinc-200 placeholder:text-muted-foreground" />
         </div>
         <Button className="mt-3 h-9 text-[12px] bg-white hover:bg-zinc-200 text-black" onClick={() => void onCreate()}>Create Admin</Button>
       </section>
@@ -92,7 +92,7 @@ export default function SuperAdminAccessControlPage() {
               <th className="text-right px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-800">
+          <tbody className="divide-y divide-border dark:divide-zinc-800">
             {loading ? (
               <tr>
                 <td colSpan={5} className="px-4 py-10 text-center text-[12px] text-muted-foreground">Loading platform admins...</td>
@@ -105,7 +105,7 @@ export default function SuperAdminAccessControlPage() {
               admins.map((admin) => (
                 <tr key={admin.userId}>
                   <td className="px-4 py-3 text-[12px] font-medium text-foreground">{admin.name}</td>
-                  <td className="px-4 py-3 text-[12px] text-zinc-300">{admin.email}</td>
+                  <td className="px-4 py-3 text-[12px] text-muted-foreground dark:text-zinc-300">{admin.email}</td>
                   <td className="px-4 py-3">
                     <span className={`text-[10px] font-semibold px-2 py-[3px] rounded-full border ${admin.statusCode === 'active' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-zinc-500/10 text-muted-foreground border-zinc-500/20'}`}>
                       {admin.status}
@@ -113,7 +113,7 @@ export default function SuperAdminAccessControlPage() {
                   </td>
                   <td className="px-4 py-3 text-[12px] text-muted-foreground">{admin.lastActive ? new Date(admin.lastActive).toLocaleString() : 'N/A'}</td>
                   <td className="px-4 py-3 text-right">
-                    <Button variant="outline" className="h-8 px-3 text-[11px] border-zinc-700 bg-muted hover:bg-zinc-800 hover:border-zinc-700" onClick={() => void onToggleStatus(admin)}>
+                    <Button variant="outline" className="h-8 px-3 text-[11px] border-border dark:border-zinc-700 bg-muted hover:bg-secondary dark:bg-zinc-800 hover:border-border dark:border-zinc-700" onClick={() => void onToggleStatus(admin)}>
                       {admin.statusCode === 'active' ? 'Deactivate' : 'Activate'}
                     </Button>
                   </td>

@@ -46,7 +46,7 @@ export default function SuperAdminProfilePage() {
           <div className="space-y-4">
             <div>
               <label className="block text-[12px] font-medium text-muted-foreground mb-1.5">Full Name</label>
-              <Input value={name} onChange={e => setName(e.target.value)} className="bg-muted border-zinc-700 text-foreground" />
+              <Input value={name} onChange={e => setName(e.target.value)} className="bg-muted border-border dark:border-zinc-700 text-foreground" />
             </div>
             <div>
               <label className="block text-[12px] font-medium text-muted-foreground mb-1.5">Email</label>

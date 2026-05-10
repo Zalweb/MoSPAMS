@@ -125,7 +125,7 @@ export default function ShopBrandingSettings() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="w-12 h-12 border-4 border-zinc-700 border-t-white rounded-full animate-spin" />
+        <div className="w-12 h-12 border-4 border-border dark:border-zinc-700 border-t-white rounded-full animate-spin" />
       </div>
     );
   }
@@ -146,10 +146,10 @@ export default function ShopBrandingSettings() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.5 }}
-        className="bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-6"
+        className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-6"
       >
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-secondary dark:bg-zinc-800 flex items-center justify-center">
             <Upload className="w-5 h-5 text-muted-foreground" />
           </div>
           <div>
@@ -164,7 +164,7 @@ export default function ShopBrandingSettings() {
               <img
                 src={branding.logoUrl}
                 alt="Shop logo"
-                className="w-24 h-24 rounded-xl object-cover border border-zinc-700"
+                className="w-24 h-24 rounded-xl object-cover border border-border dark:border-zinc-700"
                 loading="lazy"
                 decoding="async"
               />
@@ -176,7 +176,7 @@ export default function ShopBrandingSettings() {
               </button>
             </div>
           ) : (
-            <div className="relative w-24 h-24 rounded-xl bg-zinc-800/50 border border-zinc-700 flex items-center justify-center overflow-hidden">
+            <div className="relative w-24 h-24 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border border-border dark:border-zinc-700 flex items-center justify-center overflow-hidden">
               <img
                 src="/images/logo.svg"
                 alt="Default MoSPAMS logo"
@@ -195,7 +195,7 @@ export default function ShopBrandingSettings() {
               onChange={handleLogoUpload}
               className="hidden"
             />
-            <div className="px-4 py-2 rounded-xl bg-zinc-800 border border-zinc-700 text-sm font-medium text-foreground hover:bg-zinc-700 transition-colors">
+            <div className="px-4 py-2 rounded-xl bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 text-sm font-medium text-foreground hover:bg-muted dark:bg-zinc-700 transition-colors">
               {branding?.logoUrl ? 'Change Logo' : 'Upload Logo'}
             </div>
           </label>
@@ -207,10 +207,10 @@ export default function ShopBrandingSettings() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.5 }}
-        className="bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-6"
+        className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-6"
       >
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-secondary dark:bg-zinc-800 flex items-center justify-center">
             <Palette className="w-5 h-5 text-muted-foreground" />
           </div>
           <div>
@@ -227,12 +227,12 @@ export default function ShopBrandingSettings() {
                 type="color"
                 value={formData.primaryColor}
                 onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                className="w-16 h-16 rounded-xl cursor-pointer border-2 border-zinc-700"
+                className="w-16 h-16 rounded-xl cursor-pointer border-2 border-border dark:border-zinc-700"
               />
               <Input
                 value={formData.primaryColor}
                 onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                className="flex-1 h-12 rounded-xl bg-zinc-800/50 border-zinc-700 text-foreground font-mono"
+                className="flex-1 h-12 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-foreground font-mono"
                 placeholder="#ef4444"
               />
             </div>
@@ -245,12 +245,12 @@ export default function ShopBrandingSettings() {
                 type="color"
                 value={formData.secondaryColor}
                 onChange={(e) => setFormData({ ...formData, secondaryColor: e.target.value })}
-                className="w-16 h-16 rounded-xl cursor-pointer border-2 border-zinc-700"
+                className="w-16 h-16 rounded-xl cursor-pointer border-2 border-border dark:border-zinc-700"
               />
               <Input
                 value={formData.secondaryColor}
                 onChange={(e) => setFormData({ ...formData, secondaryColor: e.target.value })}
-                className="flex-1 h-12 rounded-xl bg-zinc-800/50 border-zinc-700 text-foreground font-mono"
+                className="flex-1 h-12 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-foreground font-mono"
                 placeholder="#f97316"
               />
             </div>
@@ -258,7 +258,7 @@ export default function ShopBrandingSettings() {
         </div>
 
         {/* Color Preview */}
-        <div className="mt-6 p-4 rounded-xl bg-zinc-800/50 border border-zinc-700">
+        <div className="mt-6 p-4 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border border-border dark:border-zinc-700">
           <p className="text-xs font-medium text-muted-foreground mb-3">Preview</p>
           <div className="flex gap-3">
             <div
@@ -280,7 +280,7 @@ export default function ShopBrandingSettings() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.5 }}
-        className="bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-6"
+        className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-6"
       >
         <h3 className="text-base font-semibold text-foreground mb-4">Shop Information</h3>
         
@@ -290,7 +290,7 @@ export default function ShopBrandingSettings() {
             <Input
               value={formData.shopName}
               onChange={(e) => setFormData({ ...formData, shopName: e.target.value })}
-              className="h-12 rounded-xl bg-zinc-800/50 border-zinc-700 text-foreground"
+              className="h-12 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-foreground"
             />
           </div>
 
@@ -300,7 +300,7 @@ export default function ShopBrandingSettings() {
               <Input
                 value={branding?.subdomain || ''}
                 disabled
-                className="flex-1 h-12 rounded-xl bg-zinc-800/30 border-zinc-700 text-muted-foreground"
+                className="flex-1 h-12 rounded-xl bg-secondary dark:bg-zinc-800/30 border-border dark:border-zinc-700 text-muted-foreground"
               />
               <span className="text-sm text-muted-foreground">.mospams.shop</span>
             </div>
@@ -312,12 +312,12 @@ export default function ShopBrandingSettings() {
               <Input
                 value={branding?.invitationCode || ''}
                 disabled
-                className="flex-1 h-12 rounded-xl bg-zinc-800/30 border-zinc-700 text-foreground font-mono"
+                className="flex-1 h-12 rounded-xl bg-secondary dark:bg-zinc-800/30 border-border dark:border-zinc-700 text-foreground font-mono"
               />
               <Button
                 onClick={handleRegenerateCode}
                 variant="outline"
-                className="h-12 rounded-xl border-zinc-700"
+                className="h-12 rounded-xl border-border dark:border-zinc-700"
               >
                 <RefreshCw className="w-4 h-4" />
               </Button>

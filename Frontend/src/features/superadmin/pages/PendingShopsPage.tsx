@@ -90,7 +90,7 @@ export default function PendingShopsPage() {
         </div>
       ) : shops.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <CheckCircle className="w-16 h-16 mx-auto mb-4 text-zinc-600" />
+          <CheckCircle className="w-16 h-16 mx-auto mb-4 text-muted-foreground dark:text-zinc-600" />
           <h3 className="text-lg font-semibold text-foreground mb-2">All Caught Up!</h3>
           <p className="text-muted-foreground">No pending shop approvals at the moment</p>
         </div>
@@ -101,10 +101,10 @@ export default function PendingShopsPage() {
               key={shop.shopId}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-card rounded-2xl border border-border p-6 hover:border-zinc-700 transition-all"
+              className="bg-card rounded-2xl border border-border p-6 hover:border-border dark:border-zinc-700 transition-all"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="w-12 h-12 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-xl bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 flex items-center justify-center">
                   <Store className="w-6 h-6 text-foreground" strokeWidth={2} />
                 </div>
                 <span className="px-2 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold">
@@ -133,7 +133,7 @@ export default function PendingShopsPage() {
               <div className="flex gap-2">
                 <button
                   onClick={() => setSelectedShop(shop)}
-                  className="flex-1 px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-foreground text-sm font-medium hover:bg-zinc-700 transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2 rounded-lg bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 text-foreground text-sm font-medium hover:bg-muted dark:bg-zinc-700 transition-colors flex items-center justify-center gap-2"
                 >
                   <Eye className="w-4 h-4" strokeWidth={2} />
                   Review
@@ -159,7 +159,7 @@ export default function PendingShopsPage() {
               </div>
               <button
                 onClick={() => setSelectedShop(null)}
-                className="p-2 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors"
+                className="p-2 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors"
               >
                 <XCircle className="w-5 h-5" strokeWidth={2} />
               </button>
@@ -253,7 +253,7 @@ export default function PendingShopsPage() {
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               placeholder="Enter rejection reason..."
-              className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-zinc-700 focus:ring-1 focus:ring-zinc-700 mb-4 min-h-[100px]"
+              className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border dark:border-zinc-700 focus:ring-1 focus:ring-zinc-700 mb-4 min-h-[100px]"
             />
 
             <div className="flex gap-3">
@@ -262,7 +262,7 @@ export default function PendingShopsPage() {
                   setShowRejectModal(false);
                   setRejectReason('');
                 }}
-                className="flex-1 px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-foreground text-sm font-medium hover:bg-zinc-700 transition-colors"
+                className="flex-1 px-4 py-2 rounded-lg bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 text-foreground text-sm font-medium hover:bg-muted dark:bg-zinc-700 transition-colors"
               >
                 Cancel
               </button>

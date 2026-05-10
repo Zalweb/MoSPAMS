@@ -106,7 +106,7 @@ export default function AssignedJobsPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-zinc-800 animate-pulse" />
+          <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-secondary dark:bg-zinc-800 animate-pulse" />
           <p className="text-sm text-muted-foreground">Loading jobs...</p>
         </div>
       </div>
@@ -163,8 +163,8 @@ export default function AssignedJobsPage() {
       {/* Jobs List */}
       {filteredJobs.length === 0 ? (
         <div className="text-center py-12 bg-muted rounded-2xl border border-border">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-zinc-800 flex items-center justify-center">
-            <Wrench className="w-8 h-8 text-zinc-600" />
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-secondary dark:bg-zinc-800 flex items-center justify-center">
+            <Wrench className="w-8 h-8 text-muted-foreground dark:text-zinc-600" />
           </div>
           <h3 className="text-lg font-semibold text-foreground mb-2">No Jobs Found</h3>
           <p className="text-sm text-muted-foreground">
@@ -181,7 +181,7 @@ export default function AssignedJobsPage() {
               <div
                 key={job.id}
                 onClick={() => navigate(`/dashboard/mechanic/jobs/${job.id}`)}
-                className="group bg-muted border border-border rounded-2xl p-6 hover:border-zinc-700 transition-all cursor-pointer"
+                className="group bg-muted border border-border rounded-2xl p-6 hover:border-border dark:border-zinc-700 transition-all cursor-pointer"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
@@ -195,7 +195,7 @@ export default function AssignedJobsPage() {
                     <p className="text-sm text-muted-foreground mb-1">{job.motorcycleModel}</p>
                     <p className="text-sm text-muted-foreground">{job.serviceType}</p>
                   </div>
-                  <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-muted-foreground group-hover:translate-x-1 transition-all" />
+                  <ArrowRight className="w-5 h-5 text-muted-foreground dark:text-zinc-600 group-hover:text-muted-foreground group-hover:translate-x-1 transition-all" />
                 </div>
 
                 <div className="flex items-center justify-between pt-4 border-t border-border">

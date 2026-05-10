@@ -25,7 +25,7 @@ export function KPICard({ title, value, change, comparison, trend, icon: Icon, l
       className="relative group"
     >
       {/* Glassmorphism card */}
-      <div className="relative bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 overflow-hidden dark:hover:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300">
+      <div className="relative bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 overflow-hidden dark:hover:border-border dark:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300">
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-[rgb(var(--color-primary-rgb))]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         
@@ -51,7 +51,7 @@ export function KPICard({ title, value, change, comparison, trend, icon: Icon, l
           <div>
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">{title}</p>
             {loading ? (
-              <div className="h-8 w-32 bg-zinc-800/50 rounded animate-pulse" />
+              <div className="h-8 w-32 bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 rounded animate-pulse" />
             ) : (
               <>
                 <p className="text-3xl font-bold text-card-foreground tracking-tight mb-1">

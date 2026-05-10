@@ -180,7 +180,7 @@ export default function SystemPerformancePage() {
         </motion.div>
       ) : (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <AlertTriangle className="w-16 h-16 mx-auto mb-4 text-zinc-600" />
+          <AlertTriangle className="w-16 h-16 mx-auto mb-4 text-muted-foreground dark:text-zinc-600" />
           <h3 className="text-lg font-semibold text-foreground mb-2">Unable to Load System Health</h3>
           <p className="text-muted-foreground mb-4">Failed to retrieve system performance data</p>
           <button

@@ -112,7 +112,7 @@ export default function SuperAdminLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-zinc-300 font-sans selection:bg-zinc-700 flex">
+    <div className="min-h-screen bg-background text-muted-foreground dark:text-zinc-300 font-sans selection:bg-muted dark:bg-zinc-700 flex">
       {sidebarOpen && (
         <button
           className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40 lg:hidden"
@@ -127,7 +127,7 @@ export default function SuperAdminLayout() {
         }`}
       >
         <div className="flex items-center gap-3 px-6 h-[70px] border-b border-border shrink-0">
-          <div className="w-8 h-8 rounded-xl bg-muted border border-zinc-700 flex items-center justify-center overflow-hidden shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-muted border border-border dark:border-zinc-700 flex items-center justify-center overflow-hidden shrink-0">
             <img src="/images/logo.svg" alt="MoSPAMS" className="w-6 h-6 object-contain" />
           </div>
           <div>
@@ -150,8 +150,8 @@ export default function SuperAdminLayout() {
                       onClick={() => setSidebarOpen(false)}
                       className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 group ${
                         isActive
-                          ? 'bg-accent dark:bg-zinc-800 text-accent-foreground dark:text-foreground border-l-2 border-primary dark:border-white'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-secondary dark:hover:bg-zinc-800/50'
+                          ? 'bg-accent dark:bg-secondary dark:bg-zinc-800 text-accent-foreground dark:text-foreground border-l-2 border-primary dark:border-white'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-secondary dark:hover:bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50'
                       }`}
                     >
                       <item.icon className={`w-[16px] h-[16px] transition-colors ${isActive ? 'text-accent-foreground dark:text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`} strokeWidth={1.75} />
@@ -176,7 +176,7 @@ export default function SuperAdminLayout() {
           <div className="flex items-center gap-3">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-xl hover:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors mr-1"
+              className="p-2 rounded-xl hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors mr-1"
               title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             >
               {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -185,7 +185,7 @@ export default function SuperAdminLayout() {
             <div className="relative">
               <button
                 onClick={() => { setNotifOpen(o => !o); setProfileOpen(false); }}
-                className="relative p-2 rounded-xl hover:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors"
+                className="relative p-2 rounded-xl hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors"
               >
                 <Bell className="w-5 h-5" />
                 {(notifData.pendingShops > 0 || notifData.expiringSubscriptions.length > 0) && (
@@ -212,13 +212,13 @@ export default function SuperAdminLayout() {
                       ) : (
                         <>
                           {notifData.pendingShops > 0 && (
-                            <button onClick={() => { setNotifOpen(false); navigate('/superadmin/shops/pending'); }} className="w-full text-left px-4 py-3 border-b border-border/50 hover:bg-zinc-800/30 transition-colors">
+                            <button onClick={() => { setNotifOpen(false); navigate('/superadmin/shops/pending'); }} className="w-full text-left px-4 py-3 border-b border-border/50 hover:bg-secondary dark:bg-zinc-800/30 transition-colors">
                               <p className="text-xs font-semibold text-amber-400">{notifData.pendingShops} shop{notifData.pendingShops > 1 ? 's' : ''} pending approval</p>
                               <p className="text-[11px] text-muted-foreground mt-0.5">Review and approve new shop registrations</p>
                             </button>
                           )}
                           {notifData.expiringSubscriptions.map((s: any, i: number) => (
-                            <button key={i} onClick={() => { setNotifOpen(false); navigate('/superadmin/billing/overdue'); }} className="w-full text-left px-4 py-3 border-b border-border/50 hover:bg-zinc-800/30 transition-colors">
+                            <button key={i} onClick={() => { setNotifOpen(false); navigate('/superadmin/billing/overdue'); }} className="w-full text-left px-4 py-3 border-b border-border/50 hover:bg-secondary dark:bg-zinc-800/30 transition-colors">
                               <p className="text-xs font-semibold text-red-400">{s.shopName}</p>
                               <p className="text-[11px] text-muted-foreground mt-0.5">Subscription expiring in {s.daysLeft} day{s.daysLeft !== 1 ? 's' : ''}</p>
                             </button>
@@ -231,11 +231,11 @@ export default function SuperAdminLayout() {
               )}
             </div>
 
-            <div className="w-px h-6 bg-zinc-800" />
+            <div className="w-px h-6 bg-secondary dark:bg-zinc-800" />
             <div className="relative">
               <motion.button
                 onClick={() => setProfileOpen(o => !o)}
-                className="flex items-center gap-3 pl-1 pr-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-all"
+                className="flex items-center gap-3 pl-1 pr-3 py-1.5 rounded-xl hover:bg-secondary dark:bg-zinc-800 transition-all"
                 whileHover={{ scale: 1.02 }}
               >
                 <div className="w-8 h-8 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center text-sm font-bold text-foreground">
@@ -262,7 +262,7 @@ export default function SuperAdminLayout() {
                     <div className="py-1">
                       <button
                         onClick={() => { setProfileOpen(false); navigate('/superadmin/profile'); }}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-zinc-800/50 transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 transition-colors"
                       >
                         <User className="w-[18px] h-[18px]" strokeWidth={1.5} />
                         User Profile

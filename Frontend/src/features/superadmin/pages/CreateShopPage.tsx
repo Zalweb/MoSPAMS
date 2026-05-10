@@ -72,11 +72,11 @@ export default function CreateShopPage() {
                     type="text"
                     value={`${formData.shopName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}.mospams.shop`}
                     readOnly
-                    className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-foreground"
+                    className="flex-1 bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-lg px-3 py-2 text-sm text-foreground"
                   />
                   <button
                     onClick={() => copyToClipboard(`${formData.shopName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}.mospams.shop`)}
-                    className="p-2 rounded-lg bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 transition-colors"
+                    className="p-2 rounded-lg bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 hover:bg-muted dark:bg-zinc-700 transition-colors"
                   >
                     <Copy className="w-4 h-4 text-muted-foreground" strokeWidth={2} />
                   </button>
@@ -90,11 +90,11 @@ export default function CreateShopPage() {
                     type="text"
                     value={formData.ownerEmail}
                     readOnly
-                    className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-foreground"
+                    className="flex-1 bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-lg px-3 py-2 text-sm text-foreground"
                   />
                   <button
                     onClick={() => copyToClipboard(formData.ownerEmail)}
-                    className="p-2 rounded-lg bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 transition-colors"
+                    className="p-2 rounded-lg bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 hover:bg-muted dark:bg-zinc-700 transition-colors"
                   >
                     <Copy className="w-4 h-4 text-muted-foreground" strokeWidth={2} />
                   </button>
@@ -108,11 +108,11 @@ export default function CreateShopPage() {
                     type="text"
                     value={credentials.temporaryPassword}
                     readOnly
-                    className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-foreground font-mono"
+                    className="flex-1 bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-lg px-3 py-2 text-sm text-foreground font-mono"
                   />
                   <button
                     onClick={() => copyToClipboard(credentials.temporaryPassword)}
-                    className="p-2 rounded-lg bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 transition-colors"
+                    className="p-2 rounded-lg bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 hover:bg-muted dark:bg-zinc-700 transition-colors"
                   >
                     <Copy className="w-4 h-4 text-muted-foreground" strokeWidth={2} />
                   </button>
@@ -126,11 +126,11 @@ export default function CreateShopPage() {
                     type="text"
                     value={credentials.shopId}
                     readOnly
-                    className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-foreground"
+                    className="flex-1 bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 rounded-lg px-3 py-2 text-sm text-foreground"
                   />
                   <button
                     onClick={() => copyToClipboard(credentials.shopId.toString())}
-                    className="p-2 rounded-lg bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 transition-colors"
+                    className="p-2 rounded-lg bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 hover:bg-muted dark:bg-zinc-700 transition-colors"
                   >
                     <Copy className="w-4 h-4 text-muted-foreground" strokeWidth={2} />
                   </button>
@@ -148,7 +148,7 @@ export default function CreateShopPage() {
           <div className="flex gap-3">
             <button
               onClick={() => navigate('/superadmin/shops')}
-              className="flex-1 px-6 py-3 rounded-lg bg-zinc-800 border border-zinc-700 text-foreground font-semibold hover:bg-zinc-700 transition-colors"
+              className="flex-1 px-6 py-3 rounded-lg bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 text-foreground font-semibold hover:bg-muted dark:bg-zinc-700 transition-colors"
             >
               View All Shops
             </button>
@@ -180,7 +180,7 @@ export default function CreateShopPage() {
       <div className="flex items-center gap-4">
         <button
           onClick={() => navigate('/superadmin/shops')}
-          className="p-2 rounded-lg bg-muted border border-border hover:bg-zinc-800 transition-colors"
+          className="p-2 rounded-lg bg-muted border border-border hover:bg-secondary dark:bg-zinc-800 transition-colors"
         >
           <ArrowLeft className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
         </button>
@@ -199,7 +199,7 @@ export default function CreateShopPage() {
           </h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2">
+              <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">
                 Shop Name <span className="text-red-400">*</span>
               </label>
               <input
@@ -208,7 +208,7 @@ export default function CreateShopPage() {
                 value={formData.shopName}
                 onChange={(e) => setFormData({ ...formData, shopName: e.target.value })}
                 placeholder="Enter shop name"
-                className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-zinc-700 focus:ring-1 focus:ring-zinc-700"
+                className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border dark:border-zinc-700 focus:ring-1 focus:ring-zinc-700"
               />
               {formData.shopName && (
                 <p className="text-xs text-muted-foreground mt-2 flex items-center gap-2">
@@ -222,36 +222,36 @@ export default function CreateShopPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-2">Shop Email</label>
+                <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">Shop Email</label>
                 <input
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   placeholder="shop@example.com"
-                  className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-zinc-700 focus:ring-1 focus:ring-zinc-700"
+                  className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border dark:border-zinc-700 focus:ring-1 focus:ring-zinc-700"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-2">Shop Phone</label>
+                <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">Shop Phone</label>
                 <input
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   placeholder="+63 XXX XXX XXXX"
-                  className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-zinc-700 focus:ring-1 focus:ring-zinc-700"
+                  className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border dark:border-zinc-700 focus:ring-1 focus:ring-zinc-700"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2">Shop Address</label>
+              <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">Shop Address</label>
               <textarea
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 placeholder="Enter complete address"
                 rows={3}
-                className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-zinc-700 focus:ring-1 focus:ring-zinc-700"
+                className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border dark:border-zinc-700 focus:ring-1 focus:ring-zinc-700"
               />
             </div>
           </div>
@@ -265,7 +265,7 @@ export default function CreateShopPage() {
           </h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2">
+              <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">
                 Owner Name <span className="text-red-400">*</span>
               </label>
               <input
@@ -274,12 +274,12 @@ export default function CreateShopPage() {
                 value={formData.ownerName}
                 onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
                 placeholder="Enter owner full name"
-                className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-zinc-700 focus:ring-1 focus:ring-zinc-700"
+                className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border dark:border-zinc-700 focus:ring-1 focus:ring-zinc-700"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2">
+              <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">
                 Owner Email <span className="text-red-400">*</span>
               </label>
               <input
@@ -288,7 +288,7 @@ export default function CreateShopPage() {
                 value={formData.ownerEmail}
                 onChange={(e) => setFormData({ ...formData, ownerEmail: e.target.value })}
                 placeholder="owner@example.com"
-                className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-zinc-700 focus:ring-1 focus:ring-zinc-700"
+                className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border dark:border-zinc-700 focus:ring-1 focus:ring-zinc-700"
               />
               <p className="text-xs text-muted-foreground mt-1">This will be used as the login email for the shop owner</p>
             </div>
@@ -300,7 +300,7 @@ export default function CreateShopPage() {
           <button
             type="button"
             onClick={() => navigate('/superadmin/shops')}
-            className="flex-1 px-6 py-3 rounded-lg bg-muted border border-border text-foreground font-semibold hover:bg-zinc-800 transition-colors"
+            className="flex-1 px-6 py-3 rounded-lg bg-muted border border-border text-foreground font-semibold hover:bg-secondary dark:bg-zinc-800 transition-colors"
           >
             Cancel
           </button>

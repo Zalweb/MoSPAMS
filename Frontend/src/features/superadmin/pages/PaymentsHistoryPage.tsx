@@ -112,7 +112,7 @@ export default function PaymentsHistoryPage() {
 
         <div className="bg-card rounded-xl border border-border p-5">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 flex items-center justify-center">
               <FileText className="w-5 h-5 text-foreground" strokeWidth={2} />
             </div>
             <div>
@@ -133,7 +133,7 @@ export default function PaymentsHistoryPage() {
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
               filter === status
                 ? 'bg-white text-black'
-                : 'bg-muted border border-border text-muted-foreground hover:text-foreground hover:bg-zinc-800'
+                : 'bg-muted border border-border text-muted-foreground hover:text-foreground hover:bg-secondary dark:bg-zinc-800'
             }`}
           >
             {status === 'all' ? 'All' : status}
@@ -149,7 +149,7 @@ export default function PaymentsHistoryPage() {
           </div>
         ) : filteredPayments.length === 0 ? (
           <div className="text-center py-20">
-            <FileText className="w-16 h-16 mx-auto mb-4 text-zinc-600" />
+            <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground dark:text-zinc-600" />
             <h3 className="text-lg font-semibold text-foreground mb-2">No Payments Found</h3>
             <p className="text-muted-foreground">
               {filter === 'all' ? 'No payment records available' : `No ${filter.toLowerCase()} payments`}
@@ -191,7 +191,7 @@ export default function PaymentsHistoryPage() {
                     animate={{ opacity: 1 }}
                     className="border-b border-border hover:bg-muted/50 transition-colors"
                   >
-                    <td className="px-6 py-4 text-sm text-zinc-300">
+                    <td className="px-6 py-4 text-sm text-muted-foreground dark:text-zinc-300">
                       #{payment.subscriptionPaymentId}
                     </td>
                     <td className="px-6 py-4 text-sm text-foreground font-medium">

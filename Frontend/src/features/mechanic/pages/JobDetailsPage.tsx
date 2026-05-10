@@ -108,7 +108,7 @@ export default function JobDetailsPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-zinc-800 animate-pulse" />
+          <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-secondary dark:bg-zinc-800 animate-pulse" />
           <p className="text-sm text-muted-foreground">Loading job details...</p>
         </div>
       </div>
@@ -136,7 +136,7 @@ export default function JobDetailsPage() {
           disabled={job.statusCode === 'completed'}
           className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
             job.statusCode === 'completed'
-              ? 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
+              ? 'bg-secondary dark:bg-zinc-800 text-muted-foreground dark:text-zinc-600 cursor-not-allowed'
               : 'bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] text-foreground hover:opacity-90'
           }`}
         >
@@ -215,7 +215,7 @@ export default function JobDetailsPage() {
         {job.notes && (
           <div className="mt-6 pt-6 border-t border-border">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">Notes</h3>
-            <p className="text-sm text-zinc-300">{job.notes}</p>
+            <p className="text-sm text-muted-foreground dark:text-zinc-300">{job.notes}</p>
           </div>
         )}
       </div>
@@ -237,8 +237,8 @@ export default function JobDetailsPage() {
 
         {job.parts.length === 0 ? (
           <div className="text-center py-8">
-            <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-zinc-800 flex items-center justify-center">
-              <Package className="w-6 h-6 text-zinc-600" />
+            <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-secondary dark:bg-zinc-800 flex items-center justify-center">
+              <Package className="w-6 h-6 text-muted-foreground dark:text-zinc-600" />
             </div>
             <p className="text-sm text-muted-foreground">No parts added yet</p>
           </div>
@@ -247,7 +247,7 @@ export default function JobDetailsPage() {
             {job.parts.map((part) => (
               <div
                 key={part.id}
-                className="flex items-center justify-between p-4 bg-zinc-800/50 rounded-xl border border-border"
+                className="flex items-center justify-between p-4 bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 rounded-xl border border-border"
               >
                 <div className="flex-1">
                   <p className="text-sm font-medium text-foreground mb-1">{part.name}</p>

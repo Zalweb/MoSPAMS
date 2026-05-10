@@ -153,23 +153,23 @@ export default function Inventory() {
             placeholder="Search parts or scan barcode…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full h-11 pl-11 pr-4 rounded-xl bg-muted/50 border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-zinc-700 focus:ring-2 focus:ring-white/10"
+            className="w-full h-11 pl-11 pr-4 rounded-xl bg-muted/50 border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border dark:border-zinc-700 focus:ring-2 focus:ring-white/10"
           />
         </div>
         <div className="flex gap-2">
-          <select value={catFilter} onChange={e => setCatFilter(e.target.value)} className="h-11 px-4 rounded-xl bg-muted/50 border border-border text-sm text-muted-foreground focus:outline-none focus:border-zinc-700">
+          <select value={catFilter} onChange={e => setCatFilter(e.target.value)} className="h-11 px-4 rounded-xl bg-muted/50 border border-border text-sm text-muted-foreground focus:outline-none focus:border-border dark:border-zinc-700">
             <option value="All">All Categories</option>
             {categoryNames.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
           {canCreate && (
-            <Button onClick={() => setCategoryModalOpen(true)} size="sm" variant="outline" className="h-11 rounded-xl border-border text-muted-foreground hover:bg-zinc-800 hover:text-foreground">
+            <Button onClick={() => setCategoryModalOpen(true)} size="sm" variant="outline" className="h-11 rounded-xl border-border text-muted-foreground hover:bg-secondary dark:bg-zinc-800 hover:text-foreground">
               <Plus className="w-4 h-4" />
             </Button>
           )}
         </div>
       </motion.div>
 
-      <motion.div {...fadeUp(0.2)} className="bg-muted/50 backdrop-blur-sm border border-border rounded-2xl overflow-hidden">
+      <motion.div {...fadeUp(0.2)} className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -182,22 +182,22 @@ export default function Inventory() {
                 <th className="text-right px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-800/50">
+            <tbody className="divide-y divide-border dark:divide-zinc-800/50">
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i}>
                     <td colSpan={6} className="px-5 py-4">
-                      <div className="h-4 bg-zinc-800/60 rounded animate-pulse w-full" />
+                      <div className="h-4 bg-secondary dark:bg-zinc-800/60 rounded animate-pulse w-full" />
                     </td>
                   </tr>
                 ))
               ) : filtered.map(part => {
                 const isLow = part.stock <= part.minStock;
                 return (
-                  <tr key={part.id} className="hover:bg-zinc-800/30 transition-colors group">
+                  <tr key={part.id} className="hover:bg-secondary dark:bg-zinc-800/30 transition-colors group">
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-zinc-800/50 flex items-center justify-center shrink-0 group-hover:bg-zinc-800 transition-colors">
+                        <div className="w-10 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 flex items-center justify-center shrink-0 group-hover:bg-secondary dark:bg-zinc-800 transition-colors">
                           <Package className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
                         </div>
                         <div>
@@ -206,11 +206,11 @@ export default function Inventory() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-4"><span className="text-xs font-medium text-muted-foreground bg-zinc-800/50 px-3 py-1.5 rounded-full">{part.category}</span></td>
+                    <td className="px-5 py-4"><span className="text-xs font-medium text-muted-foreground bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 px-3 py-1.5 rounded-full">{part.category}</span></td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <span className={`text-sm font-semibold tabular-nums ${isLow ? 'text-amber-400' : 'text-foreground'}`}>{part.stock}</span>
-                        <div className="w-16 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                        <div className="w-16 h-1.5 bg-secondary dark:bg-zinc-800 rounded-full overflow-hidden">
                           <div className={`h-full rounded-full ${isLow ? 'bg-amber-500' : 'bg-green-500'}`} style={{ width: `${Math.min(100, (part.stock / Math.max(part.minStock * 2, 1)) * 100)}%` }} />
                         </div>
                       </div>
@@ -220,14 +220,14 @@ export default function Inventory() {
                     <td className="px-5 py-4 text-right">
                       <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                         {canMove && (
-                          <button title="Stock movement" onClick={() => openMovement(part)} className="p-2 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-green-400 transition-colors">
+                          <button title="Stock movement" onClick={() => openMovement(part)} className="p-2 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-green-400 transition-colors">
                             <ArrowDownToLine className="w-4 h-4" />
                           </button>
                         )}
-                        <button title="History" onClick={() => setHistoryTarget(part)} className="p-2 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-zinc-300 transition-colors">
+                        <button title="History" onClick={() => setHistoryTarget(part)} className="p-2 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-muted-foreground dark:text-zinc-300 transition-colors">
                           <History className="w-4 h-4" />
                         </button>
-                        <button title="Edit" onClick={() => openEdit(part)} className="p-2 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-zinc-300 transition-colors">
+                        <button title="Edit" onClick={() => openEdit(part)} className="p-2 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-muted-foreground dark:text-zinc-300 transition-colors">
                           <Pencil className="w-4 h-4" />
                         </button>
                         {canDelete && (
@@ -242,8 +242,8 @@ export default function Inventory() {
               })}
               {!loading && filtered.length === 0 && (
                 <tr><td colSpan={6} className="px-5 py-16 text-center text-sm text-muted-foreground">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-zinc-800/50 flex items-center justify-center">
-                    <Package className="w-8 h-8 text-zinc-600" />
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 flex items-center justify-center">
+                    <Package className="w-8 h-8 text-muted-foreground dark:text-zinc-600" />
                   </div>
                   No parts found
                 </td></tr>
@@ -259,14 +259,14 @@ export default function Inventory() {
               <button
                 onClick={() => setPage(page - 1)}
                 disabled={page <= 1}
-                className="p-1.5 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="p-1.5 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setPage(page + 1)}
                 disabled={page >= meta.lastPage}
-                className="p-1.5 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="p-1.5 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -283,13 +283,13 @@ export default function Inventory() {
           <form onSubmit={onSubmit} className="space-y-4 pt-2">
             <div>
               <Label className="text-xs font-medium text-muted-foreground">Part Name</Label>
-              <Input {...form.register('name')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-zinc-600" placeholder="e.g. Brake Pad Set" />
+              <Input {...form.register('name')} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="e.g. Brake Pad Set" />
               {form.formState.errors.name && <p className="text-xs text-red-400 mt-1">{form.formState.errors.name.message}</p>}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label className="text-xs font-medium text-muted-foreground">Category</Label>
-                <select {...form.register('category')} className="w-full mt-1.5 h-10 px-3 rounded-xl bg-zinc-800/50 border border-zinc-700 text-sm text-foreground focus:outline-none focus:border-zinc-600">
+                <select {...form.register('category')} className="w-full mt-1.5 h-10 px-3 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border border-border dark:border-zinc-700 text-sm text-foreground focus:outline-none focus:border-border dark:border-zinc-600">
                   {categoryNames.length > 0 ? (
                     categoryNames.map(c => <option key={c} value={c}>{c}</option>)
                   ) : (
@@ -299,18 +299,18 @@ export default function Inventory() {
               </div>
               <div>
                 <Label className="text-xs font-medium text-muted-foreground">Barcode</Label>
-                <Input {...form.register('barcode')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground font-mono placeholder:text-muted-foreground focus:border-zinc-600" placeholder="BRK-001" />
+                <Input {...form.register('barcode')} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground font-mono placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="BRK-001" />
                 {form.formState.errors.barcode && <p className="text-xs text-red-400 mt-1">{form.formState.errors.barcode.message}</p>}
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3">
-              <div><Label className="text-xs font-medium text-muted-foreground">Stock</Label><Input type="number" {...form.register('stock', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground focus:border-zinc-600" /></div>
-              <div><Label className="text-xs font-medium text-muted-foreground">Min Stock</Label><Input type="number" {...form.register('minStock', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground focus:border-zinc-600" /></div>
-              <div><Label className="text-xs font-medium text-muted-foreground">Price (₱)</Label><Input type="number" {...form.register('price', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground focus:border-zinc-600" /></div>
+              <div><Label className="text-xs font-medium text-muted-foreground">Stock</Label><Input type="number" {...form.register('stock', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground focus:border-border dark:border-zinc-600" /></div>
+              <div><Label className="text-xs font-medium text-muted-foreground">Min Stock</Label><Input type="number" {...form.register('minStock', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground focus:border-border dark:border-zinc-600" /></div>
+              <div><Label className="text-xs font-medium text-muted-foreground">Price (₱)</Label><Input type="number" {...form.register('price', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground focus:border-border dark:border-zinc-600" /></div>
             </div>
             <div className="flex gap-3 pt-2">
               <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold transition-opacity">{editing ? 'Save Changes' : 'Add Part'}</Button>
-              <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-10 rounded-xl text-sm border-zinc-700 text-muted-foreground hover:bg-zinc-800">Cancel</Button>
+              <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-10 rounded-xl text-sm border-border dark:border-zinc-700 text-muted-foreground hover:bg-secondary dark:bg-zinc-800">Cancel</Button>
             </div>
           </form>
         </DialogContent>
@@ -324,16 +324,16 @@ export default function Inventory() {
           <form onSubmit={onSubmitCategory} className="space-y-4 pt-2">
             <div>
               <Label className="text-xs font-medium text-muted-foreground">Category Name</Label>
-              <Input {...categoryForm.register('name')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-zinc-600" placeholder="e.g. Brake Parts" />
+              <Input {...categoryForm.register('name')} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="e.g. Brake Parts" />
               {categoryForm.formState.errors.name && <p className="text-xs text-red-400 mt-1">{categoryForm.formState.errors.name.message}</p>}
             </div>
             <div>
               <Label className="text-xs font-medium text-muted-foreground">Description (Optional)</Label>
-              <Input {...categoryForm.register('description')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-zinc-600" placeholder="Brief description" />
+              <Input {...categoryForm.register('description')} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="Brief description" />
             </div>
             <div className="flex gap-3 pt-2">
               <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold transition-opacity">Add Category</Button>
-              <Button type="button" variant="outline" onClick={() => setCategoryModalOpen(false)} className="h-10 rounded-xl text-sm border-zinc-700 text-muted-foreground hover:bg-zinc-800">Cancel</Button>
+              <Button type="button" variant="outline" onClick={() => setCategoryModalOpen(false)} className="h-10 rounded-xl text-sm border-border dark:border-zinc-700 text-muted-foreground hover:bg-secondary dark:bg-zinc-800">Cancel</Button>
             </div>
           </form>
         </DialogContent>
@@ -347,7 +347,7 @@ export default function Inventory() {
               <p className="text-sm text-muted-foreground">{stockMoveTarget.name} — current: <span className="font-semibold text-foreground">{stockMoveTarget.stock}</span></p>
               <div className="grid grid-cols-3 gap-2">
                 {(['in', 'out', 'adjust'] as const).map(t => (
-                  <label key={t} className={`flex items-center justify-center gap-1 h-10 rounded-xl border text-sm font-medium capitalize cursor-pointer transition-all ${moveForm.watch('type') === t ? 'bg-white border-white text-black' : 'bg-zinc-800/50 border-zinc-700 text-muted-foreground'}`}>
+                  <label key={t} className={`flex items-center justify-center gap-1 h-10 rounded-xl border text-sm font-medium capitalize cursor-pointer transition-all ${moveForm.watch('type') === t ? 'bg-white border-white text-black' : 'bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-muted-foreground'}`}>
                     <input type="radio" value={t} {...moveForm.register('type')} className="hidden" />
                     {t === 'in' ? <ArrowDownToLine className="w-3.5 h-3.5" /> : t === 'out' ? <ArrowUpFromLine className="w-3.5 h-3.5" /> : null}
                     {t === 'adjust' ? 'Set' : t}
@@ -356,16 +356,16 @@ export default function Inventory() {
               </div>
               <div>
                 <Label className="text-xs font-medium text-muted-foreground">{moveForm.watch('type') === 'adjust' ? 'New Stock Level' : 'Quantity'}</Label>
-                <Input type="number" {...moveForm.register('qty', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground focus:border-zinc-600" />
+                <Input type="number" {...moveForm.register('qty', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground focus:border-border dark:border-zinc-600" />
               </div>
               <div>
                 <Label className="text-xs font-medium text-muted-foreground">Reason</Label>
-                <Input {...moveForm.register('reason')} placeholder="Restock from supplier" className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-zinc-600" />
+                <Input {...moveForm.register('reason')} placeholder="Restock from supplier" className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" />
                 {moveForm.formState.errors.reason && <p className="text-xs text-red-400 mt-1">{moveForm.formState.errors.reason.message}</p>}
               </div>
               <div className="flex gap-3 pt-1">
                 <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold transition-opacity">Record</Button>
-                <Button type="button" variant="outline" onClick={() => setStockMoveTarget(null)} className="h-10 rounded-xl text-sm border-zinc-700 text-muted-foreground">Cancel</Button>
+                <Button type="button" variant="outline" onClick={() => setStockMoveTarget(null)} className="h-10 rounded-xl text-sm border-border dark:border-zinc-700 text-muted-foreground">Cancel</Button>
               </div>
             </form>
           )}
@@ -381,13 +381,13 @@ export default function Inventory() {
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Stock History</p>
                 <p className="text-sm font-semibold text-foreground">{historyTarget.name}</p>
               </div>
-              <button onClick={() => setHistoryTarget(null)} className="p-2 rounded-lg hover:bg-zinc-800 text-muted-foreground"><X className="w-5 h-5" /></button>
+              <button onClick={() => setHistoryTarget(null)} className="p-2 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground"><X className="w-5 h-5" /></button>
             </div>
             <div className="flex-1 overflow-y-auto px-5 py-4">
               {partHistory.length === 0 && <p className="text-sm text-muted-foreground text-center py-12">No movements recorded yet.</p>}
               <ul className="space-y-2">
                 {partHistory.map(m => (
-                  <li key={m.id} className="bg-zinc-800/50 rounded-xl p-4 border border-border">
+                  <li key={m.id} className="bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 rounded-xl p-4 border border-border">
                     <div className="flex items-center justify-between">
                       <span className={`text-xs font-bold uppercase px-2.5 py-1 rounded-full ${m.type === 'in' ? 'bg-green-500/10 text-green-400' : m.type === 'out' ? 'bg-red-500/10 text-red-400' : 'bg-blue-500/10 text-blue-400'}`}>
                         {m.type} · {m.qty}
@@ -410,7 +410,7 @@ export default function Inventory() {
           <p className="text-sm text-muted-foreground mt-1">This action cannot be undone.</p>
           <div className="flex gap-3 pt-3">
             <Button onClick={async () => { if (confirmDelete) { await deletePart(confirmDelete); removeItem(confirmDelete, 'id'); setConfirmDelete(null); } }} variant="destructive" className="flex-1 h-10 rounded-xl text-sm font-semibold">Delete</Button>
-            <Button variant="outline" onClick={() => setConfirmDelete(null)} className="h-10 rounded-xl text-sm border-zinc-700 text-muted-foreground">Cancel</Button>
+            <Button variant="outline" onClick={() => setConfirmDelete(null)} className="h-10 rounded-xl text-sm border-border dark:border-zinc-700 text-muted-foreground">Cancel</Button>
           </div>
         </DialogContent>
       </Dialog>

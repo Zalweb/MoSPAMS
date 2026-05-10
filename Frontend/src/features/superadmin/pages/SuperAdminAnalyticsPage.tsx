@@ -155,7 +155,7 @@ export default function SuperAdminAnalyticsPage() {
                   return (
                     <div key={plan.planCode}>
                       <div className="flex justify-between text-sm mb-1">
-                        <span className="text-zinc-300">{plan.planName}</span>
+                        <span className="text-muted-foreground dark:text-zinc-300">{plan.planName}</span>
                         <span className="text-foreground font-semibold">{plan.count} ({pct}%)</span>
                       </div>
                       <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
@@ -218,7 +218,7 @@ export default function SuperAdminAnalyticsPage() {
               </div>
             ) : (
               <div className="py-12 text-center">
-                <Store className="w-12 h-12 mx-auto mb-3 text-zinc-600" />
+                <Store className="w-12 h-12 mx-auto mb-3 text-muted-foreground dark:text-zinc-600" />
                 <p className="text-muted-foreground text-sm">No shops registered yet</p>
                 <p className="text-muted-foreground text-xs mt-1">New shops will appear here</p>
               </div>
@@ -252,7 +252,7 @@ export default function SuperAdminAnalyticsPage() {
                    <div key={entry.logId} className="flex gap-3 text-[13px] border-b border-border/50 pb-3 last:border-0">
                      <Activity className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                      <div className="min-w-0">
-                       <p className="text-zinc-300 truncate">{entry.action}</p>
+                       <p className="text-muted-foreground dark:text-zinc-300 truncate">{entry.action}</p>
                        <p className="text-[11px] text-muted-foreground mt-0.5">
                          {entry.userName}{entry.shopName ? ` · ${entry.shopName}` : ''}
                          {entry.timestamp ? ` · ${new Date(entry.timestamp).toLocaleString()}` : ''}
@@ -263,7 +263,7 @@ export default function SuperAdminAnalyticsPage() {
                </div>
              ) : (
                <div className="py-12 text-center">
-                 <Activity className="w-12 h-12 mx-auto mb-3 text-zinc-600" />
+                 <Activity className="w-12 h-12 mx-auto mb-3 text-muted-foreground dark:text-zinc-600" />
                  <p className="text-muted-foreground text-sm">No activity logs yet</p>
                  <p className="text-muted-foreground text-xs mt-1">Platform actions will be logged here</p>
                </div>
@@ -289,7 +289,7 @@ function KpiCard({
   warning?: boolean;
 }) {
   return (
-    <div className="bg-card rounded-2xl border border-border p-5 relative overflow-hidden group hover:border-zinc-700 transition-colors">
+    <div className="bg-card rounded-2xl border border-border p-5 relative overflow-hidden group hover:border-border dark:border-zinc-700 transition-colors">
       <div className={`absolute top-0 right-0 w-24 h-24 rounded-full blur-[40px] -translate-y-1/2 translate-x-1/2 opacity-20 transition-opacity group-hover:opacity-40 ${warning ? 'bg-amber-500' : 'bg-zinc-500'}`}></div>
       
       <div className="flex justify-between items-start mb-4 relative z-10">
@@ -300,7 +300,7 @@ function KpiCard({
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
           warning 
             ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' 
-            : 'bg-zinc-800 border-zinc-700 text-foreground'
+            : 'bg-secondary dark:bg-zinc-800 border-border dark:border-zinc-700 text-foreground'
         }`}>
           <Icon className="w-5 h-5" />
         </div>
@@ -319,7 +319,7 @@ function HealthBar({ label, count, total, color }: { label: string, count: numbe
   return (
     <div>
       <div className="flex justify-between items-center mb-1.5">
-        <span className="text-[12px] font-medium text-zinc-300">{label}</span>
+        <span className="text-[12px] font-medium text-muted-foreground dark:text-zinc-300">{label}</span>
         <span className="text-[12px] font-bold text-foreground">{count} <span className="text-muted-foreground font-normal">({percentage}%)</span></span>
       </div>
       <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">

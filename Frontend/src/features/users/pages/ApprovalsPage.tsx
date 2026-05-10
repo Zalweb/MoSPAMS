@@ -67,21 +67,21 @@ export default function ApprovalsPage() {
           )}
           <button
             onClick={() => void fetchRequests()}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-700 bg-muted px-3 py-1.5 text-[11px] font-medium text-zinc-300 hover:bg-zinc-800 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border dark:border-zinc-700 bg-muted px-3 py-1.5 text-[11px] font-medium text-muted-foreground dark:text-zinc-300 hover:bg-secondary dark:bg-zinc-800 transition-colors"
           >
             <RefreshCw className="w-3 h-3" /> Refresh
           </button>
         </div>
       </div>
 
-      <div className="bg-muted/50 backdrop-blur-sm border border-border rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
+      <div className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <div className="w-8 h-8 rounded-full border-2 border-zinc-700 border-t-white animate-spin" />
+            <div className="w-8 h-8 rounded-full border-2 border-border dark:border-zinc-700 border-t-white animate-spin" />
           </div>
         ) : requests.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
-            <UserCheck className="w-10 h-10 text-zinc-600" strokeWidth={1} />
+            <UserCheck className="w-10 h-10 text-muted-foreground dark:text-zinc-600" strokeWidth={1} />
             <p className="text-[13px] text-muted-foreground">No pending role requests</p>
           </div>
         ) : (
@@ -97,8 +97,8 @@ export default function ApprovalsPage() {
             </thead>
             <tbody>
               {requests.map((req) => (
-                <tr key={req.id} className="border-b border-border last:border-0 hover:bg-zinc-800/50 transition-colors">
-                  <td className="px-5 py-3.5 font-medium text-zinc-200">{req.user_name}</td>
+                <tr key={req.id} className="border-b border-border last:border-0 hover:bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 transition-colors">
+                  <td className="px-5 py-3.5 font-medium text-foreground dark:text-zinc-200">{req.user_name}</td>
                   <td className="px-5 py-3.5 text-muted-foreground">{req.user_email}</td>
                   <td className="px-5 py-3.5">
                     <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${
@@ -128,7 +128,7 @@ export default function ApprovalsPage() {
                       <button
                         onClick={() => void handleDeny(req.id)}
                         disabled={actionLoading !== null}
-                        className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 bg-muted px-3 py-1.5 text-[11px] font-medium text-zinc-300 hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center gap-1 rounded-lg border border-border dark:border-zinc-700 bg-muted px-3 py-1.5 text-[11px] font-medium text-muted-foreground dark:text-zinc-300 hover:bg-secondary dark:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {actionLoading === req.id ? (
                           <div className="w-3 h-3 rounded-full border border-zinc-500 border-t-transparent animate-spin" />

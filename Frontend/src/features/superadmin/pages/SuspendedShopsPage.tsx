@@ -55,7 +55,7 @@ export default function SuspendedShopsPage() {
         </div>
       ) : shops.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <Shield className="w-16 h-16 mx-auto mb-4 text-zinc-600" />
+          <Shield className="w-16 h-16 mx-auto mb-4 text-muted-foreground dark:text-zinc-600" />
           <h3 className="text-lg font-semibold text-foreground mb-2">No Suspended Shops</h3>
           <p className="text-muted-foreground">All shops are currently active</p>
         </div>
@@ -66,7 +66,7 @@ export default function SuspendedShopsPage() {
               key={shop.shopId}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-card rounded-2xl border border-border p-6 hover:border-zinc-700 transition-all"
+              className="bg-card rounded-2xl border border-border p-6 hover:border-border dark:border-zinc-700 transition-all"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
