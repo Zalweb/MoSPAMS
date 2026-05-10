@@ -61,12 +61,12 @@ export default function ResetPasswordPage() {
   if (done) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-black to-zinc-900 flex items-center justify-center px-6">
-        <div className="w-full max-w-md bg-zinc-900/40 backdrop-blur-2xl rounded-3xl border border-zinc-800/50 shadow-2xl p-10 text-center">
+        <div className="w-full max-w-md bg-muted/40 backdrop-blur-2xl rounded-3xl border border-border/50 shadow-2xl p-10 text-center">
           <div className="w-14 h-14 bg-zinc-800/60 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <ShieldCheck className="w-7 h-7 text-green-400" strokeWidth={1.5} />
           </div>
-          <h1 className="text-2xl font-bold text-white mb-3">Password updated</h1>
-          <p className="text-zinc-400 text-sm leading-relaxed mb-8">
+          <h1 className="text-2xl font-bold text-foreground mb-3">Password updated</h1>
+          <p className="text-muted-foreground text-sm leading-relaxed mb-8">
             Your password has been changed. You've been signed out of all devices.
           </p>
           <button
@@ -90,13 +90,13 @@ export default function ResetPasswordPage() {
       <div className="relative z-10 w-full max-w-md">
         <button
           onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm mb-8"
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm mb-8"
         >
           <ArrowLeft className="w-4 h-4" strokeWidth={2} />
           Back to login
         </button>
 
-        <div className="bg-zinc-900/40 backdrop-blur-2xl rounded-3xl border border-zinc-800/50 shadow-2xl p-10">
+        <div className="bg-muted/40 backdrop-blur-2xl rounded-3xl border border-border/50 shadow-2xl p-10">
           <div className="flex justify-center mb-8">
             <div className="w-14 h-14 bg-zinc-800/60 rounded-2xl flex items-center justify-center">
               <ShieldCheck className="w-7 h-7 text-zinc-300" strokeWidth={1.5} />
@@ -104,8 +104,8 @@ export default function ResetPasswordPage() {
           </div>
 
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-white mb-2">Set new password</h1>
-            <p className="text-zinc-400 text-sm">Must be at least 8 characters.</p>
+            <h1 className="text-2xl font-bold text-foreground mb-2">Set new password</h1>
+            <p className="text-muted-foreground text-sm">Must be at least 8 characters.</p>
           </div>
 
           {error && (
@@ -123,7 +123,7 @@ export default function ResetPasswordPage() {
               autoComplete="new-password"
               required
               disabled={loading}
-              className="w-full px-4 py-3.5 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-white placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
+              className="w-full px-4 py-3.5 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-foreground placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
             />
             <input
               type="password"
@@ -133,7 +133,7 @@ export default function ResetPasswordPage() {
               autoComplete="new-password"
               required
               disabled={loading}
-              className="w-full px-4 py-3.5 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-white placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
+              className="w-full px-4 py-3.5 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-foreground placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
             />
 
             <button

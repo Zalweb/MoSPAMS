@@ -176,19 +176,19 @@ export default function ShopRegistrationPage() {
     });
 
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-green-500/5 rounded-full blur-3xl" />
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl" />
         </div>
 
-        <div className="relative max-w-2xl w-full bg-zinc-900/40 backdrop-blur-2xl rounded-3xl border border-zinc-800/50 shadow-2xl p-8 md:p-12">
+        <div className="relative max-w-2xl w-full bg-muted/40 backdrop-blur-2xl rounded-3xl border border-border/50 shadow-2xl p-8 md:p-12">
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-green-500/10 border border-green-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Check className="w-8 h-8 text-green-400" strokeWidth={2} />
             </div>
-            <h1 className="text-3xl font-bold text-white mb-2">Your Shop is Ready!</h1>
-            <p className="text-zinc-400">
+            <h1 className="text-3xl font-bold text-foreground mb-2">Your Shop is Ready!</h1>
+            <p className="text-muted-foreground">
               {registrationResult.trialDays}-day free trial active &mdash; expires {trialEnd}
             </p>
           </div>
@@ -198,43 +198,43 @@ export default function ShopRegistrationPage() {
             <h2 className="font-semibold text-green-400 mb-4">Your Login Credentials</h2>
             <div className="space-y-3">
               <div>
-                <p className="text-xs text-zinc-500 mb-1">Email</p>
-                <p className="font-mono text-sm text-white bg-zinc-800/50 rounded-lg px-3 py-2 border border-zinc-700/30">
+                <p className="text-xs text-muted-foreground mb-1">Email</p>
+                <p className="font-mono text-sm text-foreground bg-zinc-800/50 rounded-lg px-3 py-2 border border-zinc-700/30">
                   {registrationResult.ownerEmail}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-zinc-500 mb-1">Temporary Password</p>
-                <p className="font-mono font-bold text-lg text-white bg-zinc-800/50 rounded-lg px-3 py-2 border border-zinc-700/30 tracking-widest">
+                <p className="text-xs text-muted-foreground mb-1">Temporary Password</p>
+                <p className="font-mono font-bold text-lg text-foreground bg-zinc-800/50 rounded-lg px-3 py-2 border border-zinc-700/30 tracking-widest">
                   {registrationResult.temporaryPassword}
                 </p>
               </div>
             </div>
-            <p className="text-xs text-zinc-500 mt-3">
+            <p className="text-xs text-muted-foreground mt-3">
               Save this password — it won't be shown again. Change it after your first login.
             </p>
           </div>
 
           {/* Shop details */}
           <div className="bg-zinc-800/30 rounded-2xl border border-zinc-700/30 p-6 mb-6">
-            <h2 className="font-semibold text-white mb-4">Shop Details</h2>
+            <h2 className="font-semibold text-foreground mb-4">Shop Details</h2>
             <div className="space-y-3">
               <div>
-                <p className="text-xs text-zinc-500 mb-1">Shop Name</p>
-                <p className="font-medium text-white">{registrationResult.shopName}</p>
+                <p className="text-xs text-muted-foreground mb-1">Shop Name</p>
+                <p className="font-medium text-foreground">{registrationResult.shopName}</p>
               </div>
               <div>
-                <p className="text-xs text-zinc-500 mb-1">Shop URL</p>
+                <p className="text-xs text-muted-foreground mb-1">Shop URL</p>
                 <p className="font-medium text-blue-400">
                   https://{registrationResult.subdomain}.mospams.shop
                 </p>
               </div>
               <div>
-                <p className="text-xs text-zinc-500 mb-1">Staff Invitation Code</p>
-                <p className="font-mono font-bold text-lg text-white bg-zinc-800/50 rounded-lg px-3 py-2 border border-zinc-700/30">
+                <p className="text-xs text-muted-foreground mb-1">Staff Invitation Code</p>
+                <p className="font-mono font-bold text-lg text-foreground bg-zinc-800/50 rounded-lg px-3 py-2 border border-zinc-700/30">
                   {registrationResult.invitationCode}
                 </p>
-                <p className="text-xs text-zinc-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Share this code with staff members to let them join your shop.
                 </p>
               </div>
@@ -248,7 +248,7 @@ export default function ShopRegistrationPage() {
             >
               Go to Login
             </button>
-            <p className="text-sm text-zinc-500 mt-4">
+            <p className="text-sm text-muted-foreground mt-4">
               Log in at{' '}
               <span className="text-blue-400">
                 https://{registrationResult.subdomain}.mospams.shop
@@ -261,7 +261,7 @@ export default function ShopRegistrationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black py-12 px-4 relative overflow-hidden">
+    <div className="min-h-screen bg-background py-12 px-4 relative overflow-hidden">
       {/* Background effects */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-zinc-800/5 rounded-full blur-3xl" />
@@ -270,42 +270,42 @@ export default function ShopRegistrationPage() {
 
       {/* Floating sparkles */}
       <div className="absolute top-20 right-20 opacity-20">
-        <Sparkles className="w-6 h-6 text-zinc-400" strokeWidth={1.5} />
+        <Sparkles className="w-6 h-6 text-muted-foreground" strokeWidth={1.5} />
       </div>
       <div className="absolute bottom-20 left-20 opacity-20">
-        <Sparkles className="w-8 h-8 text-zinc-400" strokeWidth={1.5} />
+        <Sparkles className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />
       </div>
 
       <div className="relative max-w-5xl mx-auto">
         <div className="text-center mb-12">
           <button
             onClick={() => navigate('/')}
-            className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors mb-6"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" strokeWidth={2} />
             Back to Home
           </button>
 
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/50 backdrop-blur-sm border border-zinc-800/50 text-zinc-300 text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 backdrop-blur-sm border border-border/50 text-zinc-300 text-sm font-medium mb-6">
             <Store className="w-4 h-4" strokeWidth={2} />
             Shop Registration
           </div>
 
-          <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4 tracking-tight">
+          <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight">
             Start your{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 via-zinc-400 to-zinc-600">
               free trial
             </span>
           </h1>
-          <p className="text-lg text-zinc-400">
+          <p className="text-lg text-muted-foreground">
             Get your own motorcycle shop management system in minutes
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Shop Information */}
-          <div className="bg-zinc-900/40 backdrop-blur-2xl rounded-3xl border border-zinc-800/50 p-8">
-            <h2 className="text-2xl font-bold text-white mb-6">Shop Information</h2>
+          <div className="bg-muted/40 backdrop-blur-2xl rounded-3xl border border-border/50 p-8">
+            <h2 className="text-2xl font-bold text-foreground mb-6">Shop Information</h2>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-2">
@@ -315,7 +315,7 @@ export default function ShopRegistrationPage() {
                   value={form.shopName}
                   onChange={(e) => updateForm('shopName', e.target.value)}
                   placeholder="e.g., MotoWorks Repair Shop"
-                  className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600/50 transition-all"
+                  className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-foreground placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600/50 transition-all"
                   required
                 />
               </div>
@@ -330,12 +330,12 @@ export default function ShopRegistrationPage() {
                     onChange={(e) => updateForm('subdomain', e.target.value)}
                     placeholder="motoworks"
                     pattern="[a-z0-9\-]+"
-                    className="flex-1 px-4 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600/50 transition-all"
+                    className="flex-1 px-4 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-foreground placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600/50 transition-all"
                     required
                   />
-                  <span className="text-sm text-zinc-500 whitespace-nowrap">.mospams.shop</span>
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">.mospams.shop</span>
                 </div>
-                <p className="text-xs text-zinc-500 mt-2">
+                <p className="text-xs text-muted-foreground mt-2">
                   Your shop will be accessible at: https://{form.subdomain || 'yourshop'}.mospams.shop
                 </p>
               </div>
@@ -348,7 +348,7 @@ export default function ShopRegistrationPage() {
                   value={form.phone}
                   onChange={(e) => updateForm('phone', e.target.value)}
                   placeholder="0917-123-4567"
-                  className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600/50 transition-all"
+                  className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-foreground placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600/50 transition-all"
                 />
               </div>
 
@@ -360,15 +360,15 @@ export default function ShopRegistrationPage() {
                   value={form.address}
                   onChange={(e) => updateForm('address', e.target.value)}
                   placeholder="123 Main St, Manila"
-                  className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600/50 transition-all"
+                  className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-foreground placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600/50 transition-all"
                 />
               </div>
             </div>
           </div>
 
           {/* Owner Information */}
-          <div className="bg-zinc-900/40 backdrop-blur-2xl rounded-3xl border border-zinc-800/50 p-8">
-            <h2 className="text-2xl font-bold text-white mb-6">Owner Information</h2>
+          <div className="bg-muted/40 backdrop-blur-2xl rounded-3xl border border-border/50 p-8">
+            <h2 className="text-2xl font-bold text-foreground mb-6">Owner Information</h2>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-2">
@@ -378,7 +378,7 @@ export default function ShopRegistrationPage() {
                   value={form.ownerName}
                   onChange={(e) => updateForm('ownerName', e.target.value)}
                   placeholder="Juan Dela Cruz"
-                  className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600/50 transition-all"
+                  className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-foreground placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600/50 transition-all"
                   required
                 />
               </div>
@@ -392,7 +392,7 @@ export default function ShopRegistrationPage() {
                   value={form.ownerEmail}
                   onChange={(e) => updateForm('ownerEmail', e.target.value)}
                   placeholder="juan@example.com"
-                  className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600/50 transition-all"
+                  className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-foreground placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600/50 transition-all"
                   required
                 />
               </div>
@@ -400,9 +400,9 @@ export default function ShopRegistrationPage() {
           </div>
 
           {/* Choose Plan */}
-          <div className="bg-zinc-900/40 backdrop-blur-2xl rounded-3xl border border-zinc-800/50 p-8">
-            <h2 className="text-2xl font-bold text-white mb-2">Choose Your Plan</h2>
-            <p className="text-zinc-400 mb-6">14-day free trial • No credit card required</p>
+          <div className="bg-muted/40 backdrop-blur-2xl rounded-3xl border border-border/50 p-8">
+            <h2 className="text-2xl font-bold text-foreground mb-2">Choose Your Plan</h2>
+            <p className="text-muted-foreground mb-6">14-day free trial • No credit card required</p>
 
             <div className="grid md:grid-cols-3 gap-6">
               {PLANS.map((plan) => (
@@ -425,10 +425,10 @@ export default function ShopRegistrationPage() {
                   )}
 
                   <div className="mb-4">
-                    <h3 className="text-xl font-bold text-white">{plan.name}</h3>
+                    <h3 className="text-xl font-bold text-foreground">{plan.name}</h3>
                     <div className="mt-2">
-                      <span className="text-3xl font-bold text-white">₱{plan.price}</span>
-                      <span className="text-zinc-400">/month</span>
+                      <span className="text-3xl font-bold text-foreground">₱{plan.price}</span>
+                      <span className="text-muted-foreground">/month</span>
                     </div>
                   </div>
 
@@ -436,10 +436,10 @@ export default function ShopRegistrationPage() {
 
                   <ul className="space-y-2">
                     {plan.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm text-zinc-400">
+                      <li key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
                         <div className="mt-0.5">
                           <div className="w-4 h-4 rounded-full bg-zinc-700 flex items-center justify-center">
-                            <Check className="w-2.5 h-2.5 text-zinc-400" strokeWidth={3} />
+                            <Check className="w-2.5 h-2.5 text-muted-foreground" strokeWidth={3} />
                           </div>
                         </div>
                         <span>{feature}</span>
@@ -460,7 +460,7 @@ export default function ShopRegistrationPage() {
           </div>
 
           {/* Terms & Submit */}
-          <div className="bg-zinc-900/40 backdrop-blur-2xl rounded-3xl border border-zinc-800/50 p-8">
+          <div className="bg-muted/40 backdrop-blur-2xl rounded-3xl border border-border/50 p-8">
             <label className="flex items-start gap-3 cursor-pointer mb-6">
               <input
                 type="checkbox"
@@ -469,7 +469,7 @@ export default function ShopRegistrationPage() {
                 className="mt-1 w-4 h-4 rounded border-zinc-700 bg-zinc-800"
                 required
               />
-              <span className="text-sm text-zinc-400">
+              <span className="text-sm text-muted-foreground">
                 I agree to the{' '}
                 <a href="/terms" className="text-blue-400 hover:text-blue-300 transition-colors">
                   Terms of Service
@@ -496,7 +496,7 @@ export default function ShopRegistrationPage() {
               )}
             </button>
 
-            <p className="text-center text-sm text-zinc-500 mt-4">
+            <p className="text-center text-sm text-muted-foreground mt-4">
               No credit card required &mdash; 14-day free trial, instant access
             </p>
           </div>

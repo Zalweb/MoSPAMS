@@ -98,17 +98,17 @@ export default function UserRegistrationPage() {
         </div>
 
         <div className="relative z-10 w-full max-w-md px-6">
-          <div className="bg-zinc-900/40 backdrop-blur-2xl rounded-3xl border border-zinc-800/50 shadow-2xl p-10 text-center">
+          <div className="bg-muted/40 backdrop-blur-2xl rounded-3xl border border-border/50 shadow-2xl p-10 text-center">
             <div className="flex justify-center mb-6">
               <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
                 <CheckCircle2 className="w-8 h-8 text-emerald-400" strokeWidth={2} />
               </div>
             </div>
 
-            <h1 className="text-2xl font-bold text-white mb-2">
+            <h1 className="text-2xl font-bold text-foreground mb-2">
               {result?.message?.startsWith('Welcome back') ? 'Welcome back!' : 'Welcome aboard!'}
             </h1>
-            <p className="text-zinc-400 text-sm mb-6">
+            <p className="text-muted-foreground text-sm mb-6">
               {result?.message?.startsWith('Welcome back')
                 ? 'You have joined this shop as a Customer. You can log in right away.'
                 : 'Your account has been created. You can log in right away.'}
@@ -116,15 +116,15 @@ export default function UserRegistrationPage() {
 
             <div className="bg-zinc-800/40 rounded-2xl border border-zinc-700/40 p-5 text-left mb-6 space-y-3">
               <div>
-                <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Shop</p>
-                <p className="text-sm text-white font-medium">{result.shopName}</p>
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Shop</p>
+                <p className="text-sm text-foreground font-medium">{result.shopName}</p>
               </div>
               <div>
-                <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Account Type</p>
-                <p className="text-sm text-white font-medium">Customer</p>
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Account Type</p>
+                <p className="text-sm text-foreground font-medium">Customer</p>
               </div>
               <div>
-                <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Status</p>
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Status</p>
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                   Active
@@ -154,14 +154,14 @@ export default function UserRegistrationPage() {
       {/* Back Button */}
       <button
         onClick={() => navigate('/')}
-        className="absolute top-6 left-6 z-50 flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm"
+        className="absolute top-6 left-6 z-50 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm"
       >
         <ArrowLeft className="w-4 h-4" strokeWidth={2} />
         <span>Back</span>
       </button>
 
       <div className="relative z-10 w-full max-w-md px-6 py-10">
-        <div className="bg-zinc-900/40 backdrop-blur-2xl rounded-3xl border border-zinc-800/50 shadow-2xl p-10">
+        <div className="bg-muted/40 backdrop-blur-2xl rounded-3xl border border-border/50 shadow-2xl p-10">
 
           {/* Header */}
           <div className="flex justify-center mb-6">
@@ -171,8 +171,8 @@ export default function UserRegistrationPage() {
           </div>
 
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-white mb-2">Create an Account</h1>
-            <p className="text-zinc-400 text-sm">
+            <h1 className="text-2xl font-bold text-foreground mb-2">Create an Account</h1>
+            <p className="text-muted-foreground text-sm">
               Sign up to track your motorcycle service and repairs.
             </p>
           </div>
@@ -181,13 +181,13 @@ export default function UserRegistrationPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Full Name */}
             <div>
-              <label className="block text-xs font-medium text-zinc-400 mb-1.5">Full Name</label>
+              <label className="block text-xs font-medium text-muted-foreground mb-1.5">Full Name</label>
               <input
                 type="text"
                 value={form.fullName}
                 onChange={(e) => updateField('fullName', e.target.value)}
                 placeholder="Juan Dela Cruz"
-                className="w-full px-4 py-3 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-white placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-foreground placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
                 disabled={loading}
                 autoFocus
               />
@@ -195,33 +195,33 @@ export default function UserRegistrationPage() {
 
             {/* Email */}
             <div>
-              <label className="block text-xs font-medium text-zinc-400 mb-1.5">Email Address</label>
+              <label className="block text-xs font-medium text-muted-foreground mb-1.5">Email Address</label>
               <input
                 type="email"
                 value={form.email}
                 onChange={(e) => updateField('email', e.target.value)}
                 placeholder="you@example.com"
-                className="w-full px-4 py-3 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-white placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-foreground placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
                 disabled={loading}
               />
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-xs font-medium text-zinc-400 mb-1.5">Password</label>
+              <label className="block text-xs font-medium text-muted-foreground mb-1.5">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={form.password}
                   onChange={(e) => updateField('password', e.target.value)}
                   placeholder="Minimum 8 characters"
-                  className="w-full px-4 py-3 pr-11 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-white placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 pr-11 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-foreground placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
                   disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-zinc-300 transition-colors"
                   tabIndex={-1}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -231,20 +231,20 @@ export default function UserRegistrationPage() {
 
             {/* Confirm Password */}
             <div>
-              <label className="block text-xs font-medium text-zinc-400 mb-1.5">Confirm Password</label>
+              <label className="block text-xs font-medium text-muted-foreground mb-1.5">Confirm Password</label>
               <div className="relative">
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={form.confirmPassword}
                   onChange={(e) => updateField('confirmPassword', e.target.value)}
                   placeholder="Re-enter password"
-                  className="w-full px-4 py-3 pr-11 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-white placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 pr-11 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-foreground placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
                   disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-zinc-300 transition-colors"
                   tabIndex={-1}
                 >
                   {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -284,7 +284,7 @@ export default function UserRegistrationPage() {
                 <button
                   type="button"
                   onClick={() => navigate('/login')}
-                  className="mt-2 text-xs font-semibold text-white underline hover:text-zinc-200 transition-colors"
+                  className="mt-2 text-xs font-semibold text-foreground underline hover:text-zinc-200 transition-colors"
                 >
                   Go to Sign In →
                 </button>
@@ -300,7 +300,7 @@ export default function UserRegistrationPage() {
                 <button
                   type="button"
                   onClick={() => navigate('/login')}
-                  className="mt-2 text-xs font-semibold text-white underline hover:text-zinc-200 transition-colors"
+                  className="mt-2 text-xs font-semibold text-foreground underline hover:text-zinc-200 transition-colors"
                 >
                   Sign in instead →
                 </button>
@@ -309,12 +309,12 @@ export default function UserRegistrationPage() {
           )}
 
           {/* Footer */}
-          <p className="mt-6 text-center text-xs text-zinc-500">
+          <p className="mt-6 text-center text-xs text-muted-foreground">
             Already have an account?{' '}
             <button
               type="button"
               onClick={() => navigate('/login')}
-              className="text-white font-medium hover:underline"
+              className="text-foreground font-medium hover:underline"
             >
               Sign in
             </button>

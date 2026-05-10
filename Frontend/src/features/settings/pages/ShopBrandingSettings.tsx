@@ -137,8 +137,8 @@ export default function ShopBrandingSettings() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className="text-2xl font-bold text-white tracking-tight mb-2">Shop Branding</h2>
-        <p className="text-sm text-zinc-400">Customize your shop's appearance and branding</p>
+        <h2 className="text-2xl font-bold text-foreground tracking-tight mb-2">Shop Branding</h2>
+        <p className="text-sm text-muted-foreground">Customize your shop's appearance and branding</p>
       </motion.div>
 
       {/* Logo Section */}
@@ -146,15 +146,15 @@ export default function ShopBrandingSettings() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.5 }}
-        className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl p-6"
+        className="bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-6"
       >
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center">
-            <Upload className="w-5 h-5 text-zinc-400" />
+            <Upload className="w-5 h-5 text-muted-foreground" />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-white">Shop Logo</h3>
-            <p className="text-xs text-zinc-500">Upload your shop logo (max 2MB)</p>
+            <h3 className="text-base font-semibold text-foreground">Shop Logo</h3>
+            <p className="text-xs text-muted-foreground">Upload your shop logo (max 2MB)</p>
           </div>
         </div>
 
@@ -172,7 +172,7 @@ export default function ShopBrandingSettings() {
                 onClick={handleDeleteLogo}
                 className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center hover:bg-red-600 transition-colors"
               >
-                <X className="w-4 h-4 text-white" />
+                <X className="w-4 h-4 text-foreground" />
               </button>
             </div>
           ) : (
@@ -184,7 +184,7 @@ export default function ShopBrandingSettings() {
                 loading="lazy"
                 decoding="async"
               />
-              <span className="absolute bottom-1 left-0 right-0 text-center text-[9px] text-zinc-500 font-medium">Default</span>
+              <span className="absolute bottom-1 left-0 right-0 text-center text-[9px] text-muted-foreground font-medium">Default</span>
             </div>
           )}
 
@@ -195,7 +195,7 @@ export default function ShopBrandingSettings() {
               onChange={handleLogoUpload}
               className="hidden"
             />
-            <div className="px-4 py-2 rounded-xl bg-zinc-800 border border-zinc-700 text-sm font-medium text-white hover:bg-zinc-700 transition-colors">
+            <div className="px-4 py-2 rounded-xl bg-zinc-800 border border-zinc-700 text-sm font-medium text-foreground hover:bg-zinc-700 transition-colors">
               {branding?.logoUrl ? 'Change Logo' : 'Upload Logo'}
             </div>
           </label>
@@ -207,21 +207,21 @@ export default function ShopBrandingSettings() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.5 }}
-        className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl p-6"
+        className="bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-6"
       >
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center">
-            <Palette className="w-5 h-5 text-zinc-400" />
+            <Palette className="w-5 h-5 text-muted-foreground" />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-white">Brand Colors</h3>
-            <p className="text-xs text-zinc-500">Choose colors that represent your brand</p>
+            <h3 className="text-base font-semibold text-foreground">Brand Colors</h3>
+            <p className="text-xs text-muted-foreground">Choose colors that represent your brand</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <Label className="text-xs font-medium text-zinc-400 mb-2 block">Primary Color</Label>
+            <Label className="text-xs font-medium text-muted-foreground mb-2 block">Primary Color</Label>
             <div className="flex items-center gap-3">
               <input
                 type="color"
@@ -232,14 +232,14 @@ export default function ShopBrandingSettings() {
               <Input
                 value={formData.primaryColor}
                 onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                className="flex-1 h-12 rounded-xl bg-zinc-800/50 border-zinc-700 text-white font-mono"
+                className="flex-1 h-12 rounded-xl bg-zinc-800/50 border-zinc-700 text-foreground font-mono"
                 placeholder="#ef4444"
               />
             </div>
           </div>
 
           <div>
-            <Label className="text-xs font-medium text-zinc-400 mb-2 block">Secondary Color</Label>
+            <Label className="text-xs font-medium text-muted-foreground mb-2 block">Secondary Color</Label>
             <div className="flex items-center gap-3">
               <input
                 type="color"
@@ -250,7 +250,7 @@ export default function ShopBrandingSettings() {
               <Input
                 value={formData.secondaryColor}
                 onChange={(e) => setFormData({ ...formData, secondaryColor: e.target.value })}
-                className="flex-1 h-12 rounded-xl bg-zinc-800/50 border-zinc-700 text-white font-mono"
+                className="flex-1 h-12 rounded-xl bg-zinc-800/50 border-zinc-700 text-foreground font-mono"
                 placeholder="#f97316"
               />
             </div>
@@ -259,14 +259,14 @@ export default function ShopBrandingSettings() {
 
         {/* Color Preview */}
         <div className="mt-6 p-4 rounded-xl bg-zinc-800/50 border border-zinc-700">
-          <p className="text-xs font-medium text-zinc-400 mb-3">Preview</p>
+          <p className="text-xs font-medium text-muted-foreground mb-3">Preview</p>
           <div className="flex gap-3">
             <div
               className="flex-1 h-12 rounded-lg"
               style={{ background: `linear-gradient(135deg, ${formData.primaryColor}, ${formData.secondaryColor})` }}
             />
             <button
-              className="px-6 h-12 rounded-lg font-semibold text-white transition-opacity hover:opacity-90"
+              className="px-6 h-12 rounded-lg font-semibold text-foreground transition-opacity hover:opacity-90"
               style={{ backgroundColor: formData.primaryColor }}
             >
               Primary Button
@@ -280,39 +280,39 @@ export default function ShopBrandingSettings() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.5 }}
-        className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl p-6"
+        className="bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-6"
       >
-        <h3 className="text-base font-semibold text-white mb-4">Shop Information</h3>
+        <h3 className="text-base font-semibold text-foreground mb-4">Shop Information</h3>
         
         <div className="space-y-4">
           <div>
-            <Label className="text-xs font-medium text-zinc-400 mb-2 block">Shop Name</Label>
+            <Label className="text-xs font-medium text-muted-foreground mb-2 block">Shop Name</Label>
             <Input
               value={formData.shopName}
               onChange={(e) => setFormData({ ...formData, shopName: e.target.value })}
-              className="h-12 rounded-xl bg-zinc-800/50 border-zinc-700 text-white"
+              className="h-12 rounded-xl bg-zinc-800/50 border-zinc-700 text-foreground"
             />
           </div>
 
           <div>
-            <Label className="text-xs font-medium text-zinc-400 mb-2 block">Subdomain</Label>
+            <Label className="text-xs font-medium text-muted-foreground mb-2 block">Subdomain</Label>
             <div className="flex items-center gap-2">
               <Input
                 value={branding?.subdomain || ''}
                 disabled
-                className="flex-1 h-12 rounded-xl bg-zinc-800/30 border-zinc-700 text-zinc-500"
+                className="flex-1 h-12 rounded-xl bg-zinc-800/30 border-zinc-700 text-muted-foreground"
               />
-              <span className="text-sm text-zinc-500">.mospams.shop</span>
+              <span className="text-sm text-muted-foreground">.mospams.shop</span>
             </div>
           </div>
 
           <div>
-            <Label className="text-xs font-medium text-zinc-400 mb-2 block">Invitation Code</Label>
+            <Label className="text-xs font-medium text-muted-foreground mb-2 block">Invitation Code</Label>
             <div className="flex items-center gap-2">
               <Input
                 value={branding?.invitationCode || ''}
                 disabled
-                className="flex-1 h-12 rounded-xl bg-zinc-800/30 border-zinc-700 text-white font-mono"
+                className="flex-1 h-12 rounded-xl bg-zinc-800/30 border-zinc-700 text-foreground font-mono"
               />
               <Button
                 onClick={handleRegenerateCode}
@@ -322,7 +322,7 @@ export default function ShopBrandingSettings() {
                 <RefreshCw className="w-4 h-4" />
               </Button>
             </div>
-            <p className="text-xs text-zinc-500 mt-2">Share this code with staff to join your shop</p>
+            <p className="text-xs text-muted-foreground mt-2">Share this code with staff to join your shop</p>
           </div>
         </div>
       </motion.div>

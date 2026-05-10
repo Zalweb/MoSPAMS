@@ -51,7 +51,7 @@ export default function BookService() {
         </div>
         <h2 className="text-[22px] font-bold text-[#1C1917] mb-2">Service Booked!</h2>
         <p className="text-[13px] text-[#A8A29E] mb-6">We'll contact you when your service is scheduled.</p>
-        <Button onClick={() => navigate('/dashboard/customer')} className="h-10 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-white text-sm">Back to Dashboard</Button>
+        <Button onClick={() => navigate('/dashboard/customer')} className="h-10 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-foreground text-sm">Back to Dashboard</Button>
       </div>
     );
   }
@@ -79,7 +79,7 @@ export default function BookService() {
             <div className="mt-1.5 grid grid-cols-2 gap-2">
               {serviceTypes.map(type => (
                 <button key={type} type="button" onClick={() => setServiceType(type)}
-                  className={`p-3 rounded-xl border text-left transition-all ${serviceType === type ? 'border-[#1C1917] bg-[#1C1917] text-white' : 'border-[#E7E5E4] bg-white text-[#78716C] hover:border-[#C4C0BC]'}`}>
+                  className={`p-3 rounded-xl border text-left transition-all ${serviceType === type ? 'border-[#1C1917] bg-[#1C1917] text-foreground' : 'border-[#E7E5E4] bg-white text-[#78716C] hover:border-[#C4C0BC]'}`}>
                   <div className="flex items-center gap-2"><Wrench className="w-4 h-4" strokeWidth={1.5} /><span className="text-[12px] font-medium">{type}</span></div>
                 </button>
               ))}
@@ -91,7 +91,7 @@ export default function BookService() {
             <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Any special requests or concerns..." className="mt-1.5 h-10 rounded-xl border-[#E7E5E4] text-[13px]" />
           </div>
 
-          <Button type="submit" disabled={submitting} className="w-full h-10 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-white text-sm font-medium disabled:opacity-50">
+          <Button type="submit" disabled={submitting} className="w-full h-10 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-foreground text-sm font-medium disabled:opacity-50">
             {submitting ? 'Booking...' : 'Book Service'}
           </Button>
         </form>

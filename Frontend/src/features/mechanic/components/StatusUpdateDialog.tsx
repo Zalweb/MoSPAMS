@@ -44,14 +44,14 @@ export function StatusUpdateDialog({ jobId, currentStatus, onClose, onSuccess }:
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/60 backdrop-blur-sm">
+      <div className="w-full max-w-md bg-muted border border-border rounded-2xl shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-zinc-800">
-          <h2 className="text-xl font-bold text-white">Update Job Status</h2>
+        <div className="flex items-center justify-between p-6 border-b border-border">
+          <h2 className="text-xl font-bold text-foreground">Update Job Status</h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+            className="p-2 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -59,7 +59,7 @@ export function StatusUpdateDialog({ jobId, currentStatus, onClose, onSuccess }:
 
         {/* Content */}
         <div className="p-6 space-y-4">
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-muted-foreground">
             Select the new status for this job. The customer will be notified of the update.
           </p>
 
@@ -85,14 +85,14 @@ export function StatusUpdateDialog({ jobId, currentStatus, onClose, onSuccess }:
                     </div>
                     <div className="flex-1 text-left">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-white">{status.label}</p>
+                        <p className="text-sm font-semibold text-foreground">{status.label}</p>
                         {isCurrent && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-700 text-zinc-400">
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-700 text-muted-foreground">
                             Current
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-zinc-500 mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                         {status.value === 'pending' && 'Job is waiting to be started'}
                         {status.value === 'in_progress' && 'Job is currently being worked on'}
                         {status.value === 'completed' && 'Job is finished and ready for pickup'}
@@ -114,17 +114,17 @@ export function StatusUpdateDialog({ jobId, currentStatus, onClose, onSuccess }:
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-zinc-800">
+        <div className="flex items-center justify-end gap-3 p-6 border-t border-border">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-zinc-800 text-white text-sm font-semibold hover:bg-zinc-700 transition-colors"
+            className="px-4 py-2 rounded-xl bg-zinc-800 text-foreground text-sm font-semibold hover:bg-zinc-700 transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={submitting || selectedStatus === currentStatus}
-            className="px-6 py-2 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] text-foreground text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? 'Updating...' : 'Update Status'}
           </button>

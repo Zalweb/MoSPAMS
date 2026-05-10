@@ -70,7 +70,7 @@ const ROLES = [
 const statusColorMap: Record<string, string> = {
   green: 'bg-green-500/10 text-green-400 border-green-500/20',
   orange: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  gray: 'bg-zinc-800 text-zinc-400 border-zinc-700',
+  gray: 'bg-zinc-800 text-muted-foreground border-zinc-700',
 };
 
 export default function RolesSection() {
@@ -79,7 +79,7 @@ export default function RolesSection() {
   const { ref: noteRef, isVisible: noteVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.5 });
 
   return (
-    <section id="roles" className="relative py-24 bg-black">
+    <section id="roles" className="relative py-24 bg-background">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -94,7 +94,7 @@ export default function RolesSection() {
             initial={{ opacity: 0, y: 10 }}
             animate={headerVisible ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.1 }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-semibold mb-4"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted border border-border text-zinc-300 text-xs font-semibold mb-4"
           >
             <UsersIcon className="w-3.5 h-3.5" strokeWidth={2} />
             User Roles
@@ -103,7 +103,7 @@ export default function RolesSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={headerVisible ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.2 }}
-            className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight"
+            className="text-3xl sm:text-4xl font-bold text-foreground mb-4 tracking-tight"
           >
             Designed for{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-300 to-zinc-500">
@@ -114,7 +114,7 @@ export default function RolesSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={headerVisible ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.3 }}
-            className="text-zinc-400 text-lg leading-relaxed"
+            className="text-muted-foreground text-lg leading-relaxed"
           >
             Role-based access ensures every team member sees exactly what they need, nothing more
             and nothing less.
@@ -132,8 +132,8 @@ export default function RolesSection() {
               className={`relative rounded-2xl overflow-hidden border ${
                 role.featured
                   ? 'border-zinc-700 shadow-xl ' + role.shadow
-                  : 'border-zinc-800 shadow-sm hover:shadow-md hover:border-zinc-700'
-              } transition-all duration-300 hover:-translate-y-1 bg-zinc-900`}
+                  : 'border-border shadow-sm hover:shadow-md hover:border-zinc-700'
+              } transition-all duration-300 hover:-translate-y-1 bg-muted`}
             >
               {/* Featured badge */}
               {role.featured && (
@@ -147,9 +147,9 @@ export default function RolesSection() {
               {/* Gradient Header */}
               <div className={`bg-gradient-to-br ${role.gradient} p-5`}>
                 <div className="mb-3 w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center">
-                  <role.icon className="w-5 h-5 text-white" strokeWidth={2} />
+                  <role.icon className="w-5 h-5 text-foreground" strokeWidth={2} />
                 </div>
-                <h3 className="text-lg font-bold text-white">{role.title}</h3>
+                <h3 className="text-lg font-bold text-foreground">{role.title}</h3>
                 <span
                   className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border mt-1 ${statusColorMap[role.statusColor]}`}
                 >
@@ -159,7 +159,7 @@ export default function RolesSection() {
 
               {/* Body */}
               <div className="p-5">
-                <p className="text-sm text-zinc-400 leading-relaxed mb-4">{role.description}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">{role.description}</p>
                 <div className="space-y-1.5">
                   {role.permissions.map((perm) => (
                      <div key={perm} className="flex items-center gap-2">
@@ -169,7 +169,7 @@ export default function RolesSection() {
                              ? 'text-green-500'
                              : role.statusColor === 'orange'
                              ? 'text-orange-400'
-                             : 'text-zinc-500'
+                             : 'text-muted-foreground'
                          }`}
                          fill="currentColor"
                          viewBox="0 0 20 20"
@@ -195,16 +195,16 @@ export default function RolesSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={noteVisible ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-10 p-4 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-start gap-3 max-w-3xl mx-auto"
+          className="mt-10 p-4 rounded-2xl bg-muted border border-border flex items-start gap-3 max-w-3xl mx-auto"
         >
           <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0 mt-0.5">
-            <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
           <div>
-            <p className="text-sm font-semibold text-white mb-0.5">Role-Based Onboarding</p>
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm font-semibold text-foreground mb-0.5">Role-Based Onboarding</p>
+            <p className="text-sm text-muted-foreground">
               New team members can sign up with Google and request their role (Staff, Mechanic, or
               Customer). The shop Owner approves each request before access is granted, keeping your
               shop secure and organized.

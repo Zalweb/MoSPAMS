@@ -56,8 +56,8 @@ export default function ApprovalsPage() {
     <div>
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-7">
         <div>
-          <h2 className="text-[22px] font-bold text-white tracking-tight">Role Approvals</h2>
-          <p className="text-[13px] text-zinc-400 mt-0.5">Review pending Staff and Mechanic role requests</p>
+          <h2 className="text-[22px] font-bold text-foreground tracking-tight">Role Approvals</h2>
+          <p className="text-[13px] text-muted-foreground mt-0.5">Review pending Staff and Mechanic role requests</p>
         </div>
         <div className="flex items-center gap-2">
           {requests.length > 0 && (
@@ -67,14 +67,14 @@ export default function ApprovalsPage() {
           )}
           <button
             onClick={() => void fetchRequests()}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-[11px] font-medium text-zinc-300 hover:bg-zinc-800 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-700 bg-muted px-3 py-1.5 text-[11px] font-medium text-zinc-300 hover:bg-zinc-800 transition-colors"
           >
             <RefreshCw className="w-3 h-3" /> Refresh
           </button>
         </div>
       </div>
 
-      <div className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
+      <div className="bg-muted/50 backdrop-blur-sm border border-border rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <div className="w-8 h-8 rounded-full border-2 border-zinc-700 border-t-white animate-spin" />
@@ -82,24 +82,24 @@ export default function ApprovalsPage() {
         ) : requests.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
             <UserCheck className="w-10 h-10 text-zinc-600" strokeWidth={1} />
-            <p className="text-[13px] text-zinc-500">No pending role requests</p>
+            <p className="text-[13px] text-muted-foreground">No pending role requests</p>
           </div>
         ) : (
           <table className="w-full text-[13px]">
             <thead>
-              <tr className="border-b border-zinc-800 bg-zinc-900/50">
-                <th className="text-left px-5 py-3 text-[11px] font-semibold text-zinc-500 uppercase tracking-wide">User</th>
-                <th className="text-left px-5 py-3 text-[11px] font-semibold text-zinc-500 uppercase tracking-wide">Email</th>
-                <th className="text-left px-5 py-3 text-[11px] font-semibold text-zinc-500 uppercase tracking-wide">Requested Role</th>
-                <th className="text-left px-5 py-3 text-[11px] font-semibold text-zinc-500 uppercase tracking-wide">Date</th>
+              <tr className="border-b border-border bg-muted/50">
+                <th className="text-left px-5 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">User</th>
+                <th className="text-left px-5 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Email</th>
+                <th className="text-left px-5 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Requested Role</th>
+                <th className="text-left px-5 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Date</th>
                 <th className="px-5 py-3" />
               </tr>
             </thead>
             <tbody>
               {requests.map((req) => (
-                <tr key={req.id} className="border-b border-zinc-800 last:border-0 hover:bg-zinc-800/50 transition-colors">
+                <tr key={req.id} className="border-b border-border last:border-0 hover:bg-zinc-800/50 transition-colors">
                   <td className="px-5 py-3.5 font-medium text-zinc-200">{req.user_name}</td>
-                  <td className="px-5 py-3.5 text-zinc-500">{req.user_email}</td>
+                  <td className="px-5 py-3.5 text-muted-foreground">{req.user_email}</td>
                   <td className="px-5 py-3.5">
                     <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${
                       req.requested_role === 'Mechanic'
@@ -109,7 +109,7 @@ export default function ApprovalsPage() {
                       {req.requested_role}
                     </span>
                   </td>
-                  <td className="px-5 py-3.5 text-zinc-500">
+                  <td className="px-5 py-3.5 text-muted-foreground">
                     {new Date(req.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-5 py-3.5">
@@ -117,7 +117,7 @@ export default function ApprovalsPage() {
                       <button
                         onClick={() => void handleApprove(req.id)}
                         disabled={actionLoading !== null}
-                        className="inline-flex items-center gap-1 rounded-lg bg-green-500 px-3 py-1.5 text-[11px] font-bold text-white hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center gap-1 rounded-lg bg-green-500 px-3 py-1.5 text-[11px] font-bold text-foreground hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {actionLoading === req.id ? (
                           <div className="w-3 h-3 rounded-full border border-white border-t-transparent animate-spin" />
@@ -128,7 +128,7 @@ export default function ApprovalsPage() {
                       <button
                         onClick={() => void handleDeny(req.id)}
                         disabled={actionLoading !== null}
-                        className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-[11px] font-medium text-zinc-300 hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 bg-muted px-3 py-1.5 text-[11px] font-medium text-zinc-300 hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {actionLoading === req.id ? (
                           <div className="w-3 h-3 rounded-full border border-zinc-500 border-t-transparent animate-spin" />

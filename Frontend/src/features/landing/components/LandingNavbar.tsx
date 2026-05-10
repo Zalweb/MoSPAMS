@@ -62,8 +62,8 @@ export default function LandingNavbar() {
             <div className="w-8 h-8 rounded-lg bg-transparent flex items-center justify-center overflow-hidden">
               <img src="/images/logo.svg" alt="MoSPAMS" className="w-full h-full object-contain" />
             </div>
-            <span className="text-lg font-bold text-white tracking-tight">
-              Mo<span className="text-zinc-400">SPAMS</span>
+            <span className="text-lg font-bold text-foreground tracking-tight">
+              Mo<span className="text-muted-foreground">SPAMS</span>
             </span>
           </button>
 
@@ -78,8 +78,8 @@ export default function LandingNavbar() {
                   onClick={() => scrollTo(link.href)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                     isActive
-                      ? 'text-white bg-zinc-800'
-                      : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+                      ? 'text-foreground bg-zinc-800'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-zinc-800/50'
                   }`}
                 >
                   {link.label}
@@ -102,7 +102,7 @@ export default function LandingNavbar() {
           <button
             id="nav-hamburger-btn"
             onClick={() => setMenuOpen((o) => !o)}
-            className="md:hidden p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            className="md:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-zinc-800 transition-colors"
             aria-label="Toggle menu"
           >
             <div className="w-5 h-5 flex flex-col justify-center gap-1.5">
@@ -125,14 +125,14 @@ export default function LandingNavbar() {
       <div
         className={`md:hidden transition-all duration-300 overflow-hidden ${
           menuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-        } bg-zinc-950 border-b border-zinc-800`}
+        } bg-card border-b border-border`}
       >
         <div className="px-4 py-3 space-y-1">
           {NAV_LINKS.map((link) => (
             <button
               key={link.href}
               onClick={() => scrollTo(link.href)}
-              className="w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors"
+              className="w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-zinc-800 hover:text-foreground transition-colors"
             >
               {link.label}
             </button>

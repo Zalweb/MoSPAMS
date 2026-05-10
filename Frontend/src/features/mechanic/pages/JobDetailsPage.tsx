@@ -87,7 +87,7 @@ export default function JobDetailsPage() {
       case 'completed':
         return 'bg-green-500/10 text-green-400 border-green-500/20';
       default:
-        return 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20';
+        return 'bg-zinc-500/10 text-muted-foreground border-zinc-500/20';
     }
   };
 
@@ -109,7 +109,7 @@ export default function JobDetailsPage() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-zinc-800 animate-pulse" />
-          <p className="text-sm text-zinc-500">Loading job details...</p>
+          <p className="text-sm text-muted-foreground">Loading job details...</p>
         </div>
       </div>
     );
@@ -125,7 +125,7 @@ export default function JobDetailsPage() {
       <div className="flex items-center justify-between">
         <button
           onClick={() => navigate('/dashboard/mechanic/jobs')}
-          className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors"
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
           <span className="text-sm font-medium">Back to Jobs</span>
@@ -137,7 +137,7 @@ export default function JobDetailsPage() {
           className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
             job.statusCode === 'completed'
               ? 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
-              : 'bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] text-white hover:opacity-90'
+              : 'bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] text-foreground hover:opacity-90'
           }`}
         >
           Update Status
@@ -145,10 +145,10 @@ export default function JobDetailsPage() {
       </div>
 
       {/* Job Info Card */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+      <div className="bg-muted border border-border rounded-2xl p-6">
         <div className="flex items-start justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-white mb-2">{job.customerName}</h1>
+            <h1 className="text-2xl font-bold text-foreground mb-2">{job.customerName}</h1>
             <div className="flex items-center gap-2">
               <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold border ${getStatusColor(job.statusCode)}`}>
                 <StatusIcon className="w-4 h-4" />
@@ -157,30 +157,30 @@ export default function JobDetailsPage() {
             </div>
           </div>
           <div className="text-right">
-            <p className="text-xs text-zinc-500 mb-1">Job ID</p>
-            <p className="text-sm font-mono text-white">#{job.id}</p>
+            <p className="text-xs text-muted-foreground mb-1">Job ID</p>
+            <p className="text-sm font-mono text-foreground">#{job.id}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Customer Info */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide">Customer Information</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Customer Information</h3>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <User className="w-5 h-5 text-zinc-500" />
-                <span className="text-sm text-white">{job.customerName}</span>
+                <User className="w-5 h-5 text-muted-foreground" />
+                <span className="text-sm text-foreground">{job.customerName}</span>
               </div>
               {job.customerPhone && (
                 <div className="flex items-center gap-3">
-                  <Phone className="w-5 h-5 text-zinc-500" />
-                  <span className="text-sm text-white">{job.customerPhone}</span>
+                  <Phone className="w-5 h-5 text-muted-foreground" />
+                  <span className="text-sm text-foreground">{job.customerPhone}</span>
                 </div>
               )}
               {job.customerEmail && (
                 <div className="flex items-center gap-3">
-                  <Mail className="w-5 h-5 text-zinc-500" />
-                  <span className="text-sm text-white">{job.customerEmail}</span>
+                  <Mail className="w-5 h-5 text-muted-foreground" />
+                  <span className="text-sm text-foreground">{job.customerEmail}</span>
                 </div>
               )}
             </div>
@@ -188,19 +188,19 @@ export default function JobDetailsPage() {
 
           {/* Service Info */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide">Service Information</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Service Information</h3>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <Bike className="w-5 h-5 text-zinc-500" />
-                <span className="text-sm text-white">{job.motorcycleModel || 'Not specified'}</span>
+                <Bike className="w-5 h-5 text-muted-foreground" />
+                <span className="text-sm text-foreground">{job.motorcycleModel || 'Not specified'}</span>
               </div>
               <div className="flex items-center gap-3">
-                <Wrench className="w-5 h-5 text-zinc-500" />
-                <span className="text-sm text-white">{job.serviceType}</span>
+                <Wrench className="w-5 h-5 text-muted-foreground" />
+                <span className="text-sm text-foreground">{job.serviceType}</span>
               </div>
               <div className="flex items-center gap-3">
-                <Clock className="w-5 h-5 text-zinc-500" />
-                <span className="text-sm text-white">
+                <Clock className="w-5 h-5 text-muted-foreground" />
+                <span className="text-sm text-foreground">
                   {new Date(job.createdAt).toLocaleDateString('en-US', { 
                     year: 'numeric', 
                     month: 'long', 
@@ -213,21 +213,21 @@ export default function JobDetailsPage() {
         </div>
 
         {job.notes && (
-          <div className="mt-6 pt-6 border-t border-zinc-800">
-            <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide mb-2">Notes</h3>
+          <div className="mt-6 pt-6 border-t border-border">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">Notes</h3>
             <p className="text-sm text-zinc-300">{job.notes}</p>
           </div>
         )}
       </div>
 
       {/* Parts Used */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+      <div className="bg-muted border border-border rounded-2xl p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-white">Parts Used</h2>
+          <h2 className="text-lg font-semibold text-foreground">Parts Used</h2>
           {job.statusCode !== 'completed' && (
             <button
               onClick={() => setShowAddPart(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] text-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
             >
               <Plus className="w-4 h-4" />
               Add Part
@@ -240,29 +240,29 @@ export default function JobDetailsPage() {
             <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-zinc-800 flex items-center justify-center">
               <Package className="w-6 h-6 text-zinc-600" />
             </div>
-            <p className="text-sm text-zinc-500">No parts added yet</p>
+            <p className="text-sm text-muted-foreground">No parts added yet</p>
           </div>
         ) : (
           <div className="space-y-3">
             {job.parts.map((part) => (
               <div
                 key={part.id}
-                className="flex items-center justify-between p-4 bg-zinc-800/50 rounded-xl border border-zinc-800"
+                className="flex items-center justify-between p-4 bg-zinc-800/50 rounded-xl border border-border"
               >
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-white mb-1">{part.name}</p>
-                  <p className="text-xs text-zinc-500">
+                  <p className="text-sm font-medium text-foreground mb-1">{part.name}</p>
+                  <p className="text-xs text-muted-foreground">
                     {part.quantity} × ₱{part.unitPrice.toLocaleString()}
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <p className="text-sm font-bold text-white">
+                  <p className="text-sm font-bold text-foreground">
                     ₱{part.subtotal.toLocaleString()}
                   </p>
                   {job.statusCode !== 'completed' && (
                     <button
                       onClick={() => handleRemovePart(part.id, part.name)}
-                      className="p-2 rounded-lg hover:bg-red-500/10 text-zinc-500 hover:text-red-400 transition-colors"
+                      className="p-2 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-400 transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -275,20 +275,20 @@ export default function JobDetailsPage() {
       </div>
 
       {/* Cost Summary */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-        <h2 className="text-lg font-semibold text-white mb-4">Cost Summary</h2>
+      <div className="bg-muted border border-border rounded-2xl p-6">
+        <h2 className="text-lg font-semibold text-foreground mb-4">Cost Summary</h2>
         <div className="space-y-3">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-zinc-400">Labor Cost</span>
-            <span className="text-white font-medium">₱{job.laborCost.toLocaleString()}</span>
+            <span className="text-muted-foreground">Labor Cost</span>
+            <span className="text-foreground font-medium">₱{job.laborCost.toLocaleString()}</span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-zinc-400">Parts Cost</span>
-            <span className="text-white font-medium">₱{partsCost.toLocaleString()}</span>
+            <span className="text-muted-foreground">Parts Cost</span>
+            <span className="text-foreground font-medium">₱{partsCost.toLocaleString()}</span>
           </div>
-          <div className="pt-3 border-t border-zinc-800 flex items-center justify-between">
-            <span className="text-base font-semibold text-white">Total Cost</span>
-            <span className="text-2xl font-bold text-white">₱{totalCost.toLocaleString()}</span>
+          <div className="pt-3 border-t border-border flex items-center justify-between">
+            <span className="text-base font-semibold text-foreground">Total Cost</span>
+            <span className="text-2xl font-bold text-foreground">₱{totalCost.toLocaleString()}</span>
           </div>
         </div>
       </div>

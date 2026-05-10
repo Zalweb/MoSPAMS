@@ -20,10 +20,10 @@ export default function HeroSection() {
       </div>
 
       <div className="absolute top-40 right-20 opacity-20">
-        <Sparkles className="w-8 h-8 text-zinc-400" strokeWidth={1.5} />
+        <Sparkles className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />
       </div>
       <div className="absolute bottom-40 left-20 opacity-20">
-        <Sparkles className="w-6 h-6 text-zinc-400" strokeWidth={1.5} />
+        <Sparkles className="w-6 h-6 text-muted-foreground" strokeWidth={1.5} />
       </div>
 
       <div ref={heroRef} className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -32,7 +32,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 18 }}
             animate={isVisible ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/50 backdrop-blur-sm border border-zinc-800/50 text-zinc-300 text-sm font-medium mb-8"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 backdrop-blur-sm border border-border/50 text-zinc-300 text-sm font-medium mb-8"
           >
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
             Multi-Tenant SaaS Platform
@@ -42,7 +42,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 28 }}
             animate={isVisible ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.08, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-            className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight mb-6"
+            className="text-5xl sm:text-6xl lg:text-7xl font-bold text-foreground leading-[1.1] tracking-tight mb-6"
           >
             Transform your
             <br />
@@ -57,7 +57,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 24 }}
             animate={isVisible ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.16, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-            className="text-lg sm:text-xl text-zinc-400 leading-relaxed mb-10 max-w-2xl mx-auto"
+            className="text-lg sm:text-xl text-muted-foreground leading-relaxed mb-10 max-w-2xl mx-auto"
           >
             All-in-one SaaS platform for inventory, service jobs, sales, reports, and team management.
             Multi-tenant by design - each shop gets its own branded subdomain.
@@ -78,7 +78,7 @@ export default function HeroSection() {
             </button>
             <button
               onClick={() => scrollTo('features')}
-              className="px-8 py-4 rounded-2xl bg-zinc-900/50 backdrop-blur-sm border border-zinc-800/50 text-white font-semibold text-base hover:bg-zinc-800/50 transition-all duration-200"
+              className="px-8 py-4 rounded-2xl bg-muted/50 backdrop-blur-sm border border-border/50 text-foreground font-semibold text-base hover:bg-zinc-800/50 transition-all duration-200"
             >
               View features
             </button>
@@ -88,7 +88,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 24 }}
             animate={isVisible ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.32, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="flex flex-wrap items-center justify-center gap-8 text-zinc-500 text-sm"
+            className="flex flex-wrap items-center justify-center gap-8 text-muted-foreground text-sm"
           >
             <div className="flex items-center gap-2">
               <Shield className="w-4 h-4" strokeWidth={2} />
@@ -111,17 +111,17 @@ export default function HeroSection() {
           transition={{ delay: 0.22, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
           className="relative max-w-5xl mx-auto"
         >
-          <div className="relative bg-zinc-900/40 backdrop-blur-2xl rounded-3xl border border-zinc-800/50 shadow-2xl p-8 overflow-hidden">
+          <div className="relative bg-muted/40 backdrop-blur-2xl rounded-3xl border border-border/50 shadow-2xl p-8 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-zinc-800/5 to-transparent pointer-events-none" />
 
-            <div className="relative flex items-center justify-between mb-6 pb-4 border-b border-zinc-800/50">
+            <div className="relative flex items-center justify-between mb-6 pb-4 border-b border-border/50">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-white/5 border border-zinc-700/50 flex items-center justify-center shadow-lg overflow-hidden">
                   <img src="/images/logo.svg" alt="MoSPAMS" className="w-8 h-8 object-contain" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-white">MoSPAMS Dashboard</p>
-                  <p className="text-xs text-zinc-500">Real-time overview</p>
+                  <p className="text-sm font-semibold text-foreground">MoSPAMS Dashboard</p>
+                  <p className="text-xs text-muted-foreground">Real-time overview</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
@@ -140,8 +140,8 @@ export default function HeroSection() {
             <div className="relative bg-zinc-800/30 rounded-2xl border border-zinc-700/30 p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <p className="text-xs text-zinc-500 mb-1">Sales Performance</p>
-                  <p className="text-2xl font-bold text-white">PHP 125,450</p>
+                  <p className="text-xs text-muted-foreground mb-1">Sales Performance</p>
+                  <p className="text-2xl font-bold text-foreground">PHP 125,450</p>
                 </div>
                 <div className="px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-xs font-semibold">
                   +18.2%
@@ -164,13 +164,13 @@ export default function HeroSection() {
               </div>
             </div>
 
-            <div className="absolute -top-4 -right-4 bg-zinc-900/80 backdrop-blur-sm rounded-2xl border border-zinc-800/50 shadow-xl px-4 py-3 flex items-center gap-2">
+            <div className="absolute -top-4 -right-4 bg-muted/80 backdrop-blur-sm rounded-2xl border border-border/50 shadow-xl px-4 py-3 flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center">
                 <TrendingUp className="w-4 h-4 text-green-400" strokeWidth={2} />
               </div>
               <div>
-                <p className="text-xs text-zinc-400">Growth</p>
-                <p className="text-sm font-bold text-white">+24%</p>
+                <p className="text-xs text-muted-foreground">Growth</p>
+                <p className="text-sm font-bold text-foreground">+24%</p>
               </div>
             </div>
           </div>
@@ -185,9 +185,9 @@ function StatCard({ label, value, trend }: { label: string; value: string; trend
 
   return (
     <div className="bg-zinc-800/30 backdrop-blur-sm rounded-2xl border border-zinc-700/30 p-4 hover:bg-zinc-800/40 transition-all">
-      <p className="text-xs text-zinc-500 mb-2">{label}</p>
-      <p className="text-xl font-bold text-white mb-1">{value}</p>
-      <p className={`text-xs font-semibold ${isPositive ? 'text-green-400' : 'text-zinc-400'}`}>
+      <p className="text-xs text-muted-foreground mb-2">{label}</p>
+      <p className="text-xl font-bold text-foreground mb-1">{value}</p>
+      <p className={`text-xs font-semibold ${isPositive ? 'text-green-400' : 'text-muted-foreground'}`}>
         {trend}
       </p>
     </div>

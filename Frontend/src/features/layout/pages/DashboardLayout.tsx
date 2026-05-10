@@ -115,12 +115,12 @@ export default function DashboardLayout() {
   const handleLogout = () => { logout(); navigate('/', { replace: true }); };
 
   return (
-    <div className="min-h-screen bg-black flex font-sans">
+    <div className="min-h-screen bg-background flex font-sans">
       <AnimatePresence>
         {sidebarOpen && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm"
+            className="fixed inset-0 bg-background/60 z-40 lg:hidden backdrop-blur-sm"
             onClick={() => setSidebarOpen(false)}
           />
         )}
@@ -128,13 +128,13 @@ export default function DashboardLayout() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 z-50 h-screen bg-zinc-950 border-r border-zinc-800 flex flex-col w-[260px] shrink-0 transition-transform duration-300 ease-out ${
+        className={`fixed lg:sticky top-0 left-0 z-50 h-screen bg-card border-r border-border flex flex-col w-[260px] shrink-0 transition-transform duration-300 ease-out ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3 px-6 h-[70px] border-b border-zinc-800 shrink-0">
-          <div className="w-8 h-8 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center overflow-hidden shrink-0">
+        <div className="flex items-center gap-3 px-6 h-[70px] border-b border-border shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-muted border border-zinc-700 flex items-center justify-center overflow-hidden shrink-0">
             <img
               src={branding?.logoUrl || '/images/logo.svg'}
               alt={branding?.shopName || 'MoSPAMS'}
@@ -142,15 +142,15 @@ export default function DashboardLayout() {
             />
           </div>
           <div>
-            <span className="text-[15px] font-bold text-white tracking-tight leading-none block">
-              Mo<span className="text-zinc-500">SPAMS</span>
+            <span className="text-[15px] font-bold text-foreground tracking-tight leading-none block">
+              Mo<span className="text-muted-foreground">SPAMS</span>
             </span>
-            <span className="block text-[10px] text-zinc-400 font-semibold tracking-wider leading-none mt-1">
+            <span className="block text-[10px] text-muted-foreground font-semibold tracking-wider leading-none mt-1">
               {(branding?.shopName || user?.shopName || 'Management').toUpperCase()}
             </span>
           </div>
           <button
-            className="ml-auto lg:hidden p-2 text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
+            className="ml-auto lg:hidden p-2 text-muted-foreground hover:text-foreground hover:bg-zinc-800 rounded-lg transition-colors"
             onClick={() => setSidebarOpen(false)}
           >
             <X className="w-5 h-5" />
@@ -161,7 +161,7 @@ export default function DashboardLayout() {
         <nav className="flex-1 px-4 py-6 space-y-6 overflow-y-auto custom-scrollbar">
           {visibleGroups.map((group, idx) => (
             <div key={idx}>
-              <h3 className="px-3 text-[10px] font-bold text-zinc-500 tracking-wider mb-2 uppercase">{group.title}</h3>
+              <h3 className="px-3 text-[10px] font-bold text-muted-foreground tracking-wider mb-2 uppercase">{group.title}</h3>
               <div className="space-y-1">
                 {group.items.map((item) => {
                   const isActive = location.pathname === item.to || (item.to !== '/dashboard' && location.pathname.startsWith(item.to));
@@ -173,11 +173,11 @@ export default function DashboardLayout() {
                       onClick={() => setSidebarOpen(false)}
                       className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 group ${
                         isActive
-                          ? 'bg-zinc-800 text-white border-l-2 border-white'
-                          : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
+                          ? 'bg-zinc-800 text-foreground border-l-2 border-white'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                       }`}
                     >
-                      <item.icon className={`w-[16px] h-[16px] transition-colors ${isActive ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'}`} strokeWidth={1.75} />
+                      <item.icon className={`w-[16px] h-[16px] transition-colors ${isActive ? 'text-foreground' : 'text-muted-foreground group-hover:text-zinc-300'}`} strokeWidth={1.75} />
                       <span>{item.label}</span>
                     </NavLink>
                   );
@@ -189,20 +189,20 @@ export default function DashboardLayout() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 min-w-0 min-h-screen bg-black">
+      <main className="flex-1 min-w-0 min-h-screen bg-background">
         {/* Header */}
-        <div className="sticky top-0 z-30 bg-black/80 backdrop-blur-xl border-b border-zinc-800/50">
+        <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border/50">
           <div className="flex items-center gap-4 px-6 h-[64px]">
             {/* Mobile menu button */}
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 -ml-2 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+              className="lg:hidden p-2 -ml-2 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors"
             >
               <Menu className="w-5 h-5" />
             </button>
 
             {/* Page title */}
-            <h1 className="text-base font-semibold text-white tracking-tight">{currentLabel}</h1>
+            <h1 className="text-base font-semibold text-foreground tracking-tight">{currentLabel}</h1>
 
             {/* Right side actions */}
             <div className="ml-auto flex items-center gap-2">
@@ -211,11 +211,11 @@ export default function DashboardLayout() {
                 <div className="relative">
                   <button
                     onClick={() => { setNotifOpen(o => !o); setProfileOpen(false); }}
-                    className="relative p-2 rounded-xl hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+                    className="relative p-2 rounded-xl hover:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     <Bell className="w-5 h-5" />
                     {unreadCount > 0 && (
-                      <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                      <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-foreground text-[9px] font-bold rounded-full flex items-center justify-center">
                         {unreadCount > 9 ? '9+' : unreadCount}
                       </span>
               )}
@@ -227,31 +227,31 @@ export default function DashboardLayout() {
                       <motion.div
                         initial={{ opacity: 0, y: -10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        className="absolute right-0 top-full mt-2 w-[320px] bg-zinc-900/95 backdrop-blur-xl rounded-2xl border border-zinc-800 shadow-2xl shadow-black/50 z-50 overflow-hidden"
+                        className="absolute right-0 top-full mt-2 w-[320px] bg-muted/95 backdrop-blur-xl rounded-2xl border border-border shadow-2xl shadow-black/50 z-50 overflow-hidden"
                       >
-                        <div className="px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
-                          <p className="text-sm font-semibold text-white">Notifications</p>
+                        <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+                          <p className="text-sm font-semibold text-foreground">Notifications</p>
                           {unreadCount > 0 && (
-                            <button onClick={() => void markAllRead()} className="text-xs text-zinc-500 hover:text-white transition-colors">
+                            <button onClick={() => void markAllRead()} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                               Mark all read
                             </button>
               )}
                         </div>
                         <div className="max-h-[320px] overflow-y-auto">
                           {notifications.length === 0 ? (
-                            <p className="text-center text-zinc-500 text-xs py-8">No notifications yet</p>
+                            <p className="text-center text-muted-foreground text-xs py-8">No notifications yet</p>
                           ) : (
                             notifications.map(n => (
                               <button
                                 key={n.id}
                                 onClick={() => { if (!n.is_read) void markOneRead(n.id); }}
-                                className={`w-full text-left px-4 py-3 border-b border-zinc-800/50 hover:bg-zinc-800/30 transition-colors ${!n.is_read ? 'bg-zinc-800/20' : ''}`}
+                                className={`w-full text-left px-4 py-3 border-b border-border/50 hover:bg-zinc-800/30 transition-colors ${!n.is_read ? 'bg-zinc-800/20' : ''}`}
                               >
                                 <div className="flex items-start gap-2">
                                   {!n.is_read && <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />}
                                   <div className={!n.is_read ? '' : 'pl-3.5'}>
-                                    <p className="text-xs font-semibold text-white">{n.title}</p>
-                                    <p className="text-xs text-zinc-500 mt-0.5 line-clamp-2">{n.message}</p>
+                                    <p className="text-xs font-semibold text-foreground">{n.title}</p>
+                                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{n.message}</p>
                                     <p className="text-[10px] text-zinc-600 mt-1">{new Date(n.created_at).toLocaleDateString()}</p>
                                   </div>
                                 </div>
@@ -275,12 +275,12 @@ export default function DashboardLayout() {
                   className="flex items-center gap-3 pl-1 pr-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-all"
                   whileHover={{ scale: 1.02 }}
                 >
-                  <div className="w-8 h-8 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center text-sm font-bold text-white">
+                  <div className="w-8 h-8 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center text-sm font-bold text-foreground">
                     {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
                   <div className="hidden sm:block text-left">
-                    <p className="text-sm font-medium text-white leading-none">{user?.name}</p>
-                    <p className="text-xs text-zinc-500 leading-none mt-1">{user?.role}</p>
+                    <p className="text-sm font-medium text-foreground leading-none">{user?.name}</p>
+                    <p className="text-xs text-muted-foreground leading-none mt-1">{user?.role}</p>
                   </div>
                 </motion.button>
 
@@ -291,25 +291,25 @@ export default function DashboardLayout() {
                       initial={{ opacity: 0, y: -10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                      className="absolute right-0 top-full mt-2 w-[220px] bg-zinc-900/95 backdrop-blur-xl rounded-2xl border border-zinc-800 shadow-2xl shadow-black/50 z-50 overflow-hidden"
+                      className="absolute right-0 top-full mt-2 w-[220px] bg-muted/95 backdrop-blur-xl rounded-2xl border border-border shadow-2xl shadow-black/50 z-50 overflow-hidden"
                     >
-                      <div className="px-4 py-3 border-b border-zinc-800">
-                        <p className="text-sm font-semibold text-white truncate">{user?.name}</p>
-                        <p className="text-xs text-zinc-500 mt-0.5">{user?.email}</p>
+                      <div className="px-4 py-3 border-b border-border">
+                        <p className="text-sm font-semibold text-foreground truncate">{user?.name}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{user?.email}</p>
                       </div>
                       <div className="py-1">
                         {role === 'Owner' && (
                           <>
                             <button
                               onClick={() => { setProfileOpen(false); navigate('/dashboard/activity-logs'); }}
-                              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors"
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-zinc-800/50 transition-colors"
                             >
                               <ScrollText className="w-[18px] h-[18px]" strokeWidth={1.5} />
                               Activity Logs
                             </button>
                             <button
                               onClick={() => { setProfileOpen(false); navigate('/dashboard/settings'); }}
-                              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors"
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-zinc-800/50 transition-colors"
                             >
                               <Settings className="w-[18px] h-[18px]" strokeWidth={1.5} />
                               Settings
@@ -319,7 +319,7 @@ export default function DashboardLayout() {
                         {role === 'Customer' && (
                           <button
                             onClick={() => { setProfileOpen(false); navigate('/dashboard/customer/settings'); }}
-                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors"
+                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-zinc-800/50 transition-colors"
                           >
                             <Settings className="w-[18px] h-[18px]" strokeWidth={1.5} />
                             Profile Settings
@@ -328,7 +328,7 @@ export default function DashboardLayout() {
                       </div>
                       <button
                         onClick={() => { setProfileOpen(false); handleLogout(); }}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors border-t border-zinc-800"
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors border-t border-border"
                       >
                         <LogOut className="w-[18px] h-[18px]" strokeWidth={1.5} />
                         Sign Out
@@ -342,7 +342,7 @@ export default function DashboardLayout() {
         </div>
 
         {/* Page content */}
-        <div className="min-h-[calc(100vh-64px)] bg-black p-6 lg:p-8">
+        <div className="min-h-[calc(100vh-64px)] bg-background p-6 lg:p-8">
           <Outlet />
         </div>
       </main>

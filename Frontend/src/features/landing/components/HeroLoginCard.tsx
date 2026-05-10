@@ -80,7 +80,7 @@ export default function HeroLoginCard({ onBack }: HeroLoginCardProps) {
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95, y: -20 }}
       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-      className="w-full max-w-md bg-zinc-900/80 backdrop-blur-xl rounded-2xl border border-zinc-800 shadow-2xl shadow-black/50 p-6 sm:p-8 relative overflow-hidden"
+      className="w-full max-w-md bg-muted/80 backdrop-blur-xl rounded-2xl border border-border shadow-2xl shadow-black/50 p-6 sm:p-8 relative overflow-hidden"
     >
       {/* Subtle gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
@@ -88,7 +88,7 @@ export default function HeroLoginCard({ onBack }: HeroLoginCardProps) {
       {/* Back Button */}
       <motion.button
         onClick={onBack}
-        className="absolute top-6 right-6 flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-white transition-colors"
+        className="absolute top-6 right-6 flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
         whileHover={{ x: -4 }}
         whileTap={{ scale: 0.95 }}
       >
@@ -117,8 +117,8 @@ export default function HeroLoginCard({ onBack }: HeroLoginCardProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
         >
-          <h2 className="text-2xl font-bold text-white mb-2">Welcome back</h2>
-          <p className="text-sm text-zinc-400">Sign in to your MoSPAMS account</p>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Welcome back</h2>
+          <p className="text-sm text-muted-foreground">Sign in to your MoSPAMS account</p>
         </motion.div>
 
         {error && (
@@ -142,7 +142,7 @@ export default function HeroLoginCard({ onBack }: HeroLoginCardProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email or phone"
-              className="w-full h-11 px-4 rounded-xl bg-zinc-800/50 border border-zinc-700/50 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-white/10 transition-all"
+              className="w-full h-11 px-4 rounded-xl bg-zinc-800/50 border border-zinc-700/50 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-white/10 transition-all"
               autoComplete="email"
               required
             />
@@ -158,7 +158,7 @@ export default function HeroLoginCard({ onBack }: HeroLoginCardProps) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
-              className="w-full h-11 px-4 rounded-xl bg-zinc-800/50 border border-zinc-700/50 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-white/10 transition-all"
+              className="w-full h-11 px-4 rounded-xl bg-zinc-800/50 border border-zinc-700/50 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-white/10 transition-all"
               autoComplete="current-password"
               required
             />
@@ -175,11 +175,11 @@ export default function HeroLoginCard({ onBack }: HeroLoginCardProps) {
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 rounded border-zinc-600 bg-zinc-800 text-white focus:ring-white/20 focus:ring-offset-0"
+                className="w-4 h-4 rounded border-zinc-600 bg-zinc-800 text-foreground focus:ring-white/20 focus:ring-offset-0"
               />
-              <span className="text-sm text-zinc-400 group-hover:text-zinc-300 transition-colors">Remember me</span>
+              <span className="text-sm text-muted-foreground group-hover:text-zinc-300 transition-colors">Remember me</span>
             </label>
-            <a href="#" className="text-sm text-zinc-400 hover:text-white font-medium transition-colors">
+            <a href="#" className="text-sm text-muted-foreground hover:text-foreground font-medium transition-colors">
               Forgot password?
             </a>
           </motion.div>
@@ -213,7 +213,7 @@ export default function HeroLoginCard({ onBack }: HeroLoginCardProps) {
           transition={{ delay: 0.4 }}
         >
           <div className="flex-1 border-t border-zinc-700/50"></div>
-          <span className="px-4 text-xs font-medium text-zinc-500 uppercase tracking-wider">Or</span>
+          <span className="px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Or</span>
           <div className="flex-1 border-t border-zinc-700/50"></div>
         </motion.div>
 
@@ -230,13 +230,13 @@ export default function HeroLoginCard({ onBack }: HeroLoginCardProps) {
         </motion.div>
 
         <motion.p
-          className="text-center mt-6 text-sm text-zinc-500"
+          className="text-center mt-6 text-sm text-muted-foreground"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
           Don't have an account?{' '}
-          <a href="#" className="text-white hover:text-zinc-300 font-medium transition-colors">
+          <a href="#" className="text-foreground hover:text-zinc-300 font-medium transition-colors">
             Sign up
           </a>
         </motion.p>

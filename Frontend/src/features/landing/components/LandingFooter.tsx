@@ -45,7 +45,7 @@ export default function LandingFooter() {
   };
 
   return (
-    <footer ref={ref} className="bg-black text-white border-t border-zinc-900">
+    <footer ref={ref} className="bg-background text-foreground border-t border-zinc-900">
       {/* Top border with gradient */}
       <div className="h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
 
@@ -79,10 +79,10 @@ export default function LandingFooter() {
                 <img src="/images/logo.svg" alt="MoSPAMS" className="w-7 h-7 object-contain" />
               </motion.div>
               <span className="text-xl font-bold tracking-tight">
-                Mo<span className="text-zinc-400">SPAMS</span>
+                Mo<span className="text-muted-foreground">SPAMS</span>
               </span>
             </motion.div>
-            <p className="text-zinc-400 text-sm leading-relaxed max-w-xs mb-6">
+            <p className="text-muted-foreground text-sm leading-relaxed max-w-xs mb-6">
               Motorcycle Service and Parts Management System for repair shops and parts retailers.
               Manage everything in one connected web-based platform.
             </p>
@@ -93,7 +93,7 @@ export default function LandingFooter() {
                 return (
                   <motion.span
                     key={tech.label}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs font-medium"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted border border-border text-muted-foreground text-xs font-medium"
                     whileHover={{ scale: 1.05, borderColor: 'rgb(63 63 70)' }}
                   >
                     <Icon className="w-3 h-3" />
@@ -111,7 +111,7 @@ export default function LandingFooter() {
               visible: { opacity: 1, y: 0 },
             }}
           >
-            <h4 className="text-sm font-semibold text-white mb-4">Quick Links</h4>
+            <h4 className="text-sm font-semibold text-foreground mb-4">Quick Links</h4>
             <ul className="space-y-2.5">
               {QUICK_LINKS.map((link) => {
                 const Icon = link.icon;
@@ -119,7 +119,7 @@ export default function LandingFooter() {
                   <li key={link.href}>
                     <motion.button
                       onClick={() => scrollTo(link.href)}
-                      className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-white transition-colors"
+                      className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                       whileHover={{ x: 4 }}
                       transition={{ type: 'spring', stiffness: 400 }}
                     >
@@ -139,13 +139,13 @@ export default function LandingFooter() {
               visible: { opacity: 1, y: 0 },
             }}
           >
-            <h4 className="text-sm font-semibold text-white mb-4">System</h4>
+            <h4 className="text-sm font-semibold text-foreground mb-4">System</h4>
             <ul className="space-y-2.5">
               {SYSTEM_LINKS.map((link) => (
                 <li key={link.label}>
                   <motion.button
                     onClick={() => scrollTo(link.href)}
-                    className="text-sm text-zinc-500 hover:text-white transition-colors"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                     whileHover={{ x: 4 }}
                   >
                     {link.label}
@@ -163,12 +163,12 @@ export default function LandingFooter() {
           animate={isVisible ? { opacity: 1 } : {}}
           transition={{ delay: 0.5 }}
         >
-          <p className="text-sm text-zinc-500">
-            © 2026 <span className="text-white font-semibold">MoSPAMS</span>. All rights
+          <p className="text-sm text-muted-foreground">
+            © 2026 <span className="text-foreground font-semibold">MoSPAMS</span>. All rights
             reserved.
           </p>
           <motion.div
-            className="flex items-center gap-1.5 text-xs text-zinc-500"
+            className="flex items-center gap-1.5 text-xs text-muted-foreground"
             animate={{ opacity: [0.7, 1, 0.7] }}
             transition={{ duration: 2, repeat: Infinity }}
           >

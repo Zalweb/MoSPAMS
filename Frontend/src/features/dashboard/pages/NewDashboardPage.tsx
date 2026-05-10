@@ -55,8 +55,8 @@ export default function DashboardPage() {
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-red-500/10 flex items-center justify-center border border-red-500/20">
             <TrendingDown className="w-8 h-8 text-red-400" />
           </div>
-          <h2 className="text-xl font-semibold text-white mb-2">Failed to Load Dashboard</h2>
-          <p className="text-sm text-zinc-400">{error}</p>
+          <h2 className="text-xl font-semibold text-foreground mb-2">Failed to Load Dashboard</h2>
+          <p className="text-sm text-muted-foreground">{error}</p>
         </div>
       </div>
     );
@@ -178,23 +178,23 @@ export default function DashboardPage() {
           {/* Top Service Types */}
           <motion.div
             {...fadeUp(0.25)}
-            className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-zinc-800/50 rounded-2xl overflow-hidden hover:border-zinc-700/50 transition-all duration-300"
+            className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-border/50 rounded-2xl overflow-hidden hover:border-zinc-700/50 transition-all duration-300"
           >
-            <div className="px-5 py-4 border-b border-zinc-800/50 flex items-center justify-between">
+            <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
                   <Wrench className="w-5 h-5 text-blue-400" strokeWidth={2} />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-white">Top Service Types</h3>
-                  <p className="text-xs text-zinc-500">By revenue this month</p>
+                  <h3 className="text-base font-semibold text-foreground">Top Service Types</h3>
+                  <p className="text-xs text-muted-foreground">By revenue this month</p>
                 </div>
               </div>
             </div>
             <div className="p-5 space-y-4">
               {metrics.topServiceTypes.length === 0 ? (
                 <div className="py-8 text-center">
-                  <p className="text-sm text-zinc-500">No service data available</p>
+                  <p className="text-sm text-muted-foreground">No service data available</p>
                 </div>
               ) : (
                 metrics.topServiceTypes.slice(0, 5).map((service, idx) => {
@@ -205,11 +205,11 @@ export default function DashboardPage() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-bold text-zinc-600 w-5">#{idx + 1}</span>
-                          <span className="text-sm font-medium text-white">{service.name}</span>
+                          <span className="text-sm font-medium text-foreground">{service.name}</span>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-bold text-white">₱{service.revenue.toLocaleString()}</p>
-                          <p className="text-xs text-zinc-500">{service.count} jobs</p>
+                          <p className="text-sm font-bold text-foreground">₱{service.revenue.toLocaleString()}</p>
+                          <p className="text-xs text-muted-foreground">{service.count} jobs</p>
                         </div>
                       </div>
                       <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
@@ -231,16 +231,16 @@ export default function DashboardPage() {
           {/* Payment Methods Breakdown */}
           <motion.div
             {...fadeUp(0.3)}
-            className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-zinc-800/50 rounded-2xl overflow-hidden hover:border-zinc-700/50 transition-all duration-300"
+            className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-border/50 rounded-2xl overflow-hidden hover:border-zinc-700/50 transition-all duration-300"
           >
-            <div className="px-5 py-4 border-b border-zinc-800/50 flex items-center justify-between">
+            <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center border border-green-500/20">
                   <DollarSign className="w-5 h-5 text-green-400" strokeWidth={2} />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-white">Payment Methods</h3>
-                  <p className="text-xs text-zinc-500">Transaction breakdown</p>
+                  <h3 className="text-base font-semibold text-foreground">Payment Methods</h3>
+                  <p className="text-xs text-muted-foreground">Transaction breakdown</p>
                 </div>
               </div>
             </div>
@@ -249,10 +249,10 @@ export default function DashboardPage() {
                 {/* Cash */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-white">Cash</span>
+                    <span className="text-sm font-medium text-foreground">Cash</span>
                     <div className="text-right">
-                      <p className="text-lg font-bold text-white">{metrics.paymentMethods.cash}</p>
-                      <p className="text-xs text-zinc-500">
+                      <p className="text-lg font-bold text-foreground">{metrics.paymentMethods.cash}</p>
+                      <p className="text-xs text-muted-foreground">
                         {((metrics.paymentMethods.cash / (metrics.paymentMethods.cash + metrics.paymentMethods.gcash)) * 100).toFixed(0)}%
                       </p>
                     </div>
@@ -270,10 +270,10 @@ export default function DashboardPage() {
                 {/* GCash */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-white">GCash</span>
+                    <span className="text-sm font-medium text-foreground">GCash</span>
                     <div className="text-right">
-                      <p className="text-lg font-bold text-white">{metrics.paymentMethods.gcash}</p>
-                      <p className="text-xs text-zinc-500">
+                      <p className="text-lg font-bold text-foreground">{metrics.paymentMethods.gcash}</p>
+                      <p className="text-xs text-muted-foreground">
                         {((metrics.paymentMethods.gcash / (metrics.paymentMethods.cash + metrics.paymentMethods.gcash)) * 100).toFixed(0)}%
                       </p>
                     </div>
@@ -289,10 +289,10 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Total */}
-                <div className="pt-4 border-t border-zinc-800/50">
+                <div className="pt-4 border-t border-border/50">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-zinc-400">Total Transactions</span>
-                    <span className="text-2xl font-bold text-white">
+                    <span className="text-sm font-semibold text-muted-foreground">Total Transactions</span>
+                    <span className="text-2xl font-bold text-foreground">
                       {metrics.paymentMethods.cash + metrics.paymentMethods.gcash}
                     </span>
                   </div>
@@ -310,16 +310,16 @@ export default function DashboardPage() {
           {/* Low Stock Alert */}
           <motion.div
             {...fadeUp(0.35)}
-            className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-zinc-800/50 rounded-2xl overflow-hidden hover:border-zinc-700/50 transition-all duration-300"
+            className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-border/50 rounded-2xl overflow-hidden hover:border-zinc-700/50 transition-all duration-300"
           >
-            <div className="px-5 py-4 border-b border-zinc-800/50 flex items-center justify-between">
+            <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
                   <AlertTriangle className="w-5 h-5 text-amber-400" strokeWidth={2} />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-white">Low Stock Alerts</h3>
-                  <p className="text-xs text-zinc-500">Items need restocking</p>
+                  <h3 className="text-base font-semibold text-foreground">Low Stock Alerts</h3>
+                  <p className="text-xs text-muted-foreground">Items need restocking</p>
                 </div>
               </div>
               {lowStock.length > 0 && (
@@ -334,7 +334,7 @@ export default function DashboardPage() {
                   <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-green-500/10 flex items-center justify-center border border-green-500/20">
                     <Package className="w-6 h-6 text-green-400" />
                   </div>
-                  <p className="text-sm text-zinc-500">All stock levels are healthy</p>
+                  <p className="text-sm text-muted-foreground">All stock levels are healthy</p>
                 </div>
               ) : (
                 lowStock.map((part) => {
@@ -350,14 +350,14 @@ export default function DashboardPage() {
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <p className="text-sm font-medium text-white truncate">{part.name}</p>
+                          <p className="text-sm font-medium text-foreground truncate">{part.name}</p>
                           {urgency === 'critical' && (
                             <span className="text-[10px] font-bold text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/20">
                               CRITICAL
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-zinc-500">₱{part.price.toLocaleString()}/unit</p>
+                        <p className="text-xs text-muted-foreground">₱{part.price.toLocaleString()}/unit</p>
                       </div>
                       <div className="flex items-center gap-3 ml-4">
                         <div className="text-right">
@@ -368,7 +368,7 @@ export default function DashboardPage() {
                           </p>
                           <p className="text-xs text-zinc-600">min {part.minStock}</p>
                         </div>
-                        <ArrowUpRight className="w-4 h-4 text-zinc-600 group-hover/item:text-zinc-400 transition-colors" />
+                        <ArrowUpRight className="w-4 h-4 text-zinc-600 group-hover/item:text-muted-foreground transition-colors" />
                       </div>
                     </div>
                   );
@@ -381,26 +381,26 @@ export default function DashboardPage() {
           {/* Recent Services */}
           <motion.div
             {...fadeUp(0.4)}
-            className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-zinc-800/50 rounded-2xl overflow-hidden hover:border-zinc-700/50 transition-all duration-300"
+            className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-border/50 rounded-2xl overflow-hidden hover:border-zinc-700/50 transition-all duration-300"
           >
-            <div className="px-5 py-4 border-b border-zinc-800/50 flex items-center justify-between">
+            <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center">
-                  <Wrench className="w-5 h-5 text-zinc-400" strokeWidth={2} />
+                  <Wrench className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-white">Recent Services</h3>
-                  <p className="text-xs text-zinc-500">Latest service jobs</p>
+                  <h3 className="text-base font-semibold text-foreground">Recent Services</h3>
+                  <p className="text-xs text-muted-foreground">Latest service jobs</p>
                 </div>
               </div>
-              <span className="text-xs font-semibold text-zinc-500">
+              <span className="text-xs font-semibold text-muted-foreground">
                 {totalJobs} total
               </span>
             </div>
             <div className="divide-y divide-zinc-800/30 max-h-80 overflow-y-auto">
               {recentServices.length === 0 ? (
                 <div className="py-12 text-center">
-                  <p className="text-sm text-zinc-500">No recent services</p>
+                  <p className="text-sm text-muted-foreground">No recent services</p>
                 </div>
               ) : (
                 recentServices.map((service) => {
@@ -412,7 +412,7 @@ export default function DashboardPage() {
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <p className="text-sm font-medium text-white truncate">{service.customerName}</p>
+                          <p className="text-sm font-medium text-foreground truncate">{service.customerName}</p>
                           <span className={`shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
                             service.status === 'Completed'
                               ? 'bg-green-500/10 text-green-400 border-green-500/20'
@@ -423,7 +423,7 @@ export default function DashboardPage() {
                             {service.status}
                           </span>
                         </div>
-                        <p className="text-xs text-zinc-500 mb-1">
+                        <p className="text-xs text-muted-foreground mb-1">
                           {service.motorcycleModel} • {service.serviceType}
                         </p>
                         <div className="flex items-center gap-3 text-xs text-zinc-600">
@@ -438,7 +438,7 @@ export default function DashboardPage() {
                           )}
                         </div>
                       </div>
-                      <ArrowUpRight className="w-4 h-4 text-zinc-600 group-hover/item:text-zinc-400 transition-colors ml-3 shrink-0" />
+                      <ArrowUpRight className="w-4 h-4 text-zinc-600 group-hover/item:text-muted-foreground transition-colors ml-3 shrink-0" />
                     </div>
                   );
                 })
@@ -453,16 +453,16 @@ export default function DashboardPage() {
       {(user?.role === 'Owner' || user?.role === 'Staff') && (
         <motion.div
           {...fadeUp(0.45)}
-          className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 hover:border-zinc-700/50 transition-all duration-300"
+          className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-border/50 rounded-2xl p-6 hover:border-zinc-700/50 transition-all duration-300"
         >
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-base font-semibold text-white mb-1">Service Pipeline</h3>
-              <p className="text-xs text-zinc-500">Job status breakdown</p>
+              <h3 className="text-base font-semibold text-foreground mb-1">Service Pipeline</h3>
+              <p className="text-xs text-muted-foreground">Job status breakdown</p>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold text-white">{totalJobs}</p>
-              <p className="text-xs text-zinc-500">Total jobs</p>
+              <p className="text-2xl font-bold text-foreground">{totalJobs}</p>
+              <p className="text-xs text-muted-foreground">Total jobs</p>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-4">
@@ -496,11 +496,11 @@ export default function DashboardPage() {
               >
                 <div className="flex items-center justify-between">
                   <item.icon className="w-5 h-5" strokeWidth={2} />
-                  <span className="text-xs font-bold text-zinc-400">{item.percentage}%</span>
+                  <span className="text-xs font-bold text-muted-foreground">{item.percentage}%</span>
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-white leading-none mb-1">{item.count}</p>
-                  <p className="text-xs font-medium text-zinc-400">{item.label}</p>
+                  <p className="text-3xl font-bold text-foreground leading-none mb-1">{item.count}</p>
+                  <p className="text-xs font-medium text-muted-foreground">{item.label}</p>
                 </div>
               </motion.div>
             ))}
@@ -518,15 +518,15 @@ export default function DashboardPage() {
       {/* Additional Stats for Owner/Staff */}
       {(user?.role === 'Owner' || user?.role === 'Staff') && metrics && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <motion.div {...fadeUp(0.5)} className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 hover:border-zinc-700/50 transition-all duration-300">
+          <motion.div {...fadeUp(0.5)} className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-border/50 rounded-2xl p-6 hover:border-zinc-700/50 transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
                   <Package className="w-5 h-5 text-blue-400" />
                 </div>
                 <div>
-                  <p className="text-xs text-zinc-500 uppercase tracking-wide">Inventory Value</p>
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Inventory Value</p>
+                  <p className="text-2xl font-bold text-foreground">
                     ₱{(metrics.inventoryValue ?? 0).toLocaleString()}
                   </p>
                 </div>
@@ -534,15 +534,15 @@ export default function DashboardPage() {
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-zinc-500">Total Parts</span>
-                <span className="font-semibold text-white">{metrics.totalParts}</span>
+                <span className="text-muted-foreground">Total Parts</span>
+                <span className="font-semibold text-foreground">{metrics.totalParts}</span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-zinc-500">In Stock</span>
+                <span className="text-muted-foreground">In Stock</span>
                 <span className="font-semibold text-green-400">{metrics.totalParts - (metrics.lowStockCount ?? 0)}</span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-zinc-500">Low Stock</span>
+                <span className="text-muted-foreground">Low Stock</span>
                 <span className="font-semibold text-amber-400">{metrics.lowStockCount ?? 0}</span>
               </div>
             </div>
@@ -555,31 +555,31 @@ export default function DashboardPage() {
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           </motion.div>
 
-          <motion.div {...fadeUp(0.55)} className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 hover:border-zinc-700/50 transition-all duration-300">
+          <motion.div {...fadeUp(0.55)} className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-border/50 rounded-2xl p-6 hover:border-zinc-700/50 transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
                   <Users className="w-5 h-5 text-purple-400" />
                 </div>
                 <div>
-                  <p className="text-xs text-zinc-500 uppercase tracking-wide">Customer Base</p>
-                  <p className="text-2xl font-bold text-white">{metrics.totalCustomers}</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Customer Base</p>
+                  <p className="text-2xl font-bold text-foreground">{metrics.totalCustomers}</p>
                 </div>
               </div>
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-zinc-500">Active Services</span>
+                <span className="text-muted-foreground">Active Services</span>
                 <span className="font-semibold text-blue-400">{metrics.activeServices}</span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-zinc-500">Avg Revenue/Customer</span>
-                <span className="font-semibold text-white">
+                <span className="text-muted-foreground">Avg Revenue/Customer</span>
+                <span className="font-semibold text-foreground">
                   ₱{(metrics.avgRevenuePerCustomer ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-zinc-500">Repeat Rate</span>
+                <span className="text-muted-foreground">Repeat Rate</span>
                 <span className="font-semibold text-green-400">{repeatRate}%</span>
               </div>
             </div>
@@ -589,29 +589,29 @@ export default function DashboardPage() {
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           </motion.div>
 
-          <motion.div {...fadeUp(0.6)} className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 hover:border-zinc-700/50 transition-all duration-300">
+          <motion.div {...fadeUp(0.6)} className="relative group bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-border/50 rounded-2xl p-6 hover:border-zinc-700/50 transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center border border-green-500/20">
                   <TrendingUp className="w-5 h-5 text-green-400" />
                 </div>
                 <div>
-                  <p className="text-xs text-zinc-500 uppercase tracking-wide">Performance</p>
-                  <p className="text-2xl font-bold text-white">{completionRate.toFixed(0)}%</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Performance</p>
+                  <p className="text-2xl font-bold text-foreground">{completionRate.toFixed(0)}%</p>
                 </div>
               </div>
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-zinc-500">Jobs Completed</span>
+                <span className="text-muted-foreground">Jobs Completed</span>
                 <span className="font-semibold text-green-400">{metrics.totalJobsCompleted}</span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-zinc-500">Avg Job Time</span>
-                <span className="font-semibold text-white">{avgJobTime}</span>
+                <span className="text-muted-foreground">Avg Job Time</span>
+                <span className="font-semibold text-foreground">{avgJobTime}</span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-zinc-500">Revenue Growth</span>
+                <span className="text-muted-foreground">Revenue Growth</span>
                 <span className={`font-semibold ${weeklyRevenueChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                   {weeklyRevenueChange >= 0 ? '+' : ''}{weeklyRevenueChange.toFixed(1)}%
                 </span>

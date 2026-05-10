@@ -22,7 +22,7 @@ export default function ContactSection() {
           initial={{ opacity: 0, y: 10 }}
           animate={isVisible ? { opacity: 1, y: 0 } : {}}
           transition={{ delay: 0.1 }}
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-semibold mb-6"
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted border border-border text-zinc-300 text-xs font-semibold mb-6"
         >
           <Rocket className="w-3.5 h-3.5" strokeWidth={2} />
           Get Started Today
@@ -33,7 +33,7 @@ export default function ContactSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={isVisible ? { opacity: 1, y: 0 } : {}}
           transition={{ delay: 0.2 }}
-          className="text-4xl sm:text-5xl font-bold text-white mb-6 tracking-tight leading-tight"
+          className="text-4xl sm:text-5xl font-bold text-foreground mb-6 tracking-tight leading-tight"
         >
           Ready to simplify your{' '}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-300 to-zinc-500">
@@ -46,7 +46,7 @@ export default function ContactSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={isVisible ? { opacity: 1, y: 0 } : {}}
           transition={{ delay: 0.3 }}
-          className="text-lg text-zinc-400 leading-relaxed mb-10 max-w-2xl mx-auto"
+          className="text-lg text-muted-foreground leading-relaxed mb-10 max-w-2xl mx-auto"
         >
           Start using MoSPAMS to manage parts, services, sales, and reports in one connected
           system. No complicated setup. No extra costs.
@@ -69,7 +69,7 @@ export default function ContactSection() {
           <button
             id="contact-learn-more-btn"
             onClick={() => scrollTo('features')}
-            className="px-10 py-4 rounded-2xl bg-zinc-900 border border-zinc-800 text-white font-bold text-base hover:bg-zinc-800 hover:shadow-2xl transition-all duration-200 transform hover:-translate-y-0.5"
+            className="px-10 py-4 rounded-2xl bg-muted border border-border text-foreground font-bold text-base hover:bg-zinc-800 hover:shadow-2xl transition-all duration-200 transform hover:-translate-y-0.5"
           >
             Learn More
           </button>
@@ -90,7 +90,7 @@ export default function ContactSection() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={isVisible ? { opacity: 1, scale: 1 } : {}}
               transition={{ delay: 0.5 + 0.05 * index }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-black border border-slate-100 shadow-sm text-sm text-slate-600 font-medium hover:border-zinc-700 hover:text-white hover:bg-zinc-800 transition-all duration-200 cursor-default"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-background border border-slate-100 shadow-sm text-sm text-slate-600 font-medium hover:border-zinc-700 hover:text-foreground hover:bg-zinc-800 transition-all duration-200 cursor-default"
             >
               <item.Icon className="w-4 h-4" strokeWidth={2} />
               {item.label}

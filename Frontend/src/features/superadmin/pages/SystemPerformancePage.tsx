@@ -44,8 +44,8 @@ export default function SystemPerformancePage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-[28px] font-bold text-white tracking-tight">System Performance</h1>
-          <p className="text-[13px] sm:text-[14px] text-zinc-400 mt-1">
+          <h1 className="text-2xl sm:text-[28px] font-bold text-foreground tracking-tight">System Performance</h1>
+          <p className="text-[13px] sm:text-[14px] text-muted-foreground mt-1">
             Monitor platform health and performance metrics
           </p>
         </div>
@@ -67,9 +67,9 @@ export default function SystemPerformancePage() {
       ) : data ? (
         <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-6">
           {/* System Status */}
-          <motion.div variants={itemVariants} className="bg-zinc-950 rounded-2xl border border-zinc-800 p-6">
+          <motion.div variants={itemVariants} className="bg-card rounded-2xl border border-border p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
                 <Activity className="w-5 h-5" strokeWidth={2} />
                 System Status
               </h2>
@@ -89,7 +89,7 @@ export default function SystemPerformancePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
+              <div className="bg-muted rounded-xl border border-border p-4">
                 <div className="flex items-center gap-3 mb-2">
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                     data.database.ok 
@@ -99,26 +99,26 @@ export default function SystemPerformancePage() {
                     <Database className={`w-5 h-5 ${data.database.ok ? 'text-emerald-400' : 'text-red-400'}`} strokeWidth={2} />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-white">Database</p>
+                    <p className="text-sm font-semibold text-foreground">Database</p>
                     <p className={`text-xs ${data.database.ok ? 'text-emerald-400' : 'text-red-400'}`}>
                       {data.database.ok ? 'Connected' : 'Disconnected'}
                     </p>
                   </div>
                 </div>
-                <p className="text-xs text-zinc-400 mt-2">{data.database.message}</p>
+                <p className="text-xs text-muted-foreground mt-2">{data.database.message}</p>
               </div>
 
-              <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
+              <div className="bg-muted rounded-xl border border-border p-4">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
                     <Server className="w-5 h-5 text-blue-400" strokeWidth={2} />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-white">Platform Version</p>
+                    <p className="text-sm font-semibold text-foreground">Platform Version</p>
                     <p className="text-xs text-blue-400">{data.version}</p>
                   </div>
                 </div>
-                <p className="text-xs text-zinc-400 mt-2">
+                <p className="text-xs text-muted-foreground mt-2">
                   Generated: {new Date(data.generatedAt).toLocaleString()}
                 </p>
               </div>
@@ -126,8 +126,8 @@ export default function SystemPerformancePage() {
           </motion.div>
 
           {/* Platform Metrics */}
-          <motion.div variants={itemVariants} className="bg-zinc-950 rounded-2xl border border-zinc-800 p-6">
-            <h2 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+          <motion.div variants={itemVariants} className="bg-card rounded-2xl border border-border p-6">
+            <h2 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
               <Activity className="w-5 h-5" strokeWidth={2} />
               Platform Metrics
             </h2>
@@ -161,8 +161,8 @@ export default function SystemPerformancePage() {
           </motion.div>
 
           {/* System Information */}
-          <motion.div variants={itemVariants} className="bg-zinc-950 rounded-2xl border border-zinc-800 p-6">
-            <h2 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+          <motion.div variants={itemVariants} className="bg-card rounded-2xl border border-border p-6">
+            <h2 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
               <Server className="w-5 h-5" strokeWidth={2} />
               System Information
             </h2>
@@ -179,10 +179,10 @@ export default function SystemPerformancePage() {
           </motion.div>
         </motion.div>
       ) : (
-        <div className="bg-zinc-950 rounded-2xl border border-zinc-800 p-12 text-center">
+        <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <AlertTriangle className="w-16 h-16 mx-auto mb-4 text-zinc-600" />
-          <h3 className="text-lg font-semibold text-white mb-2">Unable to Load System Health</h3>
-          <p className="text-zinc-400 mb-4">Failed to retrieve system performance data</p>
+          <h3 className="text-lg font-semibold text-foreground mb-2">Unable to Load System Health</h3>
+          <p className="text-muted-foreground mb-4">Failed to retrieve system performance data</p>
           <button
             onClick={loadSystemHealth}
             className="px-6 py-2 rounded-lg bg-white text-black text-sm font-semibold hover:bg-zinc-200 transition-colors"
@@ -209,21 +209,21 @@ function MetricCard({ icon: Icon, label, value, color }: {
   };
 
   return (
-    <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
+    <div className="bg-muted rounded-xl border border-border p-4">
       <div className={`w-10 h-10 rounded-lg ${colorClasses[color]} flex items-center justify-center mb-3`}>
         <Icon className="w-5 h-5" strokeWidth={2} />
       </div>
-      <p className="text-xs text-zinc-500 mb-1">{label}</p>
-      <p className="text-2xl font-bold text-white">{value.toLocaleString()}</p>
+      <p className="text-xs text-muted-foreground mb-1">{label}</p>
+      <p className="text-2xl font-bold text-foreground">{value.toLocaleString()}</p>
     </div>
   );
 }
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between py-2 border-b border-zinc-800 last:border-0">
-      <span className="text-sm text-zinc-400">{label}</span>
-      <span className="text-sm text-white font-medium">{value}</span>
+    <div className="flex items-center justify-between py-2 border-b border-border last:border-0">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className="text-sm text-foreground font-medium">{value}</span>
     </div>
   );
 }

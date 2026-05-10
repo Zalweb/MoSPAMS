@@ -34,7 +34,7 @@ export default function AboutSection() {
   const { ref: sectionRef, isVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.1 });
 
   return (
-    <section id="about" className="relative py-24 bg-zinc-950">
+    <section id="about" className="relative py-24 bg-card">
       {/* Top border */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
 
@@ -46,22 +46,22 @@ export default function AboutSection() {
             animate={isVisible ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-semibold mb-5">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted border border-border text-zinc-300 text-xs font-semibold mb-5">
               <Bike className="w-3.5 h-3.5" strokeWidth={2} />
               About MoSPAMS
             </div>
 
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-5 tracking-tight leading-tight">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-5 tracking-tight leading-tight">
               Built for small-to-medium{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-300 to-zinc-500">
                 motorcycle businesses
               </span>
             </h2>
 
-            <p className="text-zinc-400 text-lg leading-relaxed mb-8">
+            <p className="text-muted-foreground text-lg leading-relaxed mb-8">
               MoSPAMS is designed to reduce manual paperwork, prevent stock discrepancies, organize
               service records, speed up transactions, and provide useful business insights for{' '}
-              <strong className="text-white font-medium">
+              <strong className="text-foreground font-medium">
                 motorcycle repair shops and parts retailers.
               </strong>
             </p>
@@ -71,14 +71,14 @@ export default function AboutSection() {
               {BENEFITS.map((b) => (
                 <div
                   key={b.title}
-                  className="flex items-start gap-4 p-4 rounded-xl bg-zinc-900 border border-zinc-800 shadow-sm hover:shadow-md hover:border-zinc-700 transition-all duration-200 group"
+                  className="flex items-start gap-4 p-4 rounded-xl bg-muted border border-border shadow-sm hover:shadow-md hover:border-zinc-700 transition-all duration-200 group"
                 >
                   <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                    <b.Icon className="w-5 h-5 text-zinc-400" strokeWidth={2} />
+                    <b.Icon className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-white mb-1">{b.title}</h3>
-                    <p className="text-sm text-zinc-400 leading-relaxed">{b.description}</p>
+                    <h3 className="text-sm font-semibold text-foreground mb-1">{b.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{b.description}</p>
                   </div>
                 </div>
               ))}
@@ -97,28 +97,28 @@ export default function AboutSection() {
               {STATS.map((stat) => (
                 <div
                   key={stat.label}
-                  className="bg-zinc-900 rounded-2xl border border-zinc-800 shadow-sm p-6 text-center hover:shadow-md hover:border-zinc-700 transition-all duration-200"
+                  className="bg-muted rounded-2xl border border-border shadow-sm p-6 text-center hover:shadow-md hover:border-zinc-700 transition-all duration-200"
                 >
-                  <p className="text-3xl font-bold text-white mb-1">
+                  <p className="text-3xl font-bold text-foreground mb-1">
                     {stat.value}
                   </p>
-                  <p className="text-sm text-zinc-400 font-medium">{stat.label}</p>
+                  <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
                 </div>
               ))}
             </div>
 
             {/* Info Card */}
-            <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-6 text-white shadow-xl shadow-black/50">
+            <div className="bg-muted rounded-2xl border border-border p-6 text-foreground shadow-xl shadow-black/50">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center">
-                  <WrenchIcon className="w-5 h-5 text-zinc-400" strokeWidth={2} />
+                  <WrenchIcon className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg text-white">Version 2.0</h3>
-                  <p className="text-zinc-400 text-sm">SaaS Platform</p>
+                  <h3 className="font-bold text-lg text-foreground">Version 2.0</h3>
+                  <p className="text-muted-foreground text-sm">SaaS Platform</p>
                 </div>
               </div>
-              <p className="text-zinc-400 text-sm leading-relaxed mb-4">
+              <p className="text-muted-foreground text-sm leading-relaxed mb-4">
                 MoSPAMS V2 is a full multi-tenant SaaS platform. Owner, Staff, Mechanic, and Customer roles are all active with dedicated dashboards and workflows.
               </p>
               <div className="flex flex-wrap gap-2">

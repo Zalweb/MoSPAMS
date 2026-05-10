@@ -99,35 +99,35 @@ export default function CustomerManagementPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">Customers</h2>
-          <p className="text-sm text-zinc-500 mt-1">{meta?.total ?? customers.length} customers</p>
+          <h2 className="text-2xl font-bold text-foreground tracking-tight">Customers</h2>
+          <p className="text-sm text-muted-foreground mt-1">{meta?.total ?? customers.length} customers</p>
         </div>
-        <Button onClick={openAdd} size="sm" className="h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-white text-sm font-semibold px-5 transition-opacity">
+        <Button onClick={openAdd} size="sm" className="h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold px-5 transition-opacity">
           <Plus className="w-4 h-4 mr-2" /> Add Customer
         </Button>
       </div>
 
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
           placeholder="Search by name, phone, or email..."
           value={search}
           onChange={e => { setSearch(e.target.value); }}
           onKeyDown={e => e.key === 'Enter' && fetchCustomers()}
-          className="w-full h-11 pl-11 pr-4 rounded-xl bg-zinc-900/50 border border-zinc-800 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-700 focus:ring-2 focus:ring-white/10"
+          className="w-full h-11 pl-11 pr-4 rounded-xl bg-muted/50 border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-zinc-700 focus:ring-2 focus:ring-white/10"
         />
       </div>
 
-      <div className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl overflow-hidden">
+      <div className="bg-muted/50 backdrop-blur-sm border border-border rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-zinc-800">
-                <th className="text-left px-5 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Customer</th>
-                <th className="text-left px-5 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Contact</th>
-                <th className="text-left px-5 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider hidden md:table-cell">Address</th>
-                <th className="text-left px-5 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider hidden sm:table-cell">Joined</th>
-                <th className="text-right px-5 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider"></th>
+              <tr className="border-b border-border">
+                <th className="text-left px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Customer</th>
+                <th className="text-left px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Contact</th>
+                <th className="text-left px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Address</th>
+                <th className="text-left px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Joined</th>
+                <th className="text-right px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800/50">
@@ -140,33 +140,33 @@ export default function CustomerManagementPage() {
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-zinc-800/50 flex items-center justify-center shrink-0 group-hover:bg-zinc-800 transition-colors">
-                        <Users className="w-5 h-5 text-zinc-400" strokeWidth={1.5} />
+                        <Users className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
                       </div>
-                      <p className="text-sm font-medium text-white">{c.name}</p>
+                      <p className="text-sm font-medium text-foreground">{c.name}</p>
                     </div>
                   </td>
                   <td className="px-5 py-4">
                     <div className="space-y-1">
-                      {c.phone && <p className="text-xs text-zinc-400 flex items-center gap-1.5"><Phone className="w-3 h-3" />{c.phone}</p>}
-                      {c.email && <p className="text-xs text-zinc-400 flex items-center gap-1.5"><Mail className="w-3 h-3" />{c.email}</p>}
+                      {c.phone && <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Phone className="w-3 h-3" />{c.phone}</p>}
+                      {c.email && <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Mail className="w-3 h-3" />{c.email}</p>}
                       {!c.phone && !c.email && <span className="text-xs text-zinc-600">—</span>}
                     </div>
                   </td>
                   <td className="px-5 py-4 hidden md:table-cell">
-                    <p className="text-xs text-zinc-400 flex items-start gap-1.5">
+                    <p className="text-xs text-muted-foreground flex items-start gap-1.5">
                       <MapPin className="w-3 h-3 mt-0.5 shrink-0" />
                       <span className="line-clamp-2">{c.address || '—'}</span>
                     </p>
                   </td>
-                  <td className="px-5 py-4 hidden sm:table-cell text-xs text-zinc-500 tabular-nums">
+                  <td className="px-5 py-4 hidden sm:table-cell text-xs text-muted-foreground tabular-nums">
                     {new Date(c.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-5 py-4 text-right">
                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => openEdit(c)} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-white transition-colors">
+                      <button onClick={() => openEdit(c)} className="p-2 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors">
                         <Pencil className="w-4 h-4" />
                       </button>
-                      <button onClick={() => setConfirmDelete(c)} className="p-2 rounded-lg hover:bg-red-500/10 text-zinc-500 hover:text-red-400 transition-colors">
+                      <button onClick={() => setConfirmDelete(c)} className="p-2 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-400 transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -174,7 +174,7 @@ export default function CustomerManagementPage() {
                 </tr>
               ))}
               {!loading && customers.length === 0 && (
-                <tr><td colSpan={5} className="px-5 py-16 text-center text-sm text-zinc-500">
+                <tr><td colSpan={5} className="px-5 py-16 text-center text-sm text-muted-foreground">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-zinc-800/50 flex items-center justify-center">
                     <Users className="w-8 h-8 text-zinc-600" />
                   </div>
@@ -186,13 +186,13 @@ export default function CustomerManagementPage() {
         </div>
 
         {meta && meta.lastPage > 1 && (
-          <div className="flex items-center justify-between px-5 py-3 border-t border-zinc-800">
-            <p className="text-xs text-zinc-500">Page {meta.currentPage} of {meta.lastPage} — {meta.total} total</p>
+          <div className="flex items-center justify-between px-5 py-3 border-t border-border">
+            <p className="text-xs text-muted-foreground">Page {meta.currentPage} of {meta.lastPage} — {meta.total} total</p>
             <div className="flex items-center gap-1">
-              <button onClick={() => fetchCustomers(page - 1)} disabled={page <= 1} className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+              <button onClick={() => fetchCustomers(page - 1)} disabled={page <= 1} className="p-1.5 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <button onClick={() => fetchCustomers(page + 1)} disabled={page >= meta.lastPage} className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+              <button onClick={() => fetchCustomers(page + 1)} disabled={page >= meta.lastPage} className="p-1.5 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -201,46 +201,46 @@ export default function CustomerManagementPage() {
       </div>
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="sm:max-w-md rounded-2xl border-zinc-800 bg-zinc-900 p-6">
+        <DialogContent className="sm:max-w-md rounded-2xl border-border bg-muted p-6">
           <DialogHeader className="pb-2">
-            <DialogTitle className="text-base font-semibold text-white">{editing ? 'Edit Customer' : 'Add Customer'}</DialogTitle>
+            <DialogTitle className="text-base font-semibold text-foreground">{editing ? 'Edit Customer' : 'Add Customer'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4 pt-2">
             <div>
-              <Label className="text-xs font-medium text-zinc-400">Full Name</Label>
-              <Input {...form.register('name')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white placeholder:text-zinc-500 focus:border-zinc-600" placeholder="Juan Dela Cruz" />
+              <Label className="text-xs font-medium text-muted-foreground">Full Name</Label>
+              <Input {...form.register('name')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-zinc-600" placeholder="Juan Dela Cruz" />
               {form.formState.errors.name && <p className="text-xs text-red-400 mt-1">{form.formState.errors.name.message}</p>}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs font-medium text-zinc-400">Phone</Label>
-                <Input {...form.register('phone')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white placeholder:text-zinc-500 focus:border-zinc-600" placeholder="+63..." />
+                <Label className="text-xs font-medium text-muted-foreground">Phone</Label>
+                <Input {...form.register('phone')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-zinc-600" placeholder="+63..." />
               </div>
               <div>
-                <Label className="text-xs font-medium text-zinc-400">Email</Label>
-                <Input type="email" {...form.register('email')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white placeholder:text-zinc-500 focus:border-zinc-600" placeholder="customer@email.com" />
+                <Label className="text-xs font-medium text-muted-foreground">Email</Label>
+                <Input type="email" {...form.register('email')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-zinc-600" placeholder="customer@email.com" />
                 {form.formState.errors.email && <p className="text-xs text-red-400 mt-1">{form.formState.errors.email.message}</p>}
               </div>
             </div>
             <div>
-              <Label className="text-xs font-medium text-zinc-400">Address</Label>
-              <Input {...form.register('address')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white placeholder:text-zinc-500 focus:border-zinc-600" placeholder="Full address" />
+              <Label className="text-xs font-medium text-muted-foreground">Address</Label>
+              <Input {...form.register('address')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-zinc-600" placeholder="Full address" />
             </div>
             <div className="flex gap-3 pt-2">
-              <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-white text-sm font-semibold transition-opacity">{editing ? 'Save Changes' : 'Add Customer'}</Button>
-              <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-10 rounded-xl text-sm border-zinc-700 text-zinc-400 hover:bg-zinc-800">Cancel</Button>
+              <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold transition-opacity">{editing ? 'Save Changes' : 'Add Customer'}</Button>
+              <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-10 rounded-xl text-sm border-zinc-700 text-muted-foreground hover:bg-zinc-800">Cancel</Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
 
       <Dialog open={!!confirmDelete} onOpenChange={() => setConfirmDelete(null)}>
-        <DialogContent className="sm:max-w-sm rounded-2xl border-zinc-800 bg-zinc-900 p-6">
-          <DialogHeader><DialogTitle className="text-base font-semibold text-white">Delete Customer?</DialogTitle></DialogHeader>
-          <p className="text-sm text-zinc-400 mt-1">{confirmDelete?.name} will be permanently removed.</p>
+        <DialogContent className="sm:max-w-sm rounded-2xl border-border bg-muted p-6">
+          <DialogHeader><DialogTitle className="text-base font-semibold text-foreground">Delete Customer?</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground mt-1">{confirmDelete?.name} will be permanently removed.</p>
           <div className="flex gap-3 pt-4">
             <Button onClick={handleDelete} variant="destructive" className="flex-1 h-10 rounded-xl text-sm font-semibold">Delete</Button>
-            <Button variant="outline" onClick={() => setConfirmDelete(null)} className="h-10 rounded-xl text-sm border-zinc-700 text-zinc-400">Cancel</Button>
+            <Button variant="outline" onClick={() => setConfirmDelete(null)} className="h-10 rounded-xl text-sm border-zinc-700 text-muted-foreground">Cancel</Button>
           </div>
         </DialogContent>
       </Dialog>

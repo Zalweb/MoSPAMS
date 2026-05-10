@@ -56,38 +56,38 @@ const FEATURES = [
 const colorMap: Record<string, { card: string; icon: string; tag: string; dot: string }> = {
   violet: {
     card: 'hover:border-zinc-700 hover:shadow-black/60',
-    icon: 'bg-zinc-800 text-white',
-    tag: 'bg-zinc-950 text-zinc-300 border-zinc-800',
+    icon: 'bg-zinc-800 text-foreground',
+    tag: 'bg-card text-zinc-300 border-border',
     dot: 'bg-zinc-500',
   },
   blue: {
     card: 'hover:border-zinc-700 hover:shadow-black/60',
-    icon: 'bg-zinc-800 text-white',
-    tag: 'bg-zinc-950 text-zinc-300 border-zinc-800',
+    icon: 'bg-zinc-800 text-foreground',
+    tag: 'bg-card text-zinc-300 border-border',
     dot: 'bg-zinc-500',
   },
   green: {
     card: 'hover:border-zinc-700 hover:shadow-black/60',
-    icon: 'bg-zinc-800 text-white',
-    tag: 'bg-zinc-950 text-zinc-300 border-zinc-800',
+    icon: 'bg-zinc-800 text-foreground',
+    tag: 'bg-card text-zinc-300 border-border',
     dot: 'bg-zinc-500',
   },
   orange: {
     card: 'hover:border-zinc-700 hover:shadow-black/60',
-    icon: 'bg-zinc-800 text-white',
-    tag: 'bg-zinc-950 text-zinc-300 border-zinc-800',
+    icon: 'bg-zinc-800 text-foreground',
+    tag: 'bg-card text-zinc-300 border-border',
     dot: 'bg-zinc-500',
   },
   pink: {
     card: 'hover:border-zinc-700 hover:shadow-black/60',
-    icon: 'bg-zinc-800 text-white',
-    tag: 'bg-zinc-950 text-zinc-300 border-zinc-800',
+    icon: 'bg-zinc-800 text-foreground',
+    tag: 'bg-card text-zinc-300 border-border',
     dot: 'bg-zinc-500',
   },
   indigo: {
     card: 'hover:border-zinc-700 hover:shadow-black/60',
-    icon: 'bg-zinc-800 text-white',
-    tag: 'bg-zinc-950 text-zinc-300 border-zinc-800',
+    icon: 'bg-zinc-800 text-foreground',
+    tag: 'bg-card text-zinc-300 border-border',
     dot: 'bg-zinc-500',
   },
 };
@@ -118,7 +118,7 @@ export default function FeaturesSection() {
             initial={{ opacity: 0, y: 10 }}
             animate={headerVisible ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.1 }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-semibold mb-4"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted border border-border text-zinc-300 text-xs font-semibold mb-4"
           >
             <Zap className="w-3.5 h-3.5" strokeWidth={2} />
             Core Features
@@ -127,7 +127,7 @@ export default function FeaturesSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={headerVisible ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.2 }}
-            className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight"
+            className="text-3xl sm:text-4xl font-bold text-foreground mb-4 tracking-tight"
           >
             Powerful features built for{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-300 to-zinc-500">
@@ -138,7 +138,7 @@ export default function FeaturesSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={headerVisible ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.3 }}
-            className="text-zinc-400 text-lg leading-relaxed"
+            className="text-muted-foreground text-lg leading-relaxed"
           >
             Everything your shop needs — from tracking inventory and completing service jobs to
             managing your team and branding your storefront.
@@ -155,7 +155,7 @@ export default function FeaturesSection() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={gridVisible ? { opacity: 1, y: 0 } : {}}
                 transition={{ delay: 0.1 * index, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                className={`group relative bg-zinc-900 rounded-2xl border border-zinc-800 p-6 shadow-sm hover:shadow-lg transition-all duration-300 ${c.card} hover:-translate-y-1 cursor-default`}
+                className={`group relative bg-muted rounded-2xl border border-border p-6 shadow-sm hover:shadow-lg transition-all duration-300 ${c.card} hover:-translate-y-1 cursor-default`}
               >
                 {/* Icon */}
                 <div
@@ -165,8 +165,8 @@ export default function FeaturesSection() {
                 </div>
 
                 {/* Content */}
-                <h3 className="text-base font-semibold text-white mb-2">{feature.title}</h3>
-                <p className="text-sm text-zinc-400 leading-relaxed mb-4">{feature.description}</p>
+                <h3 className="text-base font-semibold text-foreground mb-2">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">{feature.description}</p>
 
                 {/* Tags */}
                 <div className="flex flex-wrap gap-1.5">

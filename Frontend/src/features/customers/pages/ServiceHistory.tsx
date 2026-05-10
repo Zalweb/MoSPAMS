@@ -71,7 +71,7 @@ export default function ServiceHistory() {
             onClick={() => setStatusFilter(s)}
             className={`px-3.5 py-[7px] rounded-full text-[12px] font-medium whitespace-nowrap transition-all ${
               statusFilter === s
-                ? 'bg-[#1C1917] text-white'
+                ? 'bg-[#1C1917] text-foreground'
                 : 'bg-white text-[#A8A29E] border border-[#F0EFED] hover:border-[#E7E5E4] hover:text-[#78716C]'
             }`}
           >

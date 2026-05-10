@@ -51,15 +51,15 @@ export function AIAssistant({ metrics }: AIAssistantProps) {
       transition={{ delay: 0.4, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className="relative group"
     >
-      <div className="relative bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-zinc-800/50 rounded-2xl overflow-hidden hover:border-zinc-700/50 transition-all duration-300">
-        <div className="flex items-center justify-between p-6 border-b border-zinc-800/50">
+      <div className="relative bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-border/50 rounded-2xl overflow-hidden hover:border-zinc-700/50 transition-all duration-300">
+        <div className="flex items-center justify-between p-6 border-b border-border/50">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[rgb(var(--color-primary-rgb))]/20 to-[rgb(var(--color-secondary-rgb))]/20 flex items-center justify-center border border-[rgb(var(--color-primary-rgb))]/30">
               <Sparkles className="w-5 h-5 text-[rgb(var(--color-primary-rgb))]" />
             </div>
             <div>
-              <h3 className="text-base font-semibold text-white">AI Assistant</h3>
-              <p className="text-xs text-zinc-500">Shop insights</p>
+              <h3 className="text-base font-semibold text-foreground">AI Assistant</h3>
+              <p className="text-xs text-muted-foreground">Shop insights</p>
             </div>
           </div>
           <span className="px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-[10px] font-semibold text-amber-400 flex items-center gap-1.5">
@@ -69,14 +69,14 @@ export function AIAssistant({ metrics }: AIAssistantProps) {
         </div>
 
         <div className="p-6 space-y-3">
-          <p className="text-xs text-zinc-500 leading-relaxed">
+          <p className="text-xs text-muted-foreground leading-relaxed">
             AI-powered chat and predictive insights are coming soon. In the meantime, here's what the data says about your shop right now:
           </p>
 
           {insights.length === 0 ? (
             <div className="text-center py-6">
               <Sparkles className="w-10 h-10 mx-auto mb-2 text-zinc-600" />
-              <p className="text-sm text-zinc-500">Not enough data to generate insights yet.</p>
+              <p className="text-sm text-muted-foreground">Not enough data to generate insights yet.</p>
             </div>
           ) : (
             insights.map((insight, index) => (

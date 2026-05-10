@@ -63,7 +63,7 @@ export default function PricingSection() {
     <section id="pricing" className="relative py-32 overflow-hidden">
       {/* Large background text */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
-        <h2 className="text-[20rem] font-bold text-white/[0.02] select-none whitespace-nowrap">
+        <h2 className="text-[20rem] font-bold text-foreground/[0.02] select-none whitespace-nowrap">
           Pricing
         </h2>
       </div>
@@ -88,7 +88,7 @@ export default function PricingSection() {
             initial={{ opacity: 0, y: 10 }}
             animate={headerVisible ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.1 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/50 backdrop-blur-sm border border-zinc-800/50 text-zinc-300 text-sm font-medium mb-6"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 backdrop-blur-sm border border-border/50 text-zinc-300 text-sm font-medium mb-6"
           >
             <DollarSign className="w-4 h-4" strokeWidth={2} />
             Simple Pricing
@@ -97,7 +97,7 @@ export default function PricingSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={headerVisible ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.2 }}
-            className="text-4xl sm:text-5xl font-bold text-white mb-4 tracking-tight"
+            className="text-4xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight"
           >
             Choose your{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 via-zinc-400 to-zinc-600">
@@ -108,7 +108,7 @@ export default function PricingSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={headerVisible ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.3 }}
-            className="text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto"
+            className="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto"
           >
             Flexible pricing for shops of all sizes. Start free, upgrade anytime.
           </motion.p>
@@ -125,7 +125,7 @@ export default function PricingSection() {
               className={`relative group rounded-3xl p-8 transition-all duration-300 ${
                 plan.popular
                   ? 'bg-gradient-to-b from-zinc-800/80 to-zinc-900/80 border-2 border-zinc-700/50 shadow-2xl scale-105'
-                  : 'bg-zinc-900/40 border border-zinc-800/50 hover:border-zinc-700/50'
+                  : 'bg-muted/40 border border-border/50 hover:border-zinc-700/50'
               } backdrop-blur-xl`}
             >
               {/* Glow effect on hover */}
@@ -139,12 +139,12 @@ export default function PricingSection() {
               <div className="relative">
                 {/* Plan Label */}
                 <div className="mb-6">
-                  <p className="text-sm text-zinc-500 mb-2">{plan.name} Plan</p>
+                  <p className="text-sm text-muted-foreground mb-2">{plan.name} Plan</p>
                   <div className="flex items-baseline gap-1 mb-2">
-                    <span className="text-5xl font-bold text-white">{plan.price}</span>
-                    <span className="text-zinc-500 text-lg">{plan.period}</span>
+                    <span className="text-5xl font-bold text-foreground">{plan.price}</span>
+                    <span className="text-muted-foreground text-lg">{plan.period}</span>
                   </div>
-                  <p className="text-sm text-zinc-400">{plan.description}</p>
+                  <p className="text-sm text-muted-foreground">{plan.description}</p>
                 </div>
 
                 {/* Divider */}
@@ -156,10 +156,10 @@ export default function PricingSection() {
                     <li key={feature} className="flex items-start gap-3">
                       <div className="mt-0.5 flex-shrink-0">
                         <div className="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center">
-                          <Check className="w-3 h-3 text-zinc-400" strokeWidth={3} />
+                          <Check className="w-3 h-3 text-muted-foreground" strokeWidth={3} />
                         </div>
                       </div>
-                      <span className="text-sm text-zinc-400 leading-relaxed">{feature}</span>
+                      <span className="text-sm text-muted-foreground leading-relaxed">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -170,7 +170,7 @@ export default function PricingSection() {
                   className={`w-full py-3.5 rounded-2xl font-semibold text-sm transition-all duration-200 ${
                     plan.popular
                       ? 'bg-white text-black hover:bg-zinc-100 shadow-lg'
-                      : 'bg-zinc-800/50 text-white hover:bg-zinc-800 border border-zinc-700/50'
+                      : 'bg-zinc-800/50 text-foreground hover:bg-zinc-800 border border-zinc-700/50'
                   }`}
                 >
                   Get Started
@@ -182,7 +182,7 @@ export default function PricingSection() {
 
         {/* Bottom Note */}
         <div className="text-center mt-12">
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-muted-foreground">
             All plans include 14-day free trial • No credit card required • Cancel anytime
           </p>
         </div>

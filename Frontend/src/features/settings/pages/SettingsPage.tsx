@@ -249,7 +249,7 @@ export default function SettingsPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <AlertCircle className="w-12 h-12 text-red-400 mb-4" />
-        <p className="text-sm text-zinc-400">Failed to load shop settings</p>
+        <p className="text-sm text-muted-foreground">Failed to load shop settings</p>
       </div>
     );
   }
@@ -257,15 +257,15 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white mb-2">Settings</h1>
-        <p className="text-sm text-zinc-400">Manage your profile, shop, branding, and access settings</p>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Settings</h1>
+        <p className="text-sm text-muted-foreground">Manage your profile, shop, branding, and access settings</p>
       </div>
 
-      <div className="flex gap-2 border-b border-zinc-800 overflow-x-auto">
+      <div className="flex gap-2 border-b border-border overflow-x-auto">
         <button
           onClick={() => setActiveTab('user')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${
-            activeTab === 'user' ? 'text-white border-white' : 'text-zinc-500 border-transparent hover:text-zinc-300'
+            activeTab === 'user' ? 'text-foreground border-white' : 'text-muted-foreground border-transparent hover:text-zinc-300'
           }`}
         >
           <User className="w-4 h-4" strokeWidth={2} />
@@ -274,7 +274,7 @@ export default function SettingsPage() {
         <button
           onClick={() => setActiveTab('password')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${
-            activeTab === 'password' ? 'text-white border-white' : 'text-zinc-500 border-transparent hover:text-zinc-300'
+            activeTab === 'password' ? 'text-foreground border-white' : 'text-muted-foreground border-transparent hover:text-zinc-300'
           }`}
         >
           <Lock className="w-4 h-4" strokeWidth={2} />
@@ -283,7 +283,7 @@ export default function SettingsPage() {
         <button
           onClick={() => setActiveTab('shop')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${
-            activeTab === 'shop' ? 'text-white border-white' : 'text-zinc-500 border-transparent hover:text-zinc-300'
+            activeTab === 'shop' ? 'text-foreground border-white' : 'text-muted-foreground border-transparent hover:text-zinc-300'
           }`}
         >
           <Store className="w-4 h-4" strokeWidth={2} />
@@ -292,7 +292,7 @@ export default function SettingsPage() {
         <button
           onClick={() => setActiveTab('branding')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${
-            activeTab === 'branding' ? 'text-white border-white' : 'text-zinc-500 border-transparent hover:text-zinc-300'
+            activeTab === 'branding' ? 'text-foreground border-white' : 'text-muted-foreground border-transparent hover:text-zinc-300'
           }`}
         >
           <Palette className="w-4 h-4" strokeWidth={2} />
@@ -301,7 +301,7 @@ export default function SettingsPage() {
         <button
           onClick={() => setActiveTab('domain')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${
-            activeTab === 'domain' ? 'text-white border-white' : 'text-zinc-500 border-transparent hover:text-zinc-300'
+            activeTab === 'domain' ? 'text-foreground border-white' : 'text-muted-foreground border-transparent hover:text-zinc-300'
           }`}
         >
           <Globe className="w-4 h-4" strokeWidth={2} />
@@ -309,11 +309,11 @@ export default function SettingsPage() {
         </button>
       </div>
 
-      <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-6">
+      <div className="bg-muted rounded-2xl border border-border p-6">
         {activeTab === 'user' && (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Personal Information</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-4">Personal Information</h3>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-300 mb-2">Full Name</label>
@@ -321,7 +321,7 @@ export default function SettingsPage() {
                     type="text"
                     value={userName}
                     onChange={(e) => setUserName(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
                     placeholder="Enter your full name"
                   />
                 </div>
@@ -332,9 +332,9 @@ export default function SettingsPage() {
                     type="email"
                     value={user?.email || ''}
                     disabled
-                    className="w-full px-4 py-2.5 bg-zinc-800/50 border border-zinc-700 rounded-xl text-zinc-500 text-sm cursor-not-allowed"
+                    className="w-full px-4 py-2.5 bg-zinc-800/50 border border-zinc-700 rounded-xl text-muted-foreground text-sm cursor-not-allowed"
                   />
-                  <p className="text-xs text-zinc-500 mt-1">Email is linked to your Google account and cannot be changed</p>
+                  <p className="text-xs text-muted-foreground mt-1">Email is linked to your Google account and cannot be changed</p>
                 </div>
 
                 <div>
@@ -343,9 +343,9 @@ export default function SettingsPage() {
                     type="text"
                     value={user?.role || ''}
                     disabled
-                    className="w-full px-4 py-2.5 bg-zinc-800/50 border border-zinc-700 rounded-xl text-zinc-500 text-sm cursor-not-allowed"
+                    className="w-full px-4 py-2.5 bg-zinc-800/50 border border-zinc-700 rounded-xl text-muted-foreground text-sm cursor-not-allowed"
                   />
-                  <p className="text-xs text-zinc-500 mt-1">Your role determines your access level in the system</p>
+                  <p className="text-xs text-muted-foreground mt-1">Your role determines your access level in the system</p>
                 </div>
 
                 <div>
@@ -354,7 +354,7 @@ export default function SettingsPage() {
                     type="text"
                     value={user?.shopName || 'N/A'}
                     disabled
-                    className="w-full px-4 py-2.5 bg-zinc-800/50 border border-zinc-700 rounded-xl text-zinc-500 text-sm cursor-not-allowed"
+                    className="w-full px-4 py-2.5 bg-zinc-800/50 border border-zinc-700 rounded-xl text-muted-foreground text-sm cursor-not-allowed"
                   />
                 </div>
               </div>
@@ -373,7 +373,7 @@ export default function SettingsPage() {
         {activeTab === 'password' && (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Change Password</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-4">Change Password</h3>
               <div className="space-y-4 max-w-md">
                 {passwordError && (
                   <div className="px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-sm text-red-400">
@@ -386,7 +386,7 @@ export default function SettingsPage() {
                     type="password"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
                     placeholder="Enter current password"
                   />
                 </div>
@@ -396,7 +396,7 @@ export default function SettingsPage() {
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
                     placeholder="Enter new password (min 6 characters)"
                   />
                 </div>
@@ -406,7 +406,7 @@ export default function SettingsPage() {
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
                     placeholder="Re-enter new password"
                   />
                 </div>
@@ -425,7 +425,7 @@ export default function SettingsPage() {
         {activeTab === 'shop' && (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Shop Information</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-4">Shop Information</h3>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-300 mb-2">Shop Name</label>
@@ -433,7 +433,7 @@ export default function SettingsPage() {
                     type="text"
                     value={branding.shopName}
                     onChange={(e) => setBranding({ ...branding, shopName: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
                     placeholder="Enter shop name"
                   />
                 </div>
@@ -444,7 +444,7 @@ export default function SettingsPage() {
                     value={branding.shopDescription || ''}
                     onChange={(e) => setBranding({ ...branding, shopDescription: e.target.value })}
                     rows={3}
-                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
                     placeholder="Brief description of your shop"
                   />
                 </div>
@@ -456,10 +456,10 @@ export default function SettingsPage() {
                       type="email"
                       value={branding.contactEmail || ''}
                       disabled
-                      className="w-full px-4 py-2.5 bg-zinc-800/50 border border-zinc-700 rounded-xl text-zinc-500 text-sm cursor-not-allowed"
+                      className="w-full px-4 py-2.5 bg-zinc-800/50 border border-zinc-700 rounded-xl text-muted-foreground text-sm cursor-not-allowed"
                       placeholder="shop@example.com"
                     />
-                    <p className="text-xs text-zinc-500 mt-1">Email is linked to your Google account</p>
+                    <p className="text-xs text-muted-foreground mt-1">Email is linked to your Google account</p>
                   </div>
 
                   <div>
@@ -468,7 +468,7 @@ export default function SettingsPage() {
                       type="tel"
                       value={branding.contactPhone || ''}
                       onChange={(e) => setBranding({ ...branding, contactPhone: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                      className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
                       placeholder="+63 XXX XXX XXXX"
                     />
                   </div>
@@ -480,7 +480,7 @@ export default function SettingsPage() {
                     type="text"
                     value={branding.address || ''}
                     onChange={(e) => setBranding({ ...branding, address: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
                     placeholder="Shop address"
                   />
                 </div>
@@ -500,7 +500,7 @@ export default function SettingsPage() {
         {activeTab === 'branding' && (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Brand Colors</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-4">Brand Colors</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-zinc-300 mb-2">Primary Color</label>
@@ -515,7 +515,7 @@ export default function SettingsPage() {
                       type="text"
                       value={branding.primaryColor}
                       onChange={(e) => setBranding({ ...branding, primaryColor: e.target.value })}
-                      className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                      className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
                       placeholder="#000000"
                     />
                   </div>
@@ -534,7 +534,7 @@ export default function SettingsPage() {
                       type="text"
                       value={branding.secondaryColor}
                       onChange={(e) => setBranding({ ...branding, secondaryColor: e.target.value })}
-                      className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                      className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
                       placeholder="#000000"
                     />
                   </div>
@@ -543,7 +543,7 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Shop Logo</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-4">Shop Logo</h3>
               <div className="flex items-start gap-6">
                 {branding.logoUrl ? (
                   <div className="relative">
@@ -554,7 +554,7 @@ export default function SettingsPage() {
                     />
                     <button
                       onClick={handleDeleteLogo}
-                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs hover:bg-red-600 transition-colors"
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-foreground text-xs hover:bg-red-600 transition-colors"
                     >
                       ×
                     </button>
@@ -573,12 +573,12 @@ export default function SettingsPage() {
                       onChange={(e) => e.target.files?.[0] && handleLogoUpload(e.target.files[0])}
                       className="hidden"
                     />
-                    <span className="inline-flex items-center gap-2 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white text-sm font-medium hover:bg-zinc-700 transition-colors cursor-pointer">
+                    <span className="inline-flex items-center gap-2 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm font-medium hover:bg-zinc-700 transition-colors cursor-pointer">
                       <Upload className="w-4 h-4" strokeWidth={2} />
                       Upload Logo
                     </span>
                   </label>
-                  <p className="text-xs text-zinc-500 mt-2">Recommended: 512x512px, PNG or JPG</p>
+                  <p className="text-xs text-muted-foreground mt-2">Recommended: 512x512px, PNG or JPG</p>
                 </div>
               </div>
             </div>
@@ -596,23 +596,23 @@ export default function SettingsPage() {
         {activeTab === 'domain' && (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Invitation Code</h3>
-              <p className="text-sm text-zinc-400 mb-4">
+              <h3 className="text-lg font-semibold text-foreground mb-4">Invitation Code</h3>
+              <p className="text-sm text-muted-foreground mb-4">
                 Share this code with staff and mechanics to join your shop
               </p>
               <div className="flex gap-3">
-                <div className="flex-1 px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white font-mono text-lg">
+                <div className="flex-1 px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground font-mono text-lg">
                   {branding.invitationCode}
                 </div>
                 <button
                   onClick={handleCopyCode}
-                  className="px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white hover:bg-zinc-700 transition-colors"
+                  className="px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground hover:bg-zinc-700 transition-colors"
                 >
                   {copied ? <Check className="w-5 h-5 text-green-400" /> : <Copy className="w-5 h-5" />}
                 </button>
                 <button
                   onClick={handleRegenerateCode}
-                  className="px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white hover:bg-zinc-700 transition-colors"
+                  className="px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground hover:bg-zinc-700 transition-colors"
                 >
                   <RefreshCw className="w-5 h-5" />
                 </button>
@@ -620,11 +620,11 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Custom Domain</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-4">Custom Domain</h3>
               {branding.customDomain ? (
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
-                    <div className="flex-1 px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white">
+                    <div className="flex-1 px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground">
                       {branding.customDomain}
                     </div>
                     <span
@@ -635,7 +635,7 @@ export default function SettingsPage() {
                           ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
                           : branding.domainStatus === 'PENDING'
                           ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20'
-                          : 'bg-zinc-500/10 text-zinc-400 border border-zinc-500/20'
+                          : 'bg-zinc-500/10 text-muted-foreground border border-zinc-500/20'
                       }`}
                     >
                       {branding.domainStatus}
@@ -643,7 +643,7 @@ export default function SettingsPage() {
                   </div>
                   {branding.domainStatus === 'PENDING' && (
                     <div className="space-y-3">
-                      <p className="text-xs text-zinc-500">DNS verification pending. Set up the required DNS records, then verify.</p>
+                      <p className="text-xs text-muted-foreground">DNS verification pending. Set up the required DNS records, then verify.</p>
                       <div className="flex gap-2">
                         <button
                           onClick={handleFetchDnsInstructions}
@@ -654,13 +654,13 @@ export default function SettingsPage() {
                         <button
                           onClick={handleVerifyDomain}
                           disabled={domainVerifying}
-                          className="px-4 py-2 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50"
+                          className="px-4 py-2 bg-blue-500 text-foreground rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50"
                         >
                           {domainVerifying ? 'Verifying...' : 'Verify DNS'}
                         </button>
                       </div>
                       {dnsInstructions && (
-                        <div className="p-4 bg-zinc-800/50 border border-zinc-700 rounded-xl text-xs text-zinc-400 font-mono whitespace-pre-wrap">
+                        <div className="p-4 bg-zinc-800/50 border border-zinc-700 rounded-xl text-xs text-muted-foreground font-mono whitespace-pre-wrap">
                           {dnsInstructions}
                         </div>
                       )}
@@ -668,11 +668,11 @@ export default function SettingsPage() {
                   )}
                   {branding.domainStatus === 'VERIFIED' && (
                     <div className="space-y-2">
-                      <p className="text-xs text-zinc-500">Domain verified — ready to activate.</p>
+                      <p className="text-xs text-muted-foreground">Domain verified — ready to activate.</p>
                       <button
                         onClick={handleActivateDomain}
                         disabled={domainActivating}
-                        className="px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 transition-colors disabled:opacity-50"
+                        className="px-4 py-2 bg-green-500 text-foreground rounded-xl text-sm font-medium hover:bg-green-600 transition-colors disabled:opacity-50"
                       >
                         {domainActivating ? 'Activating...' : 'Activate Domain'}
                       </button>
@@ -692,14 +692,14 @@ export default function SettingsPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <p className="text-sm text-zinc-400">Use your own domain for your shop.</p>
+                  <p className="text-sm text-muted-foreground">Use your own domain for your shop.</p>
                   <div className="flex gap-2">
                     <input
                       type="text"
                       value={domainInput}
                       onChange={(e) => setDomainInput(e.target.value)}
                       placeholder="e.g. myshop.com"
-                      className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                      className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
                     />
                     <button
                       onClick={handleRequestDomain}
@@ -709,7 +709,7 @@ export default function SettingsPage() {
                       {domainRequesting ? 'Requesting...' : 'Request Domain'}
                     </button>
                   </div>
-                  <p className="text-xs text-zinc-500">After request, you'll receive DNS instructions to configure your domain.</p>
+                  <p className="text-xs text-muted-foreground">After request, you'll receive DNS instructions to configure your domain.</p>
                 </div>
               )}
             </div>

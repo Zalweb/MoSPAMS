@@ -102,8 +102,8 @@ export default function SuperAdminShopsPage() {
     <div>
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-7">
         <div>
-          <h2 className="text-[22px] font-bold text-white tracking-tight">Shop Management</h2>
-          <p className="text-[13px] text-zinc-400 mt-0.5">Provision, suspend, and monitor tenant shops</p>
+          <h2 className="text-[22px] font-bold text-foreground tracking-tight">Shop Management</h2>
+          <p className="text-[13px] text-muted-foreground mt-0.5">Provision, suspend, and monitor tenant shops</p>
         </div>
 
         <Button onClick={() => navigate('/superadmin/shops/new')} className="h-9 rounded-xl bg-white hover:bg-zinc-200 text-black text-[12px] font-medium px-4">
@@ -118,51 +118,51 @@ export default function SuperAdminShopsPage() {
       </div>
 
       <div className="relative mb-5 max-w-md">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
         <Input
           value={search}
           onChange={(event) => {
             void onSearch(event.target.value);
           }}
           placeholder="Search shops or owners..."
-          className="pl-9 h-9 rounded-xl border-zinc-700 bg-zinc-950 text-zinc-200 placeholder:text-zinc-500 text-[13px]"
+          className="pl-9 h-9 rounded-xl border-zinc-700 bg-card text-zinc-200 placeholder:text-muted-foreground text-[13px]"
         />
       </div>
 
-      <div className="bg-zinc-950 rounded-2xl border border-zinc-800 overflow-x-auto">
+      <div className="bg-card rounded-2xl border border-border overflow-x-auto">
         <table className="w-full min-w-[860px]">
           <thead>
-            <tr className="border-b border-zinc-800">
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-zinc-400 uppercase">Shop</th>
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-zinc-400 uppercase">Owner / Applicant</th>
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-zinc-400 uppercase">Subscription</th>
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-zinc-400 uppercase">Status</th>
-              <th className="text-right px-4 py-3 text-[10px] font-semibold text-zinc-400 uppercase">Actions</th>
+            <tr className="border-b border-border">
+              <th className="text-left px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Shop</th>
+              <th className="text-left px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Owner / Applicant</th>
+              <th className="text-left px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Subscription</th>
+              <th className="text-left px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Status</th>
+              <th className="text-right px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-800">
             {loading ? (
               <tr>
-                <td colSpan={5} className="px-4 py-10 text-center text-[12px] text-zinc-400">Loading shops...</td>
+                <td colSpan={5} className="px-4 py-10 text-center text-[12px] text-muted-foreground">Loading shops...</td>
               </tr>
             ) : shops.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-10 text-center text-[12px] text-zinc-400">No shops found</td>
+                <td colSpan={5} className="px-4 py-10 text-center text-[12px] text-muted-foreground">No shops found</td>
               </tr>
             ) : (
               shops.map((shop) => (
                 <tr key={shop.shopId}>
                   <td className="px-4 py-3">
-                    <p className="text-[12px] font-semibold text-white">{shop.shopName}</p>
-                    <p className="text-[11px] text-zinc-500 font-mono">
+                    <p className="text-[12px] font-semibold text-foreground">{shop.shopName}</p>
+                    <p className="text-[11px] text-muted-foreground font-mono">
                       {shop.shopName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}.mospams.shop
                     </p>
-                    <p className="text-[11px] text-zinc-400">Registration: {shop.registration.status}</p>
+                    <p className="text-[11px] text-muted-foreground">Registration: {shop.registration.status}</p>
                   </td>
                   <td className="px-4 py-3 text-[12px] text-zinc-300">
                     <p>{shop.owner.name ?? 'Unassigned'}</p>
                     {!shop.owner.name && shop.applicant.name ? (
-                      <p className="text-[11px] text-zinc-400">Applicant: {shop.applicant.name} ({shop.applicant.email ?? 'No email'})</p>
+                      <p className="text-[11px] text-muted-foreground">Applicant: {shop.applicant.name} ({shop.applicant.email ?? 'No email'})</p>
                     ) : null}
                     {shop.registration.status === 'REJECTED' && shop.registration.rejectionReason ? (
                       <p className="text-[11px] text-red-400">Rejected: {shop.registration.rejectionReason}</p>
@@ -178,21 +178,21 @@ export default function SuperAdminShopsPage() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="inline-flex items-center gap-2">
-                      <Button variant="outline" className="h-8 px-3 text-[11px] border-zinc-700 bg-zinc-900 hover:bg-zinc-800 hover:border-zinc-700" onClick={() => void onOpenDiagnostics(shop.shopId)}>
+                      <Button variant="outline" className="h-8 px-3 text-[11px] border-zinc-700 bg-muted hover:bg-zinc-800 hover:border-zinc-700" onClick={() => void onOpenDiagnostics(shop.shopId)}>
                         Diagnostics
                       </Button>
                       {shop.registration.status === 'PENDING' ? (
                         <>
                           <Button
                             variant="outline"
-                            className="h-8 px-3 text-[11px] border-zinc-700 bg-zinc-900 hover:bg-zinc-800 hover:border-zinc-700"
+                            className="h-8 px-3 text-[11px] border-zinc-700 bg-muted hover:bg-zinc-800 hover:border-zinc-700"
                             onClick={() => void onApproveRegistration(shop)}
                           >
                             Approve
                           </Button>
                           <Button
                             variant="outline"
-                            className="h-8 px-3 text-[11px] border-zinc-700 bg-zinc-900 hover:bg-zinc-800 hover:border-zinc-700"
+                            className="h-8 px-3 text-[11px] border-zinc-700 bg-muted hover:bg-zinc-800 hover:border-zinc-700"
                             onClick={() => void onRejectRegistration(shop)}
                           >
                             Reject
@@ -201,7 +201,7 @@ export default function SuperAdminShopsPage() {
                       ) : null}
                       <Button
                         variant="outline"
-                        className="h-8 px-3 text-[11px] border-zinc-700 bg-zinc-900 hover:bg-zinc-800 hover:border-zinc-700"
+                        className="h-8 px-3 text-[11px] border-zinc-700 bg-muted hover:bg-zinc-800 hover:border-zinc-700"
                         onClick={() => void onToggleStatus(shop)}
                       >
                         {shop.statusCode === 'SUSPENDED' ? 'Activate' : 'Suspend'}
@@ -216,23 +216,23 @@ export default function SuperAdminShopsPage() {
       </div>
 
       <Dialog open={diagOpen} onOpenChange={setDiagOpen}>
-        <DialogContent className="sm:max-w-2xl rounded-[20px] border-zinc-800 bg-zinc-950 text-zinc-300 p-6">
+        <DialogContent className="sm:max-w-2xl rounded-[20px] border-border bg-card text-zinc-300 p-6">
           <DialogHeader>
-            <DialogTitle className="text-[15px] font-semibold text-white">Shop Diagnostics</DialogTitle>
+            <DialogTitle className="text-[15px] font-semibold text-foreground">Shop Diagnostics</DialogTitle>
           </DialogHeader>
 
           {!diag ? (
-            <p className="text-[12px] text-zinc-400">Loading...</p>
+            <p className="text-[12px] text-muted-foreground">Loading...</p>
           ) : (
             <div className="space-y-5">
               <div>
-                <p className="text-[13px] font-semibold text-white">{diag.shop.shopName}</p>
-                <p className="text-[12px] text-zinc-400">Status: {diag.shop.statusCode}</p>
-                <p className="text-[12px] text-zinc-400">Owner: {diag.owner?.name ?? 'Unassigned'}</p>
+                <p className="text-[13px] font-semibold text-foreground">{diag.shop.shopName}</p>
+                <p className="text-[12px] text-muted-foreground">Status: {diag.shop.statusCode}</p>
+                <p className="text-[12px] text-muted-foreground">Owner: {diag.owner?.name ?? 'Unassigned'}</p>
                 {diag.applicant.name ? (
-                  <p className="text-[12px] text-zinc-400">Applicant: {diag.applicant.name} ({diag.applicant.email ?? 'No email'})</p>
+                  <p className="text-[12px] text-muted-foreground">Applicant: {diag.applicant.name} ({diag.applicant.email ?? 'No email'})</p>
                 ) : null}
-                <p className="text-[12px] text-zinc-400">Registration: {diag.registration.status}</p>
+                <p className="text-[12px] text-muted-foreground">Registration: {diag.registration.status}</p>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -245,15 +245,15 @@ export default function SuperAdminShopsPage() {
               </div>
 
               <div>
-                <p className="text-[12px] font-semibold text-white mb-2">Recent Activity</p>
-                <div className="max-h-48 overflow-y-auto border border-zinc-800 rounded-xl divide-y divide-zinc-800">
+                <p className="text-[12px] font-semibold text-foreground mb-2">Recent Activity</p>
+                <div className="max-h-48 overflow-y-auto border border-border rounded-xl divide-y divide-zinc-800">
                   {diag.recentLogs.length === 0 ? (
-                    <p className="px-3 py-4 text-[12px] text-zinc-400">No activity yet.</p>
+                    <p className="px-3 py-4 text-[12px] text-muted-foreground">No activity yet.</p>
                   ) : (
                     diag.recentLogs.map((log) => (
                       <div key={log.id} className="px-3 py-2.5">
-                        <p className="text-[11px] text-white">{log.action}</p>
-                        <p className="text-[10px] text-zinc-400">{log.actorName ?? 'System'} | {log.loggedAt ? new Date(log.loggedAt).toLocaleString() : 'N/A'}</p>
+                        <p className="text-[11px] text-foreground">{log.action}</p>
+                        <p className="text-[10px] text-muted-foreground">{log.actorName ?? 'System'} | {log.loggedAt ? new Date(log.loggedAt).toLocaleString() : 'N/A'}</p>
                       </div>
                     ))
                   )}
@@ -276,29 +276,29 @@ function statusTone(code: string) {
     case 'PENDING':
       return 'bg-orange-500/10 text-orange-400 border border-orange-500/20';
     default:
-      return 'bg-zinc-500/10 text-zinc-400 border border-zinc-500/20';
+      return 'bg-zinc-500/10 text-muted-foreground border border-zinc-500/20';
   }
 }
 
 function Stat({ label, value, icon: Icon, tone }: { label: string; value: number; icon: typeof Wrench; tone: 'slate' | 'amber' | 'green' }) {
-  const bg = tone === 'amber' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' : tone === 'green' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-zinc-900 text-zinc-300 border-zinc-700';
+  const bg = tone === 'amber' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' : tone === 'green' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-muted text-zinc-300 border-zinc-700';
 
   return (
-    <div className="bg-zinc-950 rounded-2xl border border-zinc-800 p-4">
+    <div className="bg-card rounded-2xl border border-border p-4">
       <div className={`w-8 h-8 rounded-[10px] border ${bg} flex items-center justify-center mb-3`}>
         <Icon className="w-[14px] h-[14px]" strokeWidth={2} />
       </div>
-      <p className="text-[11px] text-zinc-400">{label}</p>
-      <p className="text-[20px] font-bold text-white">{value}</p>
+      <p className="text-[11px] text-muted-foreground">{label}</p>
+      <p className="text-[20px] font-bold text-foreground">{value}</p>
     </div>
   );
 }
 
 function DiagMetric({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="bg-zinc-900 rounded-xl px-3 py-2.5 border border-zinc-800">
-      <p className="text-[10px] text-zinc-400">{label}</p>
-      <p className="text-[13px] font-semibold text-white">{value}</p>
+    <div className="bg-muted rounded-xl px-3 py-2.5 border border-border">
+      <p className="text-[10px] text-muted-foreground">{label}</p>
+      <p className="text-[13px] font-semibold text-foreground">{value}</p>
     </div>
   );
 }

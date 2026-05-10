@@ -14,7 +14,7 @@ export default function ShopGrowthPage() {
   const d = data;
   return (
     <div className="space-y-6">
-      <div><h1 className="text-2xl sm:text-[28px] font-bold text-white tracking-tight">Shop Growth Trends</h1><p className="text-[13px] sm:text-[14px] text-zinc-400 mt-1">Track shop registration and growth over time</p></div>
+      <div><h1 className="text-2xl sm:text-[28px] font-bold text-foreground tracking-tight">Shop Growth Trends</h1><p className="text-[13px] sm:text-[14px] text-muted-foreground mt-1">Track shop registration and growth over time</p></div>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <StatCard icon={Store} label="Total Shops" value={d?.summary?.totalShops ?? 0} />
         <StatCard icon={CheckCircle} label="Active Shops" value={d?.summary?.activeShops ?? 0} color="emerald" />
@@ -22,8 +22,8 @@ export default function ShopGrowthPage() {
         <StatCard icon={TrendingUp} label="Activation Rate" value={`${d?.summary?.activationRate ?? 0}%`} color="blue" />
       </div>
       {d?.monthlyGrowth?.length > 0 && (
-        <div className="bg-zinc-950 rounded-2xl border border-zinc-800 p-6">
-          <h2 className="text-[16px] font-bold text-white mb-4">Monthly Shop Registrations</h2>
+        <div className="bg-card rounded-2xl border border-border p-6">
+          <h2 className="text-[16px] font-bold text-foreground mb-4">Monthly Shop Registrations</h2>
           <div className="h-[200px] flex items-end gap-[2px]">
             {d.monthlyGrowth.map((m: any, i: number) => {
               const maxVal = Math.max(...d.monthlyGrowth.map((x: any) => x.count), 1);
@@ -38,6 +38,6 @@ export default function ShopGrowthPage() {
 }
 
 function StatCard({ icon: Icon, label, value, color = 'zinc' }: any) {
-  const colors: any = { emerald: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400', blue: 'bg-blue-500/10 border-blue-500/20 text-blue-400', amber: 'bg-amber-500/10 border-amber-500/20 text-amber-400', zinc: 'bg-zinc-800 border-zinc-700 text-white' };
-  return <div className="bg-zinc-950 rounded-xl border border-zinc-800 p-5"><div className="flex items-center gap-3"><div className={`w-10 h-10 rounded-lg flex items-center justify-center border ${colors[color]}`}><Icon className="w-5 h-5" /></div><div><p className="text-xs text-zinc-500">{label}</p><p className="text-xl font-bold text-white">{value}</p></div></div></div>;
+  const colors: any = { emerald: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400', blue: 'bg-blue-500/10 border-blue-500/20 text-blue-400', amber: 'bg-amber-500/10 border-amber-500/20 text-amber-400', zinc: 'bg-zinc-800 border-zinc-700 text-foreground' };
+  return <div className="bg-card rounded-xl border border-border p-5"><div className="flex items-center gap-3"><div className={`w-10 h-10 rounded-lg flex items-center justify-center border ${colors[color]}`}><Icon className="w-5 h-5" /></div><div><p className="text-xs text-muted-foreground">{label}</p><p className="text-xl font-bold text-foreground">{value}</p></div></div></div>;
 }

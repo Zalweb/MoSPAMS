@@ -151,10 +151,10 @@ export default function GoogleAuthProxyPage() {
 
   if (status === 'redirecting') {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="w-10 h-10 border-2 border-zinc-700 border-t-white rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-zinc-400 text-sm">Signing you in…</p>
+          <p className="text-muted-foreground text-sm">Signing you in…</p>
           <p className="text-zinc-600 text-xs mt-1">Redirecting back to your shop</p>
         </div>
       </div>
@@ -162,27 +162,27 @@ export default function GoogleAuthProxyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="w-14 h-14 rounded-2xl bg-transparent flex items-center justify-center overflow-hidden mx-auto mb-4">
             <img src="/images/logo.svg" alt="MoSPAMS" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-xl font-bold text-white">Sign in with Google</h1>
+          <h1 className="text-xl font-bold text-foreground">Sign in with Google</h1>
           {tenant && (
-            <p className="text-zinc-400 text-sm mt-2">
+            <p className="text-muted-foreground text-sm mt-2">
               Signing in to <span className="text-blue-400 font-medium">{tenant}.mospams.shop</span>
             </p>
           )}
         </div>
 
         {/* Content */}
-        <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 backdrop-blur-sm">
+        <div className="bg-muted/60 border border-border rounded-2xl p-6 backdrop-blur-sm">
           {!isValid ? (
             <div className="text-center">
               <p className="text-red-400 text-sm">{error}</p>
-              <p className="text-zinc-500 text-xs mt-2">
+              <p className="text-muted-foreground text-xs mt-2">
                 Go back to your shop and try "Sign in with Google" again.
               </p>
             </div>
@@ -190,8 +190,8 @@ export default function GoogleAuthProxyPage() {
             <>
               {joinData ? (
                 <>
-                  <p className="text-zinc-400 text-sm text-center mb-6">
-                    {joinData.email ?? 'Your account'} is verified. Confirm to join <span className="text-white">{joinData.shopName}</span> as Customer.
+                  <p className="text-muted-foreground text-sm text-center mb-6">
+                    {joinData.email ?? 'Your account'} is verified. Confirm to join <span className="text-foreground">{joinData.shopName}</span> as Customer.
                   </p>
                   <button
                     type="button"
@@ -204,7 +204,7 @@ export default function GoogleAuthProxyPage() {
                 </>
               ) : (
                 <>
-                  <p className="text-zinc-400 text-sm text-center mb-6">
+                  <p className="text-muted-foreground text-sm text-center mb-6">
                     Click below to continue with your Google account
                   </p>
 
@@ -231,7 +231,7 @@ export default function GoogleAuthProxyPage() {
               {status === 'loading' && (
                 <div className="flex items-center justify-center gap-2 mt-4">
                   <div className="w-4 h-4 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
-                  <span className="text-zinc-500 text-xs">Authenticating…</span>
+                  <span className="text-muted-foreground text-xs">Authenticating…</span>
                 </div>
               )}
 

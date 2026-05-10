@@ -20,17 +20,17 @@ export function DashboardHeader() {
     >
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <h1 className="text-2xl font-bold text-white tracking-tight">
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">
             Welcome back, {user?.name?.split(' ')[0] || 'User'} 👋
           </h1>
         </div>
-        <p className="text-sm text-zinc-400">Dashboard Overview</p>
+        <p className="text-sm text-muted-foreground">Dashboard Overview</p>
       </div>
 
       <div className="flex items-center gap-3">
         <button
           onClick={toggleTheme}
-          className="w-10 h-10 rounded-xl bg-zinc-900/50 border border-zinc-800/50 flex items-center justify-center text-zinc-400 hover:text-white hover:border-zinc-700 transition-all"
+          className="w-10 h-10 rounded-xl bg-muted/50 border border-border/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-zinc-700 transition-all"
           title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
         >
           {theme === 'dark' ? (
@@ -42,13 +42,13 @@ export function DashboardHeader() {
 
         <button
           onClick={() => navigate('/dashboard/reports')}
-          className="h-10 px-4 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] text-white text-sm font-semibold flex items-center gap-2 hover:opacity-90 transition-opacity"
+          className="h-10 px-4 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] text-foreground text-sm font-semibold flex items-center gap-2 hover:opacity-90 transition-opacity"
         >
           <FileText className="w-4 h-4" />
           <span className="hidden sm:inline">Create Report</span>
         </button>
 
-        <div className="w-10 h-10 rounded-xl bg-zinc-900/50 border border-zinc-800/50 flex items-center justify-center overflow-hidden">
+        <div className="w-10 h-10 rounded-xl bg-muted/50 border border-border/50 flex items-center justify-center overflow-hidden">
           {shop?.logoUrl ? (
             <img src={shop.logoUrl} alt={shop.shopName} className="w-full h-full rounded-xl object-cover" loading="lazy" decoding="async" />
           ) : (

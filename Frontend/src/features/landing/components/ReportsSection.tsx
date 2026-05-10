@@ -104,7 +104,7 @@ export default function ReportsSection() {
   ];
 
   return (
-    <section id="reports" className="relative py-24 bg-zinc-950">
+    <section id="reports" className="relative py-24 bg-card">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -118,7 +118,7 @@ export default function ReportsSection() {
             initial={{ opacity: 0, y: 10 }}
             animate={headerVisible ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.1 }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-semibold mb-4"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted border border-border text-zinc-300 text-xs font-semibold mb-4"
           >
             <BarChart3 className="w-3.5 h-3.5" strokeWidth={2} />
             Reports & Analytics
@@ -127,7 +127,7 @@ export default function ReportsSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={headerVisible ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.2 }}
-            className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight"
+            className="text-3xl sm:text-4xl font-bold text-foreground mb-4 tracking-tight"
           >
             Clear reports for{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-300 to-zinc-500">
@@ -138,7 +138,7 @@ export default function ReportsSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={headerVisible ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.3 }}
-            className="text-zinc-400 text-lg leading-relaxed"
+            className="text-muted-foreground text-lg leading-relaxed"
           >
             Generate actionable business intelligence at the click of a button. No spreadsheet
             skills required.
@@ -151,15 +151,15 @@ export default function ReportsSection() {
             initial={{ opacity: 0, x: -30 }}
             animate={contentVisible ? { opacity: 1, x: 0 } : {}}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="lg:col-span-1 bg-zinc-900 rounded-2xl border border-zinc-800 shadow-sm p-5"
+            className="lg:col-span-1 bg-muted rounded-2xl border border-border shadow-sm p-5"
             whileHover={{ y: -4 }}
           >
-            <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-4">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-4">
               Revenue Overview
             </p>
 
             <div className="mb-5">
-              <p className="text-3xl font-bold text-white mb-0.5">
+              <p className="text-3xl font-bold text-foreground mb-0.5">
                 {formatMoney(totalRevenue)}
               </p>
               <div className="flex items-center gap-2">
@@ -189,7 +189,7 @@ export default function ReportsSection() {
                   />
                 ))}
               </div>
-              <div className="flex justify-between text-[10px] text-zinc-500 mt-1">
+              <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
                 <span>{xLabels[0]}</span>
                 <span>{xLabels[1]}</span>
                 <span>{xLabels[2]}</span>
@@ -209,8 +209,8 @@ export default function ReportsSection() {
                     animate={contentVisible ? { opacity: 1 } : {}}
                     transition={{ delay: 0.5 }}
                   >
-                    <span className="text-zinc-400 font-medium">{item.label}</span>
-                    <span className="text-white font-semibold">
+                    <span className="text-muted-foreground font-medium">{item.label}</span>
+                    <span className="text-foreground font-semibold">
                       {formatMoney(item.value)}
                     </span>
                   </motion.div>
@@ -243,7 +243,7 @@ export default function ReportsSection() {
                   initial={{ opacity: 0, y: 30 }}
                   animate={contentVisible ? { opacity: 1, y: 0 } : {}}
                   transition={{ delay: 0.3 + index * 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                  className="group bg-zinc-900 rounded-2xl border border-zinc-800 p-5 shadow-sm hover:shadow-md transition-all duration-300 hover:border-zinc-700 hover:-translate-y-1 cursor-default"
+                  className="group bg-muted rounded-2xl border border-border p-5 shadow-sm hover:shadow-md transition-all duration-300 hover:border-zinc-700 hover:-translate-y-1 cursor-default"
                   whileHover={{ y: -4 }}
                 >
                   <div className="flex items-start justify-between mb-3 gap-3">
@@ -254,14 +254,14 @@ export default function ReportsSection() {
                       >
                         <Icon className="w-4 h-4" strokeWidth={2} />
                       </motion.span>
-                      <h3 className="text-sm font-semibold text-white">{report.title}</h3>
+                      <h3 className="text-sm font-semibold text-foreground">{report.title}</h3>
                     </div>
                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full border bg-zinc-800 text-zinc-300 border-zinc-700 shrink-0">
                       {report.trend}
                     </span>
                   </div>
 
-                  <p className="text-xs text-zinc-400 leading-relaxed mb-3">{report.description}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed mb-3">{report.description}</p>
 
                   {/* Animated Bars */}
                   <motion.div
@@ -285,20 +285,20 @@ export default function ReportsSection() {
                   <div className="flex items-center justify-between">
                     <div className="min-w-0">
                       <motion.p
-                        className="text-xl font-bold text-white truncate"
+                        className="text-xl font-bold text-foreground truncate"
                         initial={{ opacity: 0 }}
                         animate={contentVisible ? { opacity: 1 } : {}}
                         transition={{ delay: 0.6 + index * 0.1 }}
                       >
                         {report.metric}
                       </motion.p>
-                      <p className="text-[10px] text-zinc-500">{report.metricLabel}</p>
+                      <p className="text-[10px] text-muted-foreground">{report.metricLabel}</p>
                     </div>
                     <motion.div
                       className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-700 transition-colors shrink-0"
                       whileHover={{ scale: 1.1 }}
                     >
-                      <ChevronRight className="w-4 h-4 text-zinc-500 group-hover:text-white transition-colors" />
+                      <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                     </motion.div>
                   </div>
                 </motion.div>

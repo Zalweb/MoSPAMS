@@ -94,7 +94,7 @@ export default function CustomerVehicles() {
         </div>
         <Button
           onClick={openAdd}
-          className="flex items-center gap-2 h-9 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-white text-[13px] font-medium px-4"
+          className="flex items-center gap-2 h-9 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-foreground text-[13px] font-medium px-4"
         >
           <Plus className="w-4 h-4" /> Add Vehicle
         </Button>
@@ -163,7 +163,7 @@ export default function CustomerVehicles() {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+              className="absolute inset-0 bg-background/40 backdrop-blur-sm"
               onClick={closeForm}
             />
             <motion.div
@@ -236,7 +236,7 @@ export default function CustomerVehicles() {
                   <Button
                     type="submit"
                     disabled={submitting}
-                    className="flex-1 h-10 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-white text-[13px] font-medium disabled:opacity-50"
+                    className="flex-1 h-10 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-foreground text-[13px] font-medium disabled:opacity-50"
                   >
                     {submitting
                       ? <Loader2 className="w-4 h-4 animate-spin" />

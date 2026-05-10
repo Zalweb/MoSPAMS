@@ -46,11 +46,11 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
       transition={{ delay: 0.2, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className="relative group"
     >
-      <div className="relative bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 overflow-hidden hover:border-zinc-700/50 transition-all duration-300">
+      <div className="relative bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-border/50 rounded-2xl p-6 overflow-hidden hover:border-zinc-700/50 transition-all duration-300">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-white mb-1">Your Assets</h3>
-            <p className="text-sm text-zinc-400">Revenue trend</p>
+            <h3 className="text-lg font-semibold text-foreground mb-1">Your Assets</h3>
+            <p className="text-sm text-muted-foreground">Revenue trend</p>
           </div>
 
           <select
@@ -69,19 +69,19 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
             <div className="w-12 h-12 border-4 border-zinc-700 border-t-[rgb(var(--color-primary-rgb))] rounded-full animate-spin" />
           </div>
         ) : filteredData.length === 0 ? (
-          <div className="h-64 flex items-center justify-center text-zinc-500">
+          <div className="h-64 flex items-center justify-center text-muted-foreground">
             <p>No data available</p>
           </div>
         ) : (
           <>
             <div className="flex items-center gap-6 mb-4">
               <div>
-                <p className="text-xs text-zinc-500 mb-1">Total Revenue</p>
-                <p className="text-2xl font-bold text-white">₱{total.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground mb-1">Total Revenue</p>
+                <p className="text-2xl font-bold text-foreground">₱{total.toLocaleString()}</p>
               </div>
               <div>
-                <p className="text-xs text-zinc-500 mb-1">Daily Average</p>
-                <p className="text-2xl font-bold text-zinc-400">₱{average.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+                <p className="text-xs text-muted-foreground mb-1">Daily Average</p>
+                <p className="text-2xl font-bold text-muted-foreground">₱{average.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
               </div>
             </div>
 

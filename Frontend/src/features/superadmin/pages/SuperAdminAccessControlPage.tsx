@@ -67,53 +67,53 @@ export default function SuperAdminAccessControlPage() {
   return (
     <div>
       <div className="mb-7">
-        <h2 className="text-[22px] font-bold text-white tracking-tight">Access Control</h2>
-        <p className="text-[13px] text-zinc-400 mt-0.5">Manage SuperAdmin accounts and platform-wide access</p>
+        <h2 className="text-[22px] font-bold text-foreground tracking-tight">Access Control</h2>
+        <p className="text-[13px] text-muted-foreground mt-0.5">Manage SuperAdmin accounts and platform-wide access</p>
       </div>
 
-      <section className="bg-zinc-950 rounded-2xl border border-zinc-800 p-4 mb-4">
-        <h3 className="text-[13px] font-semibold text-white mb-3">Create Platform Admin</h3>
+      <section className="bg-card rounded-2xl border border-border p-4 mb-4">
+        <h3 className="text-[13px] font-semibold text-foreground mb-3">Create Platform Admin</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-          <Input placeholder="Full name" value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} className="bg-zinc-900 border-zinc-700 text-zinc-200 placeholder:text-zinc-500" />
-          <Input placeholder="Email" value={form.email} onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))} className="bg-zinc-900 border-zinc-700 text-zinc-200 placeholder:text-zinc-500" />
-          <Input placeholder="Password (optional)" value={form.password} onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))} className="bg-zinc-900 border-zinc-700 text-zinc-200 placeholder:text-zinc-500" />
+          <Input placeholder="Full name" value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} className="bg-muted border-zinc-700 text-zinc-200 placeholder:text-muted-foreground" />
+          <Input placeholder="Email" value={form.email} onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))} className="bg-muted border-zinc-700 text-zinc-200 placeholder:text-muted-foreground" />
+          <Input placeholder="Password (optional)" value={form.password} onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))} className="bg-muted border-zinc-700 text-zinc-200 placeholder:text-muted-foreground" />
         </div>
         <Button className="mt-3 h-9 text-[12px] bg-white hover:bg-zinc-200 text-black" onClick={() => void onCreate()}>Create Admin</Button>
       </section>
 
-      <section className="bg-zinc-950 rounded-2xl border border-zinc-800 overflow-x-auto">
+      <section className="bg-card rounded-2xl border border-border overflow-x-auto">
         <table className="w-full min-w-[620px]">
           <thead>
-            <tr className="border-b border-zinc-800">
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-zinc-400 uppercase">Name</th>
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-zinc-400 uppercase">Email</th>
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-zinc-400 uppercase">Status</th>
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-zinc-400 uppercase">Last Active</th>
-              <th className="text-right px-4 py-3 text-[10px] font-semibold text-zinc-400 uppercase">Action</th>
+            <tr className="border-b border-border">
+              <th className="text-left px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Name</th>
+              <th className="text-left px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Email</th>
+              <th className="text-left px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Status</th>
+              <th className="text-left px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Last Active</th>
+              <th className="text-right px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-800">
             {loading ? (
               <tr>
-                <td colSpan={5} className="px-4 py-10 text-center text-[12px] text-zinc-400">Loading platform admins...</td>
+                <td colSpan={5} className="px-4 py-10 text-center text-[12px] text-muted-foreground">Loading platform admins...</td>
               </tr>
             ) : admins.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-10 text-center text-[12px] text-zinc-400">No platform admins found</td>
+                <td colSpan={5} className="px-4 py-10 text-center text-[12px] text-muted-foreground">No platform admins found</td>
               </tr>
             ) : (
               admins.map((admin) => (
                 <tr key={admin.userId}>
-                  <td className="px-4 py-3 text-[12px] font-medium text-white">{admin.name}</td>
+                  <td className="px-4 py-3 text-[12px] font-medium text-foreground">{admin.name}</td>
                   <td className="px-4 py-3 text-[12px] text-zinc-300">{admin.email}</td>
                   <td className="px-4 py-3">
-                    <span className={`text-[10px] font-semibold px-2 py-[3px] rounded-full border ${admin.statusCode === 'active' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'}`}>
+                    <span className={`text-[10px] font-semibold px-2 py-[3px] rounded-full border ${admin.statusCode === 'active' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-zinc-500/10 text-muted-foreground border-zinc-500/20'}`}>
                       {admin.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-[12px] text-zinc-400">{admin.lastActive ? new Date(admin.lastActive).toLocaleString() : 'N/A'}</td>
+                  <td className="px-4 py-3 text-[12px] text-muted-foreground">{admin.lastActive ? new Date(admin.lastActive).toLocaleString() : 'N/A'}</td>
                   <td className="px-4 py-3 text-right">
-                    <Button variant="outline" className="h-8 px-3 text-[11px] border-zinc-700 bg-zinc-900 hover:bg-zinc-800 hover:border-zinc-700" onClick={() => void onToggleStatus(admin)}>
+                    <Button variant="outline" className="h-8 px-3 text-[11px] border-zinc-700 bg-muted hover:bg-zinc-800 hover:border-zinc-700" onClick={() => void onToggleStatus(admin)}>
                       {admin.statusCode === 'active' ? 'Deactivate' : 'Activate'}
                     </Button>
                   </td>

@@ -42,12 +42,42 @@
     --color-secondary-rgb: 249 115 22;
   }
 
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
   * {
     @apply border-border;
   }
 
   body {
-    @apply bg-black text-zinc-300 antialiased;
+    @apply bg-background text-foreground antialiased;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 
@@ -63,11 +93,11 @@
 
   /* Glassmorphism utilities */
   .glass {
-    @apply bg-zinc-900/90 backdrop-blur-xl border border-zinc-800/50;
+    @apply bg-background/80 dark:bg-zinc-900/90 backdrop-blur-xl border border-border/50 dark:border-zinc-800/50;
   }
 
   .glass-hover {
-    @apply hover:border-zinc-700/50 transition-all duration-300;
+    @apply hover:border-zinc-300/50 dark:hover:border-zinc-700/50 transition-all duration-300;
   }
 
   /* Gradient text */
@@ -189,30 +219,16 @@
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-zinc-950;
+    @apply bg-zinc-100 dark:bg-zinc-950;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-zinc-800 rounded-full;
+    @apply bg-zinc-300 dark:bg-zinc-800 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-zinc-700;
+    @apply bg-zinc-400 dark:bg-zinc-700;
   }
 }
 
-/* Light mode overrides */
-html.light body { background-color: #fafafa; color: #27272a; }
-html.light .bg-black { background-color: #fafafa; }
-html.light .bg-zinc-950 { background-color: #fafafa; }
-html.light .bg-zinc-900 { background-color: #ffffff; }
-html.light .border-zinc-800 { border-color: #e4e4e7; }
-html.light .text-white { color: #18181b; }
-html.light .text-zinc-400 { color: #52525b; }
-html.light .text-zinc-500 { color: #71717a; }
-html.light .from-zinc-900 { --tw-gradient-from: #ffffff; }
-html.light .to-zinc-950 { --tw-gradient-to: #f4f4f5; }
-html.light .hover\:bg-zinc-800:hover { background-color: #f4f4f5; }
-html.light .bg-zinc-800 { background-color: #f4f4f5; }
-html.light .border-zinc-700 { border-color: #d4d4d8; }
-html.light .divide-zinc-800 > :not([hidden]) ~ :not([hidden]) { border-color: #e4e4e7; }
+

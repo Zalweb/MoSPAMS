@@ -25,7 +25,7 @@ export function KPICard({ title, value, change, comparison, trend, icon: Icon, l
       className="relative group"
     >
       {/* Glassmorphism card */}
-      <div className="relative bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 overflow-hidden hover:border-zinc-700/50 transition-all duration-300">
+      <div className="relative bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl border border-border/50 rounded-2xl p-6 overflow-hidden hover:border-zinc-700/50 transition-all duration-300">
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-[rgb(var(--color-primary-rgb))]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         
@@ -49,19 +49,19 @@ export function KPICard({ title, value, change, comparison, trend, icon: Icon, l
           </div>
           
           <div>
-            <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide mb-2">{title}</p>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">{title}</p>
             {loading ? (
               <div className="h-8 w-32 bg-zinc-800/50 rounded animate-pulse" />
             ) : (
               <>
-                <p className="text-3xl font-bold text-white tracking-tight mb-1">
+                <p className="text-3xl font-bold text-foreground tracking-tight mb-1">
                   {typeof value === 'number' ? value.toLocaleString() : value}
                 </p>
                 {comparison && (
-                  <p className="text-xs text-zinc-500 mb-1">{comparison}</p>
+                  <p className="text-xs text-muted-foreground mb-1">{comparison}</p>
                 )}
                 {trend && (
-                  <p className="text-xs font-medium text-zinc-400">{trend}</p>
+                  <p className="text-xs font-medium text-muted-foreground">{trend}</p>
                 )}
               </>
             )}

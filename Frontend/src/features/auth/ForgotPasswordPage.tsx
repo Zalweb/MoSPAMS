@@ -70,17 +70,17 @@ export default function ForgotPasswordPage() {
   if (submitted) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-black to-zinc-900 flex items-center justify-center px-6">
-        <div className="w-full max-w-md bg-zinc-900/40 backdrop-blur-2xl rounded-3xl border border-zinc-800/50 shadow-2xl p-10 text-center">
+        <div className="w-full max-w-md bg-muted/40 backdrop-blur-2xl rounded-3xl border border-border/50 shadow-2xl p-10 text-center">
           <div className="w-14 h-14 bg-zinc-800/60 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <Mail className="w-7 h-7 text-zinc-300" strokeWidth={1.5} />
           </div>
-          <h1 className="text-2xl font-bold text-white mb-3">Check your email</h1>
-          <p className="text-zinc-400 text-sm leading-relaxed mb-2">
+          <h1 className="text-2xl font-bold text-foreground mb-3">Check your email</h1>
+          <p className="text-muted-foreground text-sm leading-relaxed mb-2">
             If an account with that email exists, we've sent a password reset link to{' '}
-            <span className="text-white font-medium">{email}</span>.
+            <span className="text-foreground font-medium">{email}</span>.
           </p>
-          <p className="text-zinc-500 text-xs mb-8">
-            The link expires in <span className="text-zinc-400 font-medium">15 minutes</span>.
+          <p className="text-muted-foreground text-xs mb-8">
+            The link expires in <span className="text-muted-foreground font-medium">15 minutes</span>.
           </p>
 
           <button
@@ -95,7 +95,7 @@ export default function ForgotPasswordPage() {
 
           <button
             onClick={() => navigate('/')}
-            className="text-sm text-zinc-500 hover:text-white transition-colors flex items-center gap-2 mx-auto"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2 mx-auto"
           >
             <ArrowLeft className="w-4 h-4" strokeWidth={2} />
             Back to login
@@ -115,13 +115,13 @@ export default function ForgotPasswordPage() {
       <div className="relative z-10 w-full max-w-md">
         <button
           onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm mb-8"
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm mb-8"
         >
           <ArrowLeft className="w-4 h-4" strokeWidth={2} />
           Back to login
         </button>
 
-        <div className="bg-zinc-900/40 backdrop-blur-2xl rounded-3xl border border-zinc-800/50 shadow-2xl p-10">
+        <div className="bg-muted/40 backdrop-blur-2xl rounded-3xl border border-border/50 shadow-2xl p-10">
           <div className="flex justify-center mb-8">
             <div className="w-14 h-14 bg-zinc-800/60 rounded-2xl flex items-center justify-center">
               <Mail className="w-7 h-7 text-zinc-300" strokeWidth={1.5} />
@@ -129,8 +129,8 @@ export default function ForgotPasswordPage() {
           </div>
 
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-white mb-2">Forgot password?</h1>
-            <p className="text-zinc-400 text-sm">
+            <h1 className="text-2xl font-bold text-foreground mb-2">Forgot password?</h1>
+            <p className="text-muted-foreground text-sm">
               Enter your email and we'll send you a reset link.
             </p>
           </div>
@@ -144,7 +144,7 @@ export default function ForgotPasswordPage() {
               autoComplete="email"
               required
               disabled={loading}
-              className="w-full px-4 py-3.5 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-white placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
+              className="w-full px-4 py-3.5 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-foreground placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
             />
 
             <button

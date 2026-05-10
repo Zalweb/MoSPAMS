@@ -132,14 +132,14 @@ export default function Inventory() {
     <div className="space-y-6">
       <motion.div {...fadeUp(0)} className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">Inventory</h2>
-          <p className="text-sm text-zinc-500 mt-1">
+          <h2 className="text-2xl font-bold text-foreground tracking-tight">Inventory</h2>
+          <p className="text-sm text-muted-foreground mt-1">
             {meta ? `${meta.total} parts` : `${parts.length} parts`} in stock
             {lowCount > 0 && <span className="text-amber-400"> — {lowCount} low</span>}
           </p>
         </div>
         {canCreate && (
-          <Button onClick={openAdd} size="sm" className="h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-white text-sm font-semibold px-5 transition-opacity">
+          <Button onClick={openAdd} size="sm" className="h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold px-5 transition-opacity">
             <Plus className="w-4 h-4 mr-2" /> Add Part
           </Button>
         )}
@@ -147,39 +147,39 @@ export default function Inventory() {
 
       <motion.div {...fadeUp(0.1)} className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             autoFocus
             placeholder="Search parts or scan barcode…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full h-11 pl-11 pr-4 rounded-xl bg-zinc-900/50 border border-zinc-800 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-700 focus:ring-2 focus:ring-white/10"
+            className="w-full h-11 pl-11 pr-4 rounded-xl bg-muted/50 border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-zinc-700 focus:ring-2 focus:ring-white/10"
           />
         </div>
         <div className="flex gap-2">
-          <select value={catFilter} onChange={e => setCatFilter(e.target.value)} className="h-11 px-4 rounded-xl bg-zinc-900/50 border border-zinc-800 text-sm text-zinc-400 focus:outline-none focus:border-zinc-700">
+          <select value={catFilter} onChange={e => setCatFilter(e.target.value)} className="h-11 px-4 rounded-xl bg-muted/50 border border-border text-sm text-muted-foreground focus:outline-none focus:border-zinc-700">
             <option value="All">All Categories</option>
             {categoryNames.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
           {canCreate && (
-            <Button onClick={() => setCategoryModalOpen(true)} size="sm" variant="outline" className="h-11 rounded-xl border-zinc-800 text-zinc-400 hover:bg-zinc-800 hover:text-white">
+            <Button onClick={() => setCategoryModalOpen(true)} size="sm" variant="outline" className="h-11 rounded-xl border-border text-muted-foreground hover:bg-zinc-800 hover:text-foreground">
               <Plus className="w-4 h-4" />
             </Button>
           )}
         </div>
       </motion.div>
 
-      <motion.div {...fadeUp(0.2)} className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl overflow-hidden">
+      <motion.div {...fadeUp(0.2)} className="bg-muted/50 backdrop-blur-sm border border-border rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-zinc-800">
-                <th className="text-left px-5 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Part</th>
-                <th className="text-left px-5 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Category</th>
-                <th className="text-left px-5 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Stock</th>
-                <th className="text-left px-5 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Price</th>
-                <th className="text-left px-5 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Barcode</th>
-                <th className="text-right px-5 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider"></th>
+              <tr className="border-b border-border">
+                <th className="text-left px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Part</th>
+                <th className="text-left px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Category</th>
+                <th className="text-left px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Stock</th>
+                <th className="text-left px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Price</th>
+                <th className="text-left px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Barcode</th>
+                <th className="text-right px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800/50">
@@ -198,40 +198,40 @@ export default function Inventory() {
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-zinc-800/50 flex items-center justify-center shrink-0 group-hover:bg-zinc-800 transition-colors">
-                          <Package className="w-5 h-5 text-zinc-400" strokeWidth={1.5} />
+                          <Package className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-white">{part.name}</p>
+                          <p className="text-sm font-medium text-foreground">{part.name}</p>
                           {isLow && <p className="text-xs text-amber-400 font-medium flex items-center gap-1"><AlertTriangle className="w-3 h-3" />Low stock</p>}
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-4"><span className="text-xs font-medium text-zinc-400 bg-zinc-800/50 px-3 py-1.5 rounded-full">{part.category}</span></td>
+                    <td className="px-5 py-4"><span className="text-xs font-medium text-muted-foreground bg-zinc-800/50 px-3 py-1.5 rounded-full">{part.category}</span></td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <span className={`text-sm font-semibold tabular-nums ${isLow ? 'text-amber-400' : 'text-white'}`}>{part.stock}</span>
+                        <span className={`text-sm font-semibold tabular-nums ${isLow ? 'text-amber-400' : 'text-foreground'}`}>{part.stock}</span>
                         <div className="w-16 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
                           <div className={`h-full rounded-full ${isLow ? 'bg-amber-500' : 'bg-green-500'}`} style={{ width: `${Math.min(100, (part.stock / Math.max(part.minStock * 2, 1)) * 100)}%` }} />
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-4 text-sm font-semibold text-white tabular-nums">₱{part.price.toLocaleString()}</td>
-                    <td className="px-5 py-4 text-xs font-mono text-zinc-500">{part.barcode}</td>
+                    <td className="px-5 py-4 text-sm font-semibold text-foreground tabular-nums">₱{part.price.toLocaleString()}</td>
+                    <td className="px-5 py-4 text-xs font-mono text-muted-foreground">{part.barcode}</td>
                     <td className="px-5 py-4 text-right">
                       <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                         {canMove && (
-                          <button title="Stock movement" onClick={() => openMovement(part)} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-green-400 transition-colors">
+                          <button title="Stock movement" onClick={() => openMovement(part)} className="p-2 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-green-400 transition-colors">
                             <ArrowDownToLine className="w-4 h-4" />
                           </button>
                         )}
-                        <button title="History" onClick={() => setHistoryTarget(part)} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors">
+                        <button title="History" onClick={() => setHistoryTarget(part)} className="p-2 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-zinc-300 transition-colors">
                           <History className="w-4 h-4" />
                         </button>
-                        <button title="Edit" onClick={() => openEdit(part)} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors">
+                        <button title="Edit" onClick={() => openEdit(part)} className="p-2 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-zinc-300 transition-colors">
                           <Pencil className="w-4 h-4" />
                         </button>
                         {canDelete && (
-                          <button title="Delete" onClick={() => setConfirmDelete(part.id)} className="p-2 rounded-lg hover:bg-red-500/10 text-zinc-500 hover:text-red-400 transition-colors">
+                          <button title="Delete" onClick={() => setConfirmDelete(part.id)} className="p-2 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-400 transition-colors">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         )}
@@ -241,7 +241,7 @@ export default function Inventory() {
                 );
               })}
               {!loading && filtered.length === 0 && (
-                <tr><td colSpan={6} className="px-5 py-16 text-center text-sm text-zinc-500">
+                <tr><td colSpan={6} className="px-5 py-16 text-center text-sm text-muted-foreground">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-zinc-800/50 flex items-center justify-center">
                     <Package className="w-8 h-8 text-zinc-600" />
                   </div>
@@ -253,20 +253,20 @@ export default function Inventory() {
         </div>
 
         {meta && meta.lastPage > 1 && (
-          <div className="flex items-center justify-between px-5 py-3 border-t border-zinc-800">
-            <p className="text-xs text-zinc-500">Page {meta.currentPage} of {meta.lastPage} — {meta.total} total</p>
+          <div className="flex items-center justify-between px-5 py-3 border-t border-border">
+            <p className="text-xs text-muted-foreground">Page {meta.currentPage} of {meta.lastPage} — {meta.total} total</p>
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setPage(page - 1)}
                 disabled={page <= 1}
-                className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="p-1.5 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setPage(page + 1)}
                 disabled={page >= meta.lastPage}
-                className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="p-1.5 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -276,20 +276,20 @@ export default function Inventory() {
       </motion.div>
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="sm:max-w-md rounded-2xl border-zinc-800 bg-zinc-900 p-6">
+        <DialogContent className="sm:max-w-md rounded-2xl border-border bg-muted p-6">
           <DialogHeader className="pb-2">
-            <DialogTitle className="text-base font-semibold text-white">{editing ? 'Edit Part' : 'Add New Part'}</DialogTitle>
+            <DialogTitle className="text-base font-semibold text-foreground">{editing ? 'Edit Part' : 'Add New Part'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4 pt-2">
             <div>
-              <Label className="text-xs font-medium text-zinc-400">Part Name</Label>
-              <Input {...form.register('name')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white placeholder:text-zinc-500 focus:border-zinc-600" placeholder="e.g. Brake Pad Set" />
+              <Label className="text-xs font-medium text-muted-foreground">Part Name</Label>
+              <Input {...form.register('name')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-zinc-600" placeholder="e.g. Brake Pad Set" />
               {form.formState.errors.name && <p className="text-xs text-red-400 mt-1">{form.formState.errors.name.message}</p>}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs font-medium text-zinc-400">Category</Label>
-                <select {...form.register('category')} className="w-full mt-1.5 h-10 px-3 rounded-xl bg-zinc-800/50 border border-zinc-700 text-sm text-white focus:outline-none focus:border-zinc-600">
+                <Label className="text-xs font-medium text-muted-foreground">Category</Label>
+                <select {...form.register('category')} className="w-full mt-1.5 h-10 px-3 rounded-xl bg-zinc-800/50 border border-zinc-700 text-sm text-foreground focus:outline-none focus:border-zinc-600">
                   {categoryNames.length > 0 ? (
                     categoryNames.map(c => <option key={c} value={c}>{c}</option>)
                   ) : (
@@ -298,56 +298,56 @@ export default function Inventory() {
                 </select>
               </div>
               <div>
-                <Label className="text-xs font-medium text-zinc-400">Barcode</Label>
-                <Input {...form.register('barcode')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white font-mono placeholder:text-zinc-500 focus:border-zinc-600" placeholder="BRK-001" />
+                <Label className="text-xs font-medium text-muted-foreground">Barcode</Label>
+                <Input {...form.register('barcode')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground font-mono placeholder:text-muted-foreground focus:border-zinc-600" placeholder="BRK-001" />
                 {form.formState.errors.barcode && <p className="text-xs text-red-400 mt-1">{form.formState.errors.barcode.message}</p>}
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3">
-              <div><Label className="text-xs font-medium text-zinc-400">Stock</Label><Input type="number" {...form.register('stock', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white focus:border-zinc-600" /></div>
-              <div><Label className="text-xs font-medium text-zinc-400">Min Stock</Label><Input type="number" {...form.register('minStock', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white focus:border-zinc-600" /></div>
-              <div><Label className="text-xs font-medium text-zinc-400">Price (₱)</Label><Input type="number" {...form.register('price', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white focus:border-zinc-600" /></div>
+              <div><Label className="text-xs font-medium text-muted-foreground">Stock</Label><Input type="number" {...form.register('stock', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground focus:border-zinc-600" /></div>
+              <div><Label className="text-xs font-medium text-muted-foreground">Min Stock</Label><Input type="number" {...form.register('minStock', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground focus:border-zinc-600" /></div>
+              <div><Label className="text-xs font-medium text-muted-foreground">Price (₱)</Label><Input type="number" {...form.register('price', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground focus:border-zinc-600" /></div>
             </div>
             <div className="flex gap-3 pt-2">
-              <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-white text-sm font-semibold transition-opacity">{editing ? 'Save Changes' : 'Add Part'}</Button>
-              <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-10 rounded-xl text-sm border-zinc-700 text-zinc-400 hover:bg-zinc-800">Cancel</Button>
+              <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold transition-opacity">{editing ? 'Save Changes' : 'Add Part'}</Button>
+              <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-10 rounded-xl text-sm border-zinc-700 text-muted-foreground hover:bg-zinc-800">Cancel</Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
 
       <Dialog open={categoryModalOpen} onOpenChange={setCategoryModalOpen}>
-        <DialogContent className="sm:max-w-md rounded-2xl border-zinc-800 bg-zinc-900 p-6">
+        <DialogContent className="sm:max-w-md rounded-2xl border-border bg-muted p-6">
           <DialogHeader className="pb-2">
-            <DialogTitle className="text-base font-semibold text-white">Add New Category</DialogTitle>
+            <DialogTitle className="text-base font-semibold text-foreground">Add New Category</DialogTitle>
           </DialogHeader>
           <form onSubmit={onSubmitCategory} className="space-y-4 pt-2">
             <div>
-              <Label className="text-xs font-medium text-zinc-400">Category Name</Label>
-              <Input {...categoryForm.register('name')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white placeholder:text-zinc-500 focus:border-zinc-600" placeholder="e.g. Brake Parts" />
+              <Label className="text-xs font-medium text-muted-foreground">Category Name</Label>
+              <Input {...categoryForm.register('name')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-zinc-600" placeholder="e.g. Brake Parts" />
               {categoryForm.formState.errors.name && <p className="text-xs text-red-400 mt-1">{categoryForm.formState.errors.name.message}</p>}
             </div>
             <div>
-              <Label className="text-xs font-medium text-zinc-400">Description (Optional)</Label>
-              <Input {...categoryForm.register('description')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white placeholder:text-zinc-500 focus:border-zinc-600" placeholder="Brief description" />
+              <Label className="text-xs font-medium text-muted-foreground">Description (Optional)</Label>
+              <Input {...categoryForm.register('description')} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-zinc-600" placeholder="Brief description" />
             </div>
             <div className="flex gap-3 pt-2">
-              <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-white text-sm font-semibold transition-opacity">Add Category</Button>
-              <Button type="button" variant="outline" onClick={() => setCategoryModalOpen(false)} className="h-10 rounded-xl text-sm border-zinc-700 text-zinc-400 hover:bg-zinc-800">Cancel</Button>
+              <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold transition-opacity">Add Category</Button>
+              <Button type="button" variant="outline" onClick={() => setCategoryModalOpen(false)} className="h-10 rounded-xl text-sm border-zinc-700 text-muted-foreground hover:bg-zinc-800">Cancel</Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
 
       <Dialog open={!!stockMoveTarget} onOpenChange={(o) => !o && setStockMoveTarget(null)}>
-        <DialogContent className="sm:max-w-sm rounded-2xl border-zinc-800 bg-zinc-900 p-6">
-          <DialogHeader><DialogTitle className="text-base font-semibold text-white">Stock Movement</DialogTitle></DialogHeader>
+        <DialogContent className="sm:max-w-sm rounded-2xl border-border bg-muted p-6">
+          <DialogHeader><DialogTitle className="text-base font-semibold text-foreground">Stock Movement</DialogTitle></DialogHeader>
           {stockMoveTarget && (
             <form onSubmit={onSubmitMovement} className="mt-2 space-y-3">
-              <p className="text-sm text-zinc-400">{stockMoveTarget.name} — current: <span className="font-semibold text-white">{stockMoveTarget.stock}</span></p>
+              <p className="text-sm text-muted-foreground">{stockMoveTarget.name} — current: <span className="font-semibold text-foreground">{stockMoveTarget.stock}</span></p>
               <div className="grid grid-cols-3 gap-2">
                 {(['in', 'out', 'adjust'] as const).map(t => (
-                  <label key={t} className={`flex items-center justify-center gap-1 h-10 rounded-xl border text-sm font-medium capitalize cursor-pointer transition-all ${moveForm.watch('type') === t ? 'bg-white border-white text-black' : 'bg-zinc-800/50 border-zinc-700 text-zinc-400'}`}>
+                  <label key={t} className={`flex items-center justify-center gap-1 h-10 rounded-xl border text-sm font-medium capitalize cursor-pointer transition-all ${moveForm.watch('type') === t ? 'bg-white border-white text-black' : 'bg-zinc-800/50 border-zinc-700 text-muted-foreground'}`}>
                     <input type="radio" value={t} {...moveForm.register('type')} className="hidden" />
                     {t === 'in' ? <ArrowDownToLine className="w-3.5 h-3.5" /> : t === 'out' ? <ArrowUpFromLine className="w-3.5 h-3.5" /> : null}
                     {t === 'adjust' ? 'Set' : t}
@@ -355,17 +355,17 @@ export default function Inventory() {
                 ))}
               </div>
               <div>
-                <Label className="text-xs font-medium text-zinc-400">{moveForm.watch('type') === 'adjust' ? 'New Stock Level' : 'Quantity'}</Label>
-                <Input type="number" {...moveForm.register('qty', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white focus:border-zinc-600" />
+                <Label className="text-xs font-medium text-muted-foreground">{moveForm.watch('type') === 'adjust' ? 'New Stock Level' : 'Quantity'}</Label>
+                <Input type="number" {...moveForm.register('qty', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground focus:border-zinc-600" />
               </div>
               <div>
-                <Label className="text-xs font-medium text-zinc-400">Reason</Label>
-                <Input {...moveForm.register('reason')} placeholder="Restock from supplier" className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-white placeholder:text-zinc-500 focus:border-zinc-600" />
+                <Label className="text-xs font-medium text-muted-foreground">Reason</Label>
+                <Input {...moveForm.register('reason')} placeholder="Restock from supplier" className="mt-1.5 h-10 rounded-xl bg-zinc-800/50 border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-zinc-600" />
                 {moveForm.formState.errors.reason && <p className="text-xs text-red-400 mt-1">{moveForm.formState.errors.reason.message}</p>}
               </div>
               <div className="flex gap-3 pt-1">
-                <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-white text-sm font-semibold transition-opacity">Record</Button>
-                <Button type="button" variant="outline" onClick={() => setStockMoveTarget(null)} className="h-10 rounded-xl text-sm border-zinc-700 text-zinc-400">Cancel</Button>
+                <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold transition-opacity">Record</Button>
+                <Button type="button" variant="outline" onClick={() => setStockMoveTarget(null)} className="h-10 rounded-xl text-sm border-zinc-700 text-muted-foreground">Cancel</Button>
               </div>
             </form>
           )}
@@ -374,28 +374,28 @@ export default function Inventory() {
 
       {historyTarget && (
         <>
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40" onClick={() => setHistoryTarget(null)} />
-          <aside className="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-zinc-900 border-l border-zinc-800 z-50 shadow-2xl flex flex-col">
-            <div className="flex items-center justify-between px-5 h-16 border-b border-zinc-800">
+          <div className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40" onClick={() => setHistoryTarget(null)} />
+          <aside className="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-muted border-l border-border z-50 shadow-2xl flex flex-col">
+            <div className="flex items-center justify-between px-5 h-16 border-b border-border">
               <div>
-                <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide">Stock History</p>
-                <p className="text-sm font-semibold text-white">{historyTarget.name}</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Stock History</p>
+                <p className="text-sm font-semibold text-foreground">{historyTarget.name}</p>
               </div>
-              <button onClick={() => setHistoryTarget(null)} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500"><X className="w-5 h-5" /></button>
+              <button onClick={() => setHistoryTarget(null)} className="p-2 rounded-lg hover:bg-zinc-800 text-muted-foreground"><X className="w-5 h-5" /></button>
             </div>
             <div className="flex-1 overflow-y-auto px-5 py-4">
-              {partHistory.length === 0 && <p className="text-sm text-zinc-500 text-center py-12">No movements recorded yet.</p>}
+              {partHistory.length === 0 && <p className="text-sm text-muted-foreground text-center py-12">No movements recorded yet.</p>}
               <ul className="space-y-2">
                 {partHistory.map(m => (
-                  <li key={m.id} className="bg-zinc-800/50 rounded-xl p-4 border border-zinc-800">
+                  <li key={m.id} className="bg-zinc-800/50 rounded-xl p-4 border border-border">
                     <div className="flex items-center justify-between">
                       <span className={`text-xs font-bold uppercase px-2.5 py-1 rounded-full ${m.type === 'in' ? 'bg-green-500/10 text-green-400' : m.type === 'out' ? 'bg-red-500/10 text-red-400' : 'bg-blue-500/10 text-blue-400'}`}>
                         {m.type} · {m.qty}
                       </span>
-                      <span className="text-xs text-zinc-500 tabular-nums">{new Date(m.timestamp).toLocaleString()}</span>
+                      <span className="text-xs text-muted-foreground tabular-nums">{new Date(m.timestamp).toLocaleString()}</span>
                     </div>
-                    <p className="text-sm text-white mt-2">{m.reason}</p>
-                    <p className="text-xs text-zinc-500 mt-1">by {m.userName}</p>
+                    <p className="text-sm text-foreground mt-2">{m.reason}</p>
+                    <p className="text-xs text-muted-foreground mt-1">by {m.userName}</p>
                   </li>
                 ))}
               </ul>
@@ -405,12 +405,12 @@ export default function Inventory() {
       )}
 
       <Dialog open={!!confirmDelete} onOpenChange={() => setConfirmDelete(null)}>
-        <DialogContent className="sm:max-w-sm rounded-2xl border-zinc-800 bg-zinc-900 p-6">
-          <DialogHeader><DialogTitle className="text-base font-semibold text-white">Delete Part?</DialogTitle></DialogHeader>
-          <p className="text-sm text-zinc-400 mt-1">This action cannot be undone.</p>
+        <DialogContent className="sm:max-w-sm rounded-2xl border-border bg-muted p-6">
+          <DialogHeader><DialogTitle className="text-base font-semibold text-foreground">Delete Part?</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground mt-1">This action cannot be undone.</p>
           <div className="flex gap-3 pt-3">
             <Button onClick={async () => { if (confirmDelete) { await deletePart(confirmDelete); removeItem(confirmDelete, 'id'); setConfirmDelete(null); } }} variant="destructive" className="flex-1 h-10 rounded-xl text-sm font-semibold">Delete</Button>
-            <Button variant="outline" onClick={() => setConfirmDelete(null)} className="h-10 rounded-xl text-sm border-zinc-700 text-zinc-400">Cancel</Button>
+            <Button variant="outline" onClick={() => setConfirmDelete(null)} className="h-10 rounded-xl text-sm border-zinc-700 text-muted-foreground">Cancel</Button>
           </div>
         </DialogContent>
       </Dialog>

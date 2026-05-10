@@ -89,21 +89,21 @@ export default function Users() {
     <div>
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-7">
         <div>
-          <h2 className="text-[22px] font-bold text-white tracking-tight">User Management</h2>
-          <p className="text-[13px] text-zinc-400 mt-0.5">Manage access and monitor activity</p>
+          <h2 className="text-[22px] font-bold text-foreground tracking-tight">User Management</h2>
+          <p className="text-[13px] text-muted-foreground mt-0.5">Manage access and monitor activity</p>
         </div>
-        <Button onClick={openAdd} size="sm" className="h-9 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-white text-[12px] font-medium px-4 transition-opacity">
+        <Button onClick={openAdd} size="sm" className="h-9 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-[12px] font-medium px-4 transition-opacity">
           <Plus className="w-3.5 h-3.5 mr-1.5" /> Add User
         </Button>
       </div>
 
-      <div className="flex gap-1 mb-6 border-b border-zinc-800">
+      <div className="flex gap-1 mb-6 border-b border-border">
         <button
           onClick={() => setTab('users')}
           className={`px-4 py-2 text-[13px] font-medium border-b-2 transition-colors ${
             tab === 'users'
-              ? 'border-white text-white'
-              : 'border-transparent text-zinc-500 hover:text-zinc-300'
+              ? 'border-white text-foreground'
+              : 'border-transparent text-muted-foreground hover:text-zinc-300'
           }`}
         >
           All Users
@@ -112,8 +112,8 @@ export default function Users() {
           onClick={() => setTab('requests')}
           className={`px-4 py-2 text-[13px] font-medium border-b-2 transition-colors flex items-center gap-1.5 ${
             tab === 'requests'
-              ? 'border-white text-white'
-              : 'border-transparent text-zinc-500 hover:text-zinc-300'
+              ? 'border-white text-foreground'
+              : 'border-transparent text-muted-foreground hover:text-zinc-300'
           }`}
         >
           Pending Requests
@@ -134,66 +134,66 @@ export default function Users() {
           { title: 'Customers', desc: 'Registered clients', count: customerCount, icon: UsersIcon, accent: 'bg-emerald-500/20 text-emerald-400' },
           { title: 'Activity Logs', desc: 'Recorded actions', count: logs.length, icon: Activity, accent: 'bg-purple-500/20 text-purple-400' },
         ].map(card => (
-          <div key={card.title} className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl p-5">
+          <div key={card.title} className="bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5">
             <div className="flex items-center gap-3 mb-3">
               <div className={`w-9 h-9 rounded-[10px] ${card.accent.split(' ')[0]} flex items-center justify-center`}>
                 <card.icon className={`w-[18px] h-[18px] ${card.accent.split(' ')[1]}`} strokeWidth={1.5} />
               </div>
               <div>
                 <p className="text-[13px] font-semibold text-zinc-200">{card.title}</p>
-                <p className="text-[10px] text-zinc-500">{card.desc}</p>
+                <p className="text-[10px] text-muted-foreground">{card.desc}</p>
               </div>
             </div>
-            <p className="text-[22px] font-bold text-white tracking-tight">{card.count}</p>
+            <p className="text-[22px] font-bold text-foreground tracking-tight">{card.count}</p>
           </div>
         ))}
       </div>
 
-      <div className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl p-5 mb-6">
-        <h3 className="text-[13px] font-semibold text-white mb-4">Users ({users.length})</h3>
+      <div className="bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5 mb-6">
+        <h3 className="text-[13px] font-semibold text-foreground mb-4">Users ({users.length})</h3>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead><tr className="border-b border-zinc-800">
-              <th className="text-left px-3 py-3 text-[10px] font-semibold text-zinc-500 uppercase">Name</th>
-              <th className="text-left px-3 py-3 text-[10px] font-semibold text-zinc-500 uppercase">Email</th>
-              <th className="text-left px-3 py-3 text-[10px] font-semibold text-zinc-500 uppercase">Role</th>
-              <th className="text-left px-3 py-3 text-[10px] font-semibold text-zinc-500 uppercase">Status</th>
-              <th className="text-left px-3 py-3 text-[10px] font-semibold text-zinc-500 uppercase">Last Active</th>
-              <th className="text-right px-3 py-3 text-[10px] font-semibold text-zinc-500 uppercase"></th>
+            <thead><tr className="border-b border-border">
+              <th className="text-left px-3 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Name</th>
+              <th className="text-left px-3 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Email</th>
+              <th className="text-left px-3 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Role</th>
+              <th className="text-left px-3 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Status</th>
+              <th className="text-left px-3 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Last Active</th>
+              <th className="text-right px-3 py-3 text-[10px] font-semibold text-muted-foreground uppercase"></th>
             </tr></thead>
             <tbody className="divide-y divide-zinc-800">
               {users.map(u => (
                 <tr key={u.id} className="hover:bg-zinc-800/50 transition-colors">
                   <td className="px-3 py-3 text-[12px] font-medium text-zinc-200">{u.name}{me?.id === u.id && <span className="ml-1.5 text-[10px] text-blue-400">(you)</span>}</td>
-                  <td className="px-3 py-3 text-[12px] text-zinc-500">{u.email}</td>
+                  <td className="px-3 py-3 text-[12px] text-muted-foreground">{u.email}</td>
                   <td className="px-3 py-3"><span className={`text-[10px] font-bold uppercase px-2 py-[3px] rounded-full ${u.role === 'Owner' ? 'bg-white text-zinc-900' : 'bg-blue-500/20 text-blue-400'}`}>{u.role}</span></td>
-                  <td className="px-3 py-3"><span className={`text-[10px] font-medium px-2 py-[3px] rounded-full ${u.status === 'Active' ? 'bg-green-500/20 text-green-400' : 'bg-zinc-800 text-zinc-500'}`}>{u.status}</span></td>
-                  <td className="px-3 py-3 text-[11px] text-zinc-500 tabular-nums">{u.lastActive ? new Date(u.lastActive).toLocaleString() : '—'}</td>
+                  <td className="px-3 py-3"><span className={`text-[10px] font-medium px-2 py-[3px] rounded-full ${u.status === 'Active' ? 'bg-green-500/20 text-green-400' : 'bg-zinc-800 text-muted-foreground'}`}>{u.status}</span></td>
+                  <td className="px-3 py-3 text-[11px] text-muted-foreground tabular-nums">{u.lastActive ? new Date(u.lastActive).toLocaleString() : '—'}</td>
                   <td className="px-3 py-3 text-right">
                     <div className="inline-flex items-center gap-0.5">
-                      <button title={u.status === 'Active' ? 'Disable' : 'Enable'} onClick={() => setUserStatus(u.id, u.status === 'Active' ? 'Inactive' : 'Active')} disabled={me?.id === u.id} className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors disabled:opacity-30">
+                      <button title={u.status === 'Active' ? 'Disable' : 'Enable'} onClick={() => setUserStatus(u.id, u.status === 'Active' ? 'Inactive' : 'Active')} disabled={me?.id === u.id} className="p-1.5 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-zinc-300 transition-colors disabled:opacity-30">
                         <Power className="w-3.5 h-3.5" />
                       </button>
-                      <button title="Edit" onClick={() => openEdit(u)} disabled={u.role === 'Owner'} className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-zinc-500"><Pencil className="w-3.5 h-3.5" /></button>
-                      <button title="Delete" onClick={() => setConfirmDelete(u)} disabled={me?.id === u.id} className="p-1.5 rounded-lg hover:bg-red-500/10 text-zinc-500 hover:text-red-400 transition-colors disabled:opacity-30"><Trash2 className="w-3.5 h-3.5" /></button>
+                      <button title="Edit" onClick={() => openEdit(u)} disabled={u.role === 'Owner'} className="p-1.5 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-zinc-300 transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-muted-foreground"><Pencil className="w-3.5 h-3.5" /></button>
+                      <button title="Delete" onClick={() => setConfirmDelete(u)} disabled={me?.id === u.id} className="p-1.5 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-400 transition-colors disabled:opacity-30"><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
                   </td>
                 </tr>
               ))}
-              {users.length === 0 && <tr><td colSpan={6} className="px-3 py-12 text-center text-[12px] text-zinc-500">No users yet</td></tr>}
+              {users.length === 0 && <tr><td colSpan={6} className="px-3 py-12 text-center text-[12px] text-muted-foreground">No users yet</td></tr>}
             </tbody>
           </table>
         </div>
       </div>
 
-      <div className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl p-5 mb-6">
-        <h3 className="text-[13px] font-semibold text-white mb-4">Access Privileges</h3>
+      <div className="bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5 mb-6">
+        <h3 className="text-[13px] font-semibold text-foreground mb-4">Access Privileges</h3>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead><tr className="border-b border-zinc-800">
-              <th className="text-left px-4 py-3 text-[10px] font-semibold text-zinc-500 uppercase">Module</th>
-              <th className="text-center px-4 py-3 text-[10px] font-semibold text-zinc-500 uppercase">Owner</th>
-              <th className="text-center px-4 py-3 text-[10px] font-semibold text-zinc-500 uppercase">Staff / Mechanic</th>
+            <thead><tr className="border-b border-border">
+              <th className="text-left px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Module</th>
+              <th className="text-center px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Owner</th>
+              <th className="text-center px-4 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Staff / Mechanic</th>
             </tr></thead>
             <tbody className="divide-y divide-zinc-800">
               {[
@@ -205,8 +205,8 @@ export default function Users() {
               ].map(row => (
                 <tr key={row.module}>
                   <td className="px-4 py-3 text-[12px] font-medium text-zinc-200">{row.module}</td>
-                  <td className="px-4 py-3 text-center text-[12px] text-zinc-500">{row.admin}</td>
-                  <td className="px-4 py-3 text-center text-[12px] text-zinc-500">{row.staff}</td>
+                  <td className="px-4 py-3 text-center text-[12px] text-muted-foreground">{row.admin}</td>
+                  <td className="px-4 py-3 text-center text-[12px] text-muted-foreground">{row.staff}</td>
                 </tr>
               ))}
             </tbody>
@@ -220,45 +220,45 @@ export default function Users() {
       )}
 
       {tab === 'requests' && (
-        <div className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 shadow-[0_1px_2px_rgba(0,0,0,0.03)] rounded-2xl overflow-hidden">
+        <div className="bg-muted/50 backdrop-blur-sm border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] rounded-2xl overflow-hidden">
           {pendingRequests.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 gap-3">
               <Clock className="w-10 h-10 text-zinc-600" strokeWidth={1} />
-              <p className="text-[13px] text-zinc-500">No pending role requests</p>
+              <p className="text-[13px] text-muted-foreground">No pending role requests</p>
             </div>
           ) : (
             <table className="w-full text-[13px]">
               <thead>
-                <tr className="border-b border-zinc-800 bg-zinc-900/50">
-                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-zinc-500 uppercase tracking-wide">User</th>
-                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-zinc-500 uppercase tracking-wide">Email</th>
-                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-zinc-500 uppercase tracking-wide">Requested Role</th>
-                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-zinc-500 uppercase tracking-wide">Date</th>
+                <tr className="border-b border-border bg-muted/50">
+                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">User</th>
+                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Email</th>
+                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Requested Role</th>
+                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Date</th>
                   <th className="px-5 py-3" />
                 </tr>
               </thead>
               <tbody>
                 {pendingRequests.map((req) => (
-                  <tr key={req.id} className="border-b border-zinc-800 last:border-0 hover:bg-zinc-800/50 transition-colors">
+                  <tr key={req.id} className="border-b border-border last:border-0 hover:bg-zinc-800/50 transition-colors">
                     <td className="px-5 py-3.5 font-medium text-zinc-200">{req.user_name}</td>
-                    <td className="px-5 py-3.5 text-zinc-500">{req.user_email}</td>
+                    <td className="px-5 py-3.5 text-muted-foreground">{req.user_email}</td>
                     <td className="px-5 py-3.5">
                       <span className="inline-flex items-center rounded-full bg-zinc-800 px-2.5 py-1 text-[11px] font-semibold text-zinc-300">
                         {req.requested_role}
                       </span>
                     </td>
-                    <td className="px-5 py-3.5 text-zinc-500">{new Date(req.created_at).toLocaleDateString()}</td>
+                    <td className="px-5 py-3.5 text-muted-foreground">{new Date(req.created_at).toLocaleDateString()}</td>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-2 justify-end">
                         <button
                           onClick={() => handleApprove(req.id)}
-                          className="inline-flex items-center gap-1 rounded-lg bg-green-500 px-3 py-1.5 text-[11px] font-bold text-white hover:bg-green-600 transition-colors"
+                          className="inline-flex items-center gap-1 rounded-lg bg-green-500 px-3 py-1.5 text-[11px] font-bold text-foreground hover:bg-green-600 transition-colors"
                         >
                           <CheckCircle className="w-3 h-3" /> Approve
                         </button>
                         <button
                           onClick={() => handleDeny(req.id)}
-                          className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-[11px] font-medium text-zinc-300 hover:bg-zinc-800 transition-colors"
+                          className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 bg-muted px-3 py-1.5 text-[11px] font-medium text-zinc-300 hover:bg-zinc-800 transition-colors"
                         >
                           <XCircle className="w-3 h-3" /> Deny
                         </button>
@@ -273,20 +273,20 @@ export default function Users() {
       )}
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="sm:max-w-md rounded-[20px] border-zinc-800 bg-zinc-900 p-6">
-          <DialogHeader><DialogTitle className="text-[15px] font-semibold text-white">{editing ? 'Edit User' : 'Add User'}</DialogTitle></DialogHeader>
+        <DialogContent className="sm:max-w-md rounded-[20px] border-border bg-muted p-6">
+          <DialogHeader><DialogTitle className="text-[15px] font-semibold text-foreground">{editing ? 'Edit User' : 'Add User'}</DialogTitle></DialogHeader>
           {editing ? (
             <form onSubmit={onSubmitEdit} className="space-y-4 pt-3">
               <div>
-                <Label className="text-[11px] font-medium text-zinc-400">Name</Label>
+                <Label className="text-[11px] font-medium text-muted-foreground">Name</Label>
                 <Input {...editForm.register('name')} className="mt-1.5 h-9 rounded-xl border-zinc-700 bg-zinc-800 text-[13px] text-zinc-200 placeholder:text-zinc-600" />
               </div>
               <div>
-                <Label className="text-[11px] font-medium text-zinc-400">Email</Label>
+                <Label className="text-[11px] font-medium text-muted-foreground">Email</Label>
                 <Input type="email" {...editForm.register('email')} className="mt-1.5 h-9 rounded-xl border-zinc-700 bg-zinc-800 text-[13px] text-zinc-200 placeholder:text-zinc-600" />
               </div>
               <div>
-                <Label className="text-[11px] font-medium text-zinc-400">Role</Label>
+                <Label className="text-[11px] font-medium text-muted-foreground">Role</Label>
                 <select {...editForm.register('role')} className="w-full mt-1.5 h-9 px-3 rounded-xl border border-zinc-700 text-[13px] bg-zinc-800 text-zinc-200">
                   <option value="Staff">Staff</option>
                   <option value="Mechanic">Mechanic</option>
@@ -294,28 +294,28 @@ export default function Users() {
                 </select>
               </div>
               <div>
-                <Label className="text-[11px] font-medium text-zinc-400">New Password (leave blank to keep)</Label>
+                <Label className="text-[11px] font-medium text-muted-foreground">New Password (leave blank to keep)</Label>
                 <Input type="password" {...editForm.register('password')} className="mt-1.5 h-9 rounded-xl border-zinc-700 bg-zinc-800 text-[13px] text-zinc-200 placeholder:text-zinc-600" />
               </div>
               <div className="flex gap-2 pt-2">
-                <Button type="submit" className="flex-1 h-9 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-white text-[12px] transition-opacity">Save</Button>
+                <Button type="submit" className="flex-1 h-9 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-[12px] transition-opacity">Save</Button>
                 <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-9 rounded-xl text-[12px] border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700">Cancel</Button>
               </div>
             </form>
           ) : (
             <form onSubmit={onSubmitAdd} className="space-y-4 pt-3">
               <div>
-                <Label className="text-[11px] font-medium text-zinc-400">Name</Label>
+                <Label className="text-[11px] font-medium text-muted-foreground">Name</Label>
                 <Input {...addForm.register('name')} className="mt-1.5 h-9 rounded-xl border-zinc-700 bg-zinc-800 text-[13px] text-zinc-200 placeholder:text-zinc-600" />
                 {addForm.formState.errors.name && <p className="text-[10px] text-red-400 mt-1">{addForm.formState.errors.name.message}</p>}
               </div>
               <div>
-                <Label className="text-[11px] font-medium text-zinc-400">Email</Label>
+                <Label className="text-[11px] font-medium text-muted-foreground">Email</Label>
                 <Input type="email" {...addForm.register('email')} className="mt-1.5 h-9 rounded-xl border-zinc-700 bg-zinc-800 text-[13px] text-zinc-200 placeholder:text-zinc-600" />
                 {addForm.formState.errors.email && <p className="text-[10px] text-red-400 mt-1">{addForm.formState.errors.email.message}</p>}
               </div>
               <div>
-                <Label className="text-[11px] font-medium text-zinc-400">Role</Label>
+                <Label className="text-[11px] font-medium text-muted-foreground">Role</Label>
                 <select {...addForm.register('role')} className="w-full mt-1.5 h-9 px-3 rounded-xl border border-zinc-700 text-[13px] bg-zinc-800 text-zinc-200">
                   <option value="Staff">Staff</option>
                   <option value="Mechanic">Mechanic</option>
@@ -323,12 +323,12 @@ export default function Users() {
                 </select>
               </div>
               <div>
-                <Label className="text-[11px] font-medium text-zinc-400">Password</Label>
+                <Label className="text-[11px] font-medium text-muted-foreground">Password</Label>
                 <Input type="password" {...addForm.register('password')} className="mt-1.5 h-9 rounded-xl border-zinc-700 bg-zinc-800 text-[13px] text-zinc-200 placeholder:text-zinc-600" />
                 {addForm.formState.errors.password && <p className="text-[10px] text-red-400 mt-1">{addForm.formState.errors.password.message}</p>}
               </div>
               <div className="flex gap-2 pt-2">
-                <Button type="submit" className="flex-1 h-9 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-white text-[12px] transition-opacity">Create</Button>
+                <Button type="submit" className="flex-1 h-9 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-[12px] transition-opacity">Create</Button>
                 <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-9 rounded-xl text-[12px] border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700">Cancel</Button>
               </div>
             </form>
@@ -337,9 +337,9 @@ export default function Users() {
       </Dialog>
 
       <Dialog open={!!confirmDelete} onOpenChange={() => setConfirmDelete(null)}>
-        <DialogContent className="sm:max-w-sm rounded-[20px] border-zinc-800 bg-zinc-900 p-6">
-          <DialogHeader><DialogTitle className="text-[15px] font-semibold text-white">Delete User?</DialogTitle></DialogHeader>
-          <p className="text-[13px] text-zinc-400 mt-1">{confirmDelete?.name} will lose access immediately.</p>
+        <DialogContent className="sm:max-w-sm rounded-[20px] border-border bg-muted p-6">
+          <DialogHeader><DialogTitle className="text-[15px] font-semibold text-foreground">Delete User?</DialogTitle></DialogHeader>
+          <p className="text-[13px] text-muted-foreground mt-1">{confirmDelete?.name} will lose access immediately.</p>
           <div className="flex gap-2 pt-3">
             <Button onClick={() => { if (confirmDelete) { deleteUser(confirmDelete.id); setConfirmDelete(null); } }} variant="destructive" className="flex-1 h-9 rounded-xl text-[12px]">Delete</Button>
             <Button variant="outline" onClick={() => setConfirmDelete(null)} className="h-9 rounded-xl text-[12px] border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700">Cancel</Button>

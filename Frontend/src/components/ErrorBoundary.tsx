@@ -17,9 +17,9 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.error) {
       return (
-        <div className="min-h-screen bg-black flex items-center justify-center p-8">
+        <div className="min-h-screen bg-background flex items-center justify-center p-8">
           <div className="max-w-md w-full text-center space-y-4" role="alert" aria-live="assertive">
-            <p className="text-zinc-400 text-[13px]">Something went wrong on this page.</p>
+            <p className="text-muted-foreground text-[13px]">Something went wrong on this page.</p>
             <p className="text-zinc-600 text-[11px] font-mono break-all">{this.state.error.message}</p>
             <button
               onClick={() => window.location.reload()}

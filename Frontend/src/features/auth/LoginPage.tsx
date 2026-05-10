@@ -108,7 +108,7 @@ export default function LoginPage() {
       {hostMode === 'public' && (
         <button
           onClick={() => navigate('/')}
-          className="absolute top-6 left-6 z-50 flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm"
+          className="absolute top-6 left-6 z-50 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm"
         >
           <ArrowLeft className="w-4 h-4" strokeWidth={2} />
           <span>Back</span>
@@ -117,7 +117,7 @@ export default function LoginPage() {
 
       {/* Centered Login Container */}
       <div className="relative z-10 w-full max-w-md px-6">
-        <div className="bg-zinc-900/40 backdrop-blur-2xl rounded-3xl border border-zinc-800/50 shadow-2xl p-10">
+        <div className="bg-muted/40 backdrop-blur-2xl rounded-3xl border border-border/50 shadow-2xl p-10">
           
           {/* Logo/Icon */}
           <div className="flex justify-center mb-8">
@@ -134,10 +134,10 @@ export default function LoginPage() {
 
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-3">
+            <h1 className="text-3xl font-bold text-foreground mb-3">
               {isSuperAdmin ? 'Platform Admin' : isShop ? shopName : 'Welcome back'}
             </h1>
-            <p className="text-zinc-400 text-sm">
+            <p className="text-muted-foreground text-sm">
               {isSuperAdmin ? (
                 'Sign in to manage the platform'
               ) : isShop ? (
@@ -146,7 +146,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => navigate('/register')}
-                    className="text-white font-medium hover:underline"
+                    className="text-foreground font-medium hover:underline"
                   >
                     Join this shop
                   </button>
@@ -157,7 +157,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => navigate('/register-shop')}
-                    className="text-white font-medium hover:underline"
+                    className="text-foreground font-medium hover:underline"
                   >
                     Create an account
                   </button>
@@ -168,8 +168,8 @@ export default function LoginPage() {
 
           {pendingJoin && (
             <div className="mb-6 rounded-2xl border border-zinc-700/50 bg-zinc-800/40 p-4">
-              <p className="text-sm font-medium text-white">Join {pendingJoin.shop.shopName} as Customer</p>
-              <p className="mt-1 text-xs text-zinc-400">
+              <p className="text-sm font-medium text-foreground">Join {pendingJoin.shop.shopName} as Customer</p>
+              <p className="mt-1 text-xs text-muted-foreground">
                 {pendingJoin.account?.email ?? 'This account'} is verified and can be added to this shop with Customer access.
               </p>
               <div className="mt-4 flex gap-3">
@@ -185,7 +185,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={clearPendingJoin}
                   disabled={joining}
-                  className="rounded-xl border border-zinc-700 px-4 py-2.5 text-sm text-zinc-300 transition hover:border-zinc-500 hover:text-white"
+                  className="rounded-xl border border-zinc-700 px-4 py-2.5 text-sm text-zinc-300 transition hover:border-zinc-500 hover:text-foreground"
                 >
                   Cancel
                 </button>
@@ -205,7 +205,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmailOrUsername(e.target.value)}
                 placeholder="Email address"
                 autoComplete="email"
-                className="w-full px-4 py-3.5 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-white placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
+                className="w-full px-4 py-3.5 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-foreground placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
                 disabled={loading}
               />
             </div>
@@ -220,7 +220,7 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
                 autoComplete="current-password"
-                className="w-full px-4 py-3.5 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-white placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
+                className="w-full px-4 py-3.5 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-foreground placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
                 disabled={loading}
               />
             </div>
@@ -232,14 +232,14 @@ export default function LoginPage() {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded bg-zinc-800 border-zinc-700 text-white focus:ring-2 focus:ring-zinc-600"
+                  className="w-4 h-4 rounded bg-zinc-800 border-zinc-700 text-foreground focus:ring-2 focus:ring-zinc-600"
                 />
-                <span className="text-zinc-400">Remember me</span>
+                <span className="text-muted-foreground">Remember me</span>
               </label>
               <button
                 type="button"
                 onClick={() => navigate('/forgot-password')}
-                className="text-zinc-400 hover:text-white transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 Forgot password?
               </button>
@@ -258,10 +258,10 @@ export default function LoginPage() {
           {/* Divider */}
           <div className="relative my-7">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-zinc-800/60" />
+              <div className="w-full border-t border-border/60" />
             </div>
             <div className="relative flex justify-center">
-              <span className="px-4 bg-zinc-900/40 text-zinc-500 text-xs">or</span>
+              <span className="px-4 bg-muted/40 text-muted-foreground text-xs">or</span>
             </div>
           </div>
 
@@ -309,7 +309,7 @@ export default function LoginPage() {
           )}
 
           {/* Footer Legal Text */}
-          <p className="mt-8 text-center text-xs text-zinc-500 leading-relaxed">
+          <p className="mt-8 text-center text-xs text-muted-foreground leading-relaxed">
             By continuing, you agree to our Terms and Privacy Policy.
           </p>
         </div>

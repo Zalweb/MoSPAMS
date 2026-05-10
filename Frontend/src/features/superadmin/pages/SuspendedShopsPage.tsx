@@ -45,8 +45,8 @@ export default function SuspendedShopsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl sm:text-[28px] font-bold text-white tracking-tight">Suspended Shops</h1>
-        <p className="text-[13px] sm:text-[14px] text-zinc-400 mt-1">Manage shops that have been suspended</p>
+        <h1 className="text-2xl sm:text-[28px] font-bold text-foreground tracking-tight">Suspended Shops</h1>
+        <p className="text-[13px] sm:text-[14px] text-muted-foreground mt-1">Manage shops that have been suspended</p>
       </div>
 
       {loading ? (
@@ -54,10 +54,10 @@ export default function SuspendedShopsPage() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
         </div>
       ) : shops.length === 0 ? (
-        <div className="bg-zinc-950 rounded-2xl border border-zinc-800 p-12 text-center">
+        <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <Shield className="w-16 h-16 mx-auto mb-4 text-zinc-600" />
-          <h3 className="text-lg font-semibold text-white mb-2">No Suspended Shops</h3>
-          <p className="text-zinc-400">All shops are currently active</p>
+          <h3 className="text-lg font-semibold text-foreground mb-2">No Suspended Shops</h3>
+          <p className="text-muted-foreground">All shops are currently active</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -66,7 +66,7 @@ export default function SuspendedShopsPage() {
               key={shop.shopId}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-zinc-950 rounded-2xl border border-zinc-800 p-6 hover:border-zinc-700 transition-all"
+              className="bg-card rounded-2xl border border-border p-6 hover:border-zinc-700 transition-all"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
@@ -77,15 +77,15 @@ export default function SuspendedShopsPage() {
                 </span>
               </div>
 
-              <h3 className="text-lg font-bold text-white mb-1">{shop.shopName}</h3>
-              <p className="text-sm text-zinc-400 mb-4">Shop ID: #{shop.shopId}</p>
+              <h3 className="text-lg font-bold text-foreground mb-1">{shop.shopName}</h3>
+              <p className="text-sm text-muted-foreground mb-4">Shop ID: #{shop.shopId}</p>
 
               <div className="space-y-2 mb-6">
-                <div className="flex items-center gap-2 text-sm text-zinc-400">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Store className="w-4 h-4" strokeWidth={2} />
                   <span>{shop.applicant?.email || shop.owner?.email || 'No email'}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-zinc-400">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Calendar className="w-4 h-4" strokeWidth={2} />
                   <span>Created: {shop.createdAt ? new Date(shop.createdAt).toLocaleDateString() : 'N/A'}</span>
                 </div>
@@ -94,7 +94,7 @@ export default function SuspendedShopsPage() {
               <button
                 onClick={() => handleReactivate(shop.shopId, shop.shopName)}
                 disabled={actionLoading}
-                className="w-full px-4 py-2 rounded-lg bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full px-4 py-2 rounded-lg bg-emerald-500 text-foreground text-sm font-semibold hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 <RefreshCw className="w-4 h-4" strokeWidth={2} />
                 {actionLoading ? 'Reactivating...' : 'Reactivate Shop'}

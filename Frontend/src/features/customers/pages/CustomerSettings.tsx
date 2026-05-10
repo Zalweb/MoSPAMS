@@ -171,7 +171,7 @@ export default function CustomerSettings() {
             <Button
               type="submit"
               disabled={submitting}
-              className="w-full h-10 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-white text-sm font-medium disabled:opacity-50"
+              className="w-full h-10 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-foreground text-sm font-medium disabled:opacity-50"
             >
               {submitting ? 'Saving...' : 'Save Changes'}
             </Button>
@@ -221,7 +221,7 @@ export default function CustomerSettings() {
           <Button
             type="submit"
             disabled={pwSubmitting}
-            className="w-full h-10 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-white text-sm font-medium disabled:opacity-50"
+            className="w-full h-10 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-foreground text-sm font-medium disabled:opacity-50"
           >
             {pwSubmitting ? 'Changing...' : 'Change Password'}
           </Button>

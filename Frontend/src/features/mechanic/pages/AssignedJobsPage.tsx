@@ -78,7 +78,7 @@ export default function AssignedJobsPage() {
       case 'completed':
         return 'bg-green-500/10 text-green-400 border-green-500/20';
       default:
-        return 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20';
+        return 'bg-zinc-500/10 text-muted-foreground border-zinc-500/20';
     }
   };
 
@@ -107,7 +107,7 @@ export default function AssignedJobsPage() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-zinc-800 animate-pulse" />
-          <p className="text-sm text-zinc-500">Loading jobs...</p>
+          <p className="text-sm text-muted-foreground">Loading jobs...</p>
         </div>
       </div>
     );
@@ -118,7 +118,7 @@ export default function AssignedJobsPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total Jobs', value: stats.total, icon: Wrench, color: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' },
+          { label: 'Total Jobs', value: stats.total, icon: Wrench, color: 'bg-zinc-500/10 text-muted-foreground border-zinc-500/20' },
           { label: 'Pending', value: stats.pending, icon: Clock, color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
           { label: 'In Progress', value: stats.inProgress, icon: Wrench, color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
           { label: 'Completed', value: stats.completed, icon: CheckCircle2, color: 'bg-green-500/10 text-green-400 border-green-500/20' },
@@ -126,7 +126,7 @@ export default function AssignedJobsPage() {
           <div key={stat.label} className={`p-4 rounded-xl border ${stat.color}`}>
             <div className="flex items-center justify-between mb-2">
               <stat.icon className="w-5 h-5" strokeWidth={2} />
-              <span className="text-2xl font-bold text-white">{stat.value}</span>
+              <span className="text-2xl font-bold text-foreground">{stat.value}</span>
             </div>
             <p className="text-xs font-medium">{stat.label}</p>
           </div>
@@ -137,13 +137,13 @@ export default function AssignedJobsPage() {
       <div className="flex flex-col sm:flex-row gap-4">
         {/* Search */}
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search by customer, motorcycle, or service..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-700"
+            className="w-full pl-10 pr-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-700"
           />
         </div>
 
@@ -151,7 +151,7 @@ export default function AssignedJobsPage() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-zinc-700"
+          className="px-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-zinc-700"
         >
           <option value="all">All Status</option>
           <option value="pending">Pending</option>
@@ -162,12 +162,12 @@ export default function AssignedJobsPage() {
 
       {/* Jobs List */}
       {filteredJobs.length === 0 ? (
-        <div className="text-center py-12 bg-zinc-900 rounded-2xl border border-zinc-800">
+        <div className="text-center py-12 bg-muted rounded-2xl border border-border">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-zinc-800 flex items-center justify-center">
             <Wrench className="w-8 h-8 text-zinc-600" />
           </div>
-          <h3 className="text-lg font-semibold text-white mb-2">No Jobs Found</h3>
-          <p className="text-sm text-zinc-500">
+          <h3 className="text-lg font-semibold text-foreground mb-2">No Jobs Found</h3>
+          <p className="text-sm text-muted-foreground">
             {searchQuery || statusFilter !== 'all' 
               ? 'Try adjusting your filters' 
               : 'No jobs have been assigned to you yet'}
@@ -181,25 +181,25 @@ export default function AssignedJobsPage() {
               <div
                 key={job.id}
                 onClick={() => navigate(`/dashboard/mechanic/jobs/${job.id}`)}
-                className="group bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-zinc-700 transition-all cursor-pointer"
+                className="group bg-muted border border-border rounded-2xl p-6 hover:border-zinc-700 transition-all cursor-pointer"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-white">{job.customerName}</h3>
+                      <h3 className="text-lg font-semibold text-foreground">{job.customerName}</h3>
                       <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(job.statusCode)}`}>
                         <StatusIcon className="w-3.5 h-3.5" />
                         {job.status}
                       </span>
                     </div>
-                    <p className="text-sm text-zinc-400 mb-1">{job.motorcycleModel}</p>
-                    <p className="text-sm text-zinc-500">{job.serviceType}</p>
+                    <p className="text-sm text-muted-foreground mb-1">{job.motorcycleModel}</p>
+                    <p className="text-sm text-muted-foreground">{job.serviceType}</p>
                   </div>
-                  <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-zinc-400 group-hover:translate-x-1 transition-all" />
+                  <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-muted-foreground group-hover:translate-x-1 transition-all" />
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-zinc-800">
-                  <div className="flex items-center gap-4 text-xs text-zinc-500">
+                <div className="flex items-center justify-between pt-4 border-t border-border">
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <span>Labor: ₱{job.laborCost.toLocaleString()}</span>
                     <span>•</span>
                     <span>{new Date(job.createdAt).toLocaleDateString()}</span>

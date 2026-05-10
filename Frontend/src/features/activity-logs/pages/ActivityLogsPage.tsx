@@ -116,7 +116,7 @@ export default function ActivityLogsPage() {
     if (lower.includes('created') || lower.includes('added') || lower.includes('registered')) return 'text-emerald-400';
     if (lower.includes('updated') || lower.includes('set')) return 'text-blue-400';
     if (lower.includes('login') || lower.includes('logged in')) return 'text-violet-400';
-    if (lower.includes('logout') || lower.includes('logged out')) return 'text-zinc-400';
+    if (lower.includes('logout') || lower.includes('logged out')) return 'text-muted-foreground';
     return 'text-zinc-300';
   };
 
@@ -125,15 +125,15 @@ export default function ActivityLogsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-[28px] font-bold text-white tracking-tight">Activity Logs</h1>
-          <p className="text-[13px] sm:text-[14px] text-zinc-400 mt-1">
+          <h1 className="text-2xl sm:text-[28px] font-bold text-foreground tracking-tight">Activity Logs</h1>
+          <p className="text-[13px] sm:text-[14px] text-muted-foreground mt-1">
             Track all actions performed in your shop
           </p>
         </div>
         <button
           onClick={() => void fetchLogs(true)}
           disabled={refreshing}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-800 border border-zinc-700 text-sm font-medium text-zinc-300 hover:text-white hover:bg-zinc-700 transition-all disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-800 border border-zinc-700 text-sm font-medium text-zinc-300 hover:text-foreground hover:bg-zinc-700 transition-all disabled:opacity-50"
         >
           <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
           Refresh
@@ -142,40 +142,40 @@ export default function ActivityLogsPage() {
 
       {/* Search Bar */}
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
           type="text"
           placeholder="Search by user or action..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-11 pr-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-700 focus:border-transparent transition-all"
+          className="w-full pl-11 pr-4 py-3 bg-muted border border-border rounded-xl text-foreground placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-700 focus:border-transparent transition-all"
         />
       </div>
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <div className="bg-zinc-950 rounded-2xl border border-zinc-800 p-4">
+        <div className="bg-card rounded-2xl border border-border p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Activity className="w-4 h-4 text-zinc-500" />
-            <span className="text-xs text-zinc-500 font-medium">Total Events</span>
+            <Activity className="w-4 h-4 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground font-medium">Total Events</span>
           </div>
-          <p className="text-xl font-bold text-white">{meta?.total ?? logs.length}</p>
+          <p className="text-xl font-bold text-foreground">{meta?.total ?? logs.length}</p>
         </div>
-        <div className="bg-zinc-950 rounded-2xl border border-zinc-800 p-4">
+        <div className="bg-card rounded-2xl border border-border p-4">
           <div className="flex items-center gap-2 mb-2">
-            <User className="w-4 h-4 text-zinc-500" />
-            <span className="text-xs text-zinc-500 font-medium">Active Users</span>
+            <User className="w-4 h-4 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground font-medium">Active Users</span>
           </div>
-          <p className="text-xl font-bold text-white">
+          <p className="text-xl font-bold text-foreground">
             {new Set(logs.map((l) => l.user)).size}
           </p>
         </div>
-        <div className="bg-zinc-950 rounded-2xl border border-zinc-800 p-4 hidden sm:block">
+        <div className="bg-card rounded-2xl border border-border p-4 hidden sm:block">
           <div className="flex items-center gap-2 mb-2">
-            <Calendar className="w-4 h-4 text-zinc-500" />
-            <span className="text-xs text-zinc-500 font-medium">Today's Events</span>
+            <Calendar className="w-4 h-4 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground font-medium">Today's Events</span>
           </div>
-          <p className="text-xl font-bold text-white">{todayCount}</p>
+          <p className="text-xl font-bold text-foreground">{todayCount}</p>
         </div>
       </div>
 
@@ -186,25 +186,25 @@ export default function ActivityLogsPage() {
             type="date"
             value={dateFrom}
             onChange={(e) => setDateFrom(e.target.value)}
-            className="px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-700"
+            className="px-3 py-2 bg-muted border border-border rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-zinc-700"
           />
-          <span className="text-zinc-500 text-sm">to</span>
+          <span className="text-muted-foreground text-sm">to</span>
           <input
             type="date"
             value={dateTo}
             onChange={(e) => setDateTo(e.target.value)}
-            className="px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-700"
+            className="px-3 py-2 bg-muted border border-border rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-zinc-700"
           />
           <button
             onClick={handleDateFilter}
-            className="px-3 py-2 rounded-xl bg-zinc-800 border border-zinc-700 text-sm text-zinc-300 hover:text-white hover:bg-zinc-700 transition-colors"
+            className="px-3 py-2 rounded-xl bg-zinc-800 border border-zinc-700 text-sm text-zinc-300 hover:text-foreground hover:bg-zinc-700 transition-colors"
           >
             Filter
           </button>
           {(dateFrom || dateTo) && (
             <button
               onClick={handleClearDates}
-              className="px-3 py-2 rounded-xl text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+              className="px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-zinc-300 transition-colors"
             >
               Clear
             </button>
@@ -213,7 +213,7 @@ export default function ActivityLogsPage() {
         <button
           onClick={handleExport}
           disabled={logs.length === 0}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-800 border border-zinc-700 text-sm font-medium text-zinc-300 hover:text-white hover:bg-zinc-700 transition-all disabled:opacity-50 sm:ml-auto"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-800 border border-zinc-700 text-sm font-medium text-zinc-300 hover:text-foreground hover:bg-zinc-700 transition-all disabled:opacity-50 sm:ml-auto"
         >
           <Download className="w-4 h-4" />
           Export CSV
@@ -221,20 +221,20 @@ export default function ActivityLogsPage() {
       </div>
 
       {/* Logs Table */}
-      <div className="bg-zinc-950 rounded-2xl border border-zinc-800 overflow-hidden">
+      <div className="bg-card rounded-2xl border border-border overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-4">
+            <div className="w-14 h-14 rounded-2xl bg-muted border border-border flex items-center justify-center mb-4">
               <ScrollText className="w-6 h-6 text-zinc-600" strokeWidth={1.5} />
             </div>
-            <h3 className="text-sm font-semibold text-white mb-1">
+            <h3 className="text-sm font-semibold text-foreground mb-1">
               {search ? 'No matching logs' : 'No activity yet'}
             </h3>
-            <p className="text-xs text-zinc-500 max-w-xs">
+            <p className="text-xs text-muted-foreground max-w-xs">
               {search
                 ? 'Try adjusting your search terms.'
                 : 'Activity logs will appear here as actions are performed in your shop.'}
@@ -244,14 +244,14 @@ export default function ActivityLogsPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-zinc-800">
-                  <th className="text-left px-5 py-3.5 text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
+                <tr className="border-b border-border">
+                  <th className="text-left px-5 py-3.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                     User
                   </th>
-                  <th className="text-left px-5 py-3.5 text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
+                  <th className="text-left px-5 py-3.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                     Action
                   </th>
-                  <th className="text-left px-5 py-3.5 text-[11px] font-semibold text-zinc-500 uppercase tracking-wider hidden sm:table-cell">
+                  <th className="text-left px-5 py-3.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">
                     Date & Time
                   </th>
                 </tr>
@@ -260,12 +260,12 @@ export default function ActivityLogsPage() {
                 {filtered.map((log) => (
                   <tr
                     key={log.id}
-                    className="hover:bg-zinc-900/50 transition-colors"
+                    className="hover:bg-muted/50 transition-colors"
                   >
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-2.5">
                         <div className="w-7 h-7 rounded-lg bg-zinc-800 flex items-center justify-center shrink-0">
-                          <span className="text-[10px] font-bold text-zinc-400">
+                          <span className="text-[10px] font-bold text-muted-foreground">
                             {log.user
                               .split(' ')
                               .map((n) => n[0])
@@ -274,7 +274,7 @@ export default function ActivityLogsPage() {
                               .toUpperCase()}
                           </span>
                         </div>
-                        <span className="text-sm font-medium text-white truncate max-w-[140px]">
+                        <span className="text-sm font-medium text-foreground truncate max-w-[140px]">
                           {log.user}
                         </span>
                       </div>
@@ -283,7 +283,7 @@ export default function ActivityLogsPage() {
                       <span className={`text-sm ${getActionColor(log.action)}`}>{log.action}</span>
                     </td>
                     <td className="px-5 py-3.5 hidden sm:table-cell">
-                      <span className="text-xs text-zinc-500">{formatDate(log.timestamp)}</span>
+                      <span className="text-xs text-muted-foreground">{formatDate(log.timestamp)}</span>
                     </td>
                   </tr>
                 ))}
@@ -293,20 +293,20 @@ export default function ActivityLogsPage() {
         )}
 
         {meta && meta.lastPage > 1 && (
-          <div className="flex items-center justify-between px-5 py-3 border-t border-zinc-800">
-            <p className="text-xs text-zinc-500">Page {meta.currentPage} of {meta.lastPage} — {meta.total} total</p>
+          <div className="flex items-center justify-between px-5 py-3 border-t border-border">
+            <p className="text-xs text-muted-foreground">Page {meta.currentPage} of {meta.lastPage} — {meta.total} total</p>
             <div className="flex items-center gap-1">
               <button
                 onClick={() => handlePageChange(page - 1)}
                 disabled={page <= 1}
-                className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="p-1.5 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={() => handlePageChange(page + 1)}
                 disabled={page >= meta.lastPage}
-                className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="p-1.5 rounded-lg hover:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
