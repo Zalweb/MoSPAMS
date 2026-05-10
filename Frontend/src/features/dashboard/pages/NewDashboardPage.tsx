@@ -182,8 +182,8 @@ export default function DashboardPage() {
           >
             <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-                  <Wrench className="w-5 h-5 text-blue-400" strokeWidth={2} />
+                <div className="w-10 h-10 rounded-xl bg-[rgb(var(--color-primary-rgb))]/10 flex items-center justify-center border border-[rgb(var(--color-primary-rgb))]/20">
+                  <Wrench className="w-5 h-5 text-[rgb(var(--color-primary-rgb))]" strokeWidth={2} />
                 </div>
                 <div>
                   <h3 className="text-base font-semibold text-card-foreground">Top Service Types</h3>
@@ -217,7 +217,7 @@ export default function DashboardPage() {
                           initial={{ width: 0 }}
                           animate={{ width: `${percentage}%` }}
                           transition={{ delay: 0.3 + idx * 0.1, duration: 0.8, ease: 'easeOut' }}
-                          className="h-full bg-blue-500 rounded-full"
+                          className="h-full bg-[rgb(var(--color-primary-rgb))] rounded-full"
                         />
                       </div>
                     </div>
@@ -235,8 +235,8 @@ export default function DashboardPage() {
           >
             <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center border border-green-500/20">
-                  <DollarSign className="w-5 h-5 text-green-400" strokeWidth={2} />
+                <div className="w-10 h-10 rounded-xl bg-[rgb(var(--color-primary-rgb))]/10 flex items-center justify-center border border-[rgb(var(--color-primary-rgb))]/20">
+                  <DollarSign className="w-5 h-5 text-[rgb(var(--color-primary-rgb))]" strokeWidth={2} />
                 </div>
                 <div>
                   <h3 className="text-base font-semibold text-card-foreground">Payment Methods</h3>
@@ -262,7 +262,7 @@ export default function DashboardPage() {
                       initial={{ width: 0 }}
                       animate={{ width: `${(metrics.paymentMethods.cash / (metrics.paymentMethods.cash + metrics.paymentMethods.gcash)) * 100}%` }}
                       transition={{ delay: 0.4, duration: 0.8, ease: 'easeOut' }}
-                      className="h-full bg-green-500"
+                      className="h-full bg-[rgb(var(--color-primary-rgb))]"
                     />
                   </div>
                 </div>
@@ -283,7 +283,7 @@ export default function DashboardPage() {
                       initial={{ width: 0 }}
                       animate={{ width: `${(metrics.paymentMethods.gcash / (metrics.paymentMethods.cash + metrics.paymentMethods.gcash)) * 100}%` }}
                       transition={{ delay: 0.5, duration: 0.8, ease: 'easeOut' }}
-                      className="h-full bg-blue-500"
+                      className="h-full bg-[rgb(var(--color-primary-rgb))]/60"
                     />
                   </div>
                 </div>
@@ -314,8 +314,8 @@ export default function DashboardPage() {
           >
             <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
-                  <AlertTriangle className="w-5 h-5 text-amber-400" strokeWidth={2} />
+                <div className="w-10 h-10 rounded-xl bg-[rgb(var(--color-primary-rgb))]/10 flex items-center justify-center border border-[rgb(var(--color-primary-rgb))]/20">
+                  <AlertTriangle className="w-5 h-5 text-[rgb(var(--color-primary-rgb))]" strokeWidth={2} />
                 </div>
                 <div>
                   <h3 className="text-base font-semibold text-card-foreground">Low Stock Alerts</h3>
@@ -323,7 +323,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               {lowStock.length > 0 && (
-                <span className="text-xs font-semibold text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-full border border-amber-500/20">
+                <span className="text-xs font-semibold text-[rgb(var(--color-primary-rgb))] bg-[rgb(var(--color-primary-rgb))]/10 px-3 py-1.5 rounded-full border border-[rgb(var(--color-primary-rgb))]/20">
                   {lowStock.length} items
                 </span>
               )}
@@ -331,8 +331,8 @@ export default function DashboardPage() {
             <div className="divide-y divide-border dark:divide-zinc-800/30 max-h-80 overflow-y-auto">
               {lowStock.length === 0 ? (
                 <div className="py-12 text-center">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-green-500/10 flex items-center justify-center border border-green-500/20">
-                    <Package className="w-6 h-6 text-green-400" />
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-[rgb(var(--color-primary-rgb))]/10 flex items-center justify-center border border-[rgb(var(--color-primary-rgb))]/20">
+                    <Package className="w-6 h-6 text-[rgb(var(--color-primary-rgb))]" />
                   </div>
                   <p className="text-sm text-muted-foreground">All stock levels are healthy</p>
                 </div>
@@ -385,8 +385,8 @@ export default function DashboardPage() {
           >
             <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-secondary dark:bg-zinc-800 flex items-center justify-center">
-                  <Wrench className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
+                <div className="w-10 h-10 rounded-xl bg-[rgb(var(--color-primary-rgb))]/10 flex items-center justify-center border border-[rgb(var(--color-primary-rgb))]/20">
+                  <Wrench className="w-5 h-5 text-[rgb(var(--color-primary-rgb))]" strokeWidth={2} />
                 </div>
                 <div>
                   <h3 className="text-base font-semibold text-card-foreground">Recent Services</h3>
@@ -521,8 +521,8 @@ export default function DashboardPage() {
           <motion.div {...fadeUp(0.5)} className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 dark:hover:border-border dark:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-                  <Package className="w-5 h-5 text-blue-400" />
+                <div className="w-10 h-10 rounded-xl bg-[rgb(var(--color-primary-rgb))]/10 flex items-center justify-center border border-[rgb(var(--color-primary-rgb))]/20">
+                  <Package className="w-5 h-5 text-[rgb(var(--color-primary-rgb))]" />
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-wide">Inventory Value</p>
@@ -548,7 +548,7 @@ export default function DashboardPage() {
             </div>
             <div className="mt-4 h-1.5 bg-secondary dark:bg-zinc-800 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-blue-500" 
+                className="h-full bg-[rgb(var(--color-primary-rgb))]" 
                 style={{ width: `${metrics.inventoryHealth ?? 100}%` }} 
               />
             </div>
@@ -558,8 +558,8 @@ export default function DashboardPage() {
           <motion.div {...fadeUp(0.55)} className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 dark:hover:border-border dark:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
-                  <Users className="w-5 h-5 text-purple-400" />
+                <div className="w-10 h-10 rounded-xl bg-[rgb(var(--color-primary-rgb))]/10 flex items-center justify-center border border-[rgb(var(--color-primary-rgb))]/20">
+                  <Users className="w-5 h-5 text-[rgb(var(--color-primary-rgb))]" />
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-wide">Customer Base</p>
@@ -584,7 +584,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="mt-4 h-1.5 bg-secondary dark:bg-zinc-800 rounded-full overflow-hidden">
-              <div className="h-full bg-purple-500" style={{ width: `${Math.min(100, repeatRate)}%` }} />
+              <div className="h-full bg-[rgb(var(--color-primary-rgb))]" style={{ width: `${Math.min(100, repeatRate)}%` }} />
             </div>
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           </motion.div>
@@ -592,8 +592,8 @@ export default function DashboardPage() {
           <motion.div {...fadeUp(0.6)} className="relative group bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 dark:hover:border-border dark:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center border border-green-500/20">
-                  <TrendingUp className="w-5 h-5 text-green-400" />
+                <div className="w-10 h-10 rounded-xl bg-[rgb(var(--color-primary-rgb))]/10 flex items-center justify-center border border-[rgb(var(--color-primary-rgb))]/20">
+                  <TrendingUp className="w-5 h-5 text-[rgb(var(--color-primary-rgb))]" />
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-wide">Performance</p>
@@ -618,7 +618,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="mt-4 h-1.5 bg-secondary dark:bg-zinc-800 rounded-full overflow-hidden">
-              <div className="h-full bg-green-500" style={{ width: `${completionRate}%` }} />
+              <div className="h-full bg-[rgb(var(--color-primary-rgb))]" style={{ width: `${completionRate}%` }} />
             </div>
             <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           </motion.div>
