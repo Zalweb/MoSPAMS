@@ -1228,10 +1228,10 @@ class SuperAdminController extends Controller
             ->values();
 
         $monthlySubscriptions = DB::table('subscription_payments')
-            ->selectRaw("DATE_FORMAT(payment_date, '%Y-%m') as month, SUM(amount) as total")
+            ->selectRaw("DATE_FORMAT(paid_at, '%Y-%m') as month, SUM(amount) as total")
             ->whereRaw('UPPER(payment_status) = ?', ['PAID'])
-            ->where('payment_date', '>=', now()->subMonths(12))
-            ->groupByRaw("DATE_FORMAT(payment_date, '%Y-%m')")
+            ->where('paid_at', '>=', now()->subMonths(12))
+            ->groupByRaw("DATE_FORMAT(paid_at, '%Y-%m')")
             ->orderBy('month')
             ->get()
             ->map(fn ($r) => ['month' => $r->month, 'total' => (float) $r->total])
