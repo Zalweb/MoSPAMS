@@ -238,7 +238,7 @@ function App() {
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route element={<RequireAuth />}>
                       <Route element={<RequireActiveShop />}>
-                        <Route path="dashboard" element={<DashboardLayout />}>
+                        <Route path="dashboard" element={<ThemeProvider><DashboardLayout /></ThemeProvider>}>
                           <Route index element={<DashboardIndexRedirect />} />
                           <Route path="inventory" element={<InventoryPage />} />
                           <Route path="services" element={<ServicesPage />} />
