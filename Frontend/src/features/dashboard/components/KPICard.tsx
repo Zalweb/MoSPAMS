@@ -32,7 +32,7 @@ export function KPICard({ title, value, change, comparison, trend, icon: Icon, l
         {/* Content */}
         <div className="relative z-10">
           <div className="flex items-start justify-between mb-3">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[rgb(var(--color-primary-rgb))]/10 to-[rgb(var(--color-secondary-rgb))]/10 flex items-center justify-center border border-[rgb(var(--color-primary-rgb))]/20">
+            <div className="w-11 h-11 rounded-xl bg-[rgb(var(--color-primary-rgb))]/10 flex items-center justify-center border border-[rgb(var(--color-primary-rgb))]/20">
               <Icon className="w-5 h-5 text-[rgb(var(--color-primary-rgb))]" strokeWidth={2} />
             </div>
             

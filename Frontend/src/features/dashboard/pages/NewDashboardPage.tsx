@@ -217,7 +217,7 @@ export default function DashboardPage() {
                           initial={{ width: 0 }}
                           animate={{ width: `${percentage}%` }}
                           transition={{ delay: 0.3 + idx * 0.1, duration: 0.8, ease: 'easeOut' }}
-                          className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full"
+                          className="h-full bg-blue-500 rounded-full"
                         />
                       </div>
                     </div>
@@ -262,7 +262,7 @@ export default function DashboardPage() {
                       initial={{ width: 0 }}
                       animate={{ width: `${(metrics.paymentMethods.cash / (metrics.paymentMethods.cash + metrics.paymentMethods.gcash)) * 100}%` }}
                       transition={{ delay: 0.4, duration: 0.8, ease: 'easeOut' }}
-                      className="h-full bg-gradient-to-r from-green-500 to-green-400"
+                      className="h-full bg-green-500"
                     />
                   </div>
                 </div>
@@ -283,7 +283,7 @@ export default function DashboardPage() {
                       initial={{ width: 0 }}
                       animate={{ width: `${(metrics.paymentMethods.gcash / (metrics.paymentMethods.cash + metrics.paymentMethods.gcash)) * 100}%` }}
                       transition={{ delay: 0.5, duration: 0.8, ease: 'easeOut' }}
-                      className="h-full bg-gradient-to-r from-blue-500 to-blue-400"
+                      className="h-full bg-blue-500"
                     />
                   </div>
                 </div>
@@ -548,7 +548,7 @@ export default function DashboardPage() {
             </div>
             <div className="mt-4 h-1.5 bg-secondary dark:bg-zinc-800 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-gradient-to-r from-blue-500 to-blue-400" 
+                className="h-full bg-blue-500" 
                 style={{ width: `${metrics.inventoryHealth ?? 100}%` }} 
               />
             </div>
@@ -584,7 +584,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="mt-4 h-1.5 bg-secondary dark:bg-zinc-800 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-purple-500 to-purple-400" style={{ width: `${Math.min(100, repeatRate)}%` }} />
+              <div className="h-full bg-purple-500" style={{ width: `${Math.min(100, repeatRate)}%` }} />
             </div>
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           </motion.div>
@@ -618,7 +618,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="mt-4 h-1.5 bg-secondary dark:bg-zinc-800 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-green-500 to-green-400" style={{ width: `${completionRate}%` }} />
+              <div className="h-full bg-green-500" style={{ width: `${completionRate}%` }} />
             </div>
             <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           </motion.div>

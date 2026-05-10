@@ -54,7 +54,7 @@ export function AIAssistant({ metrics }: AIAssistantProps) {
       <div className="relative bg-card dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-border dark:border-zinc-700/50 hover:border-zinc-300/50 transition-all duration-300">
         <div className="flex items-center justify-between p-6 border-b border-border/50">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[rgb(var(--color-primary-rgb))]/20 to-[rgb(var(--color-secondary-rgb))]/20 flex items-center justify-center border border-[rgb(var(--color-primary-rgb))]/30">
+            <div className="w-10 h-10 rounded-xl bg-[rgb(var(--color-primary-rgb))]/20 flex items-center justify-center border border-[rgb(var(--color-primary-rgb))]/30">
               <Sparkles className="w-5 h-5 text-[rgb(var(--color-primary-rgb))]" />
             </div>
             <div>
