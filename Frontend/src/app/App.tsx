@@ -13,7 +13,7 @@ import type { Role } from '@/shared/types';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import DashboardLayout from '@/features/layout/pages/DashboardLayout';
 import SuperAdminLayout from '@/features/superadmin/pages/SuperAdminLayout';
-import LoginPage from '@/features/auth/LoginPage';
+import { ThemeProvider } from '@/shared/contexts/ThemeContext';
 import ForgotPasswordPage from '@/features/auth/ForgotPasswordPage';
 import ResetPasswordPage from '@/features/auth/ResetPasswordPage';
 import LandingPage from '@/features/landing/LandingPage';
@@ -192,7 +192,7 @@ function App() {
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route element={<RequireAuth />}>
                       <Route element={<RequireSuperAdmin />}>
-                        <Route path="superadmin" element={<SuperAdminLayout />}>
+                        <Route path="superadmin" element={<ThemeProvider><SuperAdminLayout /></ThemeProvider>}>
                           <Route index element={<Navigate to="/superadmin/analytics" replace />} />
                           <Route path="analytics" element={<SuperAdminAnalyticsPage />} />
 
