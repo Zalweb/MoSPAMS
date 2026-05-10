@@ -19,10 +19,13 @@ import {
   TrendingUp,
   Users,
   User,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { apiGet } from '@/shared/lib/api';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/features/auth/context/AuthContext';
+import { useTheme } from '@/shared/contexts/ThemeContext';
 
 const NAV_SECTIONS = [
   {
@@ -87,6 +90,7 @@ const NAV_SECTIONS = [
 
 export default function SuperAdminLayout() {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -170,6 +174,14 @@ export default function SuperAdminLayout() {
           <div className="flex-1" />
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-xl hover:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors mr-1"
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            >
+              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+
             <div className="relative">
               <button
                 onClick={() => { setNotifOpen(o => !o); setProfileOpen(false); }}
