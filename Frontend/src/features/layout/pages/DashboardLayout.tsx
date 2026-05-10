@@ -122,7 +122,7 @@ export default function DashboardLayout() {
             className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm"
             onClick={() => setSidebarOpen(false)}
           />
-              )) : null}
+        )}
       </AnimatePresence>
 
       {/* Sidebar */}
@@ -217,7 +217,7 @@ export default function DashboardLayout() {
                       <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                         {unreadCount > 9 ? '9+' : unreadCount}
                       </span>
-              )) : null}
+              )}
                   </button>
 
                   {notifOpen && (
@@ -234,7 +234,7 @@ export default function DashboardLayout() {
                             <button onClick={() => void markAllRead()} className="text-xs text-zinc-500 hover:text-white transition-colors">
                               Mark all read
                             </button>
-              )) : null}
+              )}
                         </div>
                         <div className="max-h-[320px] overflow-y-auto">
                           {notifications.length === 0 ? (
@@ -314,7 +314,7 @@ export default function DashboardLayout() {
                               Settings
                             </button>
                           </>
-              )) : null}
+              )}
                         {role === 'Customer' && (
                           <button
                             onClick={() => { setProfileOpen(false); navigate('/dashboard/customer/settings'); }}
@@ -323,7 +323,7 @@ export default function DashboardLayout() {
                             <Settings className="w-[18px] h-[18px]" strokeWidth={1.5} />
                             Profile Settings
                           </button>
-              )) : null}
+              )}
                       </div>
                       <button
                         onClick={() => { setProfileOpen(false); handleLogout(); }}
@@ -334,7 +334,7 @@ export default function DashboardLayout() {
                       </button>
                     </motion.div>
                   </>
-              )) : null}
+              )}
               </div>
             </div>
           </div>
