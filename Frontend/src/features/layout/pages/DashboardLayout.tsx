@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Package, Wrench, ShoppingCart,
   BarChart3, Shield, LogOut, Menu, X, ClipboardCheck,
   Home, Calendar, CreditCard, ScrollText, Settings, Bike, Bell, Users, Sun, Moon,
-  ChevronLeft, ChevronRight
+  ChevronLeft
 } from 'lucide-react';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { useTenantBranding } from '@/shared/contexts/TenantBrandingContext';
