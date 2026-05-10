@@ -112,7 +112,7 @@ export default function SuperAdminLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-muted-foreground dark:text-zinc-300 font-sans selection:bg-muted dark:bg-zinc-700 flex">
+    <div className="min-h-screen bg-background text-muted-foreground dark:text-zinc-300 font-sans selection:bg-muted flex">
       {sidebarOpen && (
         <button
           className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40 lg:hidden"
