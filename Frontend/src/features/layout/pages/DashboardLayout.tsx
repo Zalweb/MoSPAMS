@@ -12,22 +12,39 @@ import { NAV_ACCESS } from '@/shared/lib/permissions';
 import { normalizeRole } from '@/shared/lib/roles';
 import { apiGet, apiMutation } from '@/shared/lib/api';
 
-const navItems: { label: string; to: string; icon: typeof LayoutDashboard; end?: boolean }[] = [
-  { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard, end: true },
-  { label: 'Inventory', to: '/dashboard/inventory', icon: Package },
-  { label: 'Service Jobs', to: '/dashboard/services', icon: Wrench },
-  { label: 'Sales', to: '/dashboard/sales', icon: ShoppingCart },
-  { label: 'Reports', to: '/dashboard/reports', icon: BarChart3 },
-  { label: 'Users', to: '/dashboard/users', icon: Shield },
-  { label: 'Approvals', to: '/dashboard/approvals', icon: ClipboardCheck },
-  // Customer navigation
-  { label: 'Home', to: '/dashboard/customer', icon: Home, end: true },
-  { label: 'Book', to: '/dashboard/customer/book', icon: Calendar },
-  { label: 'History', to: '/dashboard/customer/history', icon: Wrench },
-  { label: 'Payments', to: '/dashboard/customer/payments', icon: CreditCard },
-  { label: 'Garage', to: '/dashboard/customer/vehicles', icon: Bike },
-  // Mechanic navigation
-  { label: 'My Jobs', to: '/dashboard/mechanic/jobs', icon: Wrench },
+const navGroups = [
+  {
+    title: 'MAIN',
+    items: [
+      { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard, end: true },
+    ]
+  },
+  {
+    title: 'INVENTORY & SERVICES',
+    items: [
+      { label: 'Inventory', to: '/dashboard/inventory', icon: Package },
+      { label: 'Service Jobs', to: '/dashboard/services', icon: Wrench },
+      { label: 'Sales', to: '/dashboard/sales', icon: ShoppingCart },
+    ]
+  },
+  {
+    title: 'REPORTS & USERS',
+    items: [
+      { label: 'Reports', to: '/dashboard/reports', icon: BarChart3 },
+      { label: 'Users', to: '/dashboard/users', icon: Shield },
+      { label: 'Approvals', to: '/dashboard/approvals', icon: ClipboardCheck },
+    ]
+  },
+  {
+    title: 'CUSTOMER AREA',
+    items: [
+      { label: 'Home', to: '/dashboard/customer', icon: Home, end: true },
+      { label: 'Book Service', to: '/dashboard/customer/book', icon: Calendar },
+      { label: 'History', to: '/dashboard/customer/history', icon: Wrench },
+      { label: 'Payments', to: '/dashboard/customer/payments', icon: CreditCard },
+      { label: 'My Garage', to: '/dashboard/customer/vehicles', icon: Bike },
+    ]
+  }
 ];
 
 export default function DashboardLayout() {
@@ -81,9 +98,13 @@ export default function DashboardLayout() {
     } catch { /* silent */ }
   };
 
-  const visibleNav = navItems.filter(item => role ? (NAV_ACCESS[item.to] ?? []).includes(role) : false);
+  const visibleGroups = navGroups.map(group => ({
+    ...group,
+    items: group.items.filter(item => role ? (NAV_ACCESS[item.to] ?? []).includes(role) : false)
+  })).filter(group => group.items.length > 0);
 
-  const currentLabel = navItems.find(n => n.end ? location.pathname === n.to : location.pathname.startsWith(n.to) && n.to !== '/dashboard')?.label
+  const allNavItems = navGroups.flatMap(g => g.items);
+  const currentLabel = allNavItems.find(n => n.end ? location.pathname === n.to : location.pathname.startsWith(n.to) && n.to !== '/dashboard')?.label
     ?? (location.pathname === '/dashboard' ? 'Dashboard' : '');
 
   const handleLogout = () => { logout(); navigate('/', { replace: true }); };
@@ -102,28 +123,24 @@ export default function DashboardLayout() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 z-50 h-screen bg-zinc-900 border-r border-zinc-800 flex flex-col w-[260px] shrink-0 transition-transform duration-300 ease-out ${
+        className={`fixed lg:sticky top-0 left-0 z-50 h-screen bg-zinc-950 border-r border-zinc-800 flex flex-col w-[260px] shrink-0 transition-transform duration-300 ease-out ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3 px-5 h-[64px] border-b border-zinc-800">
-          <motion.div
-            className="w-9 h-9 rounded-xl bg-transparent border border-zinc-800/80 flex items-center justify-center overflow-hidden"
-            whileHover={{ rotate: 10 }}
-            transition={{ type: 'spring', stiffness: 400 }}
-          >
+        <div className="flex items-center gap-3 px-6 h-[70px] border-b border-zinc-800 shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center overflow-hidden shrink-0">
             <img
               src={branding?.logoUrl || '/images/logo.svg'}
               alt={branding?.shopName || 'MoSPAMS'}
-              className="w-7 h-7 object-contain"
+              className="w-6 h-6 object-contain"
             />
-          </motion.div>
+          </div>
           <div>
-            <span className="text-sm font-bold text-white tracking-tight leading-none">
+            <span className="text-[15px] font-bold text-white tracking-tight leading-none block">
               Mo<span className="text-zinc-500">SPAMS</span>
             </span>
-            <span className="block text-[10px] text-zinc-600 font-medium leading-none mt-1">
+            <span className="block text-[10px] text-zinc-400 font-semibold tracking-wider leading-none mt-1">
               {(branding?.shopName || user?.shopName || 'Management').toUpperCase()}
             </span>
           </div>
@@ -136,32 +153,34 @@ export default function DashboardLayout() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {visibleNav.map((item, index) => (
-            <motion.div
-              key={item.to}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.03 }}
-            >
-              <NavLink
-                to={item.to}
-                end={item.end}
-                onClick={() => setSidebarOpen(false)}
-                className={({ isActive }) => `w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                  isActive
-                    ? 'bg-white text-black shadow-lg shadow-black/20'
-                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
-                }`}
-              >
-                <item.icon className="w-[18px] h-[18px]" strokeWidth={1.5} />
-                <span>{item.label}</span>
-              </NavLink>
-            </motion.div>
+        <nav className="flex-1 px-4 py-6 space-y-6 overflow-y-auto custom-scrollbar">
+          {visibleGroups.map((group, idx) => (
+            <div key={idx}>
+              <h3 className="px-3 text-[10px] font-bold text-zinc-500 tracking-wider mb-2 uppercase">{group.title}</h3>
+              <div className="space-y-1">
+                {group.items.map((item) => {
+                  const isActive = location.pathname === item.to || (item.to !== '/dashboard' && location.pathname.startsWith(item.to));
+                  return (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      end={item.end}
+                      onClick={() => setSidebarOpen(false)}
+                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 group ${
+                        isActive
+                          ? 'bg-zinc-800 text-white border-l-2 border-white'
+                          : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
+                      }`}
+                    >
+                      <item.icon className={`w-[16px] h-[16px] transition-colors ${isActive ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'}`} strokeWidth={1.75} />
+                      <span>{item.label}</span>
+                    </NavLink>
+                  );
+                })}
+              </div>
+            </div>
           ))}
         </nav>
-
-
       </aside>
 
       {/* Main Content */}
