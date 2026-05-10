@@ -55,6 +55,8 @@ export interface DashboardMetrics {
   inventoryValue?: number;
   lowStockCount?: number;
   avgRevenuePerCustomer?: number;
+  avgJobTime?: number;
+  repeatRate?: number;
   revenueSparkline7d?: number[];
   partsUsageSparkline7d?: number[];
   lowStock?: Array<{

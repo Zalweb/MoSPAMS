@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
-import { ScrollText, Search, RefreshCw, Calendar, User, Activity } from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
+import { ScrollText, Search, RefreshCw, Calendar, User, Activity, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { apiGet } from '@/shared/lib/api';
+import { downloadCSV, toCSV } from '@/shared/lib/csv';
 import { toast } from 'sonner';
 
 interface LogEntry {
@@ -15,24 +16,78 @@ export default function ActivityLogsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [todayCount, setTodayCount] = useState(0);
+  const [meta, setMeta] = useState<{ currentPage: number; lastPage: number; total: number } | null>(null);
+  const [page, setPage] = useState(1);
 
-  const fetchLogs = async (showToast = false) => {
+  const buildParams = useCallback((p: number) => {
+    const params = new URLSearchParams();
+    params.set('per_page', '50');
+    params.set('page', String(p));
+    if (dateFrom) params.set('from', dateFrom);
+    if (dateTo) params.set('to', dateTo);
+    return params.toString();
+  }, [dateFrom, dateTo]);
+
+  const fetchLogs = useCallback(async (showToast = false, p = 1) => {
     try {
       if (showToast) setRefreshing(true);
-      const res = await apiGet<{ data: LogEntry[] }>('/api/activity-logs');
+      const res = await apiGet<{ data: LogEntry[]; meta: { current_page: number; last_page: number; total: number } | null }>(
+        `/api/activity-logs?${buildParams(p)}`
+      );
       setLogs(res.data);
+      setMeta(res.meta ? { currentPage: res.meta.current_page, lastPage: res.meta.last_page, total: res.meta.total } : null);
+      setPage(res.meta?.current_page ?? 1);
       if (showToast) toast.success('Logs refreshed');
+
+      // Fetch today's count separately
+      const today = new Date().toISOString().slice(0, 10);
+      const todayRes = await apiGet<{ meta?: { total: number } }>(`/api/activity-logs?from=${today}&to=${today}&per_page=1`);
+      setTodayCount(todayRes.meta?.total ?? 0);
     } catch {
       toast.error('Failed to load activity logs');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [buildParams]);
 
   useEffect(() => {
     void fetchLogs();
-  }, []);
+  }, [fetchLogs]);
+
+  const handlePageChange = (newPage: number) => {
+    void fetchLogs(false, newPage);
+  };
+
+  const handleDateFilter = () => {
+    setLoading(true);
+    void fetchLogs(false, 1);
+  };
+
+  const handleClearDates = () => {
+    setDateFrom('');
+    setDateTo('');
+    setLoading(true);
+    void fetchLogs(false, 1);
+  };
+
+  const handleExport = () => {
+    if (logs.length === 0) return;
+    const rows = logs.map(l => ({
+      user: l.user,
+      action: l.action,
+      timestamp: l.timestamp ? new Date(l.timestamp).toISOString() : '',
+    }));
+    downloadCSV(`activity-logs-${new Date().toISOString().slice(0, 10)}.csv`, toCSV(rows, [
+      { key: 'user', label: 'User' },
+      { key: 'action', label: 'Action' },
+      { key: 'timestamp', label: 'Timestamp' },
+    ]));
+    toast.success('Logs exported to CSV');
+  };
 
   const filtered = search
     ? logs.filter(
@@ -104,7 +159,7 @@ export default function ActivityLogsPage() {
             <Activity className="w-4 h-4 text-zinc-500" />
             <span className="text-xs text-zinc-500 font-medium">Total Events</span>
           </div>
-          <p className="text-xl font-bold text-white">{logs.length}</p>
+          <p className="text-xl font-bold text-white">{meta?.total ?? logs.length}</p>
         </div>
         <div className="bg-zinc-950 rounded-2xl border border-zinc-800 p-4">
           <div className="flex items-center gap-2 mb-2">
@@ -118,10 +173,51 @@ export default function ActivityLogsPage() {
         <div className="bg-zinc-950 rounded-2xl border border-zinc-800 p-4 hidden sm:block">
           <div className="flex items-center gap-2 mb-2">
             <Calendar className="w-4 h-4 text-zinc-500" />
-            <span className="text-xs text-zinc-500 font-medium">Showing</span>
+            <span className="text-xs text-zinc-500 font-medium">Today's Events</span>
           </div>
-          <p className="text-xl font-bold text-white">{filtered.length}</p>
+          <p className="text-xl font-bold text-white">{todayCount}</p>
         </div>
+      </div>
+
+      {/* Date Filter + Export */}
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+        <div className="flex items-center gap-2">
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            className="px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-700"
+          />
+          <span className="text-zinc-500 text-sm">to</span>
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            className="px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-700"
+          />
+          <button
+            onClick={handleDateFilter}
+            className="px-3 py-2 rounded-xl bg-zinc-800 border border-zinc-700 text-sm text-zinc-300 hover:text-white hover:bg-zinc-700 transition-colors"
+          >
+            Filter
+          </button>
+          {(dateFrom || dateTo) && (
+            <button
+              onClick={handleClearDates}
+              className="px-3 py-2 rounded-xl text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+        <button
+          onClick={handleExport}
+          disabled={logs.length === 0}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-800 border border-zinc-700 text-sm font-medium text-zinc-300 hover:text-white hover:bg-zinc-700 transition-all disabled:opacity-50 sm:ml-auto"
+        >
+          <Download className="w-4 h-4" />
+          Export CSV
+        </button>
       </div>
 
       {/* Logs Table */}
@@ -193,6 +289,28 @@ export default function ActivityLogsPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {meta && meta.lastPage > 1 && (
+          <div className="flex items-center justify-between px-5 py-3 border-t border-zinc-800">
+            <p className="text-xs text-zinc-500">Page {meta.currentPage} of {meta.lastPage} — {meta.total} total</p>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => handlePageChange(page - 1)}
+                disabled={page <= 1}
+                className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => handlePageChange(page + 1)}
+                disabled={page >= meta.lastPage}
+                className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         )}
       </div>

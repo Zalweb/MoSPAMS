@@ -32,6 +32,8 @@ const ReportsPage = lazy(() => import('@/features/reports/pages/ReportsPage'));
 const UsersPage = lazy(() => import('@/features/users/pages/UsersPage'));
 const ApprovalsPage = lazy(() => import('@/features/users/pages/ApprovalsPage'));
 const CustomerDashboard = lazy(() => import('@/features/customers/pages/CustomerDashboard'));
+const CustomerManagementPage = lazy(() => import('@/features/customers/pages/CustomerManagementPage'));
+                            <Route path="mechanics" element={<MechanicManagementPage />} />
 const BookService = lazy(() => import('@/features/customers/pages/BookService'));
 const ServiceHistory = lazy(() => import('@/features/customers/pages/ServiceHistory'));
 const Payments = lazy(() => import('@/features/customers/pages/Payments'));
@@ -47,6 +49,7 @@ const AssignedJobsPage = lazy(() => import('@/features/mechanic/pages/AssignedJo
 const JobDetailsPage = lazy(() => import('@/features/mechanic/pages/JobDetailsPage'));
 
 // SuperAdmin pages
+const MechanicManagementPage = lazy(() => import('@/features/mechanic/pages/MechanicManagementPage'));
 const SuperAdminAnalyticsPage = lazy(() => import('@/features/superadmin/pages/SuperAdminAnalyticsPage'));
 const SuperAdminShopsPage = lazy(() => import('@/features/superadmin/pages/SuperAdminShopsPage'));
 const PendingShopsPage = lazy(() => import('@/features/superadmin/pages/PendingShopsPage'));
@@ -246,6 +249,7 @@ function App() {
                             <Route path="approvals" element={<ApprovalsPage />} />
                             <Route path="activity-logs" element={<ActivityLogsPage />} />
                             <Route path="settings" element={<SettingsPage />} />
+                            <Route path="customers" element={<CustomerManagementPage />} />
                           </Route>
                           <Route element={<RequireCustomer />}>
                             <Route path="customer" element={<CustomerDashboard />} />

@@ -150,6 +150,24 @@ class MospamsController extends Controller
         // Average revenue per customer
         $avgRevenuePerCustomer = $totalCustomers > 0 ? $totalRevenue / $totalCustomers : 0;
 
+        // Average job completion time in days
+        $avgJobTime = DB::table('service_jobs')
+            ->where('shop_id_fk', $shopId)
+            ->whereNotNull('completion_date')
+            ->selectRaw('AVG(DATEDIFF(completion_date, job_date)) as avg_days')
+            ->value('avg_days');
+        $avgJobTime = $avgJobTime ? round((float) $avgJobTime, 1) : 0;
+
+        // Repeat customer rate
+        $repeatCustomerCount = DB::table('service_jobs')
+            ->where('shop_id_fk', $shopId)
+            ->groupBy('customer_id_fk')
+            ->havingRaw('COUNT(*) > 1')
+            ->select('customer_id_fk')
+            ->get()
+            ->count();
+        $repeatRate = $totalCustomers > 0 ? round(($repeatCustomerCount / $totalCustomers) * 100, 1) : 0;
+
         // 7-day revenue sparkline
         $revenueSparkline = [];
         for ($i = 6; $i >= 0; $i--) {
@@ -263,6 +281,8 @@ class MospamsController extends Controller
                 'inventory_value' => $inventoryValue,
                 'low_stock_count' => $lowStockParts->count(),
                 'avg_revenue_per_customer' => round($avgRevenuePerCustomer, 2),
+                'avg_job_time' => $avgJobTime,
+                'repeat_rate' => $repeatRate,
             ],
             'charts' => [
                 'revenue_by_day' => $revenueByDay,
@@ -453,6 +473,17 @@ class MospamsController extends Controller
             $this->recordMovement($partId, $request->user()->user_id, $data['type'], $data['qty'], $data['reason']);
             $this->log($request, 'Recorded stock '.$data['type'].' for '.$part->part_name, 'stock_movements', $partId);
         });
+
+        $updatedPart = DB::table('parts')->where('part_id', $partId)->first();
+        if ($updatedPart && $updatedPart->stock_quantity <= $updatedPart->reorder_level) {
+            $this->notifyOwner(
+                'low_stock',
+                'Low Stock Alert',
+                "{$updatedPart->part_name} is low on stock ({$updatedPart->stock_quantity} remaining, reorder at {$updatedPart->reorder_level}).",
+                'parts',
+                $partId
+            );
+        }
 
         return response()->json(['data' => $this->partById($partId)]);
     }
@@ -661,6 +692,22 @@ class MospamsController extends Controller
 
             $this->log($request, 'Updated service #'.$service, 'service_jobs', $service);
         });
+
+        if (($data['status'] ?? '') === 'Completed') {
+            $job = DB::table('service_jobs')
+                ->join('customers', 'customers.customer_id', '=', 'service_jobs.customer_id_fk')
+                ->where('job_id', $service)
+                ->first();
+            if ($job) {
+                $this->notifyOwner(
+                    'job_completed',
+                    'Service Job Completed',
+                    "Service for {$job->full_name} has been completed.",
+                    'service_jobs',
+                    $service
+                );
+            }
+        }
 
         return response()->json(['data' => $this->serviceById($service)]);
     }
@@ -916,6 +963,14 @@ class MospamsController extends Controller
 
         $this->log($request, 'Created user '.$data['name'].' ('.$data['role'].')', 'users', $user->user_id);
 
+        $this->notifyOwner(
+            'new_user',
+            'New User Registered',
+            "{$data['name']} joined as {$data['role']}.",
+            'users',
+            $user->user_id
+        );
+
         return response()->json(['data' => $this->membershipUserResource($membership)], 201);
     }
 
@@ -988,21 +1043,31 @@ class MospamsController extends Controller
         return response()->json(['message' => 'User deleted.']);
     }
 
-    public function activityLogs(): JsonResponse
+    public function activityLogs(Request $request): JsonResponse
     {
-        $logs = DB::table('activity_logs')
+        $query = DB::table('activity_logs')
             ->leftJoin('users', 'users.user_id', '=', 'activity_logs.user_id_fk')
-            ->where('activity_logs.shop_id_fk', $this->shopId())
-            ->orderByDesc('log_date')
-            ->get()
-            ->map(fn ($row) => [
-                'id' => (string) $row->log_id,
-                'user' => $row->full_name ?? 'System',
-                'action' => $row->action,
-                'timestamp' => $this->iso($row->log_date),
-            ]);
+            ->where('activity_logs.shop_id_fk', $this->shopId());
 
-        return response()->json(['data' => $logs]);
+        if ($from = $request->query('from')) {
+            $query->where('log_date', '>=', $from);
+        }
+        if ($to = $request->query('to')) {
+            $query->where('log_date', '<=', $to . ' 23:59:59');
+        }
+
+        $query->orderByDesc('log_date');
+
+        $result = $this->paginateOrLimit($query, 50);
+
+        $result['data'] = collect($result['data'])->map(fn ($row) => [
+            'id' => (string) $row->log_id,
+            'user' => $row->full_name ?? 'System',
+            'action' => $row->action,
+            'timestamp' => $this->iso($row->log_date),
+        ])->values();
+
+        return response()->json($result);
     }
 
     public function mechanics(): JsonResponse
@@ -1320,6 +1385,336 @@ class MospamsController extends Controller
             ],
             'low_stock' => $lowStockWithUrgency,
         ]);
+    }
+
+    public function customers(Request $request): JsonResponse
+    {
+        $query = DB::table('customers')
+            ->where('shop_id_fk', $this->shopId());
+
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('full_name', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $query->orderByDesc('created_at');
+
+        $result = $this->paginateOrLimit($query, 25);
+
+        $result['data'] = collect($result['data'])->map(fn ($row) => [
+            'id' => (string) $row->customer_id,
+            'name' => $row->full_name,
+            'phone' => $row->phone,
+            'email' => $row->email,
+            'address' => $row->address,
+            'createdAt' => $this->iso($row->created_at),
+        ])->values();
+
+        return response()->json($result);
+    }
+
+    public function storeCustomer(Request $request): JsonResponse
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'email' => ['nullable', 'email', 'max:100'],
+            'address' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $id = DB::table('customers')->insertGetId([
+            'shop_id_fk' => $this->shopId(),
+            'full_name' => $request->name,
+            'phone' => $request->phone,
+            'email' => $request->email,
+            'address' => $request->address,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->log($request, 'Created customer', 'customers', $id);
+
+        $customer = DB::table('customers')->where('customer_id', $id)->first();
+        return response()->json([
+            'id' => (string) $customer->customer_id,
+            'name' => $customer->full_name,
+            'phone' => $customer->phone,
+            'email' => $customer->email,
+            'address' => $customer->address,
+            'createdAt' => $this->iso($customer->created_at),
+        ], 201);
+    }
+
+    public function updateCustomer(Request $request, $customerId): JsonResponse
+    {
+        $customer = DB::table('customers')
+            ->where('customer_id', $customerId)
+            ->where('shop_id_fk', $this->shopId())
+            ->first();
+
+        if (!$customer) {
+            return response()->json(['error' => 'Customer not found'], 404);
+        }
+
+        $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'email' => ['nullable', 'email', 'max:100'],
+            'address' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        DB::table('customers')->where('customer_id', $customerId)->update([
+            'full_name' => $request->name,
+            'phone' => $request->phone,
+            'email' => $request->email,
+            'address' => $request->address,
+            'updated_at' => now(),
+        ]);
+
+        $this->log($request, 'Updated customer', 'customers', (int) $customerId);
+
+        return response()->json([
+            'id' => (string) $customer->customer_id,
+            'name' => $request->name,
+            'phone' => $request->phone,
+            'email' => $request->email,
+            'address' => $request->address,
+            'createdAt' => $this->iso($customer->created_at),
+        ]);
+    }
+
+    public function manageMechanics(Request $request): JsonResponse
+    {
+        $query = DB::table('mechanics')
+            ->join('mechanic_statuses', 'mechanic_statuses.mechanic_status_id', '=', 'mechanics.mechanic_status_id_fk')
+            ->where('mechanics.shop_id_fk', $this->shopId());
+
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('mechanics.full_name', 'like', "%{$search}%")
+                  ->orWhere('mechanics.phone', 'like', "%{$search}%")
+                  ->orWhere('mechanics.email', 'like', "%{$search}%");
+            });
+        }
+
+        $query->orderByDesc('mechanics.created_at');
+
+        $result = $this->paginateOrLimit($query, 25);
+
+        $result['data'] = collect($result['data'])->map(fn ($row) => [
+            'id' => (string) $row->mechanic_id,
+            'name' => $row->full_name,
+            'phone' => $row->phone,
+            'email' => $row->email,
+            'address' => $row->address,
+            'status' => $row->status_name,
+            'statusCode' => $row->status_code,
+            'createdAt' => $this->iso($row->created_at),
+        ])->values();
+
+        return response()->json($result);
+    }
+
+    public function storeMechanic(Request $request): JsonResponse
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'email' => ['nullable', 'email', 'max:100'],
+            'address' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $activeStatusId = DB::table('mechanic_statuses')->where('status_code', 'active')->value('mechanic_status_id');
+
+        $id = DB::table('mechanics')->insertGetId([
+            'shop_id_fk' => $this->shopId(),
+            'full_name' => $request->name,
+            'phone' => $request->phone,
+            'email' => $request->email,
+            'address' => $request->address,
+            'mechanic_status_id_fk' => $activeStatusId,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->log($request, 'Created mechanic', 'mechanics', $id);
+
+        return response()->json([
+            'id' => (string) $id,
+            'name' => $request->name,
+            'phone' => $request->phone,
+            'email' => $request->email,
+            'address' => $request->address,
+            'status' => 'Active',
+            'statusCode' => 'active',
+            'createdAt' => now()->toISOString(),
+        ], 201);
+    }
+
+    public function updateMechanic(Request $request, $mechanicId): JsonResponse
+    {
+        $mechanic = DB::table('mechanics')
+            ->where('mechanic_id', $mechanicId)
+            ->where('shop_id_fk', $this->shopId())
+            ->first();
+
+        if (!$mechanic) {
+            return response()->json(['error' => 'Mechanic not found'], 404);
+        }
+
+        $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'email' => ['nullable', 'email', 'max:100'],
+            'address' => ['nullable', 'string', 'max:500'],
+            'statusCode' => ['nullable', 'string', 'in:active,inactive'],
+        ]);
+
+        $update = [
+            'full_name' => $request->name,
+            'phone' => $request->phone,
+            'email' => $request->email,
+            'address' => $request->address,
+            'updated_at' => now(),
+        ];
+
+        if ($request->has('statusCode')) {
+            $statusId = DB::table('mechanic_statuses')->where('status_code', $request->statusCode)->value('mechanic_status_id');
+            if ($statusId) {
+                $update['mechanic_status_id_fk'] = $statusId;
+            }
+        }
+
+        DB::table('mechanics')->where('mechanic_id', $mechanicId)->update($update);
+        $this->log($request, 'Updated mechanic', 'mechanics', (int) $mechanicId);
+
+        $updated = DB::table('mechanics')
+            ->join('mechanic_statuses', 'mechanic_statuses.mechanic_status_id', '=', 'mechanics.mechanic_status_id_fk')
+            ->where('mechanic_id', $mechanicId)
+            ->first();
+
+        return response()->json([
+            'id' => (string) $updated->mechanic_id,
+            'name' => $updated->full_name,
+            'phone' => $updated->phone,
+            'email' => $updated->email,
+            'address' => $updated->address,
+            'status' => $updated->status_name,
+            'statusCode' => $updated->status_code,
+            'createdAt' => $this->iso($mechanic->created_at),
+        ]);
+    }
+
+    public function deleteMechanic(Request $request, $mechanicId): JsonResponse
+    {
+        $mechanic = DB::table('mechanics')
+            ->where('mechanic_id', $mechanicId)
+            ->where('shop_id_fk', $this->shopId())
+            ->first();
+
+        if (!$mechanic) {
+            return response()->json(['error' => 'Mechanic not found'], 404);
+        }
+
+        DB::table('mechanics')->where('mechanic_id', $mechanicId)->delete();
+        $this->log($request, 'Deleted mechanic', 'mechanics', (int) $mechanicId);
+
+        return response()->json(['message' => 'Mechanic deleted']);
+    }
+
+    public function deleteCustomer(Request $request, $customerId): JsonResponse
+    {
+        $customer = DB::table('customers')
+            ->where('customer_id', $customerId)
+            ->where('shop_id_fk', $this->shopId())
+            ->first();
+
+        if (!$customer) {
+            return response()->json(['error' => 'Customer not found'], 404);
+        }
+
+        DB::table('customers')->where('customer_id', $customerId)->delete();
+        $this->log($request, 'Deleted customer', 'customers', (int) $customerId);
+
+        return response()->json(['message' => 'Customer deleted']);
+    }
+
+    public function notifications(Request $request): JsonResponse
+    {
+        $userId = auth()->user()->user_id;
+
+        $query = DB::table('notifications')
+            ->where('user_id_fk', $userId)
+            ->orderByDesc('created_at');
+
+        $unreadCount = (clone $query)->where('is_read', 0)->count();
+
+        $result = $this->paginateOrLimit($query, 20);
+
+        $result['data'] = collect($result['data'])->map(fn ($row) => [
+            'id' => (string) $row->notification_id,
+            'title' => $row->title,
+            'message' => $row->message,
+            'notification_type' => $row->notification_type,
+            'is_read' => (bool) $row->is_read,
+            'created_at' => $this->iso($row->created_at),
+        ])->values();
+
+        return response()->json([
+            'data' => $result['data'],
+            'meta' => $result['meta'],
+            'unread_count' => $unreadCount,
+        ]);
+    }
+
+    public function markAllNotificationsRead(): JsonResponse
+    {
+        $userId = auth()->user()->user_id;
+
+        DB::table('notifications')
+            ->where('user_id_fk', $userId)
+            ->update(['is_read' => 1]);
+
+        return response()->json(['message' => 'All notifications marked as read']);
+    }
+
+    public function markNotificationRead($notificationId): JsonResponse
+    {
+        $userId = auth()->user()->user_id;
+
+        DB::table('notifications')
+            ->where('user_id_fk', $userId)
+            ->where('notification_id', $notificationId)
+            ->update(['is_read' => 1]);
+
+        return response()->json(['message' => 'Notification marked as read']);
+    }
+
+    public function updatePassword(Request $request): JsonResponse
+    {
+        $request->validate([
+            'current_password' => ['required', 'string'],
+            'new_password'     => ['required', 'string', 'min:6', 'confirmed'],
+        ]);
+
+        $user = auth()->user();
+        $dbUser = DB::table('users')->where('user_id', $user->user_id)->first();
+
+        if (!Hash::check($request->current_password, $dbUser->password_hash)) {
+            return response()->json(['error' => 'Current password is incorrect'], 422);
+        }
+
+        DB::table('users')->where('user_id', $user->user_id)->update([
+            'password_hash' => Hash::make($request->new_password),
+            'updated_at'    => now(),
+        ]);
+
+        $this->log($request, 'Changed password');
+
+        return response()->json(['message' => 'Password updated successfully']);
     }
 
     private function partById(int $id): array
@@ -1665,6 +2060,29 @@ class MospamsController extends Controller
             $recordId,
             $request->user()?->account_id_fk
         );
+    }
+
+    private function notifyOwner(string $type, string $title, string $message, ?string $refType = null, ?int $refId = null): void
+    {
+        $shopId = $this->shopId();
+        $ownerId = DB::table('shop_memberships')
+            ->join('roles', 'roles.role_id', '=', 'shop_memberships.role_id_fk')
+            ->where('shop_memberships.shop_id_fk', $shopId)
+            ->where('roles.role_name', 'Owner')
+            ->value('shop_memberships.user_id_fk');
+
+        if (!$ownerId) return;
+
+        DB::table('notifications')->insert([
+            'user_id_fk' => $ownerId,
+            'notification_type' => $type,
+            'title' => $title,
+            'message' => $message,
+            'reference_type' => $refType,
+            'reference_id' => $refId,
+            'is_read' => 0,
+            'created_at' => now(),
+        ]);
     }
 
     private function shopId(): ?int

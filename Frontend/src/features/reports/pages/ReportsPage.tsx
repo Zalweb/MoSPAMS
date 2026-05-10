@@ -7,14 +7,16 @@ import type { Part, ServiceRecord, Transaction } from '@/shared/types';
 
 type ReportType = 'sales' | 'inventory' | 'services';
 
-const PERIOD_LABEL: Record<Period, string> = { daily: 'Today', weekly: 'This week', monthly: 'This month', yearly: 'This year' };
+const PERIOD_LABEL: Record<Period | 'custom', string> = { daily: 'Today', weekly: 'This week', monthly: 'This month', yearly: 'This year', custom: 'Custom' };
 
 export default function Reports() {
   const [parts, setParts] = useState<Part[]>([]);
   const [services, setServices] = useState<ServiceRecord[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [reportType, setReportType] = useState<ReportType>('sales');
-  const [period, setPeriod] = useState<Period>('daily');
+  const [period, setPeriod] = useState<Period | 'custom'>('daily');
+  const [customFrom, setCustomFrom] = useState('');
+  const [customTo, setCustomTo] = useState('');
 
   useEffect(() => {
     void apiGet<{ data: Part[] }>('/api/parts').then(r => setParts(r.data)).catch(() => {});
@@ -22,8 +24,22 @@ export default function Reports() {
     void apiGet<{ data: Transaction[] }>('/api/transactions').then(r => setTransactions(r.data)).catch(() => {});
   }, []);
 
-  const filteredTx = transactions.filter(t => inPeriod(t.createdAt, period));
-  const filteredServices = services.filter(s => inPeriod(s.createdAt, period));
+  const filteredTx = transactions.filter(t => {
+    if (period === 'custom') {
+      if (customFrom && t.createdAt < customFrom) return false;
+      if (customTo && t.createdAt > customTo + 'T23:59:59') return false;
+      return true;
+    }
+    return inPeriod(t.createdAt, period);
+  });
+  const filteredServices = services.filter(s => {
+    if (period === 'custom') {
+      if (customFrom && s.createdAt < customFrom) return false;
+      if (customTo && s.createdAt > customTo + 'T23:59:59') return false;
+      return true;
+    }
+    return inPeriod(s.createdAt, period);
+  });
 
   const partsRevenue = filteredTx.reduce((s, t) => s + t.items.reduce((a, i) => a + i.price * i.quantity, 0), 0);
   const laborRevenueTx = filteredTx.reduce((s, t) => s + (t.serviceLaborCost || 0), 0);
@@ -145,10 +161,18 @@ export default function Reports() {
         ))}
       </div>
 
-      <div className="flex gap-1 mb-6 flex-wrap">
-        {(['daily', 'weekly', 'monthly', 'yearly'] as Period[]).map(p => (
+      <div className="flex gap-1 mb-6 flex-wrap items-center">
+        {(['daily', 'weekly', 'monthly', 'yearly', 'custom'] as const).map(p => (
           <button key={p} onClick={() => setPeriod(p)} className={`px-3 py-[6px] rounded-full text-[12px] font-medium capitalize transition-all ${period === p ? 'bg-zinc-800 text-zinc-100' : 'text-zinc-500 hover:text-zinc-300'}`}>{p}</button>
         ))}
+
+      {period === 'custom' && (
+        <div className="flex gap-2 mb-4 items-center">
+          <input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)} className="px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-xs focus:outline-none focus:ring-2 focus:ring-zinc-700" />
+          <span className="text-zinc-500 text-xs">to</span>
+          <input type="date" value={customTo} onChange={e => setCustomTo(e.target.value)} className="px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-xs focus:outline-none focus:ring-2 focus:ring-zinc-700" />
+        </div>
+      )}
       </div>
 
       {reportType === 'sales' && (

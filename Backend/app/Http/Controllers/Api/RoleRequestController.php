@@ -83,6 +83,14 @@ class RoleRequestController extends Controller
             $this->log(auth()->id(), "Approved role request #{$roleRequest->id} for user {$user->user_id}", 'role_requests', $roleRequest->id);
         });
 
+        $this->notifyOwner(
+            'role_approved',
+            'Role Request Approved',
+            ($roleRequest->user?->full_name ?? 'A user') . " has been approved as {$roleRequest->requestedRole?->role_name}.",
+            'role_requests',
+            $roleRequest->id
+        );
+
         return response()->json(['message' => 'Request approved.']);
     }
 
@@ -103,6 +111,14 @@ class RoleRequestController extends Controller
 
         $this->log(auth()->id(), "Denied role request #{$roleRequest->id} for user {$roleRequest->user_id_fk}", 'role_requests', $roleRequest->id);
 
+        $this->notifyOwner(
+            'role_denied',
+            'Role Request Denied',
+            ($roleRequest->user?->full_name ?? 'A user') . "'s request for {$roleRequest->requestedRole?->role_name} was denied.",
+            'role_requests',
+            $roleRequest->id
+        );
+
         return response()->json(['message' => 'Request denied.']);
     }
 
@@ -117,6 +133,29 @@ class RoleRequestController extends Controller
             'record_id'   => $recordId,
             'log_date'    => now(),
             'description' => $action,
+        ]);
+    }
+
+    private function notifyOwner(string $type, string $title, string $message, ?string $refType = null, ?int $refId = null): void
+    {
+        $shopId = app(AuthenticatedContext::class)->shopId(request());
+        $ownerId = DB::table('shop_memberships')
+            ->join('roles', 'roles.role_id', '=', 'shop_memberships.role_id_fk')
+            ->where('shop_memberships.shop_id_fk', $shopId)
+            ->where('roles.role_name', 'Owner')
+            ->value('shop_memberships.user_id_fk');
+
+        if (!$ownerId) return;
+
+        DB::table('notifications')->insert([
+            'user_id_fk' => $ownerId,
+            'notification_type' => $type,
+            'title' => $title,
+            'message' => $message,
+            'reference_type' => $refType,
+            'reference_id' => $refId,
+            'is_read' => 0,
+            'created_at' => now(),
         ]);
     }
 }

@@ -30,7 +30,8 @@ export default function DashboardPage() {
   const lowStockCount = metrics?.lowStockCount ?? 0;
   const revenueSparkline = metrics?.revenueSparkline7d ?? [];
   const partsUsageSparkline = metrics?.partsUsageSparkline7d ?? [];
-  const avgJobTime = '2.5 days';
+  const avgJobTime = metrics?.avgJobTime != null ? `${metrics.avgJobTime} days` : '—';
+  const repeatRate = metrics?.repeatRate ?? 0;
   const totalJobs = pendingServices + ongoingServices + completedServices;
 
   const lowStock = metrics?.lowStock?.map(item => ({
@@ -579,11 +580,11 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-zinc-500">Repeat Rate</span>
-                <span className="font-semibold text-green-400">68%</span>
+                <span className="font-semibold text-green-400">{repeatRate}%</span>
               </div>
             </div>
             <div className="mt-4 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-purple-500 to-purple-400" style={{ width: '68%' }} />
+              <div className="h-full bg-gradient-to-r from-purple-500 to-purple-400" style={{ width: `${Math.min(100, repeatRate)}%` }} />
             </div>
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           </motion.div>

@@ -82,3 +82,6 @@ export const NAV_ACCESS: Record<string, Role[]> = {
   '/superadmin/audit-logs': ['SuperAdmin'],
   '/superadmin/settings': ['SuperAdmin'],
 };
+  '/dashboard/customers': ['Owner', 'Admin'],
+  '/dashboard/mechanics': ['Owner', 'Admin'],
+};

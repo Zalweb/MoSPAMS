@@ -31,7 +31,8 @@ const navGroups = [
     title: 'REPORTS & USERS',
     items: [
       { label: 'Reports', to: '/dashboard/reports', icon: BarChart3 },
-      { label: 'Users', to: '/dashboard/users', icon: Shield },
+      { label: 'Customers', to: '/dashboard/customers', icon: Users },
+      { label: 'Mechanics', to: '/dashboard/mechanics', icon: Wrench },
       { label: 'Approvals', to: '/dashboard/approvals', icon: ClipboardCheck },
     ]
   },
@@ -69,10 +70,11 @@ export default function DashboardLayout() {
   const role = normalizeRole(user?.role);
 
   useEffect(() => {
-    if (role !== 'Customer') return;
+    if (role !== 'Customer' && role !== 'Owner') return;
     const fetchNotifs = async () => {
       try {
-        const data = await apiGet<{ data: Notification[]; unread_count: number }>('/api/customer/notifications');
+        const endpoint = role === 'Customer' ? '/api/customer/notifications' : '/api/notifications';
+        const data = await apiGet<{ data: Notification[]; unread_count: number }>(endpoint);
         setNotifications(data.data);
         setUnreadCount(data.unread_count);
       } catch { /* silent */ }
@@ -84,7 +86,8 @@ export default function DashboardLayout() {
 
   const markAllRead = async () => {
     try {
-      await apiMutation('/api/customer/notifications/read-all', 'PATCH');
+      const endpoint = role === 'Customer' ? '/api/customer/notifications/read-all' : '/api/notifications/read-all';
+      await apiMutation(endpoint, 'PATCH');
       setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
       setUnreadCount(0);
     } catch { /* silent */ }
@@ -92,7 +95,8 @@ export default function DashboardLayout() {
 
   const markOneRead = async (id: string) => {
     try {
-      await apiMutation(`/api/customer/notifications/${id}/read`, 'PATCH');
+      const endpoint = role === 'Customer' ? `/api/customer/notifications/${id}/read` : `/api/notifications/${id}/read`;
+      await apiMutation(endpoint, 'PATCH');
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch { /* silent */ }
@@ -118,7 +122,7 @@ export default function DashboardLayout() {
             className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm"
             onClick={() => setSidebarOpen(false)}
           />
-        )}
+              )) : null}
       </AnimatePresence>
 
       {/* Sidebar */}
@@ -202,7 +206,7 @@ export default function DashboardLayout() {
             {/* Right side actions */}
             <div className="ml-auto flex items-center gap-2">
               {/* Notification Bell — customers only */}
-              {role === 'Customer' && (
+              {role === 'Customer' || role === 'Owner' ? (
                 <div className="relative">
                   <button
                     onClick={() => { setNotifOpen(o => !o); setProfileOpen(false); }}
@@ -213,7 +217,7 @@ export default function DashboardLayout() {
                       <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                         {unreadCount > 9 ? '9+' : unreadCount}
                       </span>
-                    )}
+              )) : null}
                   </button>
 
                   {notifOpen && (
@@ -230,7 +234,7 @@ export default function DashboardLayout() {
                             <button onClick={() => void markAllRead()} className="text-xs text-zinc-500 hover:text-white transition-colors">
                               Mark all read
                             </button>
-                          )}
+              )) : null}
                         </div>
                         <div className="max-h-[320px] overflow-y-auto">
                           {notifications.length === 0 ? (
@@ -258,7 +262,7 @@ export default function DashboardLayout() {
                     </>
                   )}
                 </div>
-              )}
+              ) : null}
 
               {/* Divider */}
               <div className="w-px h-6 bg-zinc-800" />
@@ -310,7 +314,7 @@ export default function DashboardLayout() {
                               Settings
                             </button>
                           </>
-                        )}
+              )) : null}
                         {role === 'Customer' && (
                           <button
                             onClick={() => { setProfileOpen(false); navigate('/dashboard/customer/settings'); }}
@@ -319,7 +323,7 @@ export default function DashboardLayout() {
                             <Settings className="w-[18px] h-[18px]" strokeWidth={1.5} />
                             Profile Settings
                           </button>
-                        )}
+              )) : null}
                       </div>
                       <button
                         onClick={() => { setProfileOpen(false); handleLogout(); }}
@@ -330,7 +334,7 @@ export default function DashboardLayout() {
                       </button>
                     </motion.div>
                   </>
-                )}
+              )) : null}
               </div>
             </div>
           </div>
@@ -344,3 +348,4 @@ export default function DashboardLayout() {
     </div>
   );
 }
+

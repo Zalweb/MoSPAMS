@@ -64,6 +64,8 @@ export function useDashboardData(): DashboardData {
               inventory_value: number;
               low_stock_count: number;
               avg_revenue_per_customer: number;
+              avg_job_time: number;
+              repeat_rate: number;
             };
             charts: {
               revenue_by_day: Array<{ date: string; amount: number }>;
@@ -115,6 +117,8 @@ export function useDashboardData(): DashboardData {
             inventoryValue: statsResponse.summary.inventory_value,
             lowStockCount: statsResponse.summary.low_stock_count,
             avgRevenuePerCustomer: statsResponse.summary.avg_revenue_per_customer,
+            avgJobTime: statsResponse.summary.avg_job_time,
+            repeatRate: statsResponse.summary.repeat_rate,
             revenueSparkline7d: statsResponse.charts.revenue_sparkline_7d,
             partsUsageSparkline7d: statsResponse.charts.parts_usage_sparkline_7d,
             lowStock: statsResponse.low_stock,

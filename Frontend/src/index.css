@@ -200,3 +200,19 @@
     @apply bg-zinc-700;
   }
 }
+
+/* Light mode overrides */
+html.light body { background-color: #fafafa; color: #27272a; }
+html.light .bg-black { background-color: #fafafa; }
+html.light .bg-zinc-950 { background-color: #fafafa; }
+html.light .bg-zinc-900 { background-color: #ffffff; }
+html.light .border-zinc-800 { border-color: #e4e4e7; }
+html.light .text-white { color: #18181b; }
+html.light .text-zinc-400 { color: #52525b; }
+html.light .text-zinc-500 { color: #71717a; }
+html.light .from-zinc-900 { --tw-gradient-from: #ffffff; }
+html.light .to-zinc-950 { --tw-gradient-to: #f4f4f5; }
+html.light .hover\:bg-zinc-800:hover { background-color: #f4f4f5; }
+html.light .bg-zinc-800 { background-color: #f4f4f5; }
+html.light .border-zinc-700 { border-color: #d4d4d8; }
+html.light .divide-zinc-800 > :not([hidden]) ~ :not([hidden]) { border-color: #e4e4e7; }

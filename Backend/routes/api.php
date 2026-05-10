@@ -113,7 +113,22 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/users/{user}', [MospamsController::class, 'updateUser'])->middleware('role:Owner');
         Route::patch('/users/{user}/status', [MospamsController::class, 'updateUserStatus'])->middleware('role:Owner');
         Route::delete('/users/{user}', [MospamsController::class, 'deleteUser'])->middleware('role:Owner');
+        Route::patch('/users/password', [MospamsController::class, 'updatePassword'])->middleware('role:Owner,Staff');
         Route::get('/activity-logs', [MospamsController::class, 'activityLogs'])->middleware('role:Owner');
+
+        Route::get('/notifications', [MospamsController::class, 'notifications'])->middleware('role:Owner');
+        Route::patch('/notifications/read-all', [MospamsController::class, 'markAllNotificationsRead'])->middleware('role:Owner');
+        Route::patch('/notifications/{notificationId}/read', [MospamsController::class, 'markNotificationRead'])->middleware('role:Owner');
+
+        Route::get('/customers', [MospamsController::class, 'customers'])->middleware('role:Owner');
+        Route::post('/customers', [MospamsController::class, 'storeCustomer'])->middleware('role:Owner');
+        Route::patch('/customers/{customerId}', [MospamsController::class, 'updateCustomer'])->middleware('role:Owner');
+        Route::delete('/customers/{customerId}', [MospamsController::class, 'deleteCustomer'])->middleware('role:Owner');
+
+        Route::get('/mechanics/manage', [MospamsController::class, 'manageMechanics'])->middleware('role:Owner');
+        Route::post('/mechanics', [MospamsController::class, 'storeMechanic'])->middleware('role:Owner');
+        Route::patch('/mechanics/{mechanicId}', [MospamsController::class, 'updateMechanic'])->middleware('role:Owner');
+        Route::delete('/mechanics/{mechanicId}', [MospamsController::class, 'deleteMechanic'])->middleware('role:Owner');
 
         Route::get('/reports/sales', [MospamsController::class, 'salesReport'])->middleware('role:Owner,Staff');
         Route::get('/reports/inventory', [MospamsController::class, 'inventoryReport'])->middleware('role:Owner,Staff');

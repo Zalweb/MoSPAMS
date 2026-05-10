@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Store, Palette, Globe, Upload, Copy, RefreshCw, Check, AlertCircle, User } from 'lucide-react';
+import { Store, Palette, Globe, Upload, Copy, RefreshCw, Check, AlertCircle, User, Lock, Plus, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiGet, apiMutation } from '@/shared/lib/api';
 import { useAuth } from '@/features/auth/context/AuthContext';
@@ -18,7 +18,7 @@ interface ShopBranding {
   domainStatus: 'NONE' | 'PENDING' | 'VERIFIED' | 'ACTIVE';
 }
 
-type TabType = 'user' | 'shop' | 'branding' | 'domain';
+type TabType = 'user' | 'password' | 'shop' | 'branding' | 'domain';
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -28,6 +28,15 @@ export default function SettingsPage() {
   const [branding, setBranding] = useState<ShopBranding | null>(null);
   const [copied, setCopied] = useState(false);
   const [userName, setUserName] = useState(user?.name || '');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [domainInput, setDomainInput] = useState('');
+  const [domainRequesting, setDomainRequesting] = useState(false);
+  const [dnsInstructions, setDnsInstructions] = useState<string | null>(null);
+  const [domainVerifying, setDomainVerifying] = useState(false);
+  const [domainActivating, setDomainActivating] = useState(false);
 
   useEffect(() => {
     loadBranding();
@@ -58,6 +67,85 @@ export default function SettingsPage() {
       toast.error('Failed to save profile');
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleChangePassword() {
+    setPasswordError('');
+    if (newPassword.length < 6) {
+      setPasswordError('Password must be at least 6 characters');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Passwords do not match');
+      return;
+    }
+    try {
+      setSaving(true);
+      await apiMutation('/api/users/password', 'PATCH', {
+        current_password: currentPassword,
+        new_password: newPassword,
+        new_password_confirmation: confirmPassword,
+      });
+      toast.success('Password changed successfully');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error: any) {
+      const msg = error?.message || error?.error || 'Failed to change password';
+      setPasswordError(msg);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleRequestDomain() {
+    if (!domainInput) return;
+    try {
+      setDomainRequesting(true);
+      const res = await apiMutation<{ dns_instructions?: string }>('/api/shop/domain/request', 'POST', { domain: domainInput });
+      loadBranding();
+      if (res.dns_instructions) setDnsInstructions(res.dns_instructions);
+      toast.success('Domain request submitted');
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to request domain');
+    } finally {
+      setDomainRequesting(false);
+    }
+  }
+
+  async function handleVerifyDomain() {
+    try {
+      setDomainVerifying(true);
+      await apiMutation('/api/shop/domain/verify', 'POST');
+      loadBranding();
+      toast.success('Domain verified successfully');
+    } catch (error: any) {
+      toast.error(error?.message || 'Domain verification failed');
+    } finally {
+      setDomainVerifying(false);
+    }
+  }
+
+  async function handleActivateDomain() {
+    try {
+      setDomainActivating(true);
+      await apiMutation('/api/shop/domain/activate', 'POST');
+      loadBranding();
+      toast.success('Domain activated');
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to activate domain');
+    } finally {
+      setDomainActivating(false);
+    }
+  }
+
+  async function handleFetchDnsInstructions() {
+    try {
+      const res = await apiGet<{ instructions: string }>('/api/shop/domain/dns-instructions');
+      setDnsInstructions(res.instructions);
+    } catch {
+      toast.error('Failed to load DNS instructions');
     }
   }
 
@@ -184,6 +272,15 @@ export default function SettingsPage() {
           User Profile
         </button>
         <button
+          onClick={() => setActiveTab('password')}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${
+            activeTab === 'password' ? 'text-white border-white' : 'text-zinc-500 border-transparent hover:text-zinc-300'
+          }`}
+        >
+          <Lock className="w-4 h-4" strokeWidth={2} />
+          Password
+        </button>
+        <button
           onClick={() => setActiveTab('shop')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${
             activeTab === 'shop' ? 'text-white border-white' : 'text-zinc-500 border-transparent hover:text-zinc-300'
@@ -269,6 +366,58 @@ export default function SettingsPage() {
               className="px-6 py-2.5 bg-white text-black rounded-xl font-semibold text-sm hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        )}
+
+        {activeTab === 'password' && (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-4">Change Password</h3>
+              <div className="space-y-4 max-w-md">
+                {passwordError && (
+                  <div className="px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-sm text-red-400">
+                    {passwordError}
+                  </div>
+                )}
+                <div>
+                  <label className="block text-sm font-medium text-zinc-300 mb-2">Current Password</label>
+                  <input
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                    placeholder="Enter current password"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-300 mb-2">New Password</label>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                    placeholder="Enter new password (min 6 characters)"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-300 mb-2">Confirm New Password</label>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                    placeholder="Re-enter new password"
+                  />
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={handleChangePassword}
+              disabled={saving || !currentPassword || !newPassword || !confirmPassword}
+              className="px-6 py-2.5 bg-white text-black rounded-xl font-semibold text-sm hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {saving ? 'Changing...' : 'Change Password'}
             </button>
           </div>
         )}
@@ -492,17 +641,75 @@ export default function SettingsPage() {
                       {branding.domainStatus}
                     </span>
                   </div>
-                  <p className="text-xs text-zinc-500">
-                    {branding.domainStatus === 'PENDING' && 'Waiting for DNS verification'}
-                    {branding.domainStatus === 'VERIFIED' && 'Domain verified, ready to activate'}
-                    {branding.domainStatus === 'ACTIVE' && 'Domain is active and serving traffic'}
-                  </p>
+                  {branding.domainStatus === 'PENDING' && (
+                    <div className="space-y-3">
+                      <p className="text-xs text-zinc-500">DNS verification pending. Set up the required DNS records, then verify.</p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleFetchDnsInstructions}
+                          className="px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-xl text-sm text-zinc-300 hover:bg-zinc-700 transition-colors"
+                        >
+                          View DNS Instructions
+                        </button>
+                        <button
+                          onClick={handleVerifyDomain}
+                          disabled={domainVerifying}
+                          className="px-4 py-2 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50"
+                        >
+                          {domainVerifying ? 'Verifying...' : 'Verify DNS'}
+                        </button>
+                      </div>
+                      {dnsInstructions && (
+                        <div className="p-4 bg-zinc-800/50 border border-zinc-700 rounded-xl text-xs text-zinc-400 font-mono whitespace-pre-wrap">
+                          {dnsInstructions}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {branding.domainStatus === 'VERIFIED' && (
+                    <div className="space-y-2">
+                      <p className="text-xs text-zinc-500">Domain verified — ready to activate.</p>
+                      <button
+                        onClick={handleActivateDomain}
+                        disabled={domainActivating}
+                        className="px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 transition-colors disabled:opacity-50"
+                      >
+                        {domainActivating ? 'Activating...' : 'Activate Domain'}
+                      </button>
+                    </div>
+                  )}
+                  {branding.domainStatus === 'ACTIVE' && (
+                    <a
+                      href={`https://${branding.customDomain}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      Visit {branding.customDomain}
+                    </a>
+                  )}
                 </div>
               ) : (
-                <div className="bg-zinc-800/50 border border-zinc-700 rounded-xl p-6 text-center">
-                  <Globe className="w-12 h-12 text-zinc-600 mx-auto mb-3" />
-                  <p className="text-sm text-zinc-400 mb-4">No custom domain configured</p>
-                  <p className="text-xs text-zinc-500">Contact support to set up a custom domain for your shop</p>
+                <div className="space-y-3">
+                  <p className="text-sm text-zinc-400">Use your own domain for your shop.</p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={domainInput}
+                      onChange={(e) => setDomainInput(e.target.value)}
+                      placeholder="e.g. myshop.com"
+                      className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                    />
+                    <button
+                      onClick={handleRequestDomain}
+                      disabled={domainRequesting || !domainInput}
+                      className="px-4 py-2.5 bg-white text-black rounded-xl text-sm font-semibold hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {domainRequesting ? 'Requesting...' : 'Request Domain'}
+                    </button>
+                  </div>
+                  <p className="text-xs text-zinc-500">After request, you'll receive DNS instructions to configure your domain.</p>
                 </div>
               )}
             </div>
