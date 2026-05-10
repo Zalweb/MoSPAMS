@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { useTenantBranding } from '@/shared/contexts/TenantBrandingContext';
+import { useTheme } from '@/shared/contexts/ThemeContext';
 import { NAV_ACCESS } from '@/shared/lib/permissions';
 import { normalizeRole } from '@/shared/lib/roles';
 import { apiGet, apiMutation } from '@/shared/lib/api';
@@ -52,6 +53,7 @@ const navGroups = [
 export default function DashboardLayout() {
   const { user, logout } = useAuth();
   const { branding } = useTenantBranding();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -165,19 +167,31 @@ export default function DashboardLayout() {
               <div className="space-y-1">
                 {group.items.map((item) => {
                   const isActive = location.pathname === item.to || (item.to !== '/dashboard' && location.pathname.startsWith(item.to));
+                  
+                  const activeStyle = isActive && branding?.primaryColor ? {
+                    backgroundColor: theme === 'dark' ? `${branding.primaryColor}20` : `${branding.primaryColor}15`,
+                    color: branding.primaryColor,
+                    borderLeftColor: branding.primaryColor,
+                  } : undefined;
+
                   return (
                     <NavLink
                       key={item.to}
                       to={item.to}
                       end={item.end}
                       onClick={() => setSidebarOpen(false)}
+                      style={activeStyle}
                       className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 group ${
                         isActive
                           ? 'bg-accent dark:bg-secondary dark:bg-zinc-800 text-accent-foreground dark:text-foreground border-l-2 border-primary dark:border-white'
                           : 'text-muted-foreground hover:text-foreground hover:bg-secondary dark:hover:bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50'
                       }`}
                     >
-                      <item.icon className={`w-[16px] h-[16px] transition-colors ${isActive ? 'text-accent-foreground dark:text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`} strokeWidth={1.75} />
+                      <item.icon 
+                        className={`w-[16px] h-[16px] transition-colors ${isActive ? (branding?.primaryColor ? '' : 'text-accent-foreground dark:text-foreground') : 'text-muted-foreground group-hover:text-foreground'}`} 
+                        strokeWidth={1.75} 
+                        style={isActive && branding?.primaryColor ? { color: branding.primaryColor } : undefined}
+                      />
                       <span>{item.label}</span>
                     </NavLink>
                   );
