@@ -19,7 +19,7 @@ export default function SuperAdminProfilePage() {
     if (!name.trim()) { toast.error('Name is required'); return; }
     try {
       setSaving(true);
-      await apiMutation('/api/users/profile', 'PATCH', { fullName: name.trim() });
+      await apiMutation('/api/superadmin/profile', 'PATCH', { fullName: name.trim() });
       await refreshUser();
       toast.success('Profile updated');
     } catch {

@@ -68,6 +68,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/settings', [SuperAdminController::class, 'settings']);
         Route::patch('/settings', [SuperAdminController::class, 'updateSettings']);
         Route::get('/system-health', [SuperAdminController::class, 'systemHealth']);
+        Route::get('/notifications', [SuperAdminController::class, 'notifications']);
+        Route::patch('/profile', [SuperAdminController::class, 'updateProfile']);
 
         Route::get('/revenue-reports', [SuperAdminController::class, 'revenueReports']);
         Route::get('/overdue-accounts', [SuperAdminController::class, 'overdueAccounts']);

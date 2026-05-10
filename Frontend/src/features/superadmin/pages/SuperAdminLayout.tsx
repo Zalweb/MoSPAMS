@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import {
   Activity,
@@ -13,12 +13,14 @@ import {
   LogOut,
   Menu,
   MessageSquare,
+  Settings,
   Shield,
   Store,
   TrendingUp,
   Users,
   User,
 } from 'lucide-react';
+import { apiGet } from '@/shared/lib/api';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/features/auth/context/AuthContext';
 
@@ -74,6 +76,13 @@ const NAV_SECTIONS = [
       { to: '/superadmin/support/feedback', label: 'Shop Feedback', icon: MessageSquare },
     ],
   },
+  {
+    title: 'ACCOUNT',
+    items: [
+      { to: '/superadmin/profile', label: 'User Profile', icon: User },
+      { to: '/superadmin/settings', label: 'Platform Settings', icon: Settings },
+    ],
+  },
 ];
 
 export default function SuperAdminLayout() {
@@ -82,6 +91,16 @@ export default function SuperAdminLayout() {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifData, setNotifData] = useState<{ pendingShops: number; expiringSubscriptions: any[] }>({ pendingShops: 0, expiringSubscriptions: [] });
+
+  const fetchNotifications = () => {
+    apiGet<{ pendingShops: number; expiringSubscriptions: any[] }>('/api/superadmin/notifications')
+      .then(setNotifData)
+      .catch(() => {});
+  };
+
+  useEffect(() => { fetchNotifications(); const t = setInterval(fetchNotifications, 60000); return () => clearInterval(t); }, []);
 
   const handleLogout = () => {
     logout();
@@ -151,9 +170,54 @@ export default function SuperAdminLayout() {
           <div className="flex-1" />
 
           <div className="flex items-center gap-3">
-            <button className="relative p-2 rounded-xl hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors">
-              <Bell className="w-5 h-5" />
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => { setNotifOpen(o => !o); setProfileOpen(false); }}
+                className="relative p-2 rounded-xl hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+              >
+                <Bell className="w-5 h-5" />
+                {(notifData.pendingShops > 0 || notifData.expiringSubscriptions.length > 0) && (
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                    {notifData.pendingShops + notifData.expiringSubscriptions.length}
+                  </span>
+                )}
+              </button>
+
+              {notifOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} />
+                  <motion.div
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    className="absolute right-0 top-full mt-2 w-[320px] bg-zinc-900/95 backdrop-blur-xl rounded-2xl border border-zinc-800 shadow-2xl shadow-black/50 z-50 overflow-hidden"
+                  >
+                    <div className="px-4 py-3 border-b border-zinc-800">
+                      <p className="text-sm font-semibold text-white">Notifications</p>
+                    </div>
+                    <div className="max-h-[320px] overflow-y-auto">
+                      {notifData.pendingShops === 0 && notifData.expiringSubscriptions.length === 0 ? (
+                        <p className="text-center text-zinc-500 text-xs py-8">No new notifications</p>
+                      ) : (
+                        <>
+                          {notifData.pendingShops > 0 && (
+                            <button onClick={() => { setNotifOpen(false); navigate('/superadmin/shops/pending'); }} className="w-full text-left px-4 py-3 border-b border-zinc-800/50 hover:bg-zinc-800/30 transition-colors">
+                              <p className="text-xs font-semibold text-amber-400">{notifData.pendingShops} shop{notifData.pendingShops > 1 ? 's' : ''} pending approval</p>
+                              <p className="text-[11px] text-zinc-500 mt-0.5">Review and approve new shop registrations</p>
+                            </button>
+                          )}
+                          {notifData.expiringSubscriptions.map((s: any, i: number) => (
+                            <button key={i} onClick={() => { setNotifOpen(false); navigate('/superadmin/billing/overdue'); }} className="w-full text-left px-4 py-3 border-b border-zinc-800/50 hover:bg-zinc-800/30 transition-colors">
+                              <p className="text-xs font-semibold text-red-400">{s.shopName}</p>
+                              <p className="text-[11px] text-zinc-500 mt-0.5">Subscription expiring in {s.daysLeft} day{s.daysLeft !== 1 ? 's' : ''}</p>
+                            </button>
+                          ))}
+                        </>
+                      )}
+                    </div>
+                  </motion.div>
+                </>
+              )}
+            </div>
 
             <div className="w-px h-6 bg-zinc-800" />
             <div className="relative">

@@ -1133,6 +1133,24 @@ class SuperAdminController extends Controller
         return $this->settings();
     }
 
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $data = $request->validate(['fullName' => ['required', 'string', 'max:100']]);
+
+        $user = $request->user();
+        DB::table('users')->where('user_id', $user->user_id)->update([
+            'full_name' => $data['fullName'],
+            'updated_at' => now(),
+        ]);
+
+        DB::table('accounts')->where('account_id', $user->account_id_fk)->update([
+            'full_name' => $data['fullName'],
+            'updated_at' => now(),
+        ]);
+
+        return response()->json(['message' => 'Profile updated']);
+    }
+
     public function systemHealth(): JsonResponse
     {
         $dbOk = true;

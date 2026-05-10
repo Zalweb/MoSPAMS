@@ -85,7 +85,7 @@ export function useDashboardData(): DashboardData {
             }>;
           }>('/api/dashboard/stats');
 
-          const totalExpenses = statsResponse.summary.total_revenue * 0.3;
+          const totalExpenses = 0;
 
           setMetrics({
             totalRevenue: statsResponse.summary.total_revenue,
@@ -158,21 +158,8 @@ export function useDashboardData(): DashboardData {
 
           setRecentServices(recentServicesResponse.data);
         } catch (apiError) {
-          console.error('API error, using fallback data:', apiError);
-          setMetrics({
-            totalRevenue: 0,
-            totalExpenses: 0,
-            netIncome: 0,
-            activeServices: 0,
-            totalParts: 0,
-            totalCustomers: 0,
-            totalJobsCompleted: 0,
-            revenueByDay: [],
-            jobsByDay: [],
-            serviceStatus: { pending: 0, ongoing: 0, completed: 0 },
-            paymentMethods: { cash: 0, gcash: 0 },
-            topServiceTypes: [],
-          });
+          console.error('API error:', apiError);
+          setMetrics(null);
           setRecentTransactions([]);
           setRecentServices([]);
         }
@@ -231,20 +218,7 @@ export function useDashboardData(): DashboardData {
 
         setRecentTransactions(transactions);
       } else {
-        setMetrics({
-          totalRevenue: 0,
-          totalExpenses: 0,
-          netIncome: 0,
-          activeServices: 0,
-          totalParts: 0,
-          totalCustomers: 0,
-          totalJobsCompleted: 0,
-          revenueByDay: [],
-          jobsByDay: [],
-          serviceStatus: { pending: 0, ongoing: 0, completed: 0 },
-          paymentMethods: { cash: 0, gcash: 0 },
-          topServiceTypes: [],
-        });
+        setMetrics(null);
         setRecentTransactions([]);
       }
     } catch (err) {
