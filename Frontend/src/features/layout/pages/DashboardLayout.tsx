@@ -53,7 +53,7 @@ const navGroups = [
 export default function DashboardLayout() {
   const { user, logout } = useAuth();
   const { branding } = useTenantBranding();
-  const { theme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
