@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Package, Wrench, ShoppingCart,
   BarChart3, Shield, LogOut, Menu, X, ClipboardCheck,
-  Home, Calendar, CreditCard, ScrollText, Settings, Bike, Bell, Users, Sun, Moon
+  Home, Calendar, CreditCard, ScrollText, Settings, Bike, Bell, Users, Sun, Moon,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { useTenantBranding } from '@/shared/contexts/TenantBrandingContext';
@@ -57,6 +58,12 @@ export default function DashboardLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('sidebar-collapsed') === 'true';
+    }
+    return false;
+  });
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
 
@@ -86,6 +93,10 @@ export default function DashboardLayout() {
     const interval = setInterval(() => void fetchNotifs(), 30000);
     return () => clearInterval(interval);
   }, [role]);
+
+  useEffect(() => {
+    localStorage.setItem('sidebar-collapsed', String(isCollapsed));
+  }, [isCollapsed]);
 
   const markAllRead = async () => {
     try {
@@ -130,40 +141,69 @@ export default function DashboardLayout() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 z-50 h-screen bg-sidebar border-r border-border flex flex-col w-[260px] shrink-0 transition-transform duration-300 ease-out ${
+        className={`fixed lg:sticky top-0 left-0 z-50 h-screen bg-sidebar border-r border-border flex flex-col shrink-0 transition-all duration-300 ease-in-out ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
+        } ${isCollapsed ? 'w-[80px]' : 'w-[260px]'}`}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3 px-6 h-[70px] border-b border-border shrink-0">
-          <div className="w-8 h-8 rounded-xl bg-muted border border-border dark:border-zinc-700 flex items-center justify-center overflow-hidden shrink-0">
-            <img
-              src={branding?.logoUrl || '/images/logo.svg'}
-              alt={branding?.shopName || 'MoSPAMS'}
-              className="w-6 h-6 object-contain"
-            />
+        <div className={`flex items-center border-b border-border shrink-0 h-[70px] transition-all duration-300 ${isCollapsed ? 'px-0 justify-center' : 'px-6'}`}>
+          <div className="flex items-center gap-3 overflow-hidden">
+            <div className="w-8 h-8 rounded-xl bg-muted border border-border dark:border-zinc-700 flex items-center justify-center overflow-hidden shrink-0">
+              <img
+                src={branding?.logoUrl || '/images/logo.svg'}
+                alt={branding?.shopName || 'MoSPAMS'}
+                className="w-6 h-6 object-contain"
+              />
+            </div>
+            {!isCollapsed && (
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                className="whitespace-nowrap"
+              >
+                <span className="text-[15px] font-bold text-foreground tracking-tight leading-none block">
+                  Mo<span className="text-muted-foreground">SPAMS</span>
+                </span>
+                <span className="block text-[10px] text-muted-foreground font-semibold tracking-wider leading-none mt-1">
+                  {(branding?.shopName || user?.shopName || 'Management').toUpperCase()}
+                </span>
+              </motion.div>
+            )}
           </div>
-          <div>
-            <span className="text-[15px] font-bold text-foreground tracking-tight leading-none block">
-              Mo<span className="text-muted-foreground">SPAMS</span>
-            </span>
-            <span className="block text-[10px] text-muted-foreground font-semibold tracking-wider leading-none mt-1">
-              {(branding?.shopName || user?.shopName || 'Management').toUpperCase()}
-            </span>
-          </div>
+          
+          {!isCollapsed && (
+            <button
+              className="ml-auto lg:hidden p-2 text-muted-foreground hover:text-foreground hover:bg-secondary dark:bg-zinc-800 rounded-lg transition-colors"
+              onClick={() => setSidebarOpen(false)}
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
+
           <button
-            className="ml-auto lg:hidden p-2 text-muted-foreground hover:text-foreground hover:bg-secondary dark:bg-zinc-800 rounded-lg transition-colors"
-            onClick={() => setSidebarOpen(false)}
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className={`hidden lg:flex items-center justify-center w-6 h-6 rounded-full bg-border hover:bg-muted-foreground/20 text-muted-foreground absolute -right-3 top-[23px] z-[60] border border-border shadow-sm transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`}
           >
-            <X className="w-5 h-5" />
+            <ChevronLeft className="w-4 h-4" />
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-6 overflow-y-auto custom-scrollbar">
+        <nav className={`flex-1 py-6 space-y-6 overflow-y-auto custom-scrollbar transition-all duration-300 ${isCollapsed ? 'px-4' : 'px-4'}`}>
           {visibleGroups.map((group, idx) => (
-            <div key={idx}>
-              <h3 className="px-3 text-[10px] font-bold text-muted-foreground tracking-wider mb-2 uppercase">{group.title}</h3>
+            <div key={idx} className="relative">
+              {!isCollapsed ? (
+                <motion.h3 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="px-3 text-[10px] font-bold text-muted-foreground tracking-wider mb-2 uppercase whitespace-nowrap overflow-hidden"
+                >
+                  {group.title}
+                </motion.h3>
+              ) : (
+                <div className="h-4" />
+              )}
               <div className="space-y-1">
                 {group.items.map((item) => {
                   const isActive = location.pathname === item.to || (item.to !== '/dashboard' && location.pathname.startsWith(item.to));
@@ -175,25 +215,44 @@ export default function DashboardLayout() {
                   } : undefined;
 
                   return (
-                    <NavLink
-                      key={item.to}
-                      to={item.to}
-                      end={item.end}
-                      onClick={() => setSidebarOpen(false)}
-                      style={activeStyle}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 group ${
-                        isActive
-                          ? 'bg-accent dark:bg-secondary dark:bg-zinc-800 text-accent-foreground dark:text-foreground border-l-2 border-primary dark:border-white'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-secondary dark:hover:bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50'
-                      }`}
-                    >
-                      <item.icon 
-                        className={`w-[16px] h-[16px] transition-colors ${isActive ? (branding?.primaryColor ? '' : 'text-accent-foreground dark:text-foreground') : 'text-muted-foreground group-hover:text-foreground'}`} 
-                        strokeWidth={1.75} 
-                        style={isActive && branding?.primaryColor ? { color: branding.primaryColor } : undefined}
-                      />
-                      <span>{item.label}</span>
-                    </NavLink>
+                    <div key={item.to} className="relative group/item">
+                      <NavLink
+                        to={item.to}
+                        end={item.end}
+                        onClick={() => setSidebarOpen(false)}
+                        style={activeStyle}
+                        className={`w-full flex items-center rounded-lg text-[13px] font-medium transition-all duration-200 group ${
+                          isCollapsed ? 'justify-center px-0 py-2.5' : 'gap-3 px-3 py-2'
+                        } ${
+                          isActive
+                            ? 'bg-accent dark:bg-secondary dark:bg-zinc-800 text-accent-foreground dark:text-foreground border-l-2 border-primary dark:border-white'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-secondary dark:hover:bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50'
+                        }`}
+                      >
+                        <item.icon 
+                          className={`w-[18px] h-[18px] shrink-0 transition-colors ${isActive ? (branding?.primaryColor ? '' : 'text-accent-foreground dark:text-foreground') : 'text-muted-foreground group-hover:text-foreground'}`} 
+                          strokeWidth={1.75} 
+                          style={isActive && branding?.primaryColor ? { color: branding.primaryColor } : undefined}
+                        />
+                        {!isCollapsed && (
+                          <motion.span
+                            initial={{ opacity: 0, x: -5 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="whitespace-nowrap"
+                          >
+                            {item.label}
+                          </motion.span>
+                        )}
+                      </NavLink>
+
+                      {/* Tooltip for collapsed state */}
+                      {isCollapsed && (
+                        <div className="absolute left-[calc(100%+12px)] top-1/2 -translate-y-1/2 px-3 py-1.5 bg-zinc-900 text-white text-xs font-medium rounded-md opacity-0 group-hover/item:opacity-100 pointer-events-none transition-all duration-200 whitespace-nowrap z-[100] shadow-xl">
+                          {item.label}
+                          <div className="absolute left-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 bg-zinc-900 rotate-45" />
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
               </div>
