@@ -3,7 +3,6 @@ import { Palette, X, Check } from 'lucide-react';
 import { useState } from 'react';
 import { useTheme } from '@/theme/ThemeProvider';
 import { ACCENT_PRESETS } from '@/theme/themes';
-import type { AccentColor } from '@/theme/themes';
 
 export function ThemeCustomizer() {
   const { accent, setAccent } = useTheme();
