@@ -35,6 +35,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     
     // Store preference
     localStorage.setItem('mospams-theme', theme);
+
+    return () => {
+      root.classList.remove('light');
+      root.classList.add('dark');
+    };
   }, [theme]);
 
   const toggleTheme = () => {
