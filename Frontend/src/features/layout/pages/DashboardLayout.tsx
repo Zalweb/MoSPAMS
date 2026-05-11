@@ -122,7 +122,7 @@ export default function DashboardLayout() {
   })).filter(group => group.items.length > 0);
 
   const allNavItems = navGroups.flatMap(g => g.items);
-  const currentLabel = allNavItems.find(n => n.end ? location.pathname === n.to : location.pathname.startsWith(n.to) && n.to !== '/dashboard')?.label
+  const currentLabel = allNavItems.find(n => n.end ? location.pathname === n.to : location.pathname.startsWith(n.to + '/'))?.label
     ?? (location.pathname === '/dashboard' ? 'Dashboard' : '');
 
   const handleLogout = () => { logout(); navigate('/', { replace: true }); };
@@ -206,7 +206,7 @@ export default function DashboardLayout() {
               )}
               <div className="space-y-1">
                 {group.items.map((item) => {
-                  const isActive = location.pathname === item.to || (item.to !== '/dashboard' && location.pathname.startsWith(item.to));
+                  const isActive = item.end ? location.pathname === item.to : location.pathname.startsWith(item.to + '/');
                   
                   const activeStyle = isActive && branding?.primaryColor ? {
                     backgroundColor: theme === 'dark' ? `${branding.primaryColor}20` : `${branding.primaryColor}15`,
@@ -302,12 +302,14 @@ export default function DashboardLayout() {
               )}
                   </button>
 
-                  {notifOpen && (
+                  <AnimatePresence>
+                    {notifOpen && (
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} />
                       <motion.div
                         initial={{ opacity: 0, y: -10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
                         className="absolute right-0 top-full mt-2 w-[320px] bg-muted/95 backdrop-blur-xl rounded-2xl border border-border shadow-2xl shadow-black/50 z-50 overflow-hidden"
                       >
                         <div className="px-4 py-3 border-b border-border flex items-center justify-between">
@@ -343,6 +345,7 @@ export default function DashboardLayout() {
                       </motion.div>
                     </>
                   )}
+                  </AnimatePresence>
                 </div>
               ) : null}
 
@@ -365,7 +368,8 @@ export default function DashboardLayout() {
                   </div>
                 </motion.button>
 
-                {profileOpen && (
+                <AnimatePresence>
+                  {profileOpen && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
                     <motion.div
@@ -417,6 +421,7 @@ export default function DashboardLayout() {
                     </motion.div>
                   </>
               )}
+                </AnimatePresence>
               </div>
             </div>
           </div>
