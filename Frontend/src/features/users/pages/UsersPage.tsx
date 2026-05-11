@@ -123,46 +123,7 @@ export default function Users() {
             </span>
           )}
         </button>
-  return (
-    <div>
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-7">
-        <div>
-          <h2 className="text-[22px] font-bold text-foreground tracking-tight">User Management</h2>
-          <p className="text-[13px] text-muted-foreground mt-0.5">Manage access and monitor activity</p>
-        </div>
-        <Button onClick={openAdd} size="sm" className="h-9 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-[12px] font-medium px-4 transition-opacity">
-          <Plus className="w-3.5 h-3.5 mr-1.5" /> Add User
-        </Button>
       </div>
-
-      <div className="flex gap-1 mb-6 border-b border-border">
-        <button
-          onClick={() => setTab('users')}
-          className={`px-4 py-2 text-[13px] font-medium border-b-2 transition-colors ${
-            tab === 'users'
-              ? 'border-foreground text-foreground'
-              : 'border-transparent text-muted-foreground hover:text-muted-foreground dark:text-zinc-300'
-          }`}
-        >
-          All Users
-        </button>
-        <button
-          onClick={() => setTab('requests')}
-          className={`px-4 py-2 text-[13px] font-medium border-b-2 transition-colors flex items-center gap-1.5 ${
-            tab === 'requests'
-              ? 'border-foreground text-foreground'
-              : 'border-transparent text-muted-foreground hover:text-muted-foreground dark:text-zinc-300'
-          }`}
-        >
-          Pending Requests
-          {pendingRequests.length > 0 && (
-            <span className="inline-flex items-center rounded-full bg-[rgb(var(--color-primary-rgb))] px-1.5 py-0.5 text-[10px] font-bold text-white">
-              {pendingRequests.length}
-            </span>
-          )}
-        </button>
-      </div>
-
       {tab === 'users' && (
         <>
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-6">
