@@ -8,7 +8,7 @@ interface AuthContextType {
   account: Account | null;
   membership: Membership | null;
   pendingJoin: PendingShopJoin | null;
-  login: (email: string, password: string) => Promise<{ success: true } | { success: false; error?: string } | { needsMembership: true }>;
+  login: (email: string, password: string, remember?: boolean) => Promise<{ success: true } | { success: false; error?: string } | { needsMembership: true }>;
   googleLogin: (credential: string) => Promise<{ needsRegistration: true; googleData: GoogleData } | { needsMembership: true } | { needsRegistration: false }>;
   googleRegister: (payload: {
     google_id: string;
@@ -62,23 +62,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [membership, setMembership] = useState<Membership | null>(null);
   const [pendingJoin, setPendingJoin] = useState<PendingShopJoin | null>(null);
   const [ready, setReady] = useState(false);
+  const [shouldRemember, setShouldRemember] = useState(true);
 
   const clearPendingJoin = useCallback(() => setPendingJoin(null), []);
 
-  const applyAuthResponse = useCallback((response: AuthResponse) => {
+  const applyAuthResponse = useCallback((response: AuthResponse, remember: boolean = true) => {
     if (!response.token || !response.user) return;
 
-    setAuthToken(response.token);
+    setAuthToken(response.token, remember);
     setUser(normalizeUserRole(response.user));
     setAccount(response.account ?? null);
     setMembership(response.membership ?? null);
     setPendingJoin(null);
   }, []);
 
-  const applyPendingJoin = useCallback((response: AuthResponse) => {
+  const applyPendingJoin = useCallback((response: AuthResponse, remember: boolean = true) => {
     if (!response.needs_membership || !response.join_token || !response.shop) return;
 
-    setAuthToken(null);
+    setAuthToken(null, remember);
     setUser(null);
     setMembership(null);
     setAccount(null);
@@ -121,14 +122,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .finally(() => setReady(true));
   }, [refreshUser]);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string, remember: boolean = true) => {
     try {
-      const response = await apiMutation<AuthResponse>('/api/login', 'POST', { email, password });
+      setShouldRemember(remember);
+      const response = await apiMutation<AuthResponse>('/api/login', 'POST', { email, password, remember });
       if (response.needs_membership) {
-        applyPendingJoin(response);
+        applyPendingJoin(response, remember);
         return { needsMembership: true as const };
       }
-      applyAuthResponse(response);
+      applyAuthResponse(response, remember);
       return { success: true as const };
     } catch (error) {
       setAuthToken(null);
@@ -151,10 +153,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { needsRegistration: true as const, googleData: response.google_data };
       }
       if (response.needs_membership) {
-        applyPendingJoin(response);
+        applyPendingJoin(response, true); // Google login usually remembers
         return { needsMembership: true as const };
       }
-      applyAuthResponse(response);
+      applyAuthResponse(response, true);
       return { needsRegistration: false as const };
     } catch {
       return { needsRegistration: false as const };
@@ -172,7 +174,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }) => {
     try {
       const response = await apiMutation<AuthResponse>('/api/auth/google/register', 'POST', payload);
-      applyAuthResponse(response);
+      applyAuthResponse(response, true);
       return { ok: true as const, token: response.token as string };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Registration failed. Please try again.';
@@ -186,7 +188,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         join_token: joinToken,
         tenant_host: tenantHost,
       });
-      applyAuthResponse(response);
+      applyAuthResponse(response, shouldRemember);
       return { success: true as const };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to join this shop.';

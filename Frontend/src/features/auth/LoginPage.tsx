@@ -66,7 +66,7 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      const result = await login(emailOrUsername, password);
+      const result = await login(emailOrUsername, password, rememberMe);
       if ('success' in result && result.success) {
         toast.success('Login successful!');
         // Navigation handled by AuthContext

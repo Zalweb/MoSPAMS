@@ -3,9 +3,11 @@ type ApiMethod = 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
 const TOKEN_STORAGE_KEY = 'mospams_auth_token';
 
-// Rehydrate from localStorage so the token survives page refreshes.
-let authToken: string | null =
-  typeof window !== 'undefined' ? localStorage.getItem(TOKEN_STORAGE_KEY) : null;
+// Rehydrate from localStorage or sessionStorage so the token survives page refreshes.
+let authToken: string | null = null;
+if (typeof window !== 'undefined') {
+  authToken = localStorage.getItem(TOKEN_STORAGE_KEY) || sessionStorage.getItem(TOKEN_STORAGE_KEY);
+}
 
 const REQUEST_HOST = typeof window !== 'undefined' ? window.location.host : null;
 
@@ -13,13 +15,19 @@ export function getAuthToken(): string | null {
   return authToken;
 }
 
-export function setAuthToken(token: string | null) {
+export function setAuthToken(token: string | null, remember: boolean = true) {
   authToken = token;
   if (typeof window !== 'undefined') {
+    // Clear both first
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+    sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+
     if (token) {
-      localStorage.setItem(TOKEN_STORAGE_KEY, token);
-    } else {
-      localStorage.removeItem(TOKEN_STORAGE_KEY);
+      if (remember) {
+        localStorage.setItem(TOKEN_STORAGE_KEY, token);
+      } else {
+        sessionStorage.setItem(TOKEN_STORAGE_KEY, token);
+      }
     }
   }
 }
