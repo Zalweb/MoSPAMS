@@ -1,74 +1,86 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Check, DollarSign } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useScrollAnimation } from '@/shared/hooks/useScrollAnimation';
+import { apiGet } from '@/shared/lib/api';
+
+interface PlanData {
+  planId: number;
+  planCode: string;
+  planName: string;
+  monthlyPrice: number;
+  description: string | null;
+}
+
+const FALLBACK_PLANS: PlanData[] = [
+  { planId: 1, planCode: 'basic', planName: 'Basic', monthlyPrice: 499, description: 'Perfect for small shops' },
+  { planId: 2, planCode: 'premium', planName: 'Premium', monthlyPrice: 999, description: 'Best for growing shops' },
+  { planId: 3, planCode: 'enterprise', planName: 'Enterprise', monthlyPrice: 1999, description: 'Full-featured operations' },
+];
+
+const PLAN_FEATURES: Record<string, string[]> = {
+  basic: [
+    'Up to 500 parts inventory',
+    'Up to 50 service jobs/month',
+    'Basic reports & dashboard',
+    '2 staff accounts',
+    'Google Sign-In',
+    'Shop subdomain',
+  ],
+  premium: [
+    'Unlimited parts inventory',
+    'Unlimited service jobs',
+    'Advanced reports & analytics',
+    '10 staff accounts',
+    'Google Sign-In',
+    'Shop branding & logo',
+    'Mechanic dashboard',
+    'Customer portal',
+    'Activity logs',
+  ],
+  enterprise: [
+    'Everything in Premium',
+    'Unlimited staff accounts',
+    'Custom domain support',
+    'Priority support',
+    'Advanced security',
+    'Dedicated onboarding',
+  ],
+};
+
+const POPULAR_PLAN = 'premium';
 
 export default function PricingSection() {
   const navigate = useNavigate();
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.2 });
   const { ref: cardsRef, isVisible: cardsVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.1 });
+  const [plans, setPlans] = useState<PlanData[]>(FALLBACK_PLANS);
 
-  const plans = [
-    {
-      name: 'Basic',
-      price: '₱499',
-      period: '/month',
-      description: 'Perfect for small shops',
-      features: [
-        'Up to 500 parts inventory',
-        'Up to 50 service jobs/month',
-        'Basic reports & dashboard',
-        '2 staff accounts',
-        'Google Sign-In',
-        'Shop subdomain',
-      ],
-      popular: false,
-    },
-    {
-      name: 'Premium',
-      price: '₱999',
-      period: '/month',
-      description: 'Best for growing shops',
-      features: [
-        'Unlimited parts inventory',
-        'Unlimited service jobs',
-        'Advanced reports & analytics',
-        '10 staff accounts',
-        'Google Sign-In',
-        'Shop branding & logo',
-        'Mechanic dashboard',
-        'Customer portal',
-        'Activity logs',
-      ],
-      popular: true,
-    },
-    {
-      name: 'Enterprise',
-      price: '₱1,999',
-      period: '/month',
-      description: 'Full-featured operations',
-      features: [
-        'Everything in Premium',
-        'Unlimited staff accounts',
-        'Custom domain support',
-        'Priority support',
-        'Advanced security',
-        'Dedicated onboarding',
-      ],
-      popular: false,
-    },
-  ];
+  useEffect(() => {
+    apiGet<{ data: PlanData[] }>('/api/plans')
+      .then(res => {
+        if (res.data && res.data.length > 0) {
+          setPlans(res.data);
+        }
+      })
+      .catch(() => { /* use fallback */ });
+  }, []);
+
+  const plansWithFeatures = plans.map(plan => ({
+    ...plan,
+    features: PLAN_FEATURES[plan.planCode] ?? PLAN_FEATURES.basic,
+    popular: plan.planCode === POPULAR_PLAN,
+  }));
 
   return (
     <section id="pricing" className="relative py-32 overflow-hidden">
-      {/* Large background text */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
         <h2 className="text-[20rem] font-bold text-foreground/[0.02] select-none whitespace-nowrap">
           Pricing
         </h2>
       </div>
 
-      {/* Decorative glow effects */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
         <div className="absolute top-1/2 right-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
@@ -77,7 +89,6 @@ export default function PricingSection() {
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
         <div
           ref={headerRef}
           className={`text-center mb-16 transition-all duration-700 ${
@@ -114,11 +125,10 @@ export default function PricingSection() {
           </motion.p>
         </div>
 
-        {/* Pricing Cards */}
         <div ref={cardsRef} className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {plans.map((plan, index) => (
+          {plansWithFeatures.map((plan, index) => (
             <motion.div
-              key={plan.name}
+              key={plan.planCode}
               initial={{ opacity: 0, y: 30 }}
               animate={cardsVisible ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.1 * index, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
@@ -128,29 +138,24 @@ export default function PricingSection() {
                   : 'bg-muted/40 border border-border/50 hover:border-zinc-700/50'
               } backdrop-blur-xl`}
             >
-              {/* Glow effect on hover */}
               <div className={`absolute inset-0 rounded-3xl transition-opacity duration-300 ${
                 plan.popular ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
               }`}>
                 <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent rounded-3xl" />
               </div>
 
-              {/* Content */}
               <div className="relative">
-                {/* Plan Label */}
                 <div className="mb-6">
-                  <p className="text-sm text-muted-foreground mb-2">{plan.name} Plan</p>
+                  <p className="text-sm text-muted-foreground mb-2">{plan.planName} Plan</p>
                   <div className="flex items-baseline gap-1 mb-2">
-                    <span className="text-5xl font-bold text-foreground">{plan.price}</span>
-                    <span className="text-muted-foreground text-lg">{plan.period}</span>
+                    <span className="text-5xl font-bold text-foreground">₱{plan.monthlyPrice.toLocaleString()}</span>
+                    <span className="text-muted-foreground text-lg">/month</span>
                   </div>
                   <p className="text-sm text-muted-foreground">{plan.description}</p>
                 </div>
 
-                {/* Divider */}
                 <div className="h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent mb-6" />
 
-                {/* Features List */}
                 <ul className="space-y-4 mb-8">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-3">
@@ -164,7 +169,6 @@ export default function PricingSection() {
                   ))}
                 </ul>
 
-                {/* CTA Button */}
                 <button
                   onClick={() => navigate('/register-shop')}
                   className={`w-full py-3.5 rounded-2xl font-semibold text-sm transition-all duration-200 ${
@@ -180,7 +184,6 @@ export default function PricingSection() {
           ))}
         </div>
 
-        {/* Bottom Note */}
         <div className="text-center mt-12">
           <p className="text-sm text-muted-foreground">
             All plans include 14-day free trial • No credit card required • Cancel anytime

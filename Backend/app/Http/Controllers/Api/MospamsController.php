@@ -299,6 +299,23 @@ class MospamsController extends Controller
         ]);
     }
 
+    public function publicPlans(): JsonResponse
+    {
+        $plans = DB::table('subscription_plans')
+            ->where('is_active', 1)
+            ->orderBy('monthly_price')
+            ->get()
+            ->map(fn ($row) => [
+                'planId' => (int) $row->plan_id,
+                'planCode' => $row->plan_code,
+                'planName' => $row->plan_name,
+                'monthlyPrice' => (float) $row->monthly_price,
+                'description' => $row->description,
+            ])->values();
+
+        return response()->json(['data' => $plans]);
+    }
+
     public function storePart(Request $request): JsonResponse
     {
         $data = $request->validate([

@@ -22,6 +22,7 @@ Route::post('/auth/google', [GoogleAuthController::class, 'googleLogin'])->middl
 Route::post('/auth/google/register', [GoogleAuthController::class, 'googleRegister'])->middleware('google.auth.headers');
 Route::post('/auth/google/proxy', [GoogleAuthController::class, 'googleLoginProxy'])->middleware('google.auth.headers');
 Route::get('/stats', [MospamsController::class, 'publicStats']);
+Route::get('/plans', [MospamsController::class, 'publicPlans']);
 
 // Public shop registration
 Route::post('/shop-registration', [ShopRegistrationController::class, 'register'])->middleware('throttle:shop-registration');
