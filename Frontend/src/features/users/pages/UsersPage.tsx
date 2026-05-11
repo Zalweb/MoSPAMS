@@ -123,13 +123,64 @@ export default function Users() {
             </span>
           )}
         </button>
+
+  const openEdit = (u: User) => { setEditing(u); editForm.reset({ name: u.name, email: u.email, role: asEditableRole(u.role), password: '' }); setModalOpen(true); };
+
+  const onSubmitAdd = addForm.handleSubmit(async (values) => {
+    await addUser(values);
+    setModalOpen(false);
+  });
+  const onSubmitEdit = editForm.handleSubmit(async (values) => {
+    if (!editing) return;
+    await updateUser(editing.id, values);
+    setModalOpen(false);
+  });
+
+  return (
+    <div>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-7">
+        <div>
+          <h2 className="text-[22px] font-bold text-foreground tracking-tight">User Management</h2>
+          <p className="text-[13px] text-muted-foreground mt-0.5">Manage access and monitor activity</p>
+        </div>
+        <Button onClick={openAdd} size="sm" className="h-9 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-[12px] font-medium px-4 transition-opacity">
+          <Plus className="w-3.5 h-3.5 mr-1.5" /> Add User
+        </Button>
+      </div>
+
+      <div className="flex gap-1 mb-6 border-b border-border">
+        <button
+          onClick={() => setTab('users')}
+          className={`px-4 py-2 text-[13px] font-medium border-b-2 transition-colors ${
+            tab === 'users'
+              ? 'border-foreground text-foreground'
+              : 'border-transparent text-muted-foreground hover:text-muted-foreground dark:text-zinc-300'
+          }`}
+        >
+          All Users
+        </button>
+        <button
+          onClick={() => setTab('requests')}
+          className={`px-4 py-2 text-[13px] font-medium border-b-2 transition-colors flex items-center gap-1.5 ${
+            tab === 'requests'
+              ? 'border-foreground text-foreground'
+              : 'border-transparent text-muted-foreground hover:text-muted-foreground dark:text-zinc-300'
+          }`}
+        >
+          Pending Requests
+          {pendingRequests.length > 0 && (
+            <span className="inline-flex items-center rounded-full bg-[rgb(var(--color-primary-rgb))] px-1.5 py-0.5 text-[10px] font-bold text-white">
+              {pendingRequests.length}
+            </span>
+          )}
+        </button>
       </div>
 
       {tab === 'users' && (
         <>
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-6">
         {[
-          { title: 'Owners', desc: 'Full system access', count: adminCount, icon: Shield, accent: 'bg-white text-zinc-900' },
+          { title: 'Owners', desc: 'Full system access', count: adminCount, icon: Shield, accent: 'bg-[rgb(var(--color-primary-rgb))] text-white' },
           { title: 'Staff / Mechanic', desc: 'Operational access', count: staffCount, icon: UserCheck, accent: 'bg-blue-500/20 text-blue-400' },
           { title: 'Customers', desc: 'Registered clients', count: customerCount, icon: UsersIcon, accent: 'bg-emerald-500/20 text-emerald-400' },
           { title: 'Activity Logs', desc: 'Recorded actions', count: logs.length, icon: Activity, accent: 'bg-purple-500/20 text-purple-400' },
@@ -166,7 +217,7 @@ export default function Users() {
                 <tr key={u.id} className="hover:bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 transition-colors">
                   <td className="px-3 py-3 text-[12px] font-medium text-foreground dark:text-zinc-200">{u.name}{me?.id === u.id && <span className="ml-1.5 text-[10px] text-blue-400">(you)</span>}</td>
                   <td className="px-3 py-3 text-[12px] text-muted-foreground">{u.email}</td>
-                  <td className="px-3 py-3"><span className={`text-[10px] font-bold uppercase px-2 py-[3px] rounded-full ${u.role === 'Owner' ? 'bg-white text-zinc-900' : 'bg-blue-500/20 text-blue-400'}`}>{u.role}</span></td>
+                  <td className="px-3 py-3"><span className={`text-[10px] font-bold uppercase px-2 py-[3px] rounded-full ${u.role === 'Owner' ? 'bg-[rgb(var(--color-primary-rgb))]/10 text-[rgb(var(--color-primary-rgb))] border border-[rgb(var(--color-primary-rgb))]/20' : 'bg-blue-500/20 text-blue-400'}`}>{u.role}</span></td>
                   <td className="px-3 py-3"><span className={`text-[10px] font-medium px-2 py-[3px] rounded-full ${u.status === 'Active' ? 'bg-green-500/20 text-green-400' : 'bg-secondary dark:bg-zinc-800 text-muted-foreground'}`}>{u.status}</span></td>
                   <td className="px-3 py-3 text-[11px] text-muted-foreground tabular-nums">{u.lastActive ? new Date(u.lastActive).toLocaleString() : '—'}</td>
                   <td className="px-3 py-3 text-right">

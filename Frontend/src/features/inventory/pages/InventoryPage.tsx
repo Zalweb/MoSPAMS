@@ -347,7 +347,7 @@ export default function Inventory() {
               <p className="text-sm text-muted-foreground">{stockMoveTarget.name} — current: <span className="font-semibold text-foreground">{stockMoveTarget.stock}</span></p>
               <div className="grid grid-cols-3 gap-2">
                 {(['in', 'out', 'adjust'] as const).map(t => (
-                  <label key={t} className={`flex items-center justify-center gap-1 h-10 rounded-xl border text-sm font-medium capitalize cursor-pointer transition-all ${moveForm.watch('type') === t ? 'bg-white border-white text-black' : 'bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-muted-foreground'}`}>
+                  <label key={t} className={`flex items-center justify-center gap-1 h-10 rounded-xl border text-sm font-medium capitalize cursor-pointer transition-all ${moveForm.watch('type') === t ? 'bg-[rgb(var(--color-primary-rgb))] border-[rgb(var(--color-primary-rgb))] text-white' : 'bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-muted-foreground'}`}>
                     <input type="radio" value={t} {...moveForm.register('type')} className="hidden" />
                     {t === 'in' ? <ArrowDownToLine className="w-3.5 h-3.5" /> : t === 'out' ? <ArrowUpFromLine className="w-3.5 h-3.5" /> : null}
                     {t === 'adjust' ? 'Set' : t}
