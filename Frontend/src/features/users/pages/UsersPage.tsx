@@ -123,19 +123,6 @@ export default function Users() {
             </span>
           )}
         </button>
-
-  const openEdit = (u: User) => { setEditing(u); editForm.reset({ name: u.name, email: u.email, role: asEditableRole(u.role), password: '' }); setModalOpen(true); };
-
-  const onSubmitAdd = addForm.handleSubmit(async (values) => {
-    await addUser(values);
-    setModalOpen(false);
-  });
-  const onSubmitEdit = editForm.handleSubmit(async (values) => {
-    if (!editing) return;
-    await updateUser(editing.id, values);
-    setModalOpen(false);
-  });
-
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-7">
