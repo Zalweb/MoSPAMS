@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '@/features/auth/context/AuthContext';
-import { ArrowLeft, Shield } from 'lucide-react';
+import { ArrowLeft, Shield, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { currentHostMode } from '@/shared/lib/hostMode';
 import { useTenantBranding } from '@/shared/contexts/TenantBrandingContext';
@@ -22,6 +22,8 @@ export default function LoginPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [joining, setJoining] = useState(false);
   const [signUpModal, setSignUpModal] = useState<{ open: boolean; googleData: GoogleData | null }>({ open: false, googleData: null });
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleGoogleSuccess = async (response: CredentialResponse) => {
     if (!response.credential) return;
@@ -211,18 +213,26 @@ export default function LoginPage() {
             </div>
 
             {/* Password Input */}
-            <div>
+            <div className="relative">
               <label htmlFor="login-password" className="sr-only">Password</label>
               <input
                 id="login-password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
                 autoComplete="current-password"
-                className="w-full px-4 py-3.5 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-foreground placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all"
+                className="w-full px-4 py-3.5 bg-zinc-800/60 border border-zinc-700/40 rounded-xl text-foreground placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600/50 focus:border-transparent transition-all pr-12"
                 disabled={loading}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
 
             {/* Remember Me & Forgot Password */}

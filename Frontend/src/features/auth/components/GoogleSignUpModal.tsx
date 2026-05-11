@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import type { GoogleData } from '@/shared/types';
 
@@ -28,6 +28,8 @@ export default function GoogleSignUpModal({ open, googleData, tenantHost, onClos
   const [phone, setPhone]           = useState('');
   const [password, setPassword]     = useState('');
   const [confirm, setConfirm]       = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm]   = useState(false);
   const [role, setRole]             = useState<RequestedRole>('customer');
   const [error, setError]           = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -109,26 +111,46 @@ export default function GoogleSignUpModal({ open, googleData, tenantHost, onClos
 
             <div>
               <Label className="mb-2 block text-sm text-neutral-800 dark:text-neutral-200">Password</Label>
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="8+ characters"
-                className="block w-full rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700 focus:ring-3 focus:ring-neutral-400 dark:border-neutral-600 dark:bg-neutral-700/30 dark:text-neutral-300"
-              />
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="8+ characters"
+                  className="block w-full rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700 focus:ring-3 focus:ring-neutral-400 dark:border-neutral-600 dark:bg-neutral-700/30 dark:text-neutral-300 pr-12"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             <div>
               <Label className="mb-2 block text-sm text-neutral-800 dark:text-neutral-200">Confirm Password</Label>
-              <Input
-                type="password"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                required
-                placeholder="Repeat your password"
-                className="block w-full rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700 focus:ring-3 focus:ring-neutral-400 dark:border-neutral-600 dark:bg-neutral-700/30 dark:text-neutral-300"
-              />
+              <div className="relative">
+                <Input
+                  type={showConfirm ? "text" : "password"}
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  required
+                  placeholder="Repeat your password"
+                  className="block w-full rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700 focus:ring-3 focus:ring-neutral-400 dark:border-neutral-600 dark:bg-neutral-700/30 dark:text-neutral-300 pr-12"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors"
+                  tabIndex={-1}
+                >
+                  {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             <div>
