@@ -156,6 +156,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/shop/domain/activate', [DomainOnboardingController::class, 'activateDomain'])->middleware('role:Owner');
 
         // Customer routes
+        Route::get('/customer/service-types', [CustomerController::class, 'serviceTypes']);
         Route::get('/customer/services', [CustomerController::class, 'services']);
         Route::post('/customer/services', [CustomerController::class, 'createService']);
         Route::delete('/customer/services/{jobId}', [CustomerController::class, 'cancelService']);
@@ -171,7 +172,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/customer/notifications', [CustomerController::class, 'getNotifications']);
         Route::patch('/customer/notifications/read-all', [CustomerController::class, 'markAllNotificationsRead']);
         Route::patch('/customer/notifications/{notificationId}/read', [CustomerController::class, 'markNotificationRead']);
-        Route::get('/customer/service-types', [CustomerController::class, 'serviceTypes']);
 
         // Mechanic routes
         Route::middleware(['role:Mechanic'])->prefix('mechanic')->group(function () {

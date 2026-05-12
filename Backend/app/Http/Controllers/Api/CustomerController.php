@@ -483,17 +483,25 @@ class CustomerController extends Controller
     public function serviceTypes(Request $request): JsonResponse
     {
         $user = auth()->user();
-        $types = DB::table('service_types')
+
+        $query = DB::table('service_types')
             ->where('shop_id_fk', $user->shop_id_fk)
-            ->where('service_type_status_id_fk', DB::table('service_type_statuses')->where('status_code', 'active')->value('service_type_status_id'))
-            ->orderBy('service_name')
-            ->get()
-            ->map(fn ($row) => [
-                'id' => (string) $row->service_type_id,
-                'service_name' => $row->service_name,
-                'description' => $row->description,
-                'labor_cost' => (float) $row->labor_cost,
-            ]);
+            ->orderBy('service_name');
+
+        $activeStatusId = DB::table('service_type_statuses')
+            ->where('status_code', 'active')
+            ->value('service_type_status_id');
+
+        if ($activeStatusId !== null) {
+            $query->where('service_type_status_id_fk', $activeStatusId);
+        }
+
+        $types = $query->get()->map(fn ($row) => [
+            'id' => (string) $row->service_type_id,
+            'service_name' => $row->service_name,
+            'description' => $row->description,
+            'labor_cost' => (float) $row->labor_cost,
+        ]);
 
         return response()->json(['data' => $types]);
     }
