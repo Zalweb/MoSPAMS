@@ -657,7 +657,6 @@ class MospamsController extends Controller
             'motorcycleModel'      => ['sometimes', 'nullable', 'string', 'max:150'],
             'serviceType'          => ['sometimes', 'string', 'max:100'],
             'laborCost'            => ['sometimes', 'numeric', 'min:0'],
-            'status'               => ['sometimes', Rule::in(['Pending', 'Ongoing', 'Completed'])],
             'notes'                => ['sometimes', 'nullable', 'string'],
             'mechanicIds'          => ['sometimes', 'array'],
             'mechanicIds.*'        => ['string'],
@@ -671,11 +670,6 @@ class MospamsController extends Controller
             if (array_key_exists('customerName', $data)) $patch['customer_id_fk'] = $this->customerId($data['customerName']);
             if (array_key_exists('motorcycleModel', $data)) $patch['motorcycle_model'] = $data['motorcycleModel'];
             if (array_key_exists('notes', $data)) $patch['notes'] = $data['notes'];
-            if (array_key_exists('status', $data)) {
-                $statusCode = strtolower($data['status']);
-                $patch['service_job_status_id_fk'] = $this->statusId('service_job_statuses', 'service_job_status_id', $statusCode);
-                $patch['completion_date'] = $statusCode === 'completed' ? now()->toDateString() : null;
-            }
             DB::table('service_jobs')->where('job_id', $service)->where('shop_id_fk', $this->shopId())->update($patch);
 
             if (array_key_exists('serviceType', $data) || array_key_exists('laborCost', $data)) {
@@ -709,22 +703,6 @@ class MospamsController extends Controller
 
             $this->log($request, 'Updated service #'.$service, 'service_jobs', $service);
         });
-
-        if (($data['status'] ?? '') === 'Completed') {
-            $job = DB::table('service_jobs')
-                ->join('customers', 'customers.customer_id', '=', 'service_jobs.customer_id_fk')
-                ->where('job_id', $service)
-                ->first();
-            if ($job) {
-                $this->notifyOwner(
-                    'job_completed',
-                    'Service Job Completed',
-                    "Service for {$job->full_name} has been completed.",
-                    'service_jobs',
-                    $service
-                );
-            }
-        }
 
         return response()->json(['data' => $this->serviceById($service)]);
     }
@@ -987,6 +965,7 @@ class MospamsController extends Controller
     {
         $data = $request->validate([
             'paymentMethod' => ['required', Rule::in(['Cash', 'GCash'])],
+            'laborCost'     => ['sometimes', 'numeric', 'min:0'],
         ]);
 
         abort_unless(
@@ -1001,9 +980,19 @@ class MospamsController extends Controller
         $saleId = DB::transaction(function () use ($request, $service, $data) {
             $job = DB::table('service_jobs')->where('job_id', $service)->first();
             $laborItem = DB::table('service_job_items')->where('job_id_fk', $service)->first();
-            $parts = DB::table('service_job_parts')->where('job_id_fk', $service)->get();
+            if (array_key_exists('laborCost', $data)) {
+                DB::table('service_job_items')
+                    ->where('job_id_fk', $service)
+                    ->update(['labor_cost' => $data['laborCost']]);
+                $laborCost = (float) $data['laborCost'];
+            } else {
+                $laborCost = (float) ($laborItem?->labor_cost ?? 0);
+            }
 
-            $laborCost = (float) ($laborItem?->labor_cost ?? 0);
+            $parts = DB::table('service_job_parts')
+                ->where('job_id_fk', $service)
+                ->where('status', 'confirmed')
+                ->get();
             $partsCost = $parts->sum(fn ($p) => $p->unit_price * $p->quantity);
             $total = $laborCost + $partsCost;
 

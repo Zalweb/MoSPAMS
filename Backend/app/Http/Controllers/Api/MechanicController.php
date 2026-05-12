@@ -161,54 +161,29 @@ class MechanicController extends Controller
             'quantity' => ['required', 'integer', 'min:1'],
         ]);
 
-        DB::transaction(function () use ($job, $data, $request) {
+        DB::transaction(function () use ($job, $data, $request, $mechanic) {
             $part = DB::table('parts')
                 ->where('part_id', $data['partId'])
-                ->lockForUpdate()
                 ->first();
 
             if (! $part) {
                 abort(404, 'Part not found');
             }
 
-            if ($part->stock_quantity < $data['quantity']) {
-                abort(response()->json([
-                    'message' => 'Insufficient stock',
-                    'available' => $part->stock_quantity,
-                    'requested' => $data['quantity'],
-                ], 422));
-            }
-
             DB::table('service_job_parts')->insert([
-                'job_id_fk' => $job,
-                'part_id_fk' => $data['partId'],
-                'quantity' => $data['quantity'],
-                'unit_price' => $part->unit_price,
-                'subtotal' => $part->unit_price * $data['quantity'],
-            ]);
-
-            DB::table('parts')
-                ->where('part_id', $data['partId'])
-                ->update([
-                    'stock_quantity' => DB::raw('stock_quantity - ' . $data['quantity']),
-                    'updated_at' => now(),
-                ]);
-
-            DB::table('stock_movements')->insert([
-                'part_id_fk' => $data['partId'],
-                'user_id_fk' => $request->user()->user_id,
-                'movement_type' => 'out',
-                'quantity' => $data['quantity'],
-                'reference_type' => 'service_job',
-                'reference_id' => $job,
-                'movement_date' => now(),
-                'remarks' => 'Used in service job #' . $job,
+                'job_id_fk'       => $job,
+                'part_id_fk'      => $data['partId'],
+                'quantity'        => $data['quantity'],
+                'unit_price'      => $part->unit_price,
+                'subtotal'        => $part->unit_price * $data['quantity'],
+                'status'          => 'requested',
+                'requested_by_fk' => $request->user()->user_id,
             ]);
 
             $this->logActivity(
                 $request->user()->user_id,
                 $request->user()->shop_id_fk,
-                'Added ' . $data['quantity'] . 'x ' . $part->part_name . ' to job #' . $job,
+                'Requested ' . $data['quantity'] . 'x ' . $part->part_name . ' for job #' . $job,
                 'service_job_parts',
                 $job,
                 $request->user()->account_id_fk

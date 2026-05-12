@@ -528,6 +528,97 @@ class ServiceFlowTest extends TestCase
         $this->assertEquals($stockBefore, $stockAfter);
     }
 
+    // --- Task 7: mechanic add part lands as requested, no stock change ---
+
+    public function test_mechanic_add_part_lands_as_requested_no_stock_change(): void
+    {
+        $jobId = $this->createJob();
+
+        DB::table('service_job_mechanics')->insert([
+            'job_id_fk'      => $jobId,
+            'mechanic_id_fk' => $this->mechanicId,
+            'shop_id_fk'     => $this->shopId,
+            'assigned_at'    => now(),
+        ]);
+
+        $stockBefore = (int) DB::table('parts')->where('part_id', $this->partId)->value('stock_quantity');
+
+        $response = $this->withToken($this->mechanicToken)
+            ->postJson("http://default.mospams.local/api/mechanic/jobs/{$jobId}/parts", [
+                'partId'   => $this->partId,
+                'quantity' => 1,
+            ]);
+
+        $response->assertOk();
+
+        $stockAfter = (int) DB::table('parts')->where('part_id', $this->partId)->value('stock_quantity');
+        $this->assertEquals($stockBefore, $stockAfter);
+
+        $this->assertDatabaseHas('service_job_parts', [
+            'job_id_fk'  => $jobId,
+            'part_id_fk' => $this->partId,
+            'status'     => 'requested',
+        ]);
+    }
+
+    // --- Task 8: billService uses only confirmed parts and accepts laborCost ---
+
+    public function test_bill_service_uses_only_confirmed_parts_and_accepts_labor_cost(): void
+    {
+        $jobId = $this->createJob();
+
+        DB::table('service_job_parts')->insert([
+            'job_id_fk'  => $jobId,
+            'part_id_fk' => $this->partId,
+            'quantity'   => 1,
+            'unit_price' => 220.00,
+            'subtotal'   => 220.00,
+            'status'     => 'confirmed',
+        ]);
+        DB::table('service_job_parts')->insert([
+            'job_id_fk'       => $jobId,
+            'part_id_fk'      => $this->partId,
+            'quantity'        => 2,
+            'unit_price'      => 220.00,
+            'subtotal'        => 440.00,
+            'status'          => 'requested',
+            'requested_by_fk' => $this->mechanicUserId,
+        ]);
+
+        $response = $this->withToken($this->token)
+            ->postJson("http://default.mospams.local/api/services/{$jobId}/bill", [
+                'paymentMethod' => 'Cash',
+                'laborCost'     => 500,
+            ]);
+
+        $response->assertCreated();
+
+        $sale = DB::table('sales')->where('job_id_fk', $jobId)->first();
+        $this->assertEquals(720.00, (float) $sale->total_amount); // 500 + 220 only
+
+        $item = DB::table('service_job_items')->where('job_id_fk', $jobId)->first();
+        $this->assertEquals(500.00, (float) $item->labor_cost);
+    }
+
+    // --- Task 9: updateService ignores status field ---
+
+    public function test_update_service_ignores_status_field(): void
+    {
+        $jobId = $this->createJob();
+
+        $this->withToken($this->token)
+            ->patchJson("http://default.mospams.local/api/services/{$jobId}", [
+                'status' => 'Completed',
+            ])
+            ->assertOk();
+
+        $statusCode = DB::table('service_jobs')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->where('service_jobs.job_id', $jobId)
+            ->value('service_job_statuses.status_code');
+        $this->assertEquals('pending', $statusCode);
+    }
+
     // --- helpers ---
 
     private function createJob(?int $customerUserId = null): int
@@ -568,6 +659,7 @@ class ServiceFlowTest extends TestCase
             'quantity'   => 1,
             'unit_price' => 220.00,
             'subtotal'   => 220.00,
+            'status'     => 'confirmed',
         ]);
         DB::table('parts')->where('part_id', $this->partId)->update([
             'stock_quantity' => 9,
