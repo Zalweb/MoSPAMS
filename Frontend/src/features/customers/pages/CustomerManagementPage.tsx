@@ -1,11 +1,15 @@
+import { useState, useEffect, useCallback } from 'react';
 import { Plus, Pencil, Trash2, Search, Users, Phone, Mail, MapPin, ChevronLeft, ChevronRight, UserCheck, UserPlus, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { apiGet, apiMutation } from '@/shared/lib/api';
 import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 20 },

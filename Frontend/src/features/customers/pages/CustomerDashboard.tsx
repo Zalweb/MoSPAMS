@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
-import { motion } from 'framer-motion';
 import { Wrench, Clock, CheckCircle2, Calendar, ArrowRight, XCircle } from 'lucide-react';
 import { apiGet, apiMutation } from '@/shared/lib/api';
 import { useAuth } from '@/features/auth/context/AuthContext';
