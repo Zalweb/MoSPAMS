@@ -108,8 +108,8 @@ export default function CustomerVehicles() {
           </div>
         ) : vehicles.length === 0 ? (
           <motion.div {...fadeUp(0.1)} className="flex flex-col items-center justify-center py-20 bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-[32px] border border-border/50 shadow-xl">
-            <div className="w-20 h-20 rounded-3xl bg-muted/50 flex items-center justify-center mb-6">
-              <Bike className="w-10 h-10 text-muted-foreground/30" />
+            <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center mb-6 border border-primary/20">
+              <Bike className="w-10 h-10 text-primary" />
             </div>
             <p className="text-base font-semibold text-foreground">No vehicles yet</p>
             <p className="text-sm text-muted-foreground mt-1">Add your motorcycle to book services faster.</p>

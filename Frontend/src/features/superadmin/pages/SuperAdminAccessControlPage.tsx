@@ -78,7 +78,7 @@ export default function SuperAdminAccessControlPage() {
           <Input placeholder="Email" value={form.email} onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))} className="bg-muted border-border dark:border-zinc-700 text-foreground dark:text-zinc-200 placeholder:text-muted-foreground" />
           <Input placeholder="Password (optional)" value={form.password} onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))} className="bg-muted border-border dark:border-zinc-700 text-foreground dark:text-zinc-200 placeholder:text-muted-foreground" />
         </div>
-        <Button className="mt-3 h-9 text-[12px] bg-white hover:bg-zinc-200 text-black" onClick={() => void onCreate()}>Create Admin</Button>
+        <Button className="mt-3 h-9 text-[12px] bg-[rgb(var(--color-primary-rgb))] hover:bg-[rgb(var(--color-primary-rgb))]/90 text-white" onClick={() => void onCreate()}>Create Admin</Button>
       </section>
 
       <section className="bg-card rounded-2xl border border-border overflow-x-auto">

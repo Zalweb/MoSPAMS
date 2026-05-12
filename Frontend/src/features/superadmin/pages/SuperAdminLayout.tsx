@@ -238,7 +238,7 @@ export default function SuperAdminLayout() {
                 className="flex items-center gap-3 pl-1 pr-3 py-1.5 rounded-xl hover:bg-secondary dark:bg-zinc-800 transition-all"
                 whileHover={{ scale: 1.02 }}
               >
-                <div className="w-8 h-8 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center text-sm font-bold text-foreground">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 backdrop-blur-sm border border-primary/20 flex items-center justify-center text-sm font-bold text-primary">
                   {user?.name?.charAt(0)?.toUpperCase() || 'S'}
                 </div>
                 <div className="hidden sm:block text-left">

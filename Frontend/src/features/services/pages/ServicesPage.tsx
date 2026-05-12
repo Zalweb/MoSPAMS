@@ -208,7 +208,7 @@ export default function Services() {
 
       <motion.div {...fadeUp(0.1)} className="flex gap-2 flex-wrap">
         {(['All', 'Pending', 'Ongoing', 'Completed', 'Cancelled'] as StatusFilter[]).map(s => (
-          <button key={s} onClick={() => setStatusFilter(s)} className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${statusFilter === s ? 'bg-white text-black' : 'bg-muted/50 text-muted-foreground border border-border hover:border-border dark:border-zinc-700 hover:text-foreground'}`}>
+          <button key={s} onClick={() => setStatusFilter(s)} className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${statusFilter === s ? 'bg-[rgb(var(--color-primary-rgb))] text-white shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20' : 'bg-muted/50 text-muted-foreground border border-border hover:border-border dark:border-zinc-700 hover:text-foreground'}`}>
             {s} <span className="opacity-50 ml-1">{statusCounts[s]}</span>
           </button>
         ))}

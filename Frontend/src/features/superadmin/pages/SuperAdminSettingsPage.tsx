@@ -97,7 +97,7 @@ export default function SuperAdminSettingsPage() {
               </label>
             </div>
 
-            <Button className="mt-4 h-9 text-[12px] bg-white hover:bg-zinc-200 text-black" onClick={() => void onSave()} disabled={saving}>
+            <Button className="mt-4 h-9 text-[12px] bg-[rgb(var(--color-primary-rgb))] hover:bg-[rgb(var(--color-primary-rgb))]/90 text-white" onClick={() => void onSave()} disabled={saving}>
               {saving ? 'Saving...' : 'Save Settings'}
             </Button>
           </section>

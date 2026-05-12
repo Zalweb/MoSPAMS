@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Wrench, Clock, CheckCircle2, Search, XCircle } from 'lucide-react';
+import { Wrench, Clock, CheckCircle2, Search, XCircle, Calendar } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { apiGet, apiMutation } from '@/shared/lib/api';
 import type { CustomerService } from '@/shared/types';
@@ -79,7 +79,7 @@ export default function ServiceHistory() {
             className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
               statusFilter === s
                 ? 'bg-[rgb(var(--color-primary-rgb))] text-white shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20'
-                : 'bg-card dark:bg-zinc-900/40 border border-border/50 text-muted-foreground hover:border-border hover:text-foreground'
+                : 'bg-card dark:bg-zinc-900/40 border border-border/50 text-muted-foreground hover:bg-muted dark:hover:bg-zinc-800 hover:text-foreground'
             }`}
           >
             {s} <span className="opacity-50 ml-1.5 font-medium">{statusCounts[s]}</span>

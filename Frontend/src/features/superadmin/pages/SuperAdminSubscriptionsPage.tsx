@@ -113,7 +113,7 @@ export default function SuperAdminSubscriptionsPage() {
             <Input placeholder="Plan name" value={planForm.planName} onChange={(e) => setPlanForm(p => ({ ...p, planName: e.target.value }))} className="bg-muted border-border dark:border-zinc-700 text-foreground dark:text-zinc-200 placeholder:text-muted-foreground" />
             <Input type="number" placeholder="Monthly price" value={planForm.monthlyPrice} onChange={(e) => setPlanForm(p => ({ ...p, monthlyPrice: e.target.value }))} className="bg-muted border-border dark:border-zinc-700 text-foreground dark:text-zinc-200 placeholder:text-muted-foreground" />
             <div className="flex gap-2">
-              <Button className="flex-1 h-9 text-[12px] bg-white hover:bg-zinc-200 text-black" onClick={() => void onCreateOrUpdatePlan()}>{editingPlanId ? 'Update Plan' : 'Save Plan'}</Button>
+              <Button className="flex-1 h-9 text-[12px] bg-[rgb(var(--color-primary-rgb))] hover:bg-[rgb(var(--color-primary-rgb))]/90 text-white" onClick={() => void onCreateOrUpdatePlan()}>{editingPlanId ? 'Update Plan' : 'Save Plan'}</Button>
               {editingPlanId && <Button className="h-9 text-[12px] bg-secondary dark:bg-zinc-800 hover:bg-muted dark:bg-zinc-700 text-muted-foreground dark:text-zinc-300" onClick={cancelEditPlan}>Cancel</Button>}
             </div>
           </div>
@@ -126,7 +126,7 @@ export default function SuperAdminSubscriptionsPage() {
             <select className="w-full h-9 rounded-xl border border-border dark:border-zinc-700 bg-muted text-foreground dark:text-zinc-200 px-3 text-[12px]" value={subscriptionForm.planId} onChange={(e) => setSubscriptionForm(p => ({ ...p, planId: e.target.value }))}><option value="">Select plan</option>{plans.map(p => <option key={p.planId} value={p.planId}>{p.planName}</option>)}</select>
             <select className="w-full h-9 rounded-xl border border-border dark:border-zinc-700 bg-muted text-foreground dark:text-zinc-200 px-3 text-[12px]" value={subscriptionForm.status} onChange={(e) => setSubscriptionForm(p => ({ ...p, status: e.target.value as typeof p.status }))}><option value="PENDING">PENDING</option><option value="ACTIVE">ACTIVE</option><option value="EXPIRED">EXPIRED</option><option value="CANCELLED">CANCELLED</option></select>
             <Input type="date" value={subscriptionForm.endsAt} onChange={(e) => setSubscriptionForm(p => ({ ...p, endsAt: e.target.value }))} className="bg-muted border-border dark:border-zinc-700 text-foreground dark:text-zinc-200" />
-            <Button className="w-full h-9 text-[12px] bg-white hover:bg-zinc-200 text-black" onClick={() => void onAssignSubscription()}>Assign</Button>
+            <Button className="w-full h-9 text-[12px] bg-[rgb(var(--color-primary-rgb))] hover:bg-[rgb(var(--color-primary-rgb))]/90 text-white" onClick={() => void onAssignSubscription()}>Assign</Button>
           </div>
         </section>
 
@@ -138,7 +138,7 @@ export default function SuperAdminSubscriptionsPage() {
             <select className="w-full h-9 rounded-xl border border-border dark:border-zinc-700 bg-muted text-foreground dark:text-zinc-200 px-3 text-[12px]" value={paymentForm.paymentStatus} onChange={(e) => setPaymentForm(p => ({ ...p, paymentStatus: e.target.value as typeof p.paymentStatus }))}><option value="PAID">PAID</option><option value="PENDING">PENDING</option><option value="FAILED">FAILED</option><option value="REFUNDED">REFUNDED</option></select>
             <Input placeholder="Payment method" value={paymentForm.paymentMethod} onChange={(e) => setPaymentForm(p => ({ ...p, paymentMethod: e.target.value }))} className="bg-muted border-border dark:border-zinc-700 text-foreground dark:text-zinc-200 placeholder:text-muted-foreground" />
             <Input type="date" value={paymentForm.dueAt} onChange={(e) => setPaymentForm(p => ({ ...p, dueAt: e.target.value }))} className="bg-muted border-border dark:border-zinc-700 text-foreground dark:text-zinc-200" />
-            <Button className="w-full h-9 text-[12px] bg-white hover:bg-zinc-200 text-black" onClick={() => void onRecordPayment()}>Record</Button>
+            <Button className="w-full h-9 text-[12px] bg-[rgb(var(--color-primary-rgb))] hover:bg-[rgb(var(--color-primary-rgb))]/90 text-white" onClick={() => void onRecordPayment()}>Record</Button>
           </div>
         </section>
       </div>

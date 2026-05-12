@@ -65,7 +65,7 @@ export default function SuperAdminProfilePage() {
           </div>
 
           <div className="mt-6 pt-6 border-t border-border">
-            <Button className="bg-white hover:bg-zinc-200 text-black text-[13px] flex items-center gap-2" onClick={() => void handleSave()} disabled={saving}>
+            <Button className="bg-[rgb(var(--color-primary-rgb))] hover:bg-[rgb(var(--color-primary-rgb))]/90 text-white text-[13px] flex items-center gap-2" onClick={() => void handleSave()} disabled={saving}>
               <Save className="w-4 h-4" />
               {saving ? 'Saving...' : 'Save Changes'}
             </Button>

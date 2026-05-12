@@ -154,7 +154,7 @@ export default function Reports() {
 
       <div className="flex gap-2 mb-5 flex-wrap">
         {tabs.map(r => (
-          <button key={r.key} onClick={() => setReportType(r.key)} className={`flex items-center gap-2 px-4 py-[9px] rounded-xl text-[12px] font-medium transition-all ${reportType === r.key ? 'bg-white text-zinc-900 shadow-sm' : 'bg-muted text-muted-foreground border border-border hover:border-border dark:border-zinc-700 hover:text-foreground dark:text-zinc-200'}`}>
+          <button key={r.key} onClick={() => setReportType(r.key)} className={`flex items-center gap-2 px-4 py-[9px] rounded-xl text-[12px] font-medium transition-all ${reportType === r.key ? 'bg-[rgb(var(--color-primary-rgb))] text-white shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20' : 'bg-muted text-muted-foreground border border-border hover:border-border dark:border-zinc-700 hover:text-foreground dark:text-zinc-200'}`}>
             <r.icon className="w-3.5 h-3.5" strokeWidth={1.5} />
             {r.label}
           </button>
@@ -179,14 +179,14 @@ export default function Reports() {
         <div className="space-y-4">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {[
-              { label: 'Total Revenue', value: `₱${totalRevenue.toLocaleString()}`, accent: 'bg-white text-zinc-900' },
+              { label: 'Total Revenue', value: `₱${totalRevenue.toLocaleString()}`, accent: 'bg-[rgb(var(--color-primary-rgb))] text-white' },
               { label: 'Transactions', value: filteredTx.length.toString(), accent: 'bg-blue-500/20 text-blue-400' },
               { label: 'Cash', value: `₱${cashTotal.toLocaleString()}`, accent: 'bg-green-500/20 text-green-400' },
               { label: 'GCash', value: `₱${gcashTotal.toLocaleString()}`, accent: 'bg-purple-500/20 text-purple-400' },
             ].map((s, i) => (
-              <div key={s.label} className={`rounded-2xl p-4 ${i === 0 ? 'bg-white' : s.accent.split(' ')[0]}`}>
-                <p className={`text-[11px] font-medium ${i === 0 ? 'text-muted-foreground' : 'text-muted-foreground'}`}>{s.label}</p>
-                <p className={`text-xl font-bold mt-1 tracking-tight ${i === 0 ? 'text-zinc-900' : 'text-foreground'}`}>{s.value}</p>
+              <div key={s.label} className={`rounded-2xl p-4 shadow-sm border border-border/50 backdrop-blur-md ${i === 0 ? s.accent : 'bg-card dark:bg-zinc-900/40 ' + s.accent.split(' ')[0]}`}>
+                <p className={`text-[11px] font-medium ${i === 0 ? 'text-white/80' : 'text-muted-foreground'}`}>{s.label}</p>
+                <p className={`text-xl font-bold mt-1 tracking-tight ${i === 0 ? 'text-white' : 'text-foreground'}`}>{s.value}</p>
               </div>
             ))}
           </div>

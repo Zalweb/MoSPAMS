@@ -93,7 +93,7 @@ export default function LandingNavbar() {
             <button
               id="nav-get-started-btn"
               onClick={() => navigate('/register-shop')}
-              className="px-5 py-2 md:px-6 md:py-2.5 rounded-full bg-white hover:bg-zinc-200 text-black text-xs md:text-sm font-semibold transition-all duration-200"
+              className="px-5 py-2 md:px-6 md:py-2.5 rounded-full bg-[rgb(var(--color-primary-rgb))] text-white hover:opacity-90 text-xs md:text-sm font-semibold transition-all duration-200 shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20"
             >
               Get Started
             </button>

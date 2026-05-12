@@ -244,7 +244,7 @@ export default function ShopRegistrationPage() {
           <div className="text-center">
             <button
               onClick={() => navigate(`/`)}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white text-black font-semibold hover:bg-zinc-100 transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[rgb(var(--color-primary-rgb))] text-white font-semibold hover:opacity-90 transition-all shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20"
             >
               Go to Login
             </button>
@@ -418,7 +418,7 @@ export default function ShopRegistrationPage() {
                 >
                   {plan.popular && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span className="bg-white text-black text-xs font-bold px-3 py-1 rounded-full">
+                      <span className="bg-[rgb(var(--color-primary-rgb))] text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20">
                         POPULAR
                       </span>
                     </div>
@@ -449,8 +449,8 @@ export default function ShopRegistrationPage() {
 
                   {form.selectedPlan === plan.code && (
                     <div className="absolute top-4 right-4">
-                      <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                        <Check className="w-4 h-4 text-black" strokeWidth={3} />
+                      <div className="w-6 h-6 bg-[rgb(var(--color-primary-rgb))] rounded-full flex items-center justify-center">
+                        <Check className="w-4 h-4 text-white" strokeWidth={3} />
                       </div>
                     </div>
                   )}
@@ -484,7 +484,7 @@ export default function ShopRegistrationPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 rounded-2xl bg-white text-black font-semibold text-base hover:bg-zinc-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+              className="w-full py-4 rounded-2xl bg-[rgb(var(--color-primary-rgb))] text-white font-semibold text-base hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
