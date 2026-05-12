@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { Wrench, Search, Clock, CheckCircle2, AlertCircle, ArrowRight, Users, Package } from 'lucide-react';
+import { Wrench, Search, CheckCircle2, AlertCircle, ArrowRight, Users, Package } from 'lucide-react';
 import { apiGet } from '@/shared/lib/api';
 import { toast } from 'sonner';
 
@@ -73,10 +73,12 @@ export default function AssignedJobsPage() {
 
   const getStatusColor = (statusCode: string) => {
     switch (statusCode) {
-      case 'pending':
-        return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+      case 'booked_confirmed':
+        return 'bg-violet-500/10 text-violet-400 border-violet-500/20';
       case 'in_progress':
         return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+      case 'work_done':
+        return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
       case 'completed':
         return 'bg-green-500/10 text-green-400 border-green-500/20';
       default:
@@ -86,10 +88,12 @@ export default function AssignedJobsPage() {
 
   const getStatusIcon = (statusCode: string) => {
     switch (statusCode) {
-      case 'pending':
-        return Clock;
+      case 'booked_confirmed':
+        return Users;
       case 'in_progress':
         return Wrench;
+      case 'work_done':
+        return CheckCircle2;
       case 'completed':
         return CheckCircle2;
       default:
@@ -97,11 +101,21 @@ export default function AssignedJobsPage() {
     }
   };
 
+  const getStatusLabel = (statusCode: string): string => {
+    switch (statusCode) {
+      case 'booked_confirmed': return 'Confirmed';
+      case 'in_progress': return 'In Progress';
+      case 'work_done': return 'Work Done';
+      case 'completed': return 'Completed';
+      default: return statusCode;
+    }
+  };
+
   const stats = {
     total: jobs.length,
-    pending: jobs.filter(j => j.statusCode === 'pending').length,
+    confirmed: jobs.filter(j => j.statusCode === 'booked_confirmed').length,
     inProgress: jobs.filter(j => j.statusCode === 'in_progress').length,
-    completed: jobs.filter(j => j.statusCode === 'completed').length,
+    workDone: jobs.filter(j => j.statusCode === 'work_done').length,
   };
 
   if (loading) {
@@ -121,9 +135,9 @@ export default function AssignedJobsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: 'Total Jobs', value: stats.total, icon: Wrench, color: 'bg-zinc-500/10 text-muted-foreground border-zinc-500/20' },
-          { label: 'Pending', value: stats.pending, icon: Clock, color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
+          { label: 'Confirmed', value: stats.confirmed, icon: Users, color: 'bg-violet-500/10 text-violet-400 border-violet-500/20' },
           { label: 'In Progress', value: stats.inProgress, icon: Wrench, color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
-          { label: 'Completed', value: stats.completed, icon: CheckCircle2, color: 'bg-green-500/10 text-green-400 border-green-500/20' },
+          { label: 'Work Done', value: stats.workDone, icon: CheckCircle2, color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
         ].map((stat) => (
           <div key={stat.label} className={`p-4 rounded-xl border ${stat.color}`}>
             <div className="flex items-center justify-between mb-2">
@@ -156,9 +170,9 @@ export default function AssignedJobsPage() {
           className="px-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-zinc-700"
         >
           <option value="all">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="in_progress">In Progress</option>
-          <option value="completed">Completed</option>
+          <option value="booked_confirmed">{getStatusLabel('booked_confirmed')}</option>
+          <option value="in_progress">{getStatusLabel('in_progress')}</option>
+          <option value="work_done">{getStatusLabel('work_done')}</option>
         </select>
       </div>
 
@@ -191,7 +205,7 @@ export default function AssignedJobsPage() {
                       <h3 className="text-lg font-semibold text-foreground">{job.customerName}</h3>
                       <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(job.statusCode)}`}>
                         <StatusIcon className="w-3.5 h-3.5" />
-                        {job.status}
+                        {getStatusLabel(job.statusCode)}
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground mb-1">{job.motorcycleModel}</p>
@@ -218,6 +232,16 @@ export default function AssignedJobsPage() {
                           </span>
                         )}
                       </div>
+                    )}
+                  </div>
+                )}
+                {(job.statusCode === 'booked_confirmed' || job.statusCode === 'in_progress') && (
+                  <div className="mb-3">
+                    {job.statusCode === 'booked_confirmed' && (
+                      <span className="text-xs font-semibold text-green-400">▶ Start Service</span>
+                    )}
+                    {job.statusCode === 'in_progress' && (
+                      <span className="text-xs font-semibold text-blue-400">✓ Mark Complete</span>
                     )}
                   </div>
                 )}
