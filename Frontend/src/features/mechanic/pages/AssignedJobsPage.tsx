@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { Wrench, Search, Clock, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
+import { Wrench, Search, Clock, CheckCircle2, AlertCircle, ArrowRight, Users, Package } from 'lucide-react';
 import { apiGet } from '@/shared/lib/api';
 import { toast } from 'sonner';
 
@@ -15,6 +15,8 @@ interface Job {
   notes: string;
   createdAt: string;
   completedAt: string | null;
+  mechanics: { id: string; name: string }[];
+  partsUsed: { id: string; name: string; quantity: number; status: string }[];
 }
 
 export default function AssignedJobsPage() {
@@ -198,6 +200,27 @@ export default function AssignedJobsPage() {
                   <ArrowRight className="w-5 h-5 text-muted-foreground dark:text-zinc-600 group-hover:text-muted-foreground group-hover:translate-x-1 transition-all" />
                 </div>
 
+                {(job.mechanics.length > 1 || job.partsUsed.length > 0) && (
+                  <div className="flex flex-wrap gap-3 mb-4">
+                    {job.mechanics.length > 1 && (
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Users className="w-3.5 h-3.5" />
+                        <span>{job.mechanics.map(m => m.name).join(', ')}</span>
+                      </div>
+                    )}
+                    {job.partsUsed.length > 0 && (
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Package className="w-3.5 h-3.5" />
+                        <span>{job.partsUsed.length} part{job.partsUsed.length !== 1 ? 's' : ''}</span>
+                        {job.partsUsed.some(p => p.status === 'requested') && (
+                          <span className="text-[10px] font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded">
+                            pending
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
                 <div className="flex items-center justify-between pt-4 border-t border-border">
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <span>Labor: ₱{job.laborCost.toLocaleString()}</span>

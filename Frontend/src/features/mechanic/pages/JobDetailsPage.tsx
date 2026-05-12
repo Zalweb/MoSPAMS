@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { 
-  ArrowLeft, Wrench, User, Phone, Mail, Bike, Clock, 
-  CheckCircle2, Package, Plus, Trash2, AlertTriangle 
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  ArrowLeft, Wrench, User, Phone, Mail, Bike, Clock,
+  CheckCircle2, Package, Plus, Trash2, AlertTriangle, Users
 } from 'lucide-react';
 import { apiGet, apiMutation } from '@/shared/lib/api';
 import { toast } from 'sonner';
@@ -33,6 +34,7 @@ interface JobDetails {
   createdAt: string;
   completedAt: string | null;
   parts: JobPart[];
+  mechanics: { id: string; name: string }[];
 }
 
 export default function JobDetailsPage() {
@@ -42,6 +44,7 @@ export default function JobDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [showAddPart, setShowAddPart] = useState(false);
   const [showStatusUpdate, setShowStatusUpdate] = useState(false);
+  const [confirmRemovePart, setConfirmRemovePart] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -63,9 +66,8 @@ export default function JobDetailsPage() {
     }
   }
 
-  async function handleRemovePart(partId: string, partName: string) {
-    if (!confirm(`Remove ${partName} from this job?`)) return;
-
+  async function handleRemovePart(partId: string) {
+    setConfirmRemovePart(null);
     try {
       const response = await apiMutation<{ data: JobDetails }>(
         `/api/mechanic/jobs/${id}/parts/${partId}`,
@@ -213,6 +215,20 @@ export default function JobDetailsPage() {
           </div>
         </div>
 
+        {job.mechanics && job.mechanics.length > 0 && (
+          <div className="mt-6 pt-6 border-t border-border">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Assigned Mechanics</h3>
+            <div className="flex flex-wrap gap-2">
+              {job.mechanics.map(m => (
+                <div key={m.id} className="flex items-center gap-2 px-3 py-1.5 bg-secondary/50 dark:bg-zinc-800/50 rounded-xl border border-border text-sm text-foreground">
+                  <Users className="w-3.5 h-3.5 text-muted-foreground" />
+                  {m.name}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {job.notes && (
           <div className="mt-6 pt-6 border-t border-border">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">Notes</h3>
@@ -269,7 +285,7 @@ export default function JobDetailsPage() {
                   </p>
                   {job.statusCode !== 'completed' && (
                     <button
-                      onClick={() => handleRemovePart(part.id, part.name)}
+                      onClick={() => setConfirmRemovePart({ id: part.id, name: part.name })}
                       className="p-2 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-400 transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -324,6 +340,47 @@ export default function JobDetailsPage() {
           }}
         />
       )}
+
+      {/* Remove part confirmation modal */}
+      <AnimatePresence>
+        {confirmRemovePart && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-background/60 backdrop-blur-md"
+              onClick={() => setConfirmRemovePart(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-sm bg-card dark:bg-zinc-950 rounded-[28px] border border-border/50 shadow-2xl p-8 text-center"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
+                <Trash2 className="w-6 h-6 text-red-400" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground mb-1">Remove Part?</h3>
+              <p className="text-sm text-muted-foreground mb-6">
+                Remove <span className="font-semibold text-foreground">{confirmRemovePart.name}</span> from this job? Stock will be returned.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setConfirmRemovePart(null)}
+                  className="flex-1 h-11 rounded-2xl font-bold text-muted-foreground hover:bg-muted border border-border transition-colors"
+                >
+                  Keep
+                </button>
+                <button
+                  onClick={() => void handleRemovePart(confirmRemovePart.id)}
+                  className="flex-1 h-11 rounded-2xl bg-red-500 hover:bg-red-600 text-white font-bold shadow-lg shadow-red-500/20 transition-colors"
+                >
+                  Remove
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
