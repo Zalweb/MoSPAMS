@@ -35,7 +35,7 @@ const NAV_SECTIONS = [
   {
     title: 'SHOPS MANAGEMENT',
     items: [
-      { to: '/superadmin/shops', label: 'All Shops', icon: Building2 },
+      { to: '/superadmin/shops', label: 'All Shops', icon: Building2, end: true },
       { to: '/superadmin/shops/pending', label: 'Pending Approvals', icon: HeartHandshake },
       { to: '/superadmin/shops/new', label: 'Create New Shop', icon: Store },
       { to: '/superadmin/shops/suspended', label: 'Suspended Shops', icon: Shield },
@@ -142,7 +142,7 @@ export default function SuperAdminLayout() {
               <h3 className="px-3 text-[10px] font-bold text-muted-foreground tracking-wider mb-2 uppercase">{section.title}</h3>
               <div className="space-y-1">
                 {section.items.map((item) => {
-                  const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + '/');
+                  const isActive = item.end ? location.pathname === item.to : location.pathname === item.to || location.pathname.startsWith(item.to + '/');
                   return (
                     <NavLink
                       key={item.to}

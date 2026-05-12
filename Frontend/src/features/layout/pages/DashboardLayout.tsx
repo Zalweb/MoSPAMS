@@ -122,7 +122,7 @@ export default function DashboardLayout() {
   })).filter(group => group.items.length > 0);
 
   const allNavItems = navGroups.flatMap(g => g.items);
-  const currentLabel = allNavItems.find(n => n.end ? location.pathname === n.to : location.pathname.startsWith(n.to + '/'))?.label
+  const currentLabel = allNavItems.find(n => n.end ? location.pathname === n.to : location.pathname === n.to || location.pathname.startsWith(n.to + '/'))?.label
     ?? (location.pathname === '/dashboard' ? 'Dashboard' : '');
 
   const handleLogout = () => { logout(); navigate('/', { replace: true }); };
@@ -214,7 +214,7 @@ export default function DashboardLayout() {
               )}
               <div className="space-y-1">
                 {group.items.map((item) => {
-                  const isActive = item.end ? location.pathname === item.to : location.pathname.startsWith(item.to + '/');
+                  const isActive = item.end ? location.pathname === item.to : location.pathname === item.to || location.pathname.startsWith(item.to + '/');
                   
                   const activeStyle = isActive && branding?.primaryColor ? {
                     backgroundColor: theme === 'dark' ? `${branding.primaryColor}20` : `${branding.primaryColor}15`,
