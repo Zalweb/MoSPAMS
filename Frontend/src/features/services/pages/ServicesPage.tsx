@@ -16,7 +16,7 @@ import { can } from '@/shared/lib/permissions';
 import type { Part, ServiceRecord } from '@/shared/types';
 import { StartServiceModal } from '../components/StartServiceModal';
 
-type StatusFilter = 'All' | 'Pending' | 'Ongoing' | 'Completed' | 'Cancelled';
+type StatusFilter = 'All' | 'Pending' | 'Confirmed' | 'Ongoing' | 'Work Done' | 'Completed' | 'Cancelled';
 
 interface Mechanic { id: string; name: string }
 
@@ -43,7 +43,9 @@ const fadeUp = (delay = 0) => ({
 
 const STATUS_STYLES = {
   Pending: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20', icon: Clock },
+  Confirmed: { bg: 'bg-violet-500/10', text: 'text-violet-400', border: 'border-violet-500/20', icon: CheckCircle2 },
   Ongoing: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20', icon: Wrench },
+  'Work Done': { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20', icon: Wrench },
   Completed: { bg: 'bg-green-500/10', text: 'text-green-400', border: 'border-green-500/20', icon: CheckCircle2 },
   Cancelled: { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/20', icon: XCircle },
 };
@@ -117,10 +119,15 @@ export default function Services() {
   const statusCounts = useMemo(() => ({
     All: services.length,
     Pending: services.filter(s => s.status === 'Pending').length,
+    Confirmed: services.filter(s => s.status === 'Confirmed').length,
     Ongoing: services.filter(s => s.status === 'Ongoing').length,
+    'Work Done': services.filter(s => s.status === 'Work Done').length,
     Completed: services.filter(s => s.status === 'Completed').length,
     Cancelled: services.filter(s => s.status === 'Cancelled').length,
   }), [services]);
+
+  const workDoneCount = useMemo(() => services.filter(s => s.statusCode === 'work_done').length, [services]);
+  const pendingRequestsCount = useMemo(() => services.filter(s => s.statusCode === 'in_progress').length, [services]);
 
   const openAdd = () => {
     setEditing(null);
@@ -272,6 +279,20 @@ export default function Services() {
         <div>
           <h2 className="text-2xl font-bold text-foreground tracking-tight">Services</h2>
           <p className="text-sm text-muted-foreground mt-1">{meta ? meta.total : services.length} service records</p>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {workDoneCount > 0 && (
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-500/10 text-green-400 border border-green-500/20">
+                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                {workDoneCount} Ready for Payment
+              </span>
+            )}
+            {pendingRequestsCount > 0 && (
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                {pendingRequestsCount} Part Requests
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex gap-3">
           {canManageTypes && (
@@ -286,7 +307,7 @@ export default function Services() {
       </motion.div>
 
       <motion.div {...fadeUp(0.1)} className="flex gap-2 flex-wrap">
-        {(['All', 'Pending', 'Ongoing', 'Completed', 'Cancelled'] as StatusFilter[]).map(s => (
+        {(['All', 'Pending', 'Confirmed', 'Ongoing', 'Work Done', 'Completed', 'Cancelled'] as StatusFilter[]).map(s => (
           <button key={s} onClick={() => setStatusFilter(s)} className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${statusFilter === s ? 'bg-[rgb(var(--color-primary-rgb))] text-white shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20' : 'bg-muted/50 text-muted-foreground border border-border hover:border-border dark:border-zinc-700 hover:text-foreground'}`}>
             {s} <span className="opacity-50 ml-1">{statusCounts[s]}</span>
           </button>
@@ -333,11 +354,11 @@ export default function Services() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap justify-end">
-                  {service.status === 'Pending' && (
+                  {service.statusCode === 'pending' && (
                     <>
                       <Button size="sm" onClick={() => setStartJobTarget(service)}
-                        className="h-8 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3">
-                        Start Service
+                        className="h-8 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold px-3">
+                        Confirm Booking
                       </Button>
                       <Button size="sm" variant="outline" onClick={() => setCancelConfirm(service.id)}
                         className="h-8 rounded-xl border-red-500/40 text-red-400 hover:bg-red-500/10 text-xs px-3">
@@ -345,19 +366,37 @@ export default function Services() {
                       </Button>
                     </>
                   )}
-                  {service.status === 'Ongoing' && (
+                  {service.statusCode === 'booked_confirmed' && (
+                    <Button size="sm" variant="outline" onClick={() => setCancelConfirm(service.id)}
+                      className="h-8 rounded-xl border-red-500/40 text-red-400 hover:bg-red-500/10 text-xs px-3">
+                      Cancel
+                    </Button>
+                  )}
+                  {service.statusCode === 'in_progress' && (
                     <>
                       <Button size="sm" variant="outline" onClick={() => openAddPartsModal(service)}
                         className="h-8 rounded-xl border-border dark:border-zinc-700 text-muted-foreground hover:text-foreground text-xs px-3">
                         Add Items
                       </Button>
-                      <Button size="sm" onClick={() => { setBillJob(service); setBillLaborCost(service.laborCost); }}
-                        className="h-8 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3">
-                        Complete
+                      <Button size="sm" variant="outline" onClick={() => setCancelConfirm(service.id)}
+                        className="h-8 rounded-xl border-red-500/40 text-red-400 hover:bg-red-500/10 text-xs px-3">
+                        Cancel
                       </Button>
                     </>
                   )}
-                  {(service.status === 'Completed' || service.status === 'Cancelled') && (
+                  {service.statusCode === 'work_done' && (
+                    <>
+                      <Button size="sm" onClick={() => { setBillJob(service); setBillLaborCost(service.laborCost); }}
+                        className="h-8 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3">
+                        Confirm Payment
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => setCancelConfirm(service.id)}
+                        className="h-8 rounded-xl border-red-500/40 text-red-400 hover:bg-red-500/10 text-xs px-3">
+                        Cancel
+                      </Button>
+                    </>
+                  )}
+                  {(service.statusCode === 'completed' || service.statusCode === 'cancelled') && (
                     <span className={`inline-flex h-8 items-center px-3 rounded-lg text-xs font-semibold border ${style.bg} ${style.text} ${style.border}`}>
                       {service.status}
                     </span>
@@ -380,7 +419,7 @@ export default function Services() {
                   ))}
                 </div>
               )}
-              {service.status === 'Ongoing' && pendingRequests > 0 && (
+              {service.statusCode === 'in_progress' && pendingRequests > 0 && (
                 <div className="mt-3 pt-3 border-t border-border">
                   <button
                     onClick={() => togglePartRequests(service.id)}

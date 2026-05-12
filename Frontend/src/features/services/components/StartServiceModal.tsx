@@ -41,7 +41,7 @@ export function StartServiceModal({ open, onClose, onConfirm }: Props) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-sm rounded-2xl border-border bg-card dark:bg-zinc-950 p-6">
         <DialogHeader>
-          <DialogTitle className="text-base font-semibold text-foreground">Start Service</DialogTitle>
+          <DialogTitle className="text-base font-semibold text-foreground">Confirm Booking</DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground mb-3">Select at least one mechanic to assign.</p>
         {mechanics.length === 0 ? (
@@ -72,7 +72,7 @@ export function StartServiceModal({ open, onClose, onConfirm }: Props) {
             disabled={selected.length === 0 || loading}
             className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white"
           >
-            {loading ? 'Starting…' : 'Confirm Start'}
+            {loading ? 'Confirming…' : 'Confirm Booking'}
           </Button>
         </div>
       </DialogContent>
