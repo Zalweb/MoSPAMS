@@ -242,7 +242,16 @@ class MospamsApiTest extends TestCase
             'notes' => 'Test service',
         ])->assertCreated()->json('data.id');
 
-        // Use the bill endpoint (not PATCH status) to transition to Completed
+        // Advance job directly to work_done to satisfy billService pre-condition
+        // (full mechanic handshake flow is covered in ServiceFlowTest)
+        $workDoneStatusId = DB::table('service_job_statuses')
+            ->where('status_code', 'work_done')
+            ->value('service_job_status_id');
+        DB::table('service_jobs')
+            ->where('job_id', $serviceId)
+            ->update(['service_job_status_id_fk' => $workDoneStatusId]);
+
+        // Use the bill endpoint to transition to Completed
         $this->withToken($token)->postJson('http://default.mospams.local/api/services/'.$serviceId.'/bill', [
             'paymentMethod' => 'Cash',
         ])->assertCreated();

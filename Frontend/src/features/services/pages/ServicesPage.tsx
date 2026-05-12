@@ -41,17 +41,18 @@ const fadeUp = (delay = 0) => ({
   transition: { delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
 });
 
-const STATUS_STYLES = {
+const STATUS_STYLES: Record<ServiceRecord['status'], { bg: string; text: string; border: string; icon: typeof Clock }> = {
   Pending: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20', icon: Clock },
   Confirmed: { bg: 'bg-violet-500/10', text: 'text-violet-400', border: 'border-violet-500/20', icon: CheckCircle2 },
   Ongoing: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20', icon: Wrench },
+  'In Progress': { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20', icon: Wrench },
   'Work Done': { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20', icon: Wrench },
   Completed: { bg: 'bg-green-500/10', text: 'text-green-400', border: 'border-green-500/20', icon: CheckCircle2 },
   Cancelled: { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/20', icon: XCircle },
 };
 
 function getStatusStyle(status: ServiceRecord['status']) {
-  return STATUS_STYLES[status] ?? STATUS_STYLES.Pending;
+  return STATUS_STYLES[status] ?? STATUS_STYLES['Pending'];
 }
 
 export default function Services() {
@@ -166,6 +167,7 @@ export default function Services() {
       const created = await addService({
         ...values,
         status: 'Pending',
+        statusCode: 'pending',
         partsUsed: shapedParts,
         partRequests: [],
         mechanicIds: selectedMechanicIds,
