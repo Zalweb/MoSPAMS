@@ -729,6 +729,69 @@ class MospamsController extends Controller
         return response()->json(['data' => $this->serviceById($service)]);
     }
 
+    public function startService(Request $request, int $service): JsonResponse
+    {
+        $data = $request->validate([
+            'mechanicIds'   => ['required', 'array', 'min:1'],
+            'mechanicIds.*' => ['string'],
+        ]);
+
+        $job = DB::table('service_jobs')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->where('service_jobs.job_id', $service)
+            ->where('service_jobs.shop_id_fk', $this->shopId())
+            ->first();
+
+        abort_if(! $job, 404, 'Service job not found.');
+        abort_if($job->status_code !== 'pending', 422, 'Only pending jobs can be started.');
+
+        DB::transaction(function () use ($request, $service, $data) {
+            DB::table('service_job_mechanics')->where('job_id_fk', $service)->delete();
+
+            foreach ($data['mechanicIds'] as $rawId) {
+                $mechId = $this->numericId($rawId);
+                if (DB::table('mechanics')->where('mechanic_id', $mechId)->where('shop_id_fk', $this->shopId())->exists()) {
+                    DB::table('service_job_mechanics')->insertOrIgnore([
+                        'job_id_fk'      => $service,
+                        'mechanic_id_fk' => $mechId,
+                        'shop_id_fk'     => $this->shopId(),
+                        'assigned_at'    => now(),
+                    ]);
+                }
+            }
+
+            DB::table('service_jobs')->where('job_id', $service)->update([
+                'service_job_status_id_fk' => $this->statusId('service_job_statuses', 'service_job_status_id', 'in_progress'),
+                'updated_at'               => now(),
+            ]);
+
+            $this->log($request, "Started service job #{$service}", 'service_jobs', $service);
+        });
+
+        return response()->json(['data' => $this->serviceById($service)]);
+    }
+
+    public function cancelService(Request $request, int $service): JsonResponse
+    {
+        $job = DB::table('service_jobs')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->where('service_jobs.job_id', $service)
+            ->where('service_jobs.shop_id_fk', $this->shopId())
+            ->first();
+
+        abort_if(! $job, 404, 'Service job not found.');
+        abort_if($job->status_code !== 'pending', 422, 'Only pending jobs can be cancelled.');
+
+        DB::table('service_jobs')->where('job_id', $service)->update([
+            'service_job_status_id_fk' => $this->statusId('service_job_statuses', 'service_job_status_id', 'cancelled'),
+            'updated_at'               => now(),
+        ]);
+
+        $this->log($request, "Cancelled service job #{$service}", 'service_jobs', $service);
+
+        return response()->json(['data' => $this->serviceById($service)]);
+    }
+
     public function assignMechanic(Request $request, int $service): JsonResponse
     {
         $data = $request->validate([
@@ -1872,11 +1935,12 @@ class MospamsController extends Controller
 
     private function mapJobStatus(string $statusName): string
     {
-        return match ($statusName) {
-            'In Progress' => 'Ongoing',
-            'Pending'     => 'Pending',
-            'Completed'   => 'Completed',
-            default       => $statusName,
+        return match (strtolower($statusName)) {
+            'in_progress', 'ongoing', 'in progress' => 'Ongoing',
+            'pending'                                => 'Pending',
+            'completed'                              => 'Completed',
+            'cancelled'                              => 'Cancelled',
+            default                                  => $statusName,
         };
     }
 

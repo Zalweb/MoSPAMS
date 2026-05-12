@@ -331,6 +331,85 @@ class ServiceFlowTest extends TestCase
             ->assertJsonPath('data.partRequests', []);
     }
 
+    // --- startService ---
+
+    public function test_start_service_transitions_to_in_progress(): void
+    {
+        $jobId = $this->createJob();
+
+        $response = $this->withToken($this->token)
+            ->postJson("http://default.mospams.local/api/services/{$jobId}/start", [
+                'mechanicIds' => [(string) $this->mechanicId],
+            ]);
+
+        $response->assertOk()
+            ->assertJsonPath('data.status', 'Ongoing');
+
+        $this->assertDatabaseHas('service_job_mechanics', ['job_id_fk' => $jobId, 'mechanic_id_fk' => $this->mechanicId]);
+
+        $statusCode = DB::table('service_jobs')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->where('service_jobs.job_id', $jobId)
+            ->value('service_job_statuses.status_code');
+        $this->assertEquals('in_progress', $statusCode);
+    }
+
+    public function test_start_service_requires_at_least_one_mechanic(): void
+    {
+        $jobId = $this->createJob();
+
+        $this->withToken($this->token)
+            ->postJson("http://default.mospams.local/api/services/{$jobId}/start", [
+                'mechanicIds' => [],
+            ])
+            ->assertStatus(422);
+    }
+
+    public function test_start_service_rejects_non_pending_job(): void
+    {
+        $jobId = $this->createJob();
+        DB::table('service_jobs')->where('job_id', $jobId)->update([
+            'service_job_status_id_fk' => $this->statusId('service_job_statuses', 'service_job_status_id', 'in_progress'),
+        ]);
+
+        $this->withToken($this->token)
+            ->postJson("http://default.mospams.local/api/services/{$jobId}/start", [
+                'mechanicIds' => [(string) $this->mechanicId],
+            ])
+            ->assertStatus(422);
+    }
+
+    // --- cancelService ---
+
+    public function test_cancel_service_transitions_to_cancelled(): void
+    {
+        $jobId = $this->createJob();
+
+        $response = $this->withToken($this->token)
+            ->postJson("http://default.mospams.local/api/services/{$jobId}/cancel");
+
+        $response->assertOk()
+            ->assertJsonPath('data.status', 'Cancelled');
+
+        $statusCode = DB::table('service_jobs')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->where('service_jobs.job_id', $jobId)
+            ->value('service_job_statuses.status_code');
+        $this->assertEquals('cancelled', $statusCode);
+    }
+
+    public function test_cancel_service_rejects_non_pending_job(): void
+    {
+        $jobId = $this->createJob();
+        DB::table('service_jobs')->where('job_id', $jobId)->update([
+            'service_job_status_id_fk' => $this->statusId('service_job_statuses', 'service_job_status_id', 'in_progress'),
+        ]);
+
+        $this->withToken($this->token)
+            ->postJson("http://default.mospams.local/api/services/{$jobId}/cancel")
+            ->assertStatus(422);
+    }
+
     // --- helpers ---
 
     private function createJob(?int $customerUserId = null): int
@@ -377,6 +456,11 @@ class ServiceFlowTest extends TestCase
             'updated_at' => now(),
         ]);
         return $jobId;
+    }
+
+    private function statusId(string $table, string $key, string $code): int
+    {
+        return (int) DB::table($table)->where('status_code', $code)->value($key);
     }
 
     private function login(string $email): string
