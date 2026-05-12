@@ -134,17 +134,14 @@ export default function JobDetailsPage() {
           <span className="text-sm font-medium">Back to Jobs</span>
         </button>
 
-        <button
-          onClick={() => setShowStatusUpdate(true)}
-          disabled={job.statusCode === 'completed'}
-          className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-            job.statusCode === 'completed'
-              ? 'bg-secondary dark:bg-zinc-800 text-muted-foreground dark:text-zinc-600 cursor-not-allowed'
-              : 'bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] text-foreground hover:opacity-90'
-          }`}
-        >
-          Update Status
-        </button>
+        {(job.statusCode === 'booked_confirmed' || job.statusCode === 'in_progress') && (
+          <button
+            onClick={() => setShowStatusUpdate(true)}
+            className="px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] text-foreground hover:opacity-90"
+          >
+            {job.statusCode === 'booked_confirmed' ? 'Start Service' : 'Mark as Complete'}
+          </button>
+        )}
       </div>
 
       {/* Job Info Card */}
@@ -332,7 +329,7 @@ export default function JobDetailsPage() {
       {showStatusUpdate && (
         <StatusUpdateDialog
           jobId={job.id}
-          currentStatus={job.statusCode}
+          statusCode={job.statusCode}
           onClose={() => setShowStatusUpdate(false)}
           onSuccess={() => {
             setShowStatusUpdate(false);

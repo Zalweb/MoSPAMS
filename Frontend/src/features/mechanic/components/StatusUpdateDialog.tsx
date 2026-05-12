@@ -1,42 +1,44 @@
 import { useState } from 'react';
-import { X, Clock, Wrench, CheckCircle2 } from 'lucide-react';
+import { X, Wrench, CheckCircle2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { apiMutation } from '@/shared/lib/api';
 import { toast } from 'sonner';
 
 interface StatusUpdateDialogProps {
   jobId: string;
-  currentStatus: string;
+  statusCode: string;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export function StatusUpdateDialog({ jobId, currentStatus, onClose, onSuccess }: StatusUpdateDialogProps) {
-  const [selectedStatus, setSelectedStatus] = useState(currentStatus);
+export function StatusUpdateDialog({ jobId, statusCode, onClose, onSuccess }: StatusUpdateDialogProps) {
+  const [laborCost, setLaborCost] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
 
-  const statuses = [
-    { value: 'pending', label: 'Pending', icon: Clock, color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
-    { value: 'in_progress', label: 'In Progress', icon: Wrench, color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
-    { value: 'completed', label: 'Completed', icon: CheckCircle2, color: 'bg-green-500/10 text-green-400 border-green-500/20' },
-  ];
+  if (statusCode !== 'booked_confirmed' && statusCode !== 'in_progress') {
+    return null;
+  }
+
+  const isStart = statusCode === 'booked_confirmed';
 
   async function handleSubmit() {
-    if (selectedStatus === currentStatus) {
-      toast.info('Status unchanged');
-      onClose();
-      return;
-    }
-
     try {
       setSubmitting(true);
-      const statusLabel = statuses.find(s => s.value === selectedStatus)?.label || selectedStatus;
-      await apiMutation(`/api/mechanic/jobs/${jobId}/status`, 'PATCH', {
-        status: statusLabel,
-      });
-      toast.success(`Job status updated to ${statusLabel}`);
+      if (isStart) {
+        await apiMutation(`/api/mechanic/jobs/${jobId}/status`, 'PATCH', { action: 'start' });
+        toast.success('Service started. Customer has been notified.');
+      } else {
+        const cost = parseFloat(laborCost);
+        if (isNaN(cost) || cost < 0) {
+          toast.error('Please enter a valid labor cost.');
+          return;
+        }
+        await apiMutation(`/api/mechanic/jobs/${jobId}/status`, 'PATCH', { action: 'complete', laborCost: cost });
+        toast.success('Job marked as complete. Customer has been notified.');
+      }
       onSuccess();
     } catch (error) {
-      console.error('Failed to update status', error);
+      console.error('Failed to update job status', error);
       toast.error('Failed to update job status');
     } finally {
       setSubmitting(false);
@@ -44,92 +46,102 @@ export function StatusUpdateDialog({ jobId, currentStatus, onClose, onSuccess }:
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/60 backdrop-blur-sm">
-      <div className="w-full max-w-md bg-muted border border-border rounded-2xl shadow-2xl">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-border">
-          <h2 className="text-xl font-bold text-foreground">Update Job Status</h2>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-6 space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Select the new status for this job. The customer will be notified of the update.
-          </p>
-
-          <div className="space-y-3">
-            {statuses.map((status) => {
-              const StatusIcon = status.icon;
-              const isSelected = selectedStatus === status.value;
-              const isCurrent = currentStatus === status.value;
-
-              return (
-                <button
-                  key={status.value}
-                  onClick={() => setSelectedStatus(status.value)}
-                  className={`w-full p-4 rounded-xl border transition-all ${
-                    isSelected
-                      ? 'bg-secondary dark:bg-zinc-800 border-border dark:border-zinc-600 ring-2 ring-zinc-600'
-                      : 'bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 hover:bg-secondary dark:bg-zinc-800 hover:border-border dark:border-zinc-600'
-                  }`}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${status.color}`}>
-                      <StatusIcon className="w-6 h-6" strokeWidth={2} />
-                    </div>
-                    <div className="flex-1 text-left">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-foreground">{status.label}</p>
-                        {isCurrent && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-muted dark:bg-zinc-700 text-muted-foreground">
-                            Current
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {status.value === 'pending' && 'Job is waiting to be started'}
-                        {status.value === 'in_progress' && 'Job is currently being worked on'}
-                        {status.value === 'completed' && 'Job is finished and ready for pickup'}
-                      </p>
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
+    <AnimatePresence>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="absolute inset-0 bg-background/60 backdrop-blur-sm"
+          onClick={onClose}
+        />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 10 }}
+          className="relative w-full max-w-md bg-muted border border-border rounded-2xl shadow-2xl"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b border-border">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${
+                isStart
+                  ? 'bg-green-500/10 border-green-500/20'
+                  : 'bg-blue-500/10 border-blue-500/20'
+              }`}>
+                {isStart
+                  ? <Wrench className="w-5 h-5 text-green-400" strokeWidth={2} />
+                  : <CheckCircle2 className="w-5 h-5 text-blue-400" strokeWidth={2} />
+                }
+              </div>
+              <h2 className="text-xl font-bold text-foreground">
+                {isStart ? 'Start Service' : 'Mark as Complete'}
+              </h2>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
 
-          {selectedStatus === 'completed' && (
-            <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
-              <p className="text-sm text-green-400">
-                ⚠️ Marking this job as completed will notify the customer that their motorcycle is ready for pickup.
+          {/* Content */}
+          <div className="p-6 space-y-4">
+            {isStart ? (
+              <p className="text-sm text-muted-foreground">
+                Start working on this job? The customer will be notified.
               </p>
-            </div>
-          )}
-        </div>
+            ) : (
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Enter the final labor cost to complete this job. The customer will be notified.
+                </p>
+                <div className="space-y-2">
+                  <label htmlFor="laborCost" className="text-sm font-semibold text-foreground">
+                    Final Labor Cost (₱)
+                  </label>
+                  <input
+                    id="laborCost"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={laborCost}
+                    onChange={(e) => setLaborCost(e.target.value)}
+                    placeholder="0.00"
+                    required
+                    className="w-full px-4 py-2.5 rounded-xl bg-secondary dark:bg-zinc-800 border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-border">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-secondary dark:bg-zinc-800 text-foreground text-sm font-semibold hover:bg-muted dark:bg-zinc-700 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={submitting || selectedStatus === currentStatus}
-            className="px-6 py-2 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] text-foreground text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {submitting ? 'Updating...' : 'Update Status'}
-          </button>
-        </div>
+          {/* Footer */}
+          <div className="flex items-center justify-end gap-3 p-6 border-t border-border">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 rounded-xl bg-secondary dark:bg-zinc-800 text-foreground text-sm font-semibold hover:bg-muted dark:bg-zinc-700 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={submitting || (!isStart && laborCost === '')}
+              className={`px-6 py-2 rounded-xl text-foreground text-sm font-semibold transition-opacity disabled:opacity-50 disabled:cursor-not-allowed ${
+                isStart
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:opacity-90'
+                  : 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:opacity-90'
+              }`}
+            >
+              {submitting
+                ? (isStart ? 'Starting...' : 'Completing...')
+                : (isStart ? 'Start Service' : 'Mark as Complete')
+              }
+            </button>
+          </div>
+        </motion.div>
       </div>
-    </div>
+    </AnimatePresence>
   );
 }
