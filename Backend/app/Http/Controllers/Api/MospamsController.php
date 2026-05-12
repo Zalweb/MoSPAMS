@@ -736,18 +736,26 @@ class MospamsController extends Controller
             'mechanicIds.*' => ['string'],
         ]);
 
-        $job = DB::table('service_jobs')
-            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
-            ->where('service_jobs.job_id', $service)
-            ->where('service_jobs.shop_id_fk', $this->shopId())
-            ->first();
-
-        abort_if(! $job, 404, 'Service job not found.');
-        abort_if($job->status_code !== 'pending', 422, 'Only pending jobs can be started.');
+        abort_unless(
+            DB::table('service_jobs')->where('job_id', $service)->where('shop_id_fk', $this->shopId())->exists(),
+            404,
+            'Service job not found.'
+        );
 
         DB::transaction(function () use ($request, $service, $data) {
+            $job = DB::table('service_jobs')
+                ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+                ->where('service_jobs.job_id', $service)
+                ->where('service_jobs.shop_id_fk', $this->shopId())
+                ->lockForUpdate()
+                ->first();
+
+            abort_if(! $job, 404, 'Service job not found.');
+            abort_if($job->status_code !== 'pending', 422, 'Only pending jobs can be started.');
+
             DB::table('service_job_mechanics')->where('job_id_fk', $service)->delete();
 
+            $inserted = 0;
             foreach ($data['mechanicIds'] as $rawId) {
                 $mechId = $this->numericId($rawId);
                 if (DB::table('mechanics')->where('mechanic_id', $mechId)->where('shop_id_fk', $this->shopId())->exists()) {
@@ -757,8 +765,11 @@ class MospamsController extends Controller
                         'shop_id_fk'     => $this->shopId(),
                         'assigned_at'    => now(),
                     ]);
+                    $inserted++;
                 }
             }
+
+            abort_if($inserted === 0, 422, 'No valid mechanics found for this shop.');
 
             DB::table('service_jobs')->where('job_id', $service)->update([
                 'service_job_status_id_fk' => $this->statusId('service_job_statuses', 'service_job_status_id', 'in_progress'),
@@ -773,21 +784,30 @@ class MospamsController extends Controller
 
     public function cancelService(Request $request, int $service): JsonResponse
     {
-        $job = DB::table('service_jobs')
-            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
-            ->where('service_jobs.job_id', $service)
-            ->where('service_jobs.shop_id_fk', $this->shopId())
-            ->first();
+        abort_unless(
+            DB::table('service_jobs')->where('job_id', $service)->where('shop_id_fk', $this->shopId())->exists(),
+            404,
+            'Service job not found.'
+        );
 
-        abort_if(! $job, 404, 'Service job not found.');
-        abort_if($job->status_code !== 'pending', 422, 'Only pending jobs can be cancelled.');
+        DB::transaction(function () use ($request, $service) {
+            $job = DB::table('service_jobs')
+                ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+                ->where('service_jobs.job_id', $service)
+                ->where('service_jobs.shop_id_fk', $this->shopId())
+                ->lockForUpdate()
+                ->first();
 
-        DB::table('service_jobs')->where('job_id', $service)->update([
-            'service_job_status_id_fk' => $this->statusId('service_job_statuses', 'service_job_status_id', 'cancelled'),
-            'updated_at'               => now(),
-        ]);
+            abort_if(! $job, 404, 'Service job not found.');
+            abort_if($job->status_code !== 'pending', 422, 'Only pending jobs can be cancelled.');
 
-        $this->log($request, "Cancelled service job #{$service}", 'service_jobs', $service);
+            DB::table('service_jobs')->where('job_id', $service)->update([
+                'service_job_status_id_fk' => $this->statusId('service_job_statuses', 'service_job_status_id', 'cancelled'),
+                'updated_at'               => now(),
+            ]);
+
+            $this->log($request, "Cancelled service job #{$service}", 'service_jobs', $service);
+        });
 
         return response()->json(['data' => $this->serviceById($service)]);
     }
