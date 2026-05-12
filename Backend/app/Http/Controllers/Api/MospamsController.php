@@ -812,6 +812,140 @@ class MospamsController extends Controller
         return response()->json(['data' => $this->serviceById($service)]);
     }
 
+    public function addPartToService(Request $request, int $service): JsonResponse
+    {
+        $data = $request->validate([
+            'partId'   => ['required', 'integer'],
+            'quantity' => ['required', 'integer', 'min:1'],
+        ]);
+
+        abort_unless(
+            DB::table('service_jobs')->where('job_id', $service)->where('shop_id_fk', $this->shopId())->exists(),
+            404,
+            'Service job not found.'
+        );
+
+        DB::transaction(function () use ($request, $service, $data) {
+            $part = DB::table('parts')
+                ->where('part_id', $data['partId'])
+                ->where('shop_id_fk', $this->shopId())
+                ->lockForUpdate()
+                ->first();
+
+            abort_if(! $part, 404, 'Part not found.');
+            abort_if($part->stock_quantity < $data['quantity'], 422, 'Insufficient stock.');
+
+            DB::table('service_job_parts')->insert([
+                'job_id_fk'  => $service,
+                'part_id_fk' => $data['partId'],
+                'quantity'   => $data['quantity'],
+                'unit_price' => $part->unit_price,
+                'subtotal'   => $part->unit_price * $data['quantity'],
+                'status'     => 'confirmed',
+            ]);
+
+            DB::table('parts')->where('part_id', $data['partId'])->update([
+                'stock_quantity' => DB::raw('stock_quantity - ' . $data['quantity']),
+                'updated_at'     => now(),
+            ]);
+
+            DB::table('stock_movements')->insert([
+                'part_id_fk'     => $data['partId'],
+                'user_id_fk'     => $request->user()->user_id,
+                'movement_type'  => 'out',
+                'quantity'       => $data['quantity'],
+                'reference_type' => 'service_job',
+                'reference_id'   => $service,
+                'movement_date'  => now(),
+                'remarks'        => 'Staff-added to service job #' . $service,
+            ]);
+
+            $this->log($request, "Added part {$data['partId']} x{$data['quantity']} to service #{$service}", 'service_job_parts', $service);
+        });
+
+        return response()->json(['data' => $this->serviceById($service)]);
+    }
+
+    public function confirmServicePart(Request $request, int $service, int $jobPartId): JsonResponse
+    {
+        $part = DB::table('service_job_parts')
+            ->where('job_part_id', $jobPartId)
+            ->where('job_id_fk', $service)
+            ->first();
+
+        abort_if(! $part, 404, 'Part not found on this job.');
+        abort_if($part->status !== 'requested', 422, 'Part is not in requested status.');
+
+        DB::transaction(function () use ($request, $service, $jobPartId, $part) {
+            $inventory = DB::table('parts')
+                ->where('part_id', $part->part_id_fk)
+                ->lockForUpdate()
+                ->first();
+
+            abort_if(! $inventory || $inventory->stock_quantity < $part->quantity, 422, 'Insufficient stock to confirm.');
+
+            DB::table('service_job_parts')
+                ->where('job_part_id', $jobPartId)
+                ->update(['status' => 'confirmed']);
+
+            DB::table('parts')->where('part_id', $part->part_id_fk)->update([
+                'stock_quantity' => DB::raw('stock_quantity - ' . $part->quantity),
+                'updated_at'     => now(),
+            ]);
+
+            DB::table('stock_movements')->insert([
+                'part_id_fk'     => $part->part_id_fk,
+                'user_id_fk'     => $request->user()->user_id,
+                'movement_type'  => 'out',
+                'quantity'       => $part->quantity,
+                'reference_type' => 'service_job',
+                'reference_id'   => $service,
+                'movement_date'  => now(),
+                'remarks'        => 'Confirmed mechanic request for service job #' . $service,
+            ]);
+
+            $this->log($request, "Confirmed part request #{$jobPartId} on service #{$service}", 'service_job_parts', $jobPartId);
+        });
+
+        return response()->json(['data' => $this->serviceById($service)]);
+    }
+
+    public function removeServicePart(Request $request, int $service, int $jobPartId): JsonResponse
+    {
+        $part = DB::table('service_job_parts')
+            ->where('job_part_id', $jobPartId)
+            ->where('job_id_fk', $service)
+            ->first();
+
+        abort_if(! $part, 404, 'Part not found on this job.');
+
+        DB::transaction(function () use ($request, $service, $jobPartId, $part) {
+            DB::table('service_job_parts')->where('job_part_id', $jobPartId)->delete();
+
+            if ($part->status === 'confirmed') {
+                DB::table('parts')->where('part_id', $part->part_id_fk)->update([
+                    'stock_quantity' => DB::raw('stock_quantity + ' . $part->quantity),
+                    'updated_at'     => now(),
+                ]);
+
+                DB::table('stock_movements')->insert([
+                    'part_id_fk'     => $part->part_id_fk,
+                    'user_id_fk'     => $request->user()->user_id,
+                    'movement_type'  => 'in',
+                    'quantity'       => $part->quantity,
+                    'reference_type' => 'service_job',
+                    'reference_id'   => $service,
+                    'movement_date'  => now(),
+                    'remarks'        => 'Removed from service job #' . $service,
+                ]);
+            }
+
+            $this->log($request, "Removed part #{$jobPartId} from service #{$service}", 'service_job_parts', $jobPartId);
+        });
+
+        return response()->json(['data' => $this->serviceById($service)]);
+    }
+
     public function assignMechanic(Request $request, int $service): JsonResponse
     {
         $data = $request->validate([

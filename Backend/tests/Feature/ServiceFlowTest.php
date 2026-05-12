@@ -410,6 +410,124 @@ class ServiceFlowTest extends TestCase
             ->assertStatus(422);
     }
 
+    // --- addPartToService ---
+
+    public function test_staff_add_part_to_service_deducts_stock(): void
+    {
+        $jobId = $this->createJob();
+        $stockBefore = (int) DB::table('parts')->where('part_id', $this->partId)->value('stock_quantity');
+
+        $response = $this->withToken($this->token)
+            ->postJson("http://default.mospams.local/api/services/{$jobId}/parts", [
+                'partId'   => $this->partId,
+                'quantity' => 2,
+            ]);
+
+        $response->assertOk()
+            ->assertJsonPath('data.partsUsed.0.status', 'confirmed')
+            ->assertJsonPath('data.partsUsed.0.quantity', 2);
+
+        $stockAfter = (int) DB::table('parts')->where('part_id', $this->partId)->value('stock_quantity');
+        $this->assertEquals($stockBefore - 2, $stockAfter);
+
+        $this->assertDatabaseHas('service_job_parts', [
+            'job_id_fk'  => $jobId,
+            'part_id_fk' => $this->partId,
+            'status'     => 'confirmed',
+        ]);
+    }
+
+    public function test_staff_add_part_rejects_insufficient_stock(): void
+    {
+        $jobId = $this->createJob();
+
+        $this->withToken($this->token)
+            ->postJson("http://default.mospams.local/api/services/{$jobId}/parts", [
+                'partId'   => $this->partId,
+                'quantity' => 9999,
+            ])
+            ->assertStatus(422);
+    }
+
+    // --- confirmServicePart ---
+
+    public function test_confirm_part_request_deducts_stock(): void
+    {
+        $jobId = $this->createJob();
+        $stockBefore = (int) DB::table('parts')->where('part_id', $this->partId)->value('stock_quantity');
+
+        $jobPartId = (int) DB::table('service_job_parts')->insertGetId([
+            'job_id_fk'       => $jobId,
+            'part_id_fk'      => $this->partId,
+            'quantity'        => 1,
+            'unit_price'      => 220.00,
+            'subtotal'        => 220.00,
+            'status'          => 'requested',
+            'requested_by_fk' => $this->mechanicUserId,
+        ]);
+
+        $response = $this->withToken($this->token)
+            ->patchJson("http://default.mospams.local/api/services/{$jobId}/parts/{$jobPartId}/confirm");
+
+        $response->assertOk()
+            ->assertJsonPath('data.partsUsed.0.status', 'confirmed');
+
+        $stockAfter = (int) DB::table('parts')->where('part_id', $this->partId)->value('stock_quantity');
+        $this->assertEquals($stockBefore - 1, $stockAfter);
+
+        $this->assertDatabaseHas('service_job_parts', ['job_part_id' => $jobPartId, 'status' => 'confirmed']);
+    }
+
+    // --- removeServicePart ---
+
+    public function test_remove_confirmed_part_restores_stock(): void
+    {
+        $jobId = $this->createJob();
+
+        $jobPartId = (int) DB::table('service_job_parts')->insertGetId([
+            'job_id_fk'  => $jobId,
+            'part_id_fk' => $this->partId,
+            'quantity'   => 3,
+            'unit_price' => 220.00,
+            'subtotal'   => 660.00,
+            'status'     => 'confirmed',
+        ]);
+
+        $stockBefore = (int) DB::table('parts')->where('part_id', $this->partId)->value('stock_quantity');
+
+        $this->withToken($this->token)
+            ->deleteJson("http://default.mospams.local/api/services/{$jobId}/parts/{$jobPartId}")
+            ->assertOk();
+
+        $stockAfter = (int) DB::table('parts')->where('part_id', $this->partId)->value('stock_quantity');
+        $this->assertEquals($stockBefore + 3, $stockAfter);
+
+        $this->assertDatabaseMissing('service_job_parts', ['job_part_id' => $jobPartId]);
+    }
+
+    public function test_remove_requested_part_does_not_restore_stock(): void
+    {
+        $jobId = $this->createJob();
+        $stockBefore = (int) DB::table('parts')->where('part_id', $this->partId)->value('stock_quantity');
+
+        $jobPartId = (int) DB::table('service_job_parts')->insertGetId([
+            'job_id_fk'       => $jobId,
+            'part_id_fk'      => $this->partId,
+            'quantity'        => 2,
+            'unit_price'      => 220.00,
+            'subtotal'        => 440.00,
+            'status'          => 'requested',
+            'requested_by_fk' => $this->mechanicUserId,
+        ]);
+
+        $this->withToken($this->token)
+            ->deleteJson("http://default.mospams.local/api/services/{$jobId}/parts/{$jobPartId}")
+            ->assertOk();
+
+        $stockAfter = (int) DB::table('parts')->where('part_id', $this->partId)->value('stock_quantity');
+        $this->assertEquals($stockBefore, $stockAfter);
+    }
+
     // --- helpers ---
 
     private function createJob(?int $customerUserId = null): int
