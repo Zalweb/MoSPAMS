@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -8,7 +8,7 @@ import {
   ChevronLeft
 } from 'lucide-react';
 import { useAuth } from '@/features/auth/context/AuthContext';
-import { useTenantBranding } from '@/shared/contexts/TenantBrandingContext';
+import { useTenantBranding, hexToHsl } from '@/shared/contexts/TenantBrandingContext';
 import { useTheme } from '@/shared/contexts/ThemeContext';
 import { NAV_ACCESS } from '@/shared/lib/permissions';
 import { normalizeRole } from '@/shared/lib/roles';
@@ -127,8 +127,16 @@ export default function DashboardLayout() {
 
   const handleLogout = () => { logout(); navigate('/', { replace: true }); };
 
+  const brandingVars = branding?.primaryColor
+    ? ({
+        '--primary': hexToHsl(branding.primaryColor),
+        '--ring': hexToHsl(branding.primaryColor),
+        '--primary-foreground': '0 0% 100%',
+      } as React.CSSProperties)
+    : undefined;
+
   return (
-    <div className="min-h-screen bg-background flex font-sans">
+    <div className="min-h-screen bg-background flex font-sans" style={brandingVars}>
       <AnimatePresence>
         {sidebarOpen && (
           <motion.div

@@ -52,11 +52,6 @@ function applyBranding(branding: TenantBranding) {
   root.style.setProperty('--color-primary', primaryHsl);
   root.style.setProperty('--color-secondary', secondaryHsl);
 
-  // Wire into Tailwind's token system so Button and other components use shop colors
-  root.style.setProperty('--primary', primaryHsl);
-  root.style.setProperty('--primary-foreground', '0 0% 100%');
-  root.style.setProperty('--ring', primaryHsl);
-  
   document.title = branding.shopName || 'MoSPAMS';
 
   let themeMeta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
@@ -91,7 +86,7 @@ function hexToRgb(hex: string): string {
 }
 
 // Helper function to convert hex to HSL
-function hexToHsl(hex: string): string {
+export function hexToHsl(hex: string): string {
   // Remove # if present
   hex = hex.replace(/^#/, '');
   
