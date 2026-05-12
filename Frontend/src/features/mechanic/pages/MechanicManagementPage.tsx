@@ -131,7 +131,7 @@ export default function MechanicManagementPage() {
         />
       </div>
 
-      <div className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl overflow-hidden">
+      <div className="bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/40 backdrop-blur-sm border border-border rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -216,7 +216,7 @@ export default function MechanicManagementPage() {
       </div>
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="sm:max-w-md rounded-2xl border-border bg-muted p-6">
+        <DialogContent className="sm:max-w-md rounded-2xl border-border bg-card dark:bg-zinc-950 p-6">
           <DialogHeader className="pb-2">
             <DialogTitle className="text-base font-semibold text-foreground">{editing ? 'Edit Mechanic' : 'Add Mechanic'}</DialogTitle>
           </DialogHeader>
@@ -250,7 +250,7 @@ export default function MechanicManagementPage() {
       </Dialog>
 
       <Dialog open={!!confirmDelete} onOpenChange={() => setConfirmDelete(null)}>
-        <DialogContent className="sm:max-w-sm rounded-2xl border-border bg-muted p-6">
+        <DialogContent className="sm:max-w-sm rounded-2xl border-border bg-card dark:bg-zinc-950 p-6">
           <DialogHeader><DialogTitle className="text-base font-semibold text-foreground">Delete Mechanic?</DialogTitle></DialogHeader>
           <p className="text-sm text-muted-foreground mt-1">{confirmDelete?.name} will be permanently removed.</p>
           <div className="flex gap-3 pt-4">

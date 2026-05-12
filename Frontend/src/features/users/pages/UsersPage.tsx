@@ -133,7 +133,7 @@ export default function Users() {
           { title: 'Customers', desc: 'Registered clients', count: customerCount, icon: UsersIcon, accent: 'bg-emerald-500/20 text-emerald-400' },
           { title: 'Activity Logs', desc: 'Recorded actions', count: logs.length, icon: Activity, accent: 'bg-purple-500/20 text-purple-400' },
         ].map(card => (
-          <div key={card.title} className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5">
+          <div key={card.title} className="bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/50 backdrop-blur-sm border border-border rounded-2xl p-5">
             <div className="flex items-center gap-3 mb-3">
               <div className={`w-9 h-9 rounded-[10px] ${card.accent.split(' ')[0]} flex items-center justify-center`}>
                 <card.icon className={`w-[18px] h-[18px] ${card.accent.split(' ')[1]}`} strokeWidth={1.5} />
@@ -148,7 +148,7 @@ export default function Users() {
         ))}
       </div>
 
-      <div className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5 mb-6">
+      <div className="bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/40 backdrop-blur-sm border border-border rounded-2xl p-5 mb-6">
         <h3 className="text-[13px] font-semibold text-foreground mb-4">Users ({users.length})</h3>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -185,7 +185,7 @@ export default function Users() {
         </div>
       </div>
 
-      <div className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5 mb-6">
+      <div className="bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/40 backdrop-blur-sm border border-border rounded-2xl p-5 mb-6">
         <h3 className="text-[13px] font-semibold text-foreground mb-4">Access Privileges</h3>
         <div className="overflow-x-auto">
           <table className="w-full">

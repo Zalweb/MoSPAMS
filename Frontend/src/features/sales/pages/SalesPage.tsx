@@ -132,7 +132,7 @@ export default function Sales() {
         ))}
       </motion.div>
 
-      <motion.div {...fadeUp(0.25)} className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl overflow-hidden">
+      <motion.div {...fadeUp(0.25)} className="bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/40 backdrop-blur-sm border border-border rounded-2xl overflow-hidden">
         <div className="px-5 py-4 border-b border-border flex items-center justify-between">
           <h3 className="text-sm font-semibold text-foreground">Transactions ({filteredTx.length})</h3>
           <span className="text-xs text-muted-foreground">{PERIOD_LABEL[period]}{paymentFilter !== 'All' && ` · ${paymentFilter}`}</span>
@@ -197,7 +197,7 @@ export default function Sales() {
       </motion.div>
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="sm:max-w-2xl rounded-2xl border-border bg-muted p-6 max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-2xl rounded-2xl border-border bg-card dark:bg-zinc-950 p-6 max-h-[90vh] overflow-y-auto">
           <DialogHeader className="pb-2"><DialogTitle className="text-base font-semibold text-foreground">New Transaction</DialogTitle></DialogHeader>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-3">
             <div>

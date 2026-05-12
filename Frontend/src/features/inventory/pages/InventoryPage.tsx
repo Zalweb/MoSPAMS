@@ -169,7 +169,7 @@ export default function Inventory() {
         </div>
       </motion.div>
 
-      <motion.div {...fadeUp(0.2)} className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl overflow-hidden">
+      <motion.div {...fadeUp(0.2)} className="bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/40 backdrop-blur-sm border border-border rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -276,7 +276,7 @@ export default function Inventory() {
       </motion.div>
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="sm:max-w-md rounded-2xl border-border bg-muted p-6">
+        <DialogContent className="sm:max-w-md rounded-2xl border-border bg-card dark:bg-zinc-950 p-6">
           <DialogHeader className="pb-2">
             <DialogTitle className="text-base font-semibold text-foreground">{editing ? 'Edit Part' : 'Add New Part'}</DialogTitle>
           </DialogHeader>
@@ -317,7 +317,7 @@ export default function Inventory() {
       </Dialog>
 
       <Dialog open={categoryModalOpen} onOpenChange={setCategoryModalOpen}>
-        <DialogContent className="sm:max-w-md rounded-2xl border-border bg-muted p-6">
+        <DialogContent className="sm:max-w-md rounded-2xl border-border bg-card dark:bg-zinc-950 p-6">
           <DialogHeader className="pb-2">
             <DialogTitle className="text-base font-semibold text-foreground">Add New Category</DialogTitle>
           </DialogHeader>
@@ -340,7 +340,7 @@ export default function Inventory() {
       </Dialog>
 
       <Dialog open={!!stockMoveTarget} onOpenChange={(o) => !o && setStockMoveTarget(null)}>
-        <DialogContent className="sm:max-w-sm rounded-2xl border-border bg-muted p-6">
+        <DialogContent className="sm:max-w-sm rounded-2xl border-border bg-card dark:bg-zinc-950 p-6">
           <DialogHeader><DialogTitle className="text-base font-semibold text-foreground">Stock Movement</DialogTitle></DialogHeader>
           {stockMoveTarget && (
             <form onSubmit={onSubmitMovement} className="mt-2 space-y-3">
@@ -375,7 +375,7 @@ export default function Inventory() {
       {historyTarget && (
         <>
           <div className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40" onClick={() => setHistoryTarget(null)} />
-          <aside className="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-muted border-l border-border z-50 shadow-2xl flex flex-col">
+          <aside className="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-card dark:bg-zinc-950 border-l border-border z-50 shadow-2xl flex flex-col">
             <div className="flex items-center justify-between px-5 h-16 border-b border-border">
               <div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Stock History</p>
@@ -405,7 +405,7 @@ export default function Inventory() {
       )}
 
       <Dialog open={!!confirmDelete} onOpenChange={() => setConfirmDelete(null)}>
-        <DialogContent className="sm:max-w-sm rounded-2xl border-border bg-muted p-6">
+        <DialogContent className="sm:max-w-sm rounded-2xl border-border bg-card dark:bg-zinc-950 p-6">
           <DialogHeader><DialogTitle className="text-base font-semibold text-foreground">Delete Part?</DialogTitle></DialogHeader>
           <p className="text-sm text-muted-foreground mt-1">This action cannot be undone.</p>
           <div className="flex gap-3 pt-3">

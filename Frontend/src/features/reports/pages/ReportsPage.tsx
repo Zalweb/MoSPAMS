@@ -192,19 +192,19 @@ export default function Reports() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            <div className="p-5 bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl">
+            <div className="p-5 bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/40 backdrop-blur-sm border border-border rounded-2xl">
               <p className="text-[11px] text-muted-foreground">Parts Revenue</p>
               <p className="text-xl font-bold text-foreground mt-1 tracking-tight">₱{partsRevenue.toLocaleString()}</p>
               <p className="text-[10px] text-muted-foreground mt-1">From {filteredTx.reduce((s, t) => s + t.items.length, 0)} line items</p>
             </div>
-            <div className="p-5 bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl">
+            <div className="p-5 bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/40 backdrop-blur-sm border border-border rounded-2xl">
               <p className="text-[11px] text-muted-foreground">Labor Revenue (paid)</p>
               <p className="text-xl font-bold text-foreground mt-1 tracking-tight">₱{laborRevenueTx.toLocaleString()}</p>
               <p className="text-[10px] text-muted-foreground mt-1">Across linked service+parts transactions</p>
             </div>
           </div>
 
-          <div className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5">
+          <div className="bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/40 backdrop-blur-sm border border-border rounded-2xl p-5">
             <h3 className="text-[13px] font-semibold text-foreground mb-4">Top Selling Parts</h3>
             {partsUsed.length === 0 ? <p className="text-[12px] text-muted-foreground text-center py-6">No data for this period</p> : (
               <div className="space-y-3">
@@ -238,7 +238,7 @@ export default function Reports() {
             ))}
           </div>
 
-          <div className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5">
+          <div className="bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/40 backdrop-blur-sm border border-border rounded-2xl p-5">
             <h3 className="text-[13px] font-semibold text-foreground mb-4">Inventory by Category</h3>
             <div className="divide-y divide-border dark:divide-zinc-800">
               {Array.from(new Set(parts.map(p => p.category))).sort().map(cat => {
@@ -275,7 +275,7 @@ export default function Reports() {
 
       {reportType === 'services' && (
         <div className="space-y-4">
-          <div className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5">
+          <div className="bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/40 backdrop-blur-sm border border-border rounded-2xl p-5">
             <h3 className="text-[13px] font-semibold text-foreground mb-4">Service Status Overview</h3>
             <div className="flex items-end gap-6 h-36">
               {Object.entries(serviceStatusCounts).map(([status, count]) => (
@@ -288,7 +288,7 @@ export default function Reports() {
             </div>
           </div>
 
-          <div className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5">
+          <div className="bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/40 backdrop-blur-sm border border-border rounded-2xl p-5">
             <h3 className="text-[13px] font-semibold text-foreground mb-4">Most Requested Services</h3>
             {serviceTypeBreakdown.length === 0 ? <p className="text-[12px] text-muted-foreground text-center py-6">No data for this period</p> : (
               <div className="space-y-3">
@@ -305,7 +305,7 @@ export default function Reports() {
             )}
           </div>
 
-          <div className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5">
+          <div className="bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/40 backdrop-blur-sm border border-border rounded-2xl p-5">
             <h3 className="text-[13px] font-semibold text-foreground mb-4">Income Summary ({PERIOD_LABEL[period]})</h3>
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
               <div className="p-4 bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 rounded-xl border border-border">

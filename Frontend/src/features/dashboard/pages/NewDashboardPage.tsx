@@ -178,7 +178,7 @@ export default function DashboardPage() {
           {/* Top Service Types */}
           <motion.div
             {...fadeUp(0.25)}
-            className="relative group bg-card dark:bg-card/80 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-border dark:border-zinc-800/50 hover:border-zinc-300/50 transition-all duration-300"
+            className="relative group bg-card dark:bg-zinc-900/40 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-border dark:border-zinc-800/50 hover:border-zinc-300/50 transition-all duration-300"
           >
             <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -231,7 +231,7 @@ export default function DashboardPage() {
           {/* Payment Methods Breakdown */}
           <motion.div
             {...fadeUp(0.3)}
-            className="relative group bg-card dark:bg-card/80 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-border dark:border-zinc-800/50 hover:border-zinc-300/50 transition-all duration-300"
+            className="relative group bg-card dark:bg-zinc-900/40 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-border dark:border-zinc-800/50 hover:border-zinc-300/50 transition-all duration-300"
           >
             <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -310,7 +310,7 @@ export default function DashboardPage() {
           {/* Low Stock Alert */}
           <motion.div
             {...fadeUp(0.35)}
-            className="relative group bg-card dark:bg-card/80 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-border dark:border-zinc-800/50 hover:border-zinc-300/50 transition-all duration-300"
+            className="relative group bg-card dark:bg-zinc-900/40 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-border dark:border-zinc-800/50 hover:border-zinc-300/50 transition-all duration-300"
           >
             <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -381,7 +381,7 @@ export default function DashboardPage() {
           {/* Recent Services */}
           <motion.div
             {...fadeUp(0.4)}
-            className="relative group bg-card dark:bg-card/80 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-border dark:border-zinc-800/50 hover:border-zinc-300/50 transition-all duration-300"
+            className="relative group bg-card dark:bg-zinc-900/40 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-border dark:border-zinc-800/50 hover:border-zinc-300/50 transition-all duration-300"
           >
             <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -518,7 +518,7 @@ export default function DashboardPage() {
       {/* Additional Stats for Owner/Staff */}
       {(user?.role === 'Owner' || user?.role === 'Staff') && metrics && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <motion.div {...fadeUp(0.5)} className="relative group bg-card dark:bg-card/80 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 dark:hover:border-border dark:border-zinc-800/50 hover:border-zinc-300/50 transition-all duration-300">
+          <motion.div {...fadeUp(0.5)} className="relative group bg-card dark:bg-zinc-900/40 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 dark:hover:border-border dark:border-zinc-800/50 hover:border-zinc-300/50 transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[rgb(var(--color-primary-rgb))]/10 flex items-center justify-center border border-[rgb(var(--color-primary-rgb))]/20">

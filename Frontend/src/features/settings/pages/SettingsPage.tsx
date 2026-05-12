@@ -309,7 +309,7 @@ export default function SettingsPage() {
         </button>
       </div>
 
-      <div className="bg-muted rounded-2xl border border-border p-6">
+      <div className="bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-border p-6 shadow-sm">
         {activeTab === 'user' && (
           <div className="space-y-6">
             <div>

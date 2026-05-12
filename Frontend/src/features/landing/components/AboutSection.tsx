@@ -114,7 +114,7 @@ export default function AboutSection() {
                   <WrenchIcon className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg text-foreground">Version 2.0</h3>
+                  <h3 className="font-bold text-lg text-foreground">Version 1.0</h3>
                   <p className="text-muted-foreground text-sm">SaaS Platform</p>
                 </div>
               </div>

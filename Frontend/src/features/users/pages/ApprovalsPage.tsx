@@ -74,7 +74,7 @@ export default function ApprovalsPage() {
         </div>
       </div>
 
-      <div className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
+      <div className="bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/40 backdrop-blur-sm border border-border rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <div className="w-8 h-8 rounded-full border-2 border-border dark:border-zinc-700 border-t-white animate-spin" />

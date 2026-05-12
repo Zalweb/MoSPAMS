@@ -233,7 +233,7 @@ export default function Services() {
           const style = getStatusStyle(service.status);
           const StatusIcon = style.icon;
           return (
-            <div key={service.id} className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-5 hover:border-border dark:border-zinc-700 transition-all duration-300 group">
+            <div key={service.id} className="bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/40 backdrop-blur-sm border border-border rounded-2xl p-5 hover:border-border dark:border-zinc-700 transition-all duration-300 group">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-start gap-4">
                   <div className={`w-11 h-11 rounded-xl ${style.bg} border ${style.border} flex items-center justify-center shrink-0`}>
@@ -289,7 +289,7 @@ export default function Services() {
           );
         })}
         {!loading && filtered.length === 0 && (
-          <div className="text-center py-16 text-sm text-muted-foreground bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl">
+          <div className="text-center py-16 text-sm text-muted-foreground bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/40 backdrop-blur-sm border border-border rounded-2xl">
             <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 flex items-center justify-center">
               <Wrench className="w-8 h-8 text-muted-foreground dark:text-zinc-600" />
             </div>
@@ -314,7 +314,7 @@ export default function Services() {
 
       {/* Service create/edit modal */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="sm:max-w-lg rounded-2xl border-border bg-muted p-6 max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-lg rounded-2xl border-border bg-card dark:bg-zinc-950 p-6 max-h-[90vh] overflow-y-auto">
           <DialogHeader className="pb-2"><DialogTitle className="text-base font-semibold text-foreground">{editing ? 'Edit Service' : 'New Service Record'}</DialogTitle></DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4 pt-2">
             <div className="grid grid-cols-2 gap-4">
@@ -405,7 +405,7 @@ export default function Services() {
 
       {/* Bill this Job modal */}
       <Dialog open={!!billJob} onOpenChange={() => setBillJob(null)}>
-        <DialogContent className="sm:max-w-sm rounded-2xl border-border bg-muted p-6">
+        <DialogContent className="sm:max-w-sm rounded-2xl border-border bg-card dark:bg-zinc-950 p-6">
           <DialogHeader><DialogTitle className="text-base font-semibold text-foreground">Bill this Job</DialogTitle></DialogHeader>
           {billJob && (
             <div className="mt-3 space-y-4">
@@ -445,7 +445,7 @@ export default function Services() {
       </Dialog>
 
       <Dialog open={typesOpen} onOpenChange={setTypesOpen}>
-        <DialogContent className="sm:max-w-md rounded-2xl border-border bg-muted p-6">
+        <DialogContent className="sm:max-w-md rounded-2xl border-border bg-card dark:bg-zinc-950 p-6">
           <DialogHeader><DialogTitle className="text-base font-semibold text-foreground">Service Type Catalog</DialogTitle></DialogHeader>
           <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
             {serviceTypes.map(st => (
@@ -476,7 +476,7 @@ export default function Services() {
       {historyCustomer && (
         <>
           <div className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40" onClick={() => setHistoryCustomer(null)} />
-          <aside className="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-muted border-l border-border z-50 shadow-2xl flex flex-col">
+          <aside className="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-card dark:bg-zinc-950 border-l border-border z-50 shadow-2xl flex flex-col">
             <div className="flex items-center justify-between px-5 h-16 border-b border-border">
               <div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Service History</p>
@@ -506,7 +506,7 @@ export default function Services() {
       )}
 
       <Dialog open={!!confirmDelete} onOpenChange={() => setConfirmDelete(null)}>
-        <DialogContent className="sm:max-w-sm rounded-2xl border-border bg-muted p-6">
+        <DialogContent className="sm:max-w-sm rounded-2xl border-border bg-card dark:bg-zinc-950 p-6">
           <DialogHeader><DialogTitle className="text-base font-semibold text-foreground">Delete Service?</DialogTitle></DialogHeader>
           <p className="text-sm text-muted-foreground mt-1">This will permanently remove this service record.</p>
           <div className="flex gap-3 pt-4">
