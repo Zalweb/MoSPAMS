@@ -99,7 +99,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/services/{service}/mechanics', [MospamsController::class, 'assignMechanic'])->middleware('role:Owner,Staff');
         Route::delete('/services/{service}/mechanics/{mechanic}', [MospamsController::class, 'removeMechanic'])->middleware('role:Owner,Staff');
         Route::post('/services/{service}/bill', [MospamsController::class, 'billService'])->middleware('role:Owner,Staff');
-        Route::get('/service-types', [MospamsController::class, 'serviceTypes'])->middleware('role:Owner,Staff');
+
         Route::post('/service-types', [MospamsController::class, 'storeServiceType'])->middleware('role:Owner');
         Route::patch('/service-types/{serviceType}', [MospamsController::class, 'updateServiceType'])->middleware('role:Owner');
         Route::delete('/service-types/{serviceType}', [MospamsController::class, 'deleteServiceType'])->middleware('role:Owner');
@@ -138,6 +138,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::get('/dashboard/stats', [MospamsController::class, 'dashboardStats'])->middleware('role:Owner,Staff');
 
+        Route::get('/service-types', [MospamsController::class, 'serviceTypes']);
+
         Route::get('/role-requests', [RoleRequestController::class, 'index'])->middleware('role:Owner');
         Route::patch('/role-requests/{roleRequest}/approve', [RoleRequestController::class, 'approve'])->middleware('role:Owner');
         Route::patch('/role-requests/{roleRequest}/deny', [RoleRequestController::class, 'deny'])->middleware('role:Owner');
@@ -169,6 +171,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/customer/notifications', [CustomerController::class, 'getNotifications']);
         Route::patch('/customer/notifications/read-all', [CustomerController::class, 'markAllNotificationsRead']);
         Route::patch('/customer/notifications/{notificationId}/read', [CustomerController::class, 'markNotificationRead']);
+        Route::get('/customer/service-types', [CustomerController::class, 'serviceTypes']);
 
         // Mechanic routes
         Route::middleware(['role:Mechanic'])->prefix('mechanic')->group(function () {

@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { Wrench, CheckCircle2 } from 'lucide-react';
+import { Wrench, CheckCircle2, Plus, ChevronDown } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { apiMutation, apiGet } from '@/shared/lib/api';
-import { motion } from 'framer-motion';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 20 },
@@ -22,9 +22,9 @@ export default function BookService() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-
+  const [isOpen, setIsOpen] = useState(false);
   useEffect(() => {
-    apiGet<{ data: Array<{ name?: string; service_name?: string }> }>('/api/service-types')
+    apiGet<{ data: Array<{ name?: string; service_name?: string }> }>('/api/customer/service-types')
       .then(r => setServiceTypes(r.data.map(s => s.name || s.service_name || '').filter(Boolean)))
       .catch(() => setServiceTypes([]));
   }, []);
@@ -70,8 +70,8 @@ export default function BookService() {
 
   return (
     <div className="max-w-2xl">
-      <motion.div {...fadeUp(0)} className="mb-8">
-        <h2 className="text-2xl font-bold text-foreground tracking-tight">Book a Service</h2>
+      <motion.div {...fadeUp(0)} className="mb-8 px-1">
+        <h2 className="text-2xl font-bold text-foreground">Book a Service</h2>
         <p className="text-sm text-muted-foreground mt-1">Schedule your motorcycle service</p>
       </motion.div>
 
@@ -97,30 +97,81 @@ export default function BookService() {
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 relative">
             <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Service Type</Label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {serviceTypes.map(type => (
-                <button 
-                  key={type} 
-                  type="button" 
-                  onClick={() => setServiceType(type)}
-                  className={`p-4 rounded-2xl border transition-all text-left group ${
-                    serviceType === type 
-                      ? 'border-[rgb(var(--color-primary-rgb))] bg-[rgb(var(--color-primary-rgb))]/10 text-[rgb(var(--color-primary-rgb))]' 
-                      : 'border-border/50 bg-muted/30 text-muted-foreground hover:border-border hover:bg-muted/50'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
-                      serviceType === type ? 'bg-[rgb(var(--color-primary-rgb))] text-white' : 'bg-muted group-hover:bg-muted/80'
-                    }`}>
-                      <Wrench className="w-4 h-4" strokeWidth={2} />
-                    </div>
-                    <span className="text-sm font-semibold">{type}</span>
+            
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className={`w-full h-14 px-5 rounded-2xl border transition-all text-left flex items-center justify-between group ${
+                  isOpen 
+                    ? 'border-[rgb(var(--color-primary-rgb))] ring-2 ring-[rgb(var(--color-primary-rgb))]/20 bg-muted/50' 
+                    : 'border-border/50 bg-muted/30 hover:bg-muted/50'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+                    serviceType ? 'bg-[rgb(var(--color-primary-rgb))] text-white' : 'bg-muted group-hover:bg-muted/80'
+                  }`}>
+                    <Wrench className="w-4 h-4" strokeWidth={2} />
                   </div>
-                </button>
-              ))}
+                  <span className={`text-sm font-semibold ${serviceType ? 'text-foreground' : 'text-muted-foreground'}`}>
+                    {serviceType || 'Select a service type...'}
+                  </span>
+                </div>
+                <motion.div
+                  animate={{ rotate: isOpen ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Plus className={`w-4 h-4 transition-colors ${isOpen ? 'text-[rgb(var(--color-primary-rgb))]' : 'text-muted-foreground'}`} style={{ transform: isOpen ? 'rotate(45deg)' : 'none' }} />
+                </motion.div>
+              </button>
+
+              <AnimatePresence>
+                {isOpen && (
+                  <>
+                    <div className="fixed inset-0 z-[60]" onClick={() => setIsOpen(false)} />
+                    <motion.div
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      className="absolute left-0 right-0 top-full mt-2 bg-card dark:bg-zinc-900/90 backdrop-blur-xl rounded-2xl border border-border shadow-2xl z-[70] overflow-hidden p-1.5"
+                    >
+                      {serviceTypes.length === 0 ? (
+                        <div className="p-4 text-center text-xs text-muted-foreground italic">
+                          No service types available
+                        </div>
+                      ) : (
+                        <div className="max-h-[240px] overflow-y-auto custom-scrollbar">
+                          {serviceTypes.map(type => (
+                            <button
+                              key={type}
+                              type="button"
+                              onClick={() => {
+                                setServiceType(type);
+                                setIsOpen(false);
+                              }}
+                              className={`w-full p-3.5 rounded-xl text-left text-sm font-semibold transition-all flex items-center gap-3 group ${
+                                serviceType === type
+                                  ? 'bg-[rgb(var(--color-primary-rgb))]/10 text-[rgb(var(--color-primary-rgb))]'
+                                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                              }`}
+                            >
+                              <div className={`w-6 h-6 rounded-md flex items-center justify-center transition-colors ${
+                                serviceType === type ? 'bg-[rgb(var(--color-primary-rgb))] text-white' : 'bg-muted group-hover:bg-muted/80'
+                              }`}>
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                              </div>
+                              {type}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
             </div>
           </div>
 

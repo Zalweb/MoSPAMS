@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Wrench, Clock, CheckCircle2, Search, XCircle, Calendar } from 'lucide-react';
+import { Wrench, Clock, CheckCircle2, Search, XCircle, Calendar, CreditCard, User, Package } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { apiGet, apiMutation } from '@/shared/lib/api';
 import type { CustomerService } from '@/shared/types';
@@ -129,16 +129,16 @@ export default function ServiceHistory() {
                       <p className="text-sm font-semibold text-muted-foreground">{service.serviceType}</p>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1.5 mt-3">
                         <p className="text-xs font-medium text-muted-foreground flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-border" /> Labor Cost: ₱{service.laborCost.toLocaleString()}
+                          <CreditCard className="w-3.5 h-3.5 text-muted-foreground/70" strokeWidth={2} /> Labor Cost: ₱{service.laborCost.toLocaleString()}
                         </p>
                         {service.mechanics && service.mechanics.length > 0 && (
                           <p className="text-xs font-medium text-muted-foreground flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-border" /> Mechanic: {service.mechanics.map(m => m.name).join(', ')}
+                            <User className="w-3.5 h-3.5 text-muted-foreground/70" strokeWidth={2} /> Mechanic: {service.mechanics.map(m => m.name).join(', ')}
                           </p>
                         )}
                         {service.partsUsed && service.partsUsed.length > 0 && (
                           <p className="text-xs font-medium text-muted-foreground flex items-center gap-2 col-span-full">
-                            <span className="w-1.5 h-1.5 rounded-full bg-border" /> Parts: {service.partsUsed.map(p => `${p.name} x${p.quantity}`).join(', ')}
+                            <Package className="w-3.5 h-3.5 text-muted-foreground/70" strokeWidth={2} /> Parts: {service.partsUsed.map(p => `${p.name} x${p.quantity}`).join(', ')}
                           </p>
                         )}
                       </div>
