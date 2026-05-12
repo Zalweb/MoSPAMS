@@ -71,7 +71,7 @@ export default function HeroSection() {
           >
             <button
               onClick={() => navigate('/register-shop')}
-              className="group px-8 py-4 rounded-2xl bg-[rgb(var(--color-primary-rgb))] text-white font-semibold text-base hover:opacity-90 transition-all duration-200 flex items-center gap-2 shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20"
+              className="group px-8 py-4 rounded-2xl bg-white text-black font-semibold text-base hover:bg-zinc-100 transition-all duration-200 flex items-center gap-2 shadow-lg"
             >
               Start free trial
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" strokeWidth={2} />
