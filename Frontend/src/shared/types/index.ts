@@ -30,7 +30,8 @@ export interface ServiceRecord {
   serviceType: string;
   laborCost: number;
   status: 'Pending' | 'Ongoing' | 'Completed' | 'Cancelled';
-  partsUsed: { partId: string; name?: string; quantity: number; unitPrice?: number }[];
+  partsUsed: { jobPartId: string; partId: string; name?: string; quantity: number; unitPrice?: number; status: string }[];
+  partRequests: { jobPartId: string; partId: string; name: string; quantity: number; unitPrice: number; requestedBy: string; status: string }[];
   mechanics: { id: string; name: string }[];
   notes: string;
   createdAt: string;
