@@ -302,7 +302,8 @@ class MechanicController extends Controller
                 'parts.part_name',
                 'service_job_parts.quantity',
                 'service_job_parts.unit_price',
-                'service_job_parts.subtotal'
+                'service_job_parts.subtotal',
+                'service_job_parts.status'
             )
             ->get()
             ->groupBy('job_id_fk')
@@ -313,6 +314,7 @@ class MechanicController extends Controller
                 'quantity' => (int) $part->quantity,
                 'unitPrice' => (float) $part->unit_price,
                 'subtotal' => (float) $part->subtotal,
+                'status' => $part->status,
             ]));
     }
 

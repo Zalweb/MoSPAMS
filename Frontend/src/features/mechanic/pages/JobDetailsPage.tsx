@@ -16,6 +16,7 @@ interface JobPart {
   quantity: number;
   unitPrice: number;
   subtotal: number;
+  status?: string;
 }
 
 interface JobDetails {
@@ -230,7 +231,7 @@ export default function JobDetailsPage() {
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] text-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
             >
               <Plus className="w-4 h-4" />
-              Add Part
+              Request Parts
             </button>
           )}
         </div>
@@ -250,7 +251,14 @@ export default function JobDetailsPage() {
                 className="flex items-center justify-between p-4 bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 rounded-xl border border-border"
               >
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-foreground mb-1">{part.name}</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-sm font-medium text-foreground">{part.name}</p>
+                    {part.status === 'requested' && (
+                      <span className="text-[10px] font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded">
+                        Pending Approval
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-muted-foreground">
                     {part.quantity} × ₱{part.unitPrice.toLocaleString()}
                   </p>

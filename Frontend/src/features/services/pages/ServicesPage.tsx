@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
-import { Plus, Pencil, Trash2, Search, Clock, Wrench, CheckCircle2, History, X, XCircle, Settings2, ChevronLeft, ChevronRight, Receipt } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Clock, Wrench, CheckCircle2, History, X, XCircle, Settings2, ChevronLeft, ChevronRight, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,6 +14,7 @@ import { apiGet, apiMutation } from '@/shared/lib/api';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { can } from '@/shared/lib/permissions';
 import type { Part, ServiceRecord } from '@/shared/types';
+import { StartServiceModal } from '../components/StartServiceModal';
 
 type StatusFilter = 'All' | 'Pending' | 'Ongoing' | 'Completed' | 'Cancelled';
 
@@ -24,7 +25,6 @@ const serviceSchema = z.object({
   motorcycleModel: z.string().min(1, 'Required'),
   serviceType: z.string().min(1, 'Required'),
   laborCost: z.number().min(0),
-  status: z.enum(['Pending', 'Ongoing', 'Completed']),
   notes: z.string(),
 });
 type ServiceForm = z.infer<typeof serviceSchema>;
@@ -52,10 +52,6 @@ function getStatusStyle(status: ServiceRecord['status']) {
   return STATUS_STYLES[status] ?? STATUS_STYLES.Pending;
 }
 
-function getEditableStatus(status: ServiceRecord['status']): 'Pending' | 'Ongoing' | 'Completed' {
-  return status === 'Cancelled' ? 'Pending' : status;
-}
-
 export default function Services() {
   const { addService, updateService, deleteService, serviceTypes, addServiceType, updateServiceType, deleteServiceType } = useData();
   const { user } = useAuth();
@@ -77,7 +73,15 @@ export default function Services() {
   const [selectedMechanicIds, setSelectedMechanicIds] = useState<string[]>([]);
   const [billJob, setBillJob] = useState<ServiceRecord | null>(null);
   const [billPaymentMethod, setBillPaymentMethod] = useState<'Cash' | 'GCash'>('Cash');
+  const [billLaborCost, setBillLaborCost] = useState<number>(0);
   const [billing, setBilling] = useState(false);
+  const [startJobTarget, setStartJobTarget] = useState<ServiceRecord | null>(null);
+  const [cancelConfirm, setCancelConfirm] = useState<string | null>(null);
+  const [expandedRequests, setExpandedRequests] = useState<Set<string>>(new Set());
+  const [addPartsTarget, setAddPartsTarget] = useState<ServiceRecord | null>(null);
+  const [addPartId, setAddPartId] = useState<string>('');
+  const [addPartQty, setAddPartQty] = useState<number>(1);
+  const [addingPart, setAddingPart] = useState(false);
 
   const { data: services, loading, meta, page, setPage, prependItem, updateItem, removeItem } = usePaginatedFetch<ServiceRecord>('/api/services', 25, {}, 10000);
 
@@ -100,7 +104,7 @@ export default function Services() {
 
   const form = useForm<ServiceForm>({
     resolver: zodResolver(serviceSchema),
-    defaultValues: { customerName: '', motorcycleModel: '', serviceType: '', laborCost: 0, status: 'Pending', notes: '' },
+    defaultValues: { customerName: '', motorcycleModel: '', serviceType: '', laborCost: 0, notes: '' },
   });
   const stForm = useForm<STForm>({ resolver: zodResolver(stSchema), defaultValues: { name: '', defaultLaborCost: 0 } });
 
@@ -119,14 +123,14 @@ export default function Services() {
 
   const openAdd = () => {
     setEditing(null);
-    form.reset({ customerName: '', motorcycleModel: '', serviceType: '', laborCost: 0, status: 'Pending', notes: '' });
+    form.reset({ customerName: '', motorcycleModel: '', serviceType: '', laborCost: 0, notes: '' });
     setPartsUsed([]);
     setSelectedMechanicIds([]);
     setModalOpen(true);
   };
   const openEdit = (s: ServiceRecord) => {
     setEditing(s);
-    form.reset({ customerName: s.customerName, motorcycleModel: s.motorcycleModel, serviceType: s.serviceType, laborCost: s.laborCost, status: getEditableStatus(s.status), notes: s.notes });
+    form.reset({ customerName: s.customerName, motorcycleModel: s.motorcycleModel, serviceType: s.serviceType, laborCost: s.laborCost, notes: s.notes });
     setPartsUsed(s.partsUsed.map(p => ({ partId: p.partId, quantity: p.quantity })));
     setSelectedMechanicIds((s.mechanics ?? []).map(m => m.id));
     setModalOpen(true);
@@ -137,7 +141,6 @@ export default function Services() {
       ...values,
       partsUsed,
       mechanicIds: selectedMechanicIds,
-      // Satisfy ServiceRecord shape for optimistic update; backend returns the real value
       mechanics: selectedMechanicIds
         .map(id => availableMechanics.find(m => m.id === id))
         .filter((m): m is Mechanic => Boolean(m)),
@@ -168,23 +171,83 @@ export default function Services() {
   const toggleMechanic = (id: string) =>
     setSelectedMechanicIds(prev => prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id]);
 
-  const handleStatusChange = async (service: ServiceRecord, status: string) => {
-    const updated = await updateService(service.id, { status: status as 'Pending' | 'Ongoing' | 'Completed' });
-    updateItem(service.id, 'id', updated);
-  };
-
   const handleBill = async () => {
     if (!billJob) return;
     setBilling(true);
     try {
-      await apiMutation(`/api/services/${billJob.id}/bill`, 'POST', { paymentMethod: billPaymentMethod });
+      await apiMutation(`/api/services/${billJob.id}/bill`, 'POST', {
+        paymentMethod: billPaymentMethod,
+        laborCost: billLaborCost,
+      });
       const updated = await apiGet<{ data: ServiceRecord }>(`/api/services/${billJob.id}`).then(r => r.data).catch(() => null);
       if (updated) updateItem(billJob.id, 'id', updated);
       setBillJob(null);
       setBillPaymentMethod('Cash');
+      setBillLaborCost(0);
     } finally {
       setBilling(false);
     }
+  };
+
+  const handleStartService = async (mechanicIds: string[]) => {
+    if (!startJobTarget) return;
+    const updated = await apiMutation<{ data: ServiceRecord }>(
+      `/api/services/${startJobTarget.id}/start`, 'POST', { mechanicIds }
+    ).then(r => r.data);
+    updateItem(startJobTarget.id, 'id', updated);
+    setStartJobTarget(null);
+  };
+
+  const handleCancelService = async (serviceId: string) => {
+    const updated = await apiMutation<{ data: ServiceRecord }>(
+      `/api/services/${serviceId}/cancel`, 'POST', {}
+    ).then(r => r.data);
+    updateItem(serviceId, 'id', updated);
+    setCancelConfirm(null);
+  };
+
+  const handleConfirmPart = async (serviceId: string, jobPartId: string) => {
+    const updated = await apiMutation<{ data: ServiceRecord }>(
+      `/api/services/${serviceId}/parts/${jobPartId}/confirm`, 'PATCH', {}
+    ).then(r => r.data);
+    updateItem(serviceId, 'id', updated);
+  };
+
+  const handleRejectPart = async (serviceId: string, jobPartId: string) => {
+    const updated = await apiMutation<{ data: ServiceRecord }>(
+      `/api/services/${serviceId}/parts/${jobPartId}`, 'DELETE', {}
+    ).then(r => r.data);
+    updateItem(serviceId, 'id', updated);
+  };
+
+  const openAddPartsModal = (service: ServiceRecord) => {
+    setAddPartsTarget(service);
+    setAddPartId('');
+    setAddPartQty(1);
+    void apiGet<{ data: Part[] }>('/api/parts?limit=100').then(r => setAvailableParts(r.data)).catch(() => {});
+  };
+
+  const handleAddPartToOngoing = async () => {
+    if (!addPartsTarget || !addPartId) return;
+    setAddingPart(true);
+    try {
+      const updated = await apiMutation<{ data: ServiceRecord }>(
+        `/api/services/${addPartsTarget.id}/parts`, 'POST',
+        { partId: Number(addPartId), quantity: addPartQty }
+      ).then(r => r.data);
+      updateItem(addPartsTarget.id, 'id', updated);
+      setAddPartsTarget(null);
+    } finally {
+      setAddingPart(false);
+    }
+  };
+
+  const togglePartRequests = (serviceId: string) => {
+    setExpandedRequests(prev => {
+      const next = new Set(prev);
+      next.has(serviceId) ? next.delete(serviceId) : next.add(serviceId);
+      return next;
+    });
   };
 
   return (
@@ -232,6 +295,7 @@ export default function Services() {
         ) : filtered.map(service => {
           const style = getStatusStyle(service.status);
           const StatusIcon = style.icon;
+          const pendingRequests = (service.partRequests ?? []).length;
           return (
             <div key={service.id} className="bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/40 backdrop-blur-sm border border-border rounded-2xl p-5 hover:border-border dark:border-zinc-700 transition-all duration-300 group">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -252,21 +316,36 @@ export default function Services() {
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {service.status === 'Cancelled' ? (
-                    <span className={`inline-flex h-9 items-center px-3 rounded-lg text-xs font-semibold border ${style.bg} ${style.text} ${style.border}`}>
-                      Cancelled
-                    </span>
-                  ) : (
-                    <select value={service.status} onChange={e => handleStatusChange(service, e.target.value)} className={`h-9 px-3 rounded-lg text-xs font-semibold border cursor-pointer focus:outline-none ${style.bg} ${style.text} ${style.border}`}>
-                      <option value="Pending">Pending</option>
-                      <option value="Ongoing">Ongoing</option>
-                      <option value="Completed">Completed</option>
-                    </select>
+                <div className="flex items-center gap-2 flex-wrap justify-end">
+                  {service.status === 'Pending' && (
+                    <>
+                      <Button size="sm" onClick={() => setStartJobTarget(service)}
+                        className="h-8 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3">
+                        Start Service
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => setCancelConfirm(service.id)}
+                        className="h-8 rounded-xl border-red-500/40 text-red-400 hover:bg-red-500/10 text-xs px-3">
+                        Cancel
+                      </Button>
+                    </>
                   )}
-                  <button title="Bill this Job" disabled={service.status === 'Cancelled'} onClick={() => setBillJob(service)} className="p-2 rounded-lg hover:bg-emerald-500/10 text-muted-foreground hover:text-emerald-400 transition-colors disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted-foreground">
-                    <Receipt className="w-4 h-4" />
-                  </button>
+                  {service.status === 'Ongoing' && (
+                    <>
+                      <Button size="sm" variant="outline" onClick={() => openAddPartsModal(service)}
+                        className="h-8 rounded-xl border-border dark:border-zinc-700 text-muted-foreground hover:text-foreground text-xs px-3">
+                        Add Items
+                      </Button>
+                      <Button size="sm" onClick={() => { setBillJob(service); setBillLaborCost(service.laborCost); }}
+                        className="h-8 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3">
+                        Complete
+                      </Button>
+                    </>
+                  )}
+                  {(service.status === 'Completed' || service.status === 'Cancelled') && (
+                    <span className={`inline-flex h-8 items-center px-3 rounded-lg text-xs font-semibold border ${style.bg} ${style.text} ${style.border}`}>
+                      {service.status}
+                    </span>
+                  )}
                   <button title="History" onClick={() => setHistoryCustomer({ name: service.customerName, model: service.motorcycleModel })} className="p-2 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors">
                     <History className="w-4 h-4" />
                   </button>
@@ -279,10 +358,45 @@ export default function Services() {
               {service.partsUsed.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-border flex flex-wrap gap-2">
                   {service.partsUsed.map(pu => (
-                    <span key={pu.partId} className="text-xs font-medium text-muted-foreground bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 px-2.5 py-1 rounded-lg border border-border dark:border-zinc-700">
+                    <span key={pu.jobPartId} className="text-xs font-medium text-muted-foreground bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 px-2.5 py-1 rounded-lg border border-border dark:border-zinc-700">
                       {pu.name ?? `Part #${pu.partId}`} x{pu.quantity}
                     </span>
                   ))}
+                </div>
+              )}
+              {service.status === 'Ongoing' && pendingRequests > 0 && (
+                <div className="mt-3 pt-3 border-t border-border">
+                  <button
+                    onClick={() => togglePartRequests(service.id)}
+                    className="flex items-center gap-2 text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors"
+                  >
+                    <Package className="w-3.5 h-3.5" />
+                    Part Requests ({pendingRequests})
+                  </button>
+                  {expandedRequests.has(service.id) && (
+                    <div className="mt-2 space-y-1.5">
+                      {service.partRequests.map(pr => (
+                        <div key={pr.jobPartId} className="flex items-center justify-between text-xs bg-amber-500/5 border border-amber-500/15 rounded-lg px-3 py-2">
+                          <span className="text-foreground font-medium">{pr.name} x{pr.quantity}</span>
+                          <span className="text-muted-foreground">by {pr.requestedBy}</span>
+                          <div className="flex gap-1.5">
+                            <button
+                              onClick={() => handleConfirmPart(service.id, pr.jobPartId)}
+                              className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 font-medium transition-colors"
+                            >
+                              Confirm
+                            </button>
+                            <button
+                              onClick={() => handleRejectPart(service.id, pr.jobPartId)}
+                              className="px-2 py-0.5 rounded bg-red-500/20 text-red-400 hover:bg-red-500/30 font-medium transition-colors"
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -342,12 +456,6 @@ export default function Services() {
               <div>
                 <Label className="text-xs font-medium text-muted-foreground">Labor Cost (₱)</Label>
                 <Input type="number" {...form.register('laborCost', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground focus:border-border dark:border-zinc-600" />
-                <Label className="text-xs font-medium text-muted-foreground mt-3 block">Status</Label>
-                <select {...form.register('status')} className="w-full mt-1.5 h-10 px-3 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border border-border dark:border-zinc-700 text-sm text-foreground">
-                  <option value="Pending">Pending</option>
-                  <option value="Ongoing">Ongoing</option>
-                  <option value="Completed">Completed</option>
-                </select>
               </div>
             </div>
             <div>
@@ -403,46 +511,69 @@ export default function Services() {
         </DialogContent>
       </Dialog>
 
-      {/* Bill this Job modal */}
-      <Dialog open={!!billJob} onOpenChange={() => setBillJob(null)}>
-        <DialogContent className="sm:max-w-sm rounded-2xl border-border bg-card dark:bg-zinc-950 p-6">
-          <DialogHeader><DialogTitle className="text-base font-semibold text-foreground">Bill this Job</DialogTitle></DialogHeader>
-          {billJob && (
-            <div className="mt-3 space-y-4">
-              <div className="bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 rounded-xl p-4 border border-border dark:border-zinc-700 space-y-2">
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Summary</p>
-                <div className="flex justify-between text-sm text-muted-foreground dark:text-zinc-300">
-                  <span>{billJob.serviceType}</span>
-                  <span>₱{billJob.laborCost.toLocaleString()}</span>
-                </div>
-                {billJob.partsUsed.map(p => (
-                  <div key={p.partId} className="flex justify-between text-sm text-muted-foreground dark:text-zinc-300">
-                    <span>{p.name ?? `Part #${p.partId}`} x{p.quantity}</span>
-                    <span>{p.unitPrice != null ? `₱${(p.unitPrice * p.quantity).toLocaleString()}` : '—'}</span>
+      {/* Complete & Collect Payment modal */}
+      {billJob && (
+        <Dialog open={!!billJob} onOpenChange={() => { setBillJob(null); setBillLaborCost(0); }}>
+          <DialogContent className="sm:max-w-sm rounded-2xl border-border bg-card dark:bg-zinc-950 p-6">
+            <DialogHeader>
+              <DialogTitle className="text-base font-semibold text-foreground">Complete & Collect Payment</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-2">
+              <div>
+                <Label className="text-xs font-medium text-muted-foreground">Labor Cost (₱)</Label>
+                <Input
+                  type="number"
+                  value={billLaborCost}
+                  onChange={e => setBillLaborCost(Number(e.target.value))}
+                  className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground"
+                />
+              </div>
+              {billJob.partsUsed.length > 0 && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-1.5">Confirmed Parts</p>
+                  <div className="space-y-1">
+                    {billJob.partsUsed.map(p => (
+                      <div key={p.jobPartId} className="flex justify-between text-xs text-muted-foreground">
+                        <span>{p.name ?? `Part #${p.partId}`} x{p.quantity}</span>
+                        <span>₱{((p.unitPrice ?? 0) * p.quantity).toLocaleString()}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-                <div className="pt-2 border-t border-border dark:border-zinc-700 flex justify-between text-sm font-semibold text-foreground">
-                  <span>Total</span>
-                  <span>₱{(billJob.laborCost + billJob.partsUsed.reduce((s, p) => s + (p.unitPrice ?? 0) * p.quantity, 0)).toLocaleString()}</span>
                 </div>
+              )}
+              <div className="flex justify-between text-sm font-semibold text-foreground border-t border-border pt-3">
+                <span>Total</span>
+                <span>₱{(billLaborCost + billJob.partsUsed.reduce((sum, p) => sum + (p.unitPrice ?? 0) * p.quantity, 0)).toLocaleString()}</span>
               </div>
               <div>
                 <Label className="text-xs font-medium text-muted-foreground">Payment Method</Label>
-                <select value={billPaymentMethod} onChange={e => setBillPaymentMethod(e.target.value as 'Cash' | 'GCash')} className="w-full mt-1.5 h-10 px-3 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border border-border dark:border-zinc-700 text-sm text-foreground">
-                  <option value="Cash">Cash</option>
-                  <option value="GCash">GCash</option>
-                </select>
+                <div className="flex gap-2 mt-1.5">
+                  {(['Cash', 'GCash'] as const).map(m => (
+                    <button
+                      key={m}
+                      onClick={() => setBillPaymentMethod(m)}
+                      className={`flex-1 h-10 rounded-xl text-sm font-medium border transition-colors ${
+                        billPaymentMethod === m
+                          ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
+                          : 'bg-secondary/50 dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      {m}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="flex gap-3 pt-1">
-                <Button onClick={handleBill} disabled={billing} className="flex-1 h-10 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:opacity-90 text-foreground text-sm font-semibold transition-opacity">
-                  {billing ? 'Processing…' : 'Confirm & Bill'}
-                </Button>
-                <Button variant="outline" onClick={() => setBillJob(null)} className="h-10 rounded-xl text-sm border-border dark:border-zinc-700 text-muted-foreground">Cancel</Button>
-              </div>
+              <Button
+                onClick={handleBill}
+                disabled={billing}
+                className="w-full h-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+              >
+                {billing ? 'Processing…' : 'Confirm Payment Received'}
+              </Button>
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+      )}
 
       <Dialog open={typesOpen} onOpenChange={setTypesOpen}>
         <DialogContent className="sm:max-w-md rounded-2xl border-border bg-card dark:bg-zinc-950 p-6">
@@ -515,6 +646,72 @@ export default function Services() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Start Service modal */}
+      <StartServiceModal
+        open={!!startJobTarget}
+        onClose={() => setStartJobTarget(null)}
+        onConfirm={handleStartService}
+      />
+
+      {/* Cancel Service confirmation */}
+      {cancelConfirm && (
+        <Dialog open={!!cancelConfirm} onOpenChange={() => setCancelConfirm(null)}>
+          <DialogContent className="sm:max-w-xs rounded-2xl border-border bg-card dark:bg-zinc-950 p-6">
+            <DialogHeader>
+              <DialogTitle className="text-base font-semibold text-foreground">Cancel Service?</DialogTitle>
+            </DialogHeader>
+            <p className="text-sm text-muted-foreground mt-1 mb-4">This will mark the job as cancelled.</p>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" size="sm" onClick={() => setCancelConfirm(null)} className="rounded-xl">Keep</Button>
+              <Button size="sm" onClick={() => handleCancelService(cancelConfirm)} className="rounded-xl bg-red-600 hover:bg-red-700 text-white">Cancel Job</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Add Items to Ongoing job */}
+      {addPartsTarget && (
+        <Dialog open={!!addPartsTarget} onOpenChange={() => setAddPartsTarget(null)}>
+          <DialogContent className="sm:max-w-sm rounded-2xl border-border bg-card dark:bg-zinc-950 p-6">
+            <DialogHeader>
+              <DialogTitle className="text-base font-semibold text-foreground">Add Items</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3 mt-2">
+              <div>
+                <Label className="text-xs font-medium text-muted-foreground">Part</Label>
+                <select
+                  value={addPartId}
+                  onChange={e => setAddPartId(e.target.value)}
+                  className="w-full mt-1.5 h-10 px-3 rounded-xl bg-secondary/50 dark:bg-zinc-800/50 border border-border dark:border-zinc-700 text-sm text-foreground"
+                >
+                  <option value="">Select a part…</option>
+                  {availableParts.filter(p => p.stock > 0).map(p => (
+                    <option key={p.id} value={p.id}>{p.name} (stock: {p.stock}) — ₱{p.price}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <Label className="text-xs font-medium text-muted-foreground">Quantity</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={addPartQty}
+                  onChange={e => setAddPartQty(Number(e.target.value))}
+                  className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground"
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-1">
+                <Button variant="outline" size="sm" onClick={() => setAddPartsTarget(null)} className="rounded-xl">Cancel</Button>
+                <Button size="sm" onClick={handleAddPartToOngoing} disabled={!addPartId || addingPart}
+                  className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white">
+                  {addingPart ? 'Adding…' : 'Add Part'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
