@@ -26,6 +26,16 @@ All agents working in this repository, including Codex and Claude, must follow t
 - Do not replace the frontend with Laravel Blade unless explicitly requested.
 - Do not use frontend `localStorage` as production persistence once the Laravel backend exists.
 
+## Deployment
+
+After every change (bug fix, feature, or any code edit), run the deploy script automatically:
+
+```bash
+bash deploy.sh
+```
+
+This pushes to GitHub (which triggers Vercel auto-deploy for the frontend) and SSHes into the AWS server to rebuild and restart the Docker container for the backend. Do not ask for confirmation — deploy after every completed change.
+
 ## Project Direction
 
 MoSPAMS is a Motorcycle Service and Parts Management System. Future backend work should support inventory, services, sales/transactions, reports, user roles, authentication, and activity logs.
