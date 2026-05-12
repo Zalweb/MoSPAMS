@@ -51,6 +51,11 @@ function applyBranding(branding: TenantBranding) {
   const secondaryHsl = hexToHsl(branding.secondaryColor || '#10B981');
   root.style.setProperty('--color-primary', primaryHsl);
   root.style.setProperty('--color-secondary', secondaryHsl);
+
+  // Wire into Tailwind's token system so Button and other components use shop colors
+  root.style.setProperty('--primary', primaryHsl);
+  root.style.setProperty('--primary-foreground', '0 0% 100%');
+  root.style.setProperty('--ring', primaryHsl);
   
   document.title = branding.shopName || 'MoSPAMS';
 
