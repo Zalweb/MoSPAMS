@@ -1,296 +1,406 @@
-# MoSPAMS Data Flow Diagram
+# MoSPAMS — Data Flow Diagram
 
-MoSPAMS is a multi-tenant Motorcycle Service and Parts Management System. This DFD describes how external users, the React frontend, the Laravel API, and the MySQL database exchange data for shop operations such as authentication, inventory, service jobs, sales, payments, reports, notifications, and audit logs.
+> **System:** Motorcycle Service and Parts Management System (Multi-Tenant SaaS)
+> **Stack:** React + TypeScript (Frontend) · Laravel (API) · MySQL (Database)
+> **Generated from:** live codebase — routes, migrations, and feature modules
 
-## Level 0 - Context Diagram
+---
+
+## Level 0 — Context Diagram
+
+Highest-level view. Shows all external entities and what they send to and receive from the platform.
 
 ```mermaid
 flowchart LR
-    customer[Customer]
-    owner[Owner / Shop Admin]
-    staff[Staff]
-    mechanic[Mechanic]
-    superadmin[SuperAdmin]
+    C([Customer])
+    O([Owner / Staff])
+    M([Mechanic])
+    SA([SuperAdmin])
+    G([Google OAuth])
+    PM([PayMongo])
 
-    mospams((MoSPAMS Platform))
+    SYS(("MoSPAMS\nPlatform"))
 
-    db[(MySQL Database<br/>mospams_db)]
-    notify[Notification Channel]
+    C -->|"Registration, vehicle info,\nservice requests, payment"| SYS
+    SYS -->|"Service status, receipts,\nnotifications, history"| C
 
-    customer -->|Registration, profile data, booking/service requests, payment details| mospams
-    mospams -->|Service status, invoices, payment confirmation, notifications| customer
+    O -->|"Shop setup, inventory,\nservices, sales, report requests"| SYS
+    SYS -->|"Dashboards, reports,\naudit logs, alerts"| O
 
-    owner -->|Shop setup, users, inventory, services, sales, reports requests| mospams
-    mospams -->|Dashboards, reports, audit logs, approvals, alerts| owner
+    M -->|"Job progress, remarks,\ncompletion updates"| SYS
+    SYS -->|"Assigned jobs,\nservice details"| M
 
-    staff -->|Inventory updates, service job updates, sales transactions| mospams
-    mospams -->|Part records, job records, transaction results, stock alerts| staff
+    SA -->|"Shop approval, subscriptions,\nplatform config"| SYS
+    SYS -->|"Platform analytics,\ntenant audit data"| SA
 
-    mechanic -->|Assigned job progress, service remarks, completion updates| mospams
-    mospams -->|Assigned jobs, customer/job details, service history| mechanic
+    G -->|"OAuth token + profile"| SYS
+    SYS -->|"Auth request"| G
 
-    superadmin -->|Shop approval, platform configuration, tenant management| mospams
-    mospams -->|Shop status, platform reports, tenant audit data| superadmin
-
-    mospams <-->|Read/write operational data| db
-    mospams -->|Low-stock, job, approval, billing, and activity alerts| notify
-    notify -->|In-app notifications| customer
-    notify -->|In-app notifications| owner
-    notify -->|In-app notifications| staff
-    notify -->|In-app notifications| mechanic
-    notify -->|In-app notifications| superadmin
+    PM -->|"Payment webhook confirmation"| SYS
+    SYS -->|"Payment charge request"| PM
 ```
 
-## Level 1 - Major Processes
+---
+
+## Level 1 — Major Processes
+
+Breaks the system into its eight major functional processes and the data stores they access.
 
 ```mermaid
 flowchart TB
-    customer[Customer]
-    owner[Owner / Shop Admin]
-    staff[Staff]
-    mechanic[Mechanic]
-    superadmin[SuperAdmin]
+    C([Customer])
+    O([Owner / Staff])
+    M([Mechanic])
+    SA([SuperAdmin])
+    G([Google OAuth])
+    PM([PayMongo])
 
-    frontend[React + TypeScript Frontend]
+    P1(("1.0\nAuth &\nAccess Control"))
+    P2(("2.0\nShop Registration\n& Administration"))
+    P3(("3.0\nCustomer & Mechanic\nManagement"))
+    P4(("4.0\nInventory\nManagement"))
+    P5(("5.0\nService Job\nManagement"))
+    P6(("6.0\nSales & Payment\nProcessing"))
+    P7(("7.0\nReporting &\nAnalytics"))
+    P8(("8.0\nSuperAdmin Platform\nManagement"))
 
-    p1((1.0 Authentication<br/>and Tenant Access))
-    p2((2.0 Shop and User<br/>Administration))
-    p3((3.0 Inventory<br/>Management))
-    p4((4.0 Service Job<br/>Management))
-    p5((5.0 Sales and<br/>Payment Processing))
-    p6((6.0 Reports and<br/>Dashboards))
-    p7((7.0 Notifications<br/>and Activity Logging))
+    D1[(D1\nAccounts &\nAccess Control)]
+    D2[(D2\nShops &\nSubscriptions)]
+    D3[(D3\nCustomers &\nMechanics)]
+    D4[(D4\nInventory)]
+    D5[(D5\nService Jobs)]
+    D6[(D6\nSales &\nPayments)]
+    D7[(D7\nAudit &\nNotifications)]
 
-    d1[(D1 Users, Roles,<br/>User Statuses)]
-    d2[(D2 Shops and<br/>Tenant Settings)]
-    d3[(D3 Customers<br/>and Mechanics)]
-    d4[(D4 Parts, Categories,<br/>Statuses)]
-    d5[(D5 Service Jobs,<br/>Items, Job Parts)]
-    d6[(D6 Sales, Sale Items,<br/>Payments)]
-    d7[(D7 Stock Movements)]
-    d8[(D8 Notifications)]
-    d9[(D9 Activity Logs)]
-    d10[(D10 Reporting Views<br/>vw_low_stock_parts,<br/>vw_service_job_totals)]
+    C & O & M & SA -->|"Credentials / session"| P1
+    G -->|"OAuth token"| P1
+    P1 <-->|"Account, membership, role"| D1
+    P1 <-->|"Shop status, subdomain"| D2
+    P1 -->|"Auth token, role context"| C & O & M & SA
 
-    customer -->|Credentials, profile updates, requests| frontend
-    owner -->|Admin actions and reports requests| frontend
-    staff -->|Inventory, service, sales actions| frontend
-    mechanic -->|Job progress and remarks| frontend
-    superadmin -->|Platform and tenant actions| frontend
+    O -->|"Shop setup, branding, domain"| P2
+    SA -->|"Approval, suspension"| P2
+    P2 <-->|"Shop records, plans, payments"| D2
+    P2 <-->|"User memberships"| D1
 
-    frontend -->|API requests| p1
-    frontend -->|Authenticated API requests| p2
-    frontend -->|Authenticated API requests| p3
-    frontend -->|Authenticated API requests| p4
-    frontend -->|Authenticated API requests| p5
-    frontend -->|Authenticated API requests| p6
+    O -->|"Customer / mechanic actions"| P3
+    C -->|"Vehicle registration"| P3
+    P3 <-->|"Customer & mechanic records"| D3
+    P3 -->|"Profile and vehicle data"| C & O
 
-    p1 <-->|Login, registration, role, shop context| d1
-    p1 <-->|Tenant resolution and shop status| d2
-    p1 -->|Auth token, role permissions, shop context| frontend
+    O -->|"Part CRUD, stock adjustments"| P4
+    P4 <-->|"Parts, categories"| D4
+    P4 -->|"Stock levels, alerts"| O
 
-    p2 <-->|User and role maintenance| d1
-    p2 <-->|Shop approval, activation, suspension, branding| d2
-    p2 <-->|Customer and mechanic records| d3
-    p2 -->|Administration results| frontend
+    O & M -->|"Job creation, progress, completion"| P5
+    P5 <-->|"Customers, mechanics"| D3
+    P5 <-->|"Jobs, labor, parts used"| D5
+    P5 <-->|"Deduct stock"| D4
+    P5 -->|"Job status, totals"| O & M & C
 
-    p3 <-->|Part and category CRUD| d4
-    p3 <-->|Stock in/out adjustments| d7
-    p3 -->|Inventory lists, stock levels, low-stock warnings| frontend
+    O -->|"Sale details, payment info"| P6
+    PM -->|"Webhook: payment result"| P6
+    P6 <-->|"Sales, payments"| D6
+    P6 <-->|"Part stock deduction"| D4
+    P6 -->|"Receipt, payment status"| O & C
+    P6 -->|"Charge request"| PM
 
-    p4 <-->|Customer and mechanic details| d3
-    p4 <-->|Job creation, assignment, status, labor lines| d5
-    p4 <-->|Parts used in jobs| d4
-    p4 <-->|Job part stock deduction records| d7
-    p4 -->|Service job status and totals| frontend
+    O & SA -->|"Report requests"| P7
+    P7 -->|"Queries"| D4 & D5 & D6
+    P7 -->|"Dashboards, reports"| O & SA
 
-    p5 <-->|Customer and service job references| d3
-    p5 <-->|Job references and service totals| d5
-    p5 <-->|Sale line parts and stock validation| d4
-    p5 <-->|Sales, sale items, payment records| d6
-    p5 <-->|Sold stock deduction records| d7
-    p5 -->|Receipts, invoices, payment status| frontend
+    SA -->|"Platform actions"| P8
+    P8 <-->|"All shops, subscriptions, analytics"| D2
+    P8 <-->|"Platform admins, audit logs"| D1 & D7
+    P8 -->|"Platform status, reports"| SA
 
-    p6 -->|Aggregated report queries| d4
-    p6 -->|Aggregated report queries| d5
-    p6 -->|Aggregated report queries| d6
-    p6 -->|Aggregated report queries| d7
-    p6 -->|Dashboard and report queries| d10
-    p6 -->|Dashboards, inventory reports, sales reports, service reports| frontend
-
-    p1 -->|Login and access events| p7
-    p2 -->|Admin events| p7
-    p3 -->|Inventory events and low-stock triggers| p7
-    p4 -->|Service job events| p7
-    p5 -->|Transaction and payment events| p7
-
-    p7 -->|Notification records| d8
-    p7 -->|Audit records| d9
-    p7 -->|Alerts and activity messages| frontend
+    P1 & P2 & P3 & P4 & P5 & P6 -->|"Events"| D7
 ```
 
-## Level 2 - Core Operational Flows
+---
 
-### Inventory and Stock Control
+## Level 2 — Authentication & Access Control
 
 ```mermaid
 flowchart LR
-    actor[Owner / Staff]
-    inv((3.1 Maintain Parts<br/>and Categories))
-    stock((3.2 Record Stock<br/>Movement))
-    low((3.3 Check Low Stock))
+    U([Any User])
+    G([Google OAuth])
 
-    parts[(Parts)]
-    categories[(Categories)]
-    statuses[(Part and Category Statuses)]
-    movements[(Stock Movements)]
-    view[(vw_low_stock_parts)]
-    notifications[(Notifications)]
-    logs[(Activity Logs)]
+    L(("1.1\nEmail/Password\nLogin"))
+    R(("1.2\nUser Registration"))
+    GO(("1.3\nGoogle OAuth\nLogin"))
+    TC(("1.4\nTenant &\nRole Resolution"))
+    JS(("1.5\nJoin Shop"))
 
-    actor -->|Part/category form data| inv
-    inv <-->|Create, update, deactivate| parts
-    inv <-->|Assign category| categories
-    inv <-->|Resolve status| statuses
-    inv -->|Inventory event| logs
+    D1[(Accounts)]
+    D2[(Shop Memberships)]
+    D3[(Shops)]
+    D7[(Activity Logs)]
 
-    actor -->|Stock adjustment request| stock
-    stock -->|Update quantity| parts
-    stock -->|Movement record| movements
-    stock -->|Stock event| logs
-    stock -->|Updated stock level| low
+    U -->|"Email + password"| L
+    L <-->|"Verify credentials"| D1
+    L -->|"Unscoped token"| TC
 
-    low -->|Read shortage records| view
-    low -->|Low-stock alert| notifications
-    low -->|Low-stock result| actor
+    U -->|"Name, email, password"| R
+    R -->|"Create account"| D1
+    R -->|"Registration log"| D7
+
+    U -->|"Google login intent"| GO
+    GO -->|"Auth request"| G
+    G -->|"Token + profile"| GO
+    GO <-->|"Upsert account"| D1
+    GO -->|"Unscoped token"| TC
+
+    TC <-->|"Read memberships & roles"| D2
+    TC <-->|"Read shop status & subdomain"| D3
+    TC -->|"Scoped token: role + shop context"| U
+
+    U -->|"Shop code / invite"| JS
+    JS -->|"Create membership"| D2
+    JS -->|"Joined log"| D7
 ```
 
-### Service Job Flow
+---
+
+## Level 2 — Shop Registration & Administration
 
 ```mermaid
 flowchart LR
-    customer[Customer]
-    staff[Owner / Staff]
-    mech[Mechanic]
+    PA([Prospective Owner])
+    O([Owner])
+    SA([SuperAdmin])
 
-    create((4.1 Create<br/>Service Job))
-    assign((4.2 Assign<br/>Mechanic))
-    perform((4.3 Record Services<br/>and Parts Used))
-    complete((4.4 Complete Job<br/>and Calculate Totals))
+    REG(("2.1\nPublic Shop\nRegistration"))
+    APR(("2.2\nSuperAdmin\nApproval"))
+    SUB(("2.3\nSubscription\nManagement"))
+    BRD(("2.4\nBranding &\nDomain Setup"))
 
-    customers[(Customers)]
-    mechanics[(Mechanics)]
-    jobs[(Service Jobs)]
-    items[(Service Job Items)]
-    jobparts[(Service Job Parts)]
-    parts[(Parts)]
-    movements[(Stock Movements)]
-    totals[(vw_service_job_totals)]
-    notifications[(Notifications)]
-    logs[(Activity Logs)]
+    DS[(Shops)]
+    DP[(Subscription Plans)]
+    DSP[(Shop Subscriptions)]
+    DM[(Shop Memberships)]
+    DL[(Activity Logs)]
 
-    customer -->|Customer and motorcycle service request| staff
-    staff -->|Job details and notes| create
-    create <-->|Customer lookup/create| customers
-    create -->|New job record| jobs
-    create -->|Job created event| logs
+    PA -->|"Shop name, contact, owner details"| REG
+    REG -->|"Pending shop record"| DS
+    REG -->|"Membership: Owner role"| DM
+    REG -->|"Registration event"| DL
 
-    staff -->|Assignment request| assign
-    assign <-->|Mechanic availability/status| mechanics
-    assign -->|Assigned mechanic and status| jobs
-    assign -->|Assignment notification| notifications
+    SA -->|"Approve / reject / suspend"| APR
+    APR <-->|"Update shop status"| DS
+    APR -->|"Approval log"| DL
 
-    mech -->|Progress, remarks, completion details| perform
-    staff -->|Service lines and parts used| perform
-    perform -->|Labor/service records| items
-    perform -->|Parts used records| jobparts
-    perform -->|Deduct stock| parts
-    perform -->|Parts movement records| movements
-    perform -->|Service update event| logs
+    SA -->|"Assign plan"| SUB
+    O -->|"Upgrade / renew"| SUB
+    SUB <-->|"Subscription plans"| DP
+    SUB -->|"Active subscription record"| DSP
 
-    perform --> complete
-    complete -->|Completion date and final status| jobs
-    complete -->|Read final totals| totals
-    complete -->|Completion notice| notifications
-    complete -->|Job summary| staff
-    complete -->|Job status| customer
+    O -->|"Logo, colors, shop name"| BRD
+    BRD -->|"Branding fields"| DS
+    O -->|"Subdomain / custom domain request"| BRD
+    BRD -->|"Domain status"| DS
 ```
 
-### Sales and Payment Flow
+---
+
+## Level 2 — Inventory Management
 
 ```mermaid
 flowchart LR
-    cashier[Owner / Staff]
-    customer[Customer]
+    OS([Owner / Staff])
 
-    sale((5.1 Create Sale))
-    validate((5.2 Validate Items<br/>and Stock))
-    payment((5.3 Record Payment))
-    receipt((5.4 Generate Receipt<br/>and Update Logs))
+    MP(("4.1\nManage Parts\n& Categories"))
+    SM(("4.2\nRecord Stock\nMovement"))
+    LS(("4.3\nLow-Stock\nCheck"))
 
-    customers[(Customers)]
-    jobs[(Service Jobs)]
-    parts[(Parts)]
-    sales[(Sales)]
-    saleitems[(Sale Items)]
-    payments[(Payments)]
-    movements[(Stock Movements)]
-    notifications[(Notifications)]
-    logs[(Activity Logs)]
+    DP[(Parts)]
+    DC[(Categories)]
+    DM[(Stock Movements)]
+    DN[(Notifications)]
+    DL[(Activity Logs)]
 
-    customer -->|Purchase or service payment details| cashier
-    cashier -->|Customer, sale type, discount, selected items| sale
-    sale <-->|Customer lookup/create| customers
-    sale <-->|Optional service job reference| jobs
-    sale -->|Draft sale details| validate
+    OS -->|"Part / category form"| MP
+    MP <-->|"Create, update, deactivate"| DP
+    MP <-->|"Category assignment"| DC
+    MP -->|"Inventory event"| DL
 
-    validate <-->|Check part price and stock| parts
-    validate -->|Sale header| sales
-    validate -->|Line items| saleitems
-    validate -->|Deduct sold quantity| parts
-    validate -->|Stock movement records| movements
+    OS -->|"Stock adjustment"| SM
+    SM -->|"Update quantity"| DP
+    SM -->|"Movement record"| DM
+    SM -->|"Stock event"| DL
+    SM -->|"Updated level"| LS
 
-    cashier -->|Method, amount, reference number| payment
-    payment -->|Payment record and status| payments
-    payment --> receipt
-
-    receipt -->|Transaction notification| notifications
-    receipt -->|Sales and payment audit entries| logs
-    receipt -->|Receipt and payment status| cashier
-    receipt -->|Receipt and balance status| customer
+    LS <-->|"Read stock quantities"| DP
+    LS -->|"Low-stock alert"| DN
+    LS -->|"Alert result"| OS
 ```
 
-## Data Stores
+---
 
-| Store | Tables / Views | Main Purpose |
-|---|---|---|
-| D1 Users, Roles, User Statuses | `users`, `roles`, `user_statuses` | Authentication, authorization, account status, role-based access |
-| D2 Shops and Tenant Settings | shop/tenant tables from SaaS implementation | Tenant isolation, shop approval, shop status, branding, domain context |
-| D3 Customers and Mechanics | `customers`, `mechanics`, `mechanic_statuses` | Customer profiles, mechanic profiles, assignment eligibility |
-| D4 Parts, Categories, Statuses | `parts`, `categories`, `part_statuses`, `category_statuses` | Inventory master data and catalog status |
-| D5 Service Jobs | `service_jobs`, `service_job_items`, `service_job_parts`, `service_job_statuses`, `service_types`, `service_type_statuses` | Service job lifecycle, labor, parts used, job status |
-| D6 Sales and Payments | `sales`, `sale_items`, `payments`, `payment_statuses` | Point-of-sale, service billing, payment tracking |
-| D7 Stock Movements | `stock_movements` | Inventory audit trail for stock in/out and transaction references |
-| D8 Notifications | `notifications` | User-facing alerts for jobs, low stock, approvals, and transactions |
-| D9 Activity Logs | `activity_logs` | Audit trail for important system actions |
-| D10 Reporting Views | `vw_low_stock_parts`, `vw_service_job_totals` | Aggregated read models for dashboards and reports |
+## Level 2 — Service Job Management
 
-## External Entities
+```mermaid
+flowchart LR
+    C([Customer])
+    OS([Owner / Staff])
+    ME([Mechanic])
 
-| Entity | Sends To System | Receives From System |
-|---|---|---|
-| Customer | Registration/profile data, service requests, payment details | Service status, receipts, notifications, service history |
-| Owner / Shop Admin | Shop configuration, user management, inventory, service, sales, report requests | Dashboards, operational records, reports, audit logs, alerts |
-| Staff | Inventory actions, service updates, sales transactions | Job lists, stock levels, sales results, payment status |
+    CJ(("5.1\nCreate\nJob"))
+    AM(("5.2\nAssign\nMechanic"))
+    WK(("5.3\nRecord Work\n& Parts Used"))
+    CMP(("5.4\nComplete Job\n& Bill"))
+
+    DC[(Customers)]
+    DM[(Mechanics)]
+    DJ[(Service Jobs)]
+    DI[(Job Items / Labor)]
+    DJP[(Job Parts)]
+    DP[(Parts)]
+    DSM[(Stock Movements)]
+    DN[(Notifications)]
+    DL[(Activity Logs)]
+
+    C -->|"Service request"| OS
+    OS -->|"Job details"| CJ
+    CJ <-->|"Customer lookup"| DC
+    CJ -->|"New job record"| DJ
+    CJ -->|"Job created log"| DL
+
+    OS -->|"Assign mechanic"| AM
+    AM <-->|"Mechanic availability"| DM
+    AM -->|"Mechanic + status"| DJ
+    AM -->|"Assignment alert"| DN
+
+    ME & OS -->|"Labor lines, parts consumed"| WK
+    WK -->|"Labor records"| DI
+    WK -->|"Parts-used records"| DJP
+    WK -->|"Deduct stock"| DP
+    WK -->|"Movement records"| DSM
+    WK -->|"Progress log"| DL
+
+    WK --> CMP
+    CMP -->|"Final status + date"| DJ
+    CMP -->|"Completion notice"| DN
+    CMP -->|"Job summary"| OS & C
+```
+
+---
+
+## Level 2 — Sales & Payment Processing
+
+```mermaid
+flowchart LR
+    OS([Owner / Staff])
+    C([Customer])
+    PM([PayMongo])
+
+    CS(("6.1\nCreate Sale\n& Validate"))
+    RP(("6.2\nRecord\nPayment"))
+    GR(("6.3\nGenerate Receipt\n& Log"))
+
+    DCU[(Customers)]
+    DSJ[(Service Jobs)]
+    DPT[(Parts)]
+    DS[(Sales)]
+    DSI[(Sale Items)]
+    DPY[(Payments)]
+    DSM[(Stock Movements)]
+    DN[(Notifications)]
+    DL[(Activity Logs)]
+
+    C -->|"Purchase details"| OS
+    OS -->|"Customer, items, discount, type"| CS
+    CS <-->|"Customer lookup"| DCU
+    CS <-->|"Job reference (if service billing)"| DSJ
+    CS <-->|"Price & stock check"| DPT
+    CS -->|"Sale header"| DS
+    CS -->|"Line items"| DSI
+    CS -->|"Deduct sold stock"| DPT
+    CS -->|"Movement record"| DSM
+
+    OS -->|"Method, amount, reference"| RP
+    PM -->|"Webhook: payment confirmed"| RP
+    RP -->|"Payment record"| DPY
+    RP --> GR
+
+    GR -->|"Transaction alert"| DN
+    GR -->|"Audit entries"| DL
+    GR -->|"Receipt + status"| OS & C
+```
+
+---
+
+## Level 2 — SuperAdmin Platform Management
+
+```mermaid
+flowchart LR
+    SA([SuperAdmin])
+
+    MS(("8.1\nManage Shops\n& Approvals"))
+    MP(("8.2\nManage\nSubscriptions"))
+    AN(("8.3\nPlatform\nAnalytics"))
+    AU(("8.4\nAudit &\nAdmin Users"))
+
+    DS[(Shops)]
+    DP[(Subscription Plans)]
+    DSP[(Shop Subscriptions)]
+    DA[(Platform Admins)]
+    DL[(Audit Logs)]
+
+    SA -->|"Approve, suspend, delete"| MS
+    MS <-->|"Shop records"| DS
+    MS -->|"Status change log"| DL
+
+    SA -->|"Create / modify plans, assign subscriptions"| MP
+    MP <-->|"Subscription plans"| DP
+    MP <-->|"Shop subscriptions"| DSP
+
+    SA -->|"Analytics request"| AN
+    AN -->|"Aggregated queries"| DS & DSP
+    AN -->|"Platform reports, revenue, growth"| SA
+
+    SA -->|"Add / remove admins"| AU
+    AU <-->|"Platform admin records"| DA
+    AU <-->|"Audit log queries"| DL
+    AU -->|"Admin list, audit trail"| SA
+```
+
+---
+
+## Data Stores Reference
+
+| ID | Store | Key Tables | Purpose |
+|----|-------|-----------|---------|
+| D1 | Accounts & Access Control | `accounts`, `shop_memberships`, `platform_admins`, `roles` | Identity, authentication, role-based access, tenant membership |
+| D2 | Shops & Subscriptions | `shops`, `subscription_plans`, `shop_subscriptions`, `subscription_payments` | Multi-tenant shop records, billing tiers, domain config, branding |
+| D3 | Customers & Mechanics | `customers`, `mechanics`, `customer_vehicles`, `mechanic_statuses` | Customer profiles, vehicles, mechanic records and availability |
+| D4 | Inventory | `parts`, `categories`, `part_statuses`, `category_statuses` | Parts catalog, pricing, stock quantities, category classification |
+| D5 | Service Jobs | `service_jobs`, `service_job_items`, `service_job_parts`, `service_types` | Job lifecycle, labor lines, parts consumed per job |
+| D6 | Sales & Payments | `sales`, `sale_items`, `payments`, `payment_statuses` | Point-of-sale records, service billing, payment tracking |
+| D7 | Audit & Notifications | `activity_logs`, `notifications`, `tenant_audit_events` | System-wide audit trail and user-facing alerts |
+| D4/SM | Stock Movements | `stock_movements` | Inventory audit trail — all quantity changes with references |
+
+---
+
+## External Entities Reference
+
+| Entity | Sends to System | Receives from System |
+|--------|----------------|---------------------|
+| Customer | Registration, vehicle info, service requests, payments | Service status, receipts, notifications, history |
+| Owner / Staff | Shop config, inventory, services, sales, report requests | Dashboards, reports, records, alerts, audit logs |
 | Mechanic | Job progress, remarks, completion updates | Assigned jobs, customer/service details, notifications |
-| SuperAdmin | Shop approval, tenant management, platform actions | Tenant status, platform reports, audit information |
+| SuperAdmin | Shop approvals, plan management, platform actions | Platform analytics, tenant audit data, revenue reports |
+| Google OAuth | OAuth token + Google profile | Auth redirect request |
+| PayMongo | Payment webhook (confirmed / failed) | Payment charge request |
+
+---
 
 ## Key Data Flow Rules
 
-- All shop-scoped operational data is filtered by tenant/shop context after authentication.
-- SuperAdmin can access platform-level data and manage shops across tenants.
-- Owner and Staff can manage shop operations according to role permissions.
-- Mechanic access is limited to assigned job data where applicable.
-- Stock deductions are recorded through both current part quantity updates and `stock_movements`.
-- Sales and service jobs generate audit entries in `activity_logs`.
-- Low-stock, assignment, completion, approval, and payment events can create `notifications`.
+1. **Tenant isolation** — Every shop-scoped query is filtered by `shop_id` resolved from the authenticated session's subdomain or JWT context. Cross-tenant access is blocked at middleware.
+2. **Role enforcement** — Owner, Staff, Mechanic, and Customer roles are enforced per route via Laravel policies. SuperAdmin and Platform Admin bypass shop-scope checks.
+3. **Stock double-write** — Every stock change writes to both `parts.stock_quantity` (current level) and `stock_movements` (audit trail with user and reference).
+4. **Payment webhook** — PayMongo posts a signed webhook to the platform; payments are only marked `paid` after webhook verification, not on frontend confirmation.
+5. **Google OAuth upsert** — Login via Google creates the account if it does not exist, or links the Google ID to an existing account matched by email.
+6. **Notifications** — Low-stock, mechanic assignment, job completion, subscription changes, and payment events all produce `notifications` records for the relevant user.
+7. **SuperAdmin scope** — SuperAdmin operates above all tenant boundaries and can access platform-wide analytics, all shop records, and subscription data.
