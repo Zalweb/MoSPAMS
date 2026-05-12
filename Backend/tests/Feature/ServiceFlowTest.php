@@ -619,6 +619,32 @@ class ServiceFlowTest extends TestCase
         $this->assertEquals('pending', $statusCode);
     }
 
+    // --- Task 10: auto-cancel stale pending jobs ---
+
+    public function test_stale_pending_jobs_are_auto_cancelled(): void
+    {
+        $jobId = $this->createJob();
+        DB::table('service_jobs')->where('job_id', $jobId)->update([
+            'created_at' => now()->subHours(13),
+        ]);
+
+        $recentJobId = $this->createJob();
+
+        $this->artisan('services:cancel-stale')->assertSuccessful();
+
+        $oldStatus = DB::table('service_jobs')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->where('service_jobs.job_id', $jobId)
+            ->value('service_job_statuses.status_code');
+        $this->assertEquals('cancelled', $oldStatus);
+
+        $recentStatus = DB::table('service_jobs')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->where('service_jobs.job_id', $recentJobId)
+            ->value('service_job_statuses.status_code');
+        $this->assertEquals('pending', $recentStatus);
+    }
+
     // --- helpers ---
 
     private function createJob(?int $customerUserId = null): int

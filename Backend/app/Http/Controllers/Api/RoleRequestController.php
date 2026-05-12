@@ -139,11 +139,11 @@ class RoleRequestController extends Controller
     private function notifyOwner(string $type, string $title, string $message, ?string $refType = null, ?int $refId = null): void
     {
         $shopId = app(AuthenticatedContext::class)->shopId(request());
-        $ownerId = DB::table('shop_memberships')
-            ->join('roles', 'roles.role_id', '=', 'shop_memberships.role_id_fk')
-            ->where('shop_memberships.shop_id_fk', $shopId)
+        $ownerId = DB::table('users')
+            ->join('roles', 'roles.role_id', '=', 'users.role_id_fk')
+            ->where('users.shop_id_fk', $shopId)
             ->where('roles.role_name', 'Owner')
-            ->value('shop_memberships.user_id_fk');
+            ->value('users.user_id');
 
         if (!$ownerId) return;
 

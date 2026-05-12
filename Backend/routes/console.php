@@ -7,6 +7,7 @@ use App\Services\Identity\MembershipRoleGuard;
 use App\Jobs\CleanupOrphanedTenantMediaJob;
 use App\Jobs\DomainHealthCheckJob;
 use App\Jobs\RunSubscriptionRenewalSweepJob;
+use App\Console\Commands\CancelStalePendingServicesCommand;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -41,3 +42,4 @@ Artisan::command('identity:audit-memberships', function (MembershipRoleGuard $gu
 Schedule::job(new RunSubscriptionRenewalSweepJob())->everyFifteenMinutes();
 Schedule::job(new CleanupOrphanedTenantMediaJob())->dailyAt('02:00');
 Schedule::job(new DomainHealthCheckJob())->hourly();
+Schedule::command(CancelStalePendingServicesCommand::class)->hourly();

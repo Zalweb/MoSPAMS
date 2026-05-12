@@ -150,11 +150,15 @@ class MospamsController extends Controller
         // Average revenue per customer
         $avgRevenuePerCustomer = $totalCustomers > 0 ? $totalRevenue / $totalCustomers : 0;
 
-        // Average job completion time in days
+        // Average job completion time in days (cross-database compatible)
+        $driver = DB::connection()->getDriverName();
+        $dateDiffExpr = $driver === 'sqlite'
+            ? "AVG(CAST(julianday(completion_date) - julianday(job_date) AS REAL))"
+            : "AVG(DATEDIFF(completion_date, job_date))";
         $avgJobTime = DB::table('service_jobs')
             ->where('shop_id_fk', $shopId)
             ->whereNotNull('completion_date')
-            ->selectRaw('AVG(DATEDIFF(completion_date, job_date)) as avg_days')
+            ->selectRaw("{$dateDiffExpr} as avg_days")
             ->value('avg_days');
         $avgJobTime = $avgJobTime ? round((float) $avgJobTime, 1) : 0;
 

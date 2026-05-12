@@ -242,9 +242,16 @@ class MospamsApiTest extends TestCase
             'notes' => 'Test service',
         ])->assertCreated()->json('data.id');
 
-        $this->withToken($token)->patchJson('http://default.mospams.local/api/services/'.$serviceId, [
-            'status' => 'Completed',
-        ])->assertOk()->assertJsonPath('data.status', 'Completed');
+        // Use the bill endpoint (not PATCH status) to transition to Completed
+        $this->withToken($token)->postJson('http://default.mospams.local/api/services/'.$serviceId.'/bill', [
+            'paymentMethod' => 'Cash',
+        ])->assertCreated();
+
+        $status = $this->withToken($token)
+            ->getJson('http://default.mospams.local/api/services/'.$serviceId)
+            ->assertOk()
+            ->json('data.status');
+        $this->assertEquals('Completed', $status);
 
         $this->withToken($token)->getJson('http://default.mospams.local/api/reports/services')->assertOk();
         $this->withToken($token)->getJson('http://default.mospams.local/api/activity-logs')->assertOk();
