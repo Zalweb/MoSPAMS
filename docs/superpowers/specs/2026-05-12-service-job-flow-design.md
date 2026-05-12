@@ -19,7 +19,7 @@ Redesign the Service Job feature from a free-form status dropdown into a strict,
             PENDING
          ┌───────────────────────────┐
          │ [Start Service]           │  → opens Assign Mechanic modal
-         │ [Cancel]                  │  → sets cancelled immediately
+         │ [Cancel]                  │  → sets cancelled immediately(Customers can also cancel.)
          └───────────────────────────┘
                ↓ (Start Service confirmed with ≥1 mechanic)
           IN PROGRESS
@@ -173,5 +173,4 @@ Both use the existing `notifications` table and the pattern already in `updateSe
 
 - Online payment processing (PayMongo, etc.) — payment is always confirmed manually by staff
 - Mechanic ability to reject a part request back to staff with a note
-- Customer ability to cancel their own pending booking from the portal (staff-only for now)
 - Email/SMS notifications (system notifications only)

@@ -59,7 +59,7 @@ export default function CustomerDashboard() {
     setCancellingId(id);
     try {
       await apiMutation(`/api/customer/services/${id}`, 'DELETE');
-      setServices(prev => prev.filter(s => s.id !== id));
+      setServices(prev => prev.map(s => s.id === id ? { ...s, status: 'Cancelled' } : s));
       toast.success('Booking cancelled.');
     } catch {
       toast.error('Failed to cancel the booking. Please try again.');
