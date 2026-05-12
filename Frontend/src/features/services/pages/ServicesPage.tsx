@@ -82,6 +82,7 @@ export default function Services() {
   const [addPartId, setAddPartId] = useState<string>('');
   const [addPartQty, setAddPartQty] = useState<number>(1);
   const [addingPart, setAddingPart] = useState(false);
+  const [addPartsSearch, setAddPartsSearch] = useState('');
 
   const { data: services, loading, meta, page, setPage, prependItem, updateItem, removeItem } = usePaginatedFetch<ServiceRecord>('/api/services', 25, {}, 10000);
 
@@ -191,7 +192,7 @@ export default function Services() {
     try {
       await apiMutation(`/api/services/${billJob.id}/bill`, 'POST', {
         paymentMethod: billPaymentMethod,
-        laborCost: billLaborCost,
+        laborCost: isNaN(billLaborCost) ? billJob.laborCost : billLaborCost,
       });
       const updated = await apiGet<{ data: ServiceRecord }>(`/api/services/${billJob.id}`).then(r => r.data).catch(() => null);
       if (updated) updateItem(billJob.id, 'id', updated);
@@ -237,6 +238,7 @@ export default function Services() {
   const openAddPartsModal = (service: ServiceRecord) => {
     setAddPartsTarget(service);
     setAddPartId('');
+    setAddPartsSearch('');
     setAddPartQty(1);
     void apiGet<{ data: Part[] }>('/api/parts?limit=100').then(r => setAvailableParts(r.data)).catch(() => {});
   };
@@ -537,8 +539,9 @@ export default function Services() {
                 <Label className="text-xs font-medium text-muted-foreground">Labor Cost (₱)</Label>
                 <Input
                   type="number"
+                  min={0}
                   value={billLaborCost}
-                  onChange={e => setBillLaborCost(Number(e.target.value))}
+                  onChange={e => { const v = parseFloat(e.target.value); setBillLaborCost(isNaN(v) ? 0 : v); }}
                   className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground"
                 />
               </div>
@@ -694,16 +697,33 @@ export default function Services() {
             <div className="space-y-3 mt-2">
               <div>
                 <Label className="text-xs font-medium text-muted-foreground">Part</Label>
-                <select
-                  value={addPartId}
-                  onChange={e => setAddPartId(e.target.value)}
-                  className="w-full mt-1.5 h-10 px-3 rounded-xl bg-secondary/50 dark:bg-zinc-800/50 border border-border dark:border-zinc-700 text-sm text-foreground"
-                >
-                  <option value="">Select a part…</option>
-                  {availableParts.filter(p => p.stock > 0).map(p => (
-                    <option key={p.id} value={p.id}>{p.name} (stock: {p.stock}) — ₱{p.price}</option>
-                  ))}
-                </select>
+                <div className="relative mt-1.5">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="Search parts…"
+                    value={addPartsSearch}
+                    onChange={e => setAddPartsSearch(e.target.value)}
+                    className="w-full h-10 pl-9 pr-3 rounded-xl bg-secondary/50 dark:bg-zinc-800/50 border border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-white/10"
+                  />
+                </div>
+                <div className="mt-1.5 max-h-40 overflow-y-auto space-y-1 rounded-xl border border-border dark:border-zinc-700 p-1">
+                  {availableParts.filter(p => p.stock > 0 && (addPartsSearch === '' || p.name.toLowerCase().includes(addPartsSearch.toLowerCase()))).length === 0 ? (
+                    <p className="text-xs text-muted-foreground text-center py-3">{addPartsSearch ? 'No parts found' : 'No parts in stock'}</p>
+                  ) : (
+                    availableParts.filter(p => p.stock > 0 && (addPartsSearch === '' || p.name.toLowerCase().includes(addPartsSearch.toLowerCase()))).map(p => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setAddPartId(p.id)}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between ${addPartId === p.id ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'text-foreground hover:bg-muted'}`}
+                      >
+                        <span className="font-medium">{p.name}</span>
+                        <span className="text-xs text-muted-foreground ml-2 shrink-0">₱{p.price} · {p.stock} left</span>
+                      </button>
+                    ))
+                  )}
+                </div>
               </div>
               <div>
                 <Label className="text-xs font-medium text-muted-foreground">Quantity</Label>

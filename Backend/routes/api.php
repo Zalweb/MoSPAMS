@@ -82,7 +82,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     Route::middleware(['shop.active', 'tenant.user', 'tenant.token'])->group(function () {
-        Route::get('/parts', [MospamsController::class, 'parts'])->middleware('role:Owner,Staff');
+        Route::get('/parts', [MospamsController::class, 'parts'])->middleware('role:Owner,Staff,Mechanic');
         Route::post('/parts', [MospamsController::class, 'storePart'])->middleware('role:Owner,Staff');
         Route::patch('/parts/{part}', [MospamsController::class, 'updatePart'])->middleware('role:Owner,Staff');
         Route::delete('/parts/{part}', [MospamsController::class, 'deletePart'])->middleware('role:Owner');

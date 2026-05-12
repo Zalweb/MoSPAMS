@@ -39,7 +39,7 @@ export function usePaginatedFetch<T>(
   // Stable query key — React Query caches by key, so navigating back = instant
   const queryKey = ['paginated', path, page, perPage, extraParams] as const;
 
-  const { data: response, isLoading, error: queryError, refetch: tqRefetch } = useQuery<PaginatedResponse<T>>({
+  const { data: response, isPending, error: queryError, refetch: tqRefetch } = useQuery<PaginatedResponse<T>>({
     queryKey,
     queryFn: () => {
       const params = new URLSearchParams({
@@ -54,7 +54,7 @@ export function usePaginatedFetch<T>(
 
   const data = response?.data ?? [];
   const meta = response?.meta ?? null;
-  const loading = isLoading;
+  const loading = isPending;
   const error = queryError ? (queryError instanceof Error ? queryError.message : 'Failed to load data') : null;
 
   const refetch = useCallback(() => { void tqRefetch(); }, [tqRefetch]);
