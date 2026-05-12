@@ -482,23 +482,26 @@ class CustomerController extends Controller
     }
     public function serviceTypes(Request $request): JsonResponse
     {
-        $query = $this->tenantTable('service_types')
-            ->orderBy('service_name');
+        $user = auth()->user();
 
-        $activeStatusId = DB::table('service_type_statuses')
-            ->where('status_code', 'active')
-            ->value('service_type_status_id');
+        $shopId = app(\App\Support\Tenancy\TenantManager::class)->id()
+            ?? app(\App\Support\Auth\AuthenticatedContext::class)->shopId($request)
+            ?? ($user?->shop_id_fk ? (int) $user->shop_id_fk : null);
 
-        if ($activeStatusId !== null) {
-            $query->where('service_type_status_id_fk', $activeStatusId);
+        if (! $shopId) {
+            return response()->json(['data' => []]);
         }
 
-        $types = $query->get()->map(fn ($row) => [
-            'id' => (string) $row->service_type_id,
-            'service_name' => $row->service_name,
-            'description' => $row->description,
-            'labor_cost' => (float) $row->labor_cost,
-        ]);
+        $types = DB::table('service_types')
+            ->where('shop_id_fk', $shopId)
+            ->orderBy('service_name')
+            ->get()
+            ->map(fn ($row) => [
+                'id'          => (string) $row->service_type_id,
+                'service_name' => $row->service_name,
+                'description' => $row->description,
+                'labor_cost'  => (float) $row->labor_cost,
+            ]);
 
         return response()->json(['data' => $types]);
     }

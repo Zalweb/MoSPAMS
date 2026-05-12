@@ -16,6 +16,8 @@ const fadeUp = (delay = 0) => ({
 export default function BookService() {
   const navigate = useNavigate();
   const [serviceTypes, setServiceTypes] = useState<string[]>([]);
+  const [loadingTypes, setLoadingTypes] = useState(true);
+  const [typesError, setTypesError] = useState('');
   const [motorcycleModel, setMotorcycleModel] = useState('');
   const [serviceType, setServiceType] = useState('');
   const [notes, setNotes] = useState('');
@@ -23,10 +25,21 @@ export default function BookService() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+
   useEffect(() => {
+    setLoadingTypes(true);
+    setTypesError('');
     apiGet<{ data: Array<{ name?: string; service_name?: string }> }>('/api/customer/service-types')
-      .then(r => setServiceTypes(r.data.map(s => s.name || s.service_name || '').filter(Boolean)))
-      .catch(() => setServiceTypes([]));
+      .then(r => {
+        const types = r.data.map(s => s.name || s.service_name || '').filter(Boolean);
+        setServiceTypes(types);
+      })
+      .catch((err: unknown) => {
+        const msg = err instanceof Error ? err.message : 'Failed to load service types';
+        setTypesError(msg);
+        setServiceTypes([]);
+      })
+      .finally(() => setLoadingTypes(false));
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -138,9 +151,17 @@ export default function BookService() {
                       exit={{ opacity: 0, y: -10, scale: 0.95 }}
                       className="absolute left-0 right-0 top-full mt-2 bg-card dark:bg-zinc-900/90 backdrop-blur-xl rounded-2xl border border-border shadow-2xl z-[70] overflow-hidden p-1.5"
                     >
-                      {serviceTypes.length === 0 ? (
+                      {loadingTypes ? (
                         <div className="p-4 text-center text-xs text-muted-foreground italic">
-                          No service types available
+                          Loading...
+                        </div>
+                      ) : typesError ? (
+                        <div className="p-4 text-center text-xs text-red-400">
+                          {typesError}
+                        </div>
+                      ) : serviceTypes.length === 0 ? (
+                        <div className="p-4 text-center text-xs text-muted-foreground italic">
+                          No service types available. Ask the shop owner to add service types.
                         </div>
                       ) : (
                         <div className="max-h-[240px] overflow-y-auto custom-scrollbar">
