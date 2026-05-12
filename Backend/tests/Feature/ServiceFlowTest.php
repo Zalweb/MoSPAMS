@@ -249,7 +249,7 @@ class ServiceFlowTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        $jobId = $this->createJob($customerUserId);
+        $jobId = $this->createJobInStatus('booked_confirmed', $customerUserId);
 
         DB::table('service_job_mechanics')->insert([
             'job_id_fk' => $jobId,
@@ -260,14 +260,14 @@ class ServiceFlowTest extends TestCase
 
         $this->withToken($this->mechanicToken)
             ->patchJson("http://default.mospams.local/api/mechanic/jobs/{$jobId}/status", [
-                'status' => 'In Progress',
+                'action' => 'start',
             ])
             ->assertOk();
 
         $this->assertDatabaseHas('notifications', [
             'user_id_fk' => $customerUserId,
-            'notification_type' => 'job_status_update',
-            'reference_type' => 'service_job',
+            'notification_type' => 'service_started',
+            'reference_type' => 'service_jobs',
             'reference_id' => $jobId,
         ]);
     }
@@ -333,36 +333,21 @@ class ServiceFlowTest extends TestCase
 
     // --- startService ---
 
-    public function test_start_service_transitions_to_in_progress(): void
+    public function test_start_service_transitions_to_booked_confirmed(): void
     {
         $jobId = $this->createJob();
 
         $response = $this->withToken($this->token)
-            ->postJson("http://default.mospams.local/api/services/{$jobId}/start", [
-                'mechanicIds' => [(string) $this->mechanicId],
-            ]);
+            ->postJson("http://default.mospams.local/api/services/{$jobId}/start");
 
         $response->assertOk()
-            ->assertJsonPath('data.status', 'Ongoing');
-
-        $this->assertDatabaseHas('service_job_mechanics', ['job_id_fk' => $jobId, 'mechanic_id_fk' => $this->mechanicId]);
+            ->assertJsonPath('data.status', 'Booked & Confirmed');
 
         $statusCode = DB::table('service_jobs')
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
             ->where('service_jobs.job_id', $jobId)
             ->value('service_job_statuses.status_code');
-        $this->assertEquals('in_progress', $statusCode);
-    }
-
-    public function test_start_service_requires_at_least_one_mechanic(): void
-    {
-        $jobId = $this->createJob();
-
-        $this->withToken($this->token)
-            ->postJson("http://default.mospams.local/api/services/{$jobId}/start", [
-                'mechanicIds' => [],
-            ])
-            ->assertStatus(422);
+        $this->assertEquals('booked_confirmed', $statusCode);
     }
 
     public function test_start_service_rejects_non_pending_job(): void
@@ -373,9 +358,7 @@ class ServiceFlowTest extends TestCase
         ]);
 
         $this->withToken($this->token)
-            ->postJson("http://default.mospams.local/api/services/{$jobId}/start", [
-                'mechanicIds' => [(string) $this->mechanicId],
-            ])
+            ->postJson("http://default.mospams.local/api/services/{$jobId}/start")
             ->assertStatus(422);
     }
 
@@ -398,16 +381,29 @@ class ServiceFlowTest extends TestCase
         $this->assertEquals('cancelled', $statusCode);
     }
 
-    public function test_cancel_service_rejects_non_pending_job(): void
+    public function test_cancel_service_rejects_terminal_states(): void
     {
         $jobId = $this->createJob();
         DB::table('service_jobs')->where('job_id', $jobId)->update([
-            'service_job_status_id_fk' => $this->statusId('service_job_statuses', 'service_job_status_id', 'in_progress'),
+            'service_job_status_id_fk' => $this->statusId('service_job_statuses', 'service_job_status_id', 'completed'),
         ]);
 
         $this->withToken($this->token)
             ->postJson("http://default.mospams.local/api/services/{$jobId}/cancel")
             ->assertStatus(422);
+    }
+
+    public function test_cancel_service_allows_active_states(): void
+    {
+        $jobId = $this->createJob();
+        DB::table('service_jobs')->where('job_id', $jobId)->update([
+            'service_job_status_id_fk' => $this->statusId('service_job_statuses', 'service_job_status_id', 'booked_confirmed'),
+        ]);
+
+        $this->withToken($this->token)
+            ->postJson("http://default.mospams.local/api/services/{$jobId}/cancel")
+            ->assertOk()
+            ->assertJsonPath('data.status', 'Cancelled');
     }
 
     // --- addPartToService ---
@@ -585,6 +581,12 @@ class ServiceFlowTest extends TestCase
             'requested_by_fk' => $this->mechanicUserId,
         ]);
 
+        // Bill service requires work_done status
+        DB::table('service_jobs')->where('job_id', $jobId)->update([
+            'service_job_status_id_fk' => $this->statusId('service_job_statuses', 'service_job_status_id', 'work_done'),
+            'updated_at' => now(),
+        ]);
+
         $response = $this->withToken($this->token)
             ->postJson("http://default.mospams.local/api/services/{$jobId}/bill", [
                 'paymentMethod' => 'Cash',
@@ -645,6 +647,175 @@ class ServiceFlowTest extends TestCase
         $this->assertEquals('pending', $recentStatus);
     }
 
+    // --- Task 7: handshake state machine new tests ---
+
+    public function test_confirm_booking_notifies_customer(): void
+    {
+        $customerUserId = (int) DB::table('users')->insertGetId([
+            'shop_id_fk'        => $this->shopId,
+            'role_id_fk'        => (int) DB::table('roles')->where('role_name', 'Customer')->value('role_id'),
+            'full_name'         => 'Notify Customer',
+            'username'          => 'notify.customer@test.com',
+            'email'             => 'notify.customer@test.com',
+            'password_hash'     => Hash::make('password'),
+            'user_status_id_fk' => (int) DB::table('user_statuses')->where('status_code', 'active')->value('user_status_id'),
+            'created_at'        => now(),
+            'updated_at'        => now(),
+        ]);
+
+        $jobId = $this->createJob($customerUserId);
+
+        DB::table('service_job_mechanics')->insert([
+            'job_id_fk'      => $jobId,
+            'mechanic_id_fk' => $this->mechanicId,
+            'shop_id_fk'     => $this->shopId,
+            'assigned_at'    => now(),
+        ]);
+
+        $this->withToken($this->token)
+            ->postJson("http://default.mospams.local/api/services/{$jobId}/start")
+            ->assertOk();
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id_fk'        => $customerUserId,
+            'notification_type' => 'booking_confirmed',
+            'reference_type'    => 'service_jobs',
+            'reference_id'      => $jobId,
+        ]);
+    }
+
+    public function test_mechanic_start_action_transitions_booked_confirmed_to_in_progress(): void
+    {
+        $jobId = $this->createJobInStatus('booked_confirmed');
+
+        DB::table('service_job_mechanics')->insert([
+            'job_id_fk'      => $jobId,
+            'mechanic_id_fk' => $this->mechanicId,
+            'shop_id_fk'     => $this->shopId,
+            'assigned_at'    => now(),
+        ]);
+
+        $this->withToken($this->mechanicToken)
+            ->patchJson("http://default.mospams.local/api/mechanic/jobs/{$jobId}/status", [
+                'action' => 'start',
+            ])
+            ->assertOk();
+
+        $statusCode = DB::table('service_jobs')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->where('service_jobs.job_id', $jobId)
+            ->value('service_job_statuses.status_code');
+        $this->assertEquals('in_progress', $statusCode);
+    }
+
+    public function test_mechanic_complete_action_transitions_in_progress_to_work_done(): void
+    {
+        $jobId = $this->createJobInStatus('in_progress');
+
+        DB::table('service_job_mechanics')->insert([
+            'job_id_fk'      => $jobId,
+            'mechanic_id_fk' => $this->mechanicId,
+            'shop_id_fk'     => $this->shopId,
+            'assigned_at'    => now(),
+        ]);
+
+        $this->withToken($this->mechanicToken)
+            ->patchJson("http://default.mospams.local/api/mechanic/jobs/{$jobId}/status", [
+                'action'    => 'complete',
+                'laborCost' => 500,
+            ])
+            ->assertOk();
+
+        $statusCode = DB::table('service_jobs')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->where('service_jobs.job_id', $jobId)
+            ->value('service_job_statuses.status_code');
+        $this->assertEquals('work_done', $statusCode);
+
+        $laborCost = (float) DB::table('service_job_items')
+            ->where('job_id_fk', $jobId)
+            ->value('labor_cost');
+        $this->assertEquals(500.00, $laborCost);
+    }
+
+    public function test_mechanic_complete_requires_labor_cost(): void
+    {
+        $jobId = $this->createJobInStatus('in_progress');
+
+        DB::table('service_job_mechanics')->insert([
+            'job_id_fk'      => $jobId,
+            'mechanic_id_fk' => $this->mechanicId,
+            'shop_id_fk'     => $this->shopId,
+            'assigned_at'    => now(),
+        ]);
+
+        $this->withToken($this->mechanicToken)
+            ->patchJson("http://default.mospams.local/api/mechanic/jobs/{$jobId}/status", [
+                'action' => 'complete',
+            ])
+            ->assertStatus(422);
+    }
+
+    public function test_bill_service_rejects_non_work_done_job(): void
+    {
+        $jobId = $this->createJobInStatus('in_progress');
+
+        $this->withToken($this->token)
+            ->postJson("http://default.mospams.local/api/services/{$jobId}/bill", [
+                'paymentMethod' => 'Cash',
+            ])
+            ->assertStatus(422);
+    }
+
+    public function test_work_done_notifies_customer_with_total(): void
+    {
+        $customerUserId = (int) DB::table('users')->insertGetId([
+            'shop_id_fk'        => $this->shopId,
+            'role_id_fk'        => (int) DB::table('roles')->where('role_name', 'Customer')->value('role_id'),
+            'full_name'         => 'Work Done Customer',
+            'username'          => 'workdone.customer@test.com',
+            'email'             => 'workdone.customer@test.com',
+            'password_hash'     => Hash::make('password'),
+            'user_status_id_fk' => (int) DB::table('user_statuses')->where('status_code', 'active')->value('user_status_id'),
+            'created_at'        => now(),
+            'updated_at'        => now(),
+        ]);
+
+        $jobId = $this->createJobInStatus('in_progress', $customerUserId);
+
+        // Add a confirmed part so the total is meaningful
+        DB::table('service_job_parts')->insert([
+            'job_id_fk'  => $jobId,
+            'part_id_fk' => $this->partId,
+            'quantity'   => 1,
+            'unit_price' => 220.00,
+            'subtotal'   => 220.00,
+            'status'     => 'confirmed',
+        ]);
+
+        DB::table('service_job_mechanics')->insert([
+            'job_id_fk'      => $jobId,
+            'mechanic_id_fk' => $this->mechanicId,
+            'shop_id_fk'     => $this->shopId,
+            'assigned_at'    => now(),
+        ]);
+
+        $this->withToken($this->mechanicToken)
+            ->patchJson("http://default.mospams.local/api/mechanic/jobs/{$jobId}/status", [
+                'action'    => 'complete',
+                'laborCost' => 500,
+            ])
+            ->assertOk();
+
+        $notification = DB::table('notifications')
+            ->where('user_id_fk', $customerUserId)
+            ->where('notification_type', 'work_done')
+            ->first();
+
+        $this->assertNotNull($notification);
+        $this->assertStringContainsString('720', $notification->message);
+    }
+
     // --- helpers ---
 
     private function createJob(?int $customerUserId = null): int
@@ -689,6 +860,21 @@ class ServiceFlowTest extends TestCase
         ]);
         DB::table('parts')->where('part_id', $this->partId)->update([
             'stock_quantity' => 9,
+            'updated_at' => now(),
+        ]);
+        // Bill service now requires work_done status
+        DB::table('service_jobs')->where('job_id', $jobId)->update([
+            'service_job_status_id_fk' => $this->statusId('service_job_statuses', 'service_job_status_id', 'work_done'),
+            'updated_at' => now(),
+        ]);
+        return $jobId;
+    }
+
+    private function createJobInStatus(string $statusCode, ?int $customerUserId = null): int
+    {
+        $jobId = $this->createJob($customerUserId);
+        DB::table('service_jobs')->where('job_id', $jobId)->update([
+            'service_job_status_id_fk' => $this->statusId('service_job_statuses', 'service_job_status_id', $statusCode),
             'updated_at' => now(),
         ]);
         return $jobId;
