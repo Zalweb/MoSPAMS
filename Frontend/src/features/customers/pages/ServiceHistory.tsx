@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Wrench, Clock, CheckCircle2, Search, XCircle, Calendar, CreditCard, User, Package, Ban } from 'lucide-react';
+import { Wrench, Clock, CheckCircle2, Search, XCircle, Calendar, CreditCard, User, Package, Ban, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { apiGet, apiMutation } from '@/shared/lib/api';
 import type { CustomerService } from '@/shared/types';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 
 type StatusFilter = 'All' | 'Pending' | 'Ongoing' | 'Completed' | 'Cancelled';
 
@@ -18,6 +19,7 @@ export default function ServiceHistory() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('All');
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -35,11 +37,15 @@ export default function ServiceHistory() {
 
   const handleCancel = async (id: string) => {
     if (!window.confirm('Are you sure you want to cancel this booking?')) return;
+    setCancellingId(id);
     try {
       await apiMutation(`/api/customer/services/${id}`, 'DELETE');
       setServices(prev => prev.filter(s => s.id !== id));
+      toast.success('Booking cancelled.');
     } catch {
-      alert('Failed to cancel the booking. Please try again.');
+      toast.error('Failed to cancel the booking. Please try again.');
+    } finally {
+      setCancellingId(null);
     }
   };
 
@@ -163,10 +169,13 @@ export default function ServiceHistory() {
                       {service.status === 'Pending' && (
                         <button
                           onClick={() => handleCancel(service.id)}
-                          className="mt-3 text-[11px] font-bold text-red-400 hover:text-red-500 transition-colors flex items-center gap-1.5 bg-red-500/5 px-3 py-1.5 rounded-lg border border-red-500/10 hover:border-red-500/20 active:scale-95 ml-auto"
+                          disabled={cancellingId === service.id}
+                          className="mt-3 text-[11px] font-bold text-red-400 hover:text-red-500 transition-colors flex items-center gap-1.5 bg-red-500/5 px-3 py-1.5 rounded-lg border border-red-500/10 hover:border-red-500/20 active:scale-95 ml-auto disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <XCircle className="w-3.5 h-3.5" />
-                          Cancel Request
+                          {cancellingId === service.id
+                            ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            : <XCircle className="w-3.5 h-3.5" />}
+                          {cancellingId === service.id ? 'Cancelling…' : 'Cancel Request'}
                         </button>
                       )}
                     </div>

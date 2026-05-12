@@ -31,6 +31,7 @@ export default function CustomerVehicles() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   const fetchVehicles = async () => {
     try {
@@ -71,7 +72,7 @@ export default function CustomerVehicles() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Remove this vehicle from your garage?')) return;
+    setDeleteConfirmId(null);
     setDeletingId(id);
     try {
       await apiMutation(`/api/customer/vehicles/${id}`, 'DELETE');
@@ -143,7 +144,7 @@ export default function CustomerVehicles() {
                     <Pencil className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => handleDelete(v.id)}
+                    onClick={() => setDeleteConfirmId(v.id)}
                     disabled={deletingId === v.id}
                     className="w-10 h-10 flex items-center justify-center rounded-xl bg-red-500/5 text-red-400 hover:bg-red-500/10 transition-all active:scale-90 disabled:opacity-40"
                     title="Remove Vehicle"
@@ -158,6 +159,46 @@ export default function CustomerVehicles() {
           ))
         )}
       </div>
+
+      {/* Delete confirmation */}
+      <AnimatePresence>
+        {deleteConfirmId && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-background/60 backdrop-blur-md"
+              onClick={() => setDeleteConfirmId(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-sm bg-card dark:bg-zinc-950 rounded-[28px] border border-border/50 shadow-2xl p-8 text-center"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
+                <Trash2 className="w-6 h-6 text-red-400" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground mb-1">Remove Vehicle?</h3>
+              <p className="text-sm text-muted-foreground mb-6">This vehicle will be removed from your garage.</p>
+              <div className="flex gap-3">
+                <Button
+                  variant="ghost"
+                  onClick={() => setDeleteConfirmId(null)}
+                  className="flex-1 h-11 rounded-2xl font-bold text-muted-foreground hover:bg-muted"
+                >
+                  Keep
+                </Button>
+                <Button
+                  onClick={() => handleDelete(deleteConfirmId)}
+                  className="flex-1 h-11 rounded-2xl bg-red-500 hover:bg-red-600 text-white font-bold shadow-lg shadow-red-500/20"
+                >
+                  Remove
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Add / Edit modal */}
       <AnimatePresence>

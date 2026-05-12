@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
-import { Wrench, Clock, CheckCircle2, Calendar, ArrowRight, XCircle, Ban } from 'lucide-react';
+import { Wrench, Clock, CheckCircle2, Calendar, ArrowRight, XCircle, Ban, Loader2 } from 'lucide-react';
 import { apiGet, apiMutation } from '@/shared/lib/api';
 import { useAuth } from '@/features/auth/context/AuthContext';
+import { toast } from 'sonner';
 
 import type { CustomerService } from '@/shared/types';
 
@@ -18,6 +19,7 @@ export default function CustomerDashboard() {
   const navigate = useNavigate();
   const [services, setServices] = useState<CustomerService[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -54,11 +56,15 @@ export default function CustomerDashboard() {
 
   const handleCancel = async (id: string) => {
     if (!window.confirm('Are you sure you want to cancel this booking?')) return;
+    setCancellingId(id);
     try {
       await apiMutation(`/api/customer/services/${id}`, 'DELETE');
       setServices(prev => prev.filter(s => s.id !== id));
+      toast.success('Booking cancelled.');
     } catch {
-      alert('Failed to cancel the booking. Please try again.');
+      toast.error('Failed to cancel the booking. Please try again.');
+    } finally {
+      setCancellingId(null);
     }
   };
 
@@ -231,10 +237,13 @@ export default function CustomerDashboard() {
                     {service.status === 'Pending' && (
                       <button
                         onClick={() => handleCancel(service.id)}
-                        className="text-[10px] font-bold text-red-500/70 hover:text-red-500 uppercase tracking-tighter flex items-center gap-1 transition-colors"
+                        disabled={cancellingId === service.id}
+                        className="text-[10px] font-bold text-red-500/70 hover:text-red-500 uppercase tracking-tighter flex items-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <XCircle className="w-3 h-3" />
-                        Cancel
+                        {cancellingId === service.id
+                          ? <Loader2 className="w-3 h-3 animate-spin" />
+                          : <XCircle className="w-3 h-3" />}
+                        {cancellingId === service.id ? 'Cancelling…' : 'Cancel'}
                       </button>
                     )}
                   </div>

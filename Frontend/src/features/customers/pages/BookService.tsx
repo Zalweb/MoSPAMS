@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { Wrench, CheckCircle2, Plus } from 'lucide-react';
+import { Wrench, CheckCircle2, Plus, Bike, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { apiMutation, apiGet } from '@/shared/lib/api';
+
+interface Vehicle { id: string; make: string; model: string; year?: string }
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 20 },
@@ -18,6 +20,7 @@ export default function BookService() {
   const [serviceTypes, setServiceTypes] = useState<string[]>([]);
   const [loadingTypes, setLoadingTypes] = useState(true);
   const [typesError, setTypesError] = useState('');
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [motorcycleModel, setMotorcycleModel] = useState('');
   const [serviceType, setServiceType] = useState('');
   const [notes, setNotes] = useState('');
@@ -40,6 +43,9 @@ export default function BookService() {
         setServiceTypes([]);
       })
       .finally(() => setLoadingTypes(false));
+    apiGet<{ data: Vehicle[] }>('/api/customer/vehicles')
+      .then(r => setVehicles(r.data))
+      .catch(() => {});
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -99,14 +105,42 @@ export default function BookService() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {vehicles.length > 0 && (
+            <div className="space-y-2">
+              <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1 flex items-center gap-1.5">
+                <Bike className="w-3.5 h-3.5" /> Select from My Garage
+              </Label>
+              <div className="relative">
+                <select
+                  onChange={e => {
+                    const v = vehicles.find(x => x.id === e.target.value);
+                    if (v) setMotorcycleModel(`${v.year ? v.year + ' ' : ''}${v.make} ${v.model}`.trim());
+                  }}
+                  defaultValue=""
+                  className="w-full h-12 pl-5 pr-10 rounded-2xl bg-muted/50 border border-border/50 text-sm text-foreground appearance-none focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary-rgb))]/20 transition-all"
+                >
+                  <option value="">— pick a saved vehicle —</option>
+                  {vehicles.map(v => (
+                    <option key={v.id} value={v.id}>
+                      {v.year ? `${v.year} ` : ''}{v.make} {v.model}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+              </div>
+            </div>
+          )}
+
           <div className="space-y-2">
-            <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Motorcycle Model</Label>
-            <Input 
-              value={motorcycleModel} 
-              onChange={(e) => setMotorcycleModel(e.target.value)} 
-              placeholder="e.g., Honda Click 150i" 
-              className="h-12 rounded-2xl bg-muted/50 border-border/50 focus:ring-2 focus:ring-[rgb(var(--color-primary-rgb))]/20 transition-all" 
-              required 
+            <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1">
+              {vehicles.length > 0 ? 'Or type motorcycle model manually' : 'Motorcycle Model'}
+            </Label>
+            <Input
+              value={motorcycleModel}
+              onChange={(e) => setMotorcycleModel(e.target.value)}
+              placeholder="e.g., Honda Click 150i"
+              className="h-12 rounded-2xl bg-muted/50 border-border/50 focus:ring-2 focus:ring-[rgb(var(--color-primary-rgb))]/20 transition-all"
+              required
             />
           </div>
 

@@ -14,7 +14,7 @@ const fadeUp = (delay = 0) => ({
 });
 
 export default function CustomerSettings() {
-  const [loading, setLoading] = useState(true);
+  const [loadingProfile, setLoadingProfile] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -43,7 +43,7 @@ export default function CustomerSettings() {
       } catch (err) {
         setError('Failed to load profile.');
       } finally {
-        setLoading(false);
+        setLoadingProfile(false);
       }
     };
     void fetchProfile();
@@ -92,14 +92,6 @@ export default function CustomerSettings() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-2xl mx-auto">
       <motion.div {...fadeUp(0)} className="mb-8">
@@ -108,6 +100,12 @@ export default function CustomerSettings() {
       </motion.div>
 
       <motion.div {...fadeUp(0.1)} className="bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-[32px] border border-border/50 shadow-xl p-8 mb-6">
+        {loadingProfile ? (
+          <div className="flex items-center justify-center py-10">
+            <Loader2 className="w-7 h-7 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <>
         {error && (
           <div className="p-4 rounded-2xl bg-red-500/10 text-red-400 text-xs mb-6 border border-red-500/20">
             {error}
@@ -177,6 +175,8 @@ export default function CustomerSettings() {
             </Button>
           </div>
         </form>
+          </>
+        )}
       </motion.div>
 
       {/* Change Password Card */}
