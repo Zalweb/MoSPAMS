@@ -484,12 +484,14 @@ class CustomerController extends Controller
     {
         $user = auth()->user();
 
-        $shopId = app(\App\Support\Tenancy\TenantManager::class)->id()
-            ?? app(\App\Support\Auth\AuthenticatedContext::class)->shopId($request)
-            ?? ($user?->shop_id_fk ? (int) $user->shop_id_fk : null);
+        $tenantManagerId = app(\App\Support\Tenancy\TenantManager::class)->id();
+        $authContextId   = app(\App\Support\Auth\AuthenticatedContext::class)->shopId($request);
+        $userShopId      = $user?->shop_id_fk ? (int) $user->shop_id_fk : null;
+
+        $shopId = $tenantManagerId ?? $authContextId ?? $userShopId;
 
         if (! $shopId) {
-            return response()->json(['data' => []]);
+            return response()->json(['data' => [], '_debug' => ['shopId' => null, 'tenantManagerId' => null, 'authContextId' => null, 'userShopId' => null]]);
         }
 
         $types = DB::table('service_types')
@@ -503,6 +505,19 @@ class CustomerController extends Controller
                 'labor_cost'  => (float) $row->labor_cost,
             ]);
 
-        return response()->json(['data' => $types]);
+        // Debug: also fetch all shop IDs present in service_types to compare
+        $allShopIds = DB::table('service_types')->distinct()->pluck('shop_id_fk');
+
+        return response()->json([
+            'data'   => $types,
+            '_debug' => [
+                'resolvedShopId'      => $shopId,
+                'tenantManagerId'     => $tenantManagerId,
+                'authContextId'       => $authContextId,
+                'userShopId'          => $userShopId,
+                'allShopIdsInTable'   => $allShopIds,
+                'countForShop'        => $types->count(),
+            ],
+        ]);
     }
 }
