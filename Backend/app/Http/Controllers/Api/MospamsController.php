@@ -989,6 +989,17 @@ class MospamsController extends Controller
         $alreadyBilled = DB::table('sales')->where('job_id_fk', $service)->exists();
         abort_if($alreadyBilled, 422, 'This job has already been billed.');
 
+        $jobStatus = DB::table('service_jobs')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->where('service_jobs.job_id', $service)
+            ->value('service_job_statuses.status_code');
+
+        abort_if(
+            $jobStatus !== 'work_done',
+            422,
+            'Only jobs with status Work Done can be billed.'
+        );
+
         $saleId = DB::transaction(function () use ($request, $service, $data) {
             $job = DB::table('service_jobs')->where('job_id', $service)->first();
             $laborItem = DB::table('service_job_items')->where('job_id_fk', $service)->first();
