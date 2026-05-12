@@ -719,7 +719,12 @@ class MospamsController extends Controller
             'Service job not found.'
         );
 
-        DB::transaction(function () use ($request, $service) {
+        $data = $request->validate([
+            'mechanicIds' => ['required', 'array'],
+            'mechanicIds.*' => ['required', 'string'],
+        ]);
+
+        DB::transaction(function () use ($request, $service, $data) {
             $job = DB::table('service_jobs')
                 ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
                 ->where('service_jobs.job_id', $service)
@@ -734,6 +739,17 @@ class MospamsController extends Controller
                 'service_job_status_id_fk' => $this->statusId('service_job_statuses', 'service_job_status_id', 'booked_confirmed'),
                 'updated_at'               => now(),
             ]);
+
+            // Save assigned mechanics
+            DB::table('service_job_mechanics')->where('job_id_fk', $service)->delete();
+            foreach ($data['mechanicIds'] as $mId) {
+                DB::table('service_job_mechanics')->insert([
+                    'job_id_fk'      => $service,
+                    'mechanic_id_fk' => $this->numericId($mId),
+                    'shop_id_fk'     => $this->shopId(),
+                    'assigned_at'    => now(),
+                ]);
+            }
 
             // Collect assigned mechanic names for the customer notification
             $mechanicNames = DB::table('service_job_mechanics')
@@ -2105,7 +2121,7 @@ class MospamsController extends Controller
         return match (strtolower($statusName)) {
             'in_progress', 'ongoing', 'in progress' => 'Ongoing',
             'pending'                                => 'Pending',
-            'booked_confirmed', 'confirmed'          => 'Confirmed',
+            'booked_confirmed', 'confirmed', 'booked & confirmed' => 'Confirmed',
             'work_done'                              => 'Work Done',
             'completed'                              => 'Completed',
             'cancelled'                              => 'Cancelled',
