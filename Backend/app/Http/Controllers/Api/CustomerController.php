@@ -36,6 +36,7 @@ class CustomerController extends Controller
         $partsByJob = DB::table('service_job_parts')
             ->join('parts', 'parts.part_id', '=', 'service_job_parts.part_id_fk')
             ->whereIn('service_job_parts.job_id_fk', $jobIds)
+            ->where('service_job_parts.status', 'confirmed')
             ->select('service_job_parts.job_id_fk', 'parts.part_name', 'service_job_parts.quantity')
             ->get()
             ->groupBy('job_id_fk');

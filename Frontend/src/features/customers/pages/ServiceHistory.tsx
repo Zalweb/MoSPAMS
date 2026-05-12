@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Wrench, Clock, CheckCircle2, Search, XCircle, Calendar, CreditCard, User, Package } from 'lucide-react';
+import { Wrench, Clock, CheckCircle2, Search, XCircle, Calendar, CreditCard, User, Package, Ban } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { apiGet, apiMutation } from '@/shared/lib/api';
 import type { CustomerService } from '@/shared/types';
 import { motion } from 'framer-motion';
 
-type StatusFilter = 'All' | 'Pending' | 'Ongoing' | 'Completed';
+type StatusFilter = 'All' | 'Pending' | 'Ongoing' | 'Completed' | 'Cancelled';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 16 },
@@ -56,12 +56,14 @@ export default function ServiceHistory() {
     Pending: services.filter(s => s.status === 'Pending').length,
     Ongoing: services.filter(s => s.status === 'Ongoing').length,
     Completed: services.filter(s => s.status === 'Completed').length,
+    Cancelled: services.filter(s => s.status === 'Cancelled').length,
   };
 
   const STATUS_STYLES = {
     Pending: { bg: 'bg-amber-500/10', text: 'text-amber-500', border: 'border-amber-500/20', icon: Clock },
     Ongoing: { bg: 'bg-blue-500/10', text: 'text-blue-500', border: 'border-blue-500/20', icon: Wrench },
     Completed: { bg: 'bg-green-500/10', text: 'text-green-500', border: 'border-green-500/20', icon: CheckCircle2 },
+    Cancelled: { bg: 'bg-zinc-500/10', text: 'text-zinc-400', border: 'border-zinc-500/20', icon: Ban },
   };
 
   return (
@@ -72,7 +74,7 @@ export default function ServiceHistory() {
       </motion.div>
 
       <motion.div {...fadeUp(0.1)} className="flex gap-2 mb-6 flex-wrap">
-        {(['All', 'Pending', 'Ongoing', 'Completed'] as StatusFilter[]).map(s => (
+        {(['All', 'Pending', 'Ongoing', 'Completed', 'Cancelled'] as StatusFilter[]).map(s => (
           <button
             key={s}
             onClick={() => setStatusFilter(s)}
@@ -109,7 +111,7 @@ export default function ServiceHistory() {
           </div>
         ) : (
           filtered.map((service, i) => {
-            type StatusKey = 'Pending' | 'Ongoing' | 'Completed';
+            type StatusKey = 'Pending' | 'Ongoing' | 'Completed' | 'Cancelled';
             const statusKey = (service.status as StatusKey) in STATUS_STYLES ? (service.status as StatusKey) : 'Pending';
             const style = STATUS_STYLES[statusKey];
             const StatusIcon = style.icon;

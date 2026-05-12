@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
-import { Wrench, Clock, CheckCircle2, Calendar, ArrowRight, XCircle } from 'lucide-react';
+import { Wrench, Clock, CheckCircle2, Calendar, ArrowRight, XCircle, Ban } from 'lucide-react';
 import { apiGet, apiMutation } from '@/shared/lib/api';
 import { useAuth } from '@/features/auth/context/AuthContext';
 
@@ -72,6 +72,7 @@ export default function CustomerDashboard() {
     Pending: { bg: 'bg-amber-500/10', text: 'text-amber-500', border: 'border-amber-500/20', icon: Clock },
     Ongoing: { bg: 'bg-blue-500/10', text: 'text-blue-500', border: 'border-blue-500/20', icon: Wrench },
     Completed: { bg: 'bg-green-500/10', text: 'text-green-500', border: 'border-green-500/20', icon: CheckCircle2 },
+    Cancelled: { bg: 'bg-zinc-500/10', text: 'text-zinc-400', border: 'border-zinc-500/20', icon: Ban },
   };
 
   return (
@@ -189,7 +190,7 @@ export default function CustomerDashboard() {
             </div>
           ) : (
             recentServices.map((service, i) => {
-              type StatusKey = 'Pending' | 'Ongoing' | 'Completed';
+              type StatusKey = 'Pending' | 'Ongoing' | 'Completed' | 'Cancelled';
               const statusKey = (service.status as StatusKey) in STATUS_STYLES ? (service.status as StatusKey) : 'Pending';
               const style = STATUS_STYLES[statusKey];
               const Icon = style.icon;
