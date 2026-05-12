@@ -87,7 +87,7 @@ No other schema changes. Existing `service_job_parts` rows default to `confirmed
 ### Modified Endpoints
 
 #### `POST /services/{service}/bill` (existing)
-- Add optional `labor_cost` body param — overrides the stored `service_job_items.labor_cost` when provided
+- Add optional `labor_cost` body param — when provided, updates `service_job_items.labor_cost` before calculating the billing total
 - Billing total uses **only** `service_job_parts` rows with `status = 'confirmed'`
 - Sets service status to `completed` (unchanged)
 - Cannot be called twice (unchanged)
