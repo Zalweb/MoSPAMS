@@ -7,7 +7,7 @@ import type { CustomerService } from '@/shared/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 
-type StatusFilter = 'All' | 'Pending' | 'Ongoing' | 'Completed' | 'Cancelled';
+type StatusFilter = 'All' | 'Pending' | 'Confirmed' | 'Ongoing' | 'Work Done' | 'Completed' | 'Cancelled';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 16 },
@@ -42,7 +42,7 @@ export default function ServiceHistory() {
     setCancellingId(id);
     try {
       await apiMutation(`/api/customer/services/${id}`, 'DELETE');
-      setServices(prev => prev.map(s => s.id === id ? { ...s, status: 'Cancelled' } : s));
+      setServices(prev => prev.map(s => s.id === id ? { ...s, status: 'Cancelled', statusCode: 'cancelled' } : s));
       toast.success('Booking cancelled.');
     } catch {
       toast.error('Failed to cancel the booking. Please try again.');
@@ -62,14 +62,18 @@ export default function ServiceHistory() {
   const statusCounts = {
     All: services.length,
     Pending: services.filter(s => s.status === 'Pending').length,
+    Confirmed: services.filter(s => s.status === 'Confirmed').length,
     Ongoing: services.filter(s => s.status === 'Ongoing').length,
+    'Work Done': services.filter(s => s.status === 'Work Done').length,
     Completed: services.filter(s => s.status === 'Completed').length,
     Cancelled: services.filter(s => s.status === 'Cancelled').length,
   };
 
   const STATUS_STYLES = {
     Pending: { bg: 'bg-amber-500/10', text: 'text-amber-500', border: 'border-amber-500/20', icon: Clock },
+    Confirmed: { bg: 'bg-violet-500/10', text: 'text-violet-400', border: 'border-violet-500/20', icon: CheckCircle2 },
     Ongoing: { bg: 'bg-blue-500/10', text: 'text-blue-500', border: 'border-blue-500/20', icon: Wrench },
+    'Work Done': { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20', icon: CheckCircle2 },
     Completed: { bg: 'bg-green-500/10', text: 'text-green-500', border: 'border-green-500/20', icon: CheckCircle2 },
     Cancelled: { bg: 'bg-zinc-500/10', text: 'text-zinc-400', border: 'border-zinc-500/20', icon: Ban },
   };
@@ -82,7 +86,7 @@ export default function ServiceHistory() {
       </motion.div>
 
       <motion.div {...fadeUp(0.1)} className="flex gap-2 mb-6 flex-wrap">
-        {(['All', 'Pending', 'Ongoing', 'Completed', 'Cancelled'] as StatusFilter[]).map(s => (
+        {(['All', 'Pending', 'Confirmed', 'Ongoing', 'Work Done', 'Completed', 'Cancelled'] as StatusFilter[]).map(s => (
           <button
             key={s}
             onClick={() => setStatusFilter(s)}
@@ -119,7 +123,7 @@ export default function ServiceHistory() {
           </div>
         ) : (
           filtered.map((service, i) => {
-            type StatusKey = 'Pending' | 'Ongoing' | 'Completed' | 'Cancelled';
+            type StatusKey = 'Pending' | 'Confirmed' | 'Ongoing' | 'Work Done' | 'Completed' | 'Cancelled';
             const statusKey = (service.status as StatusKey) in STATUS_STYLES ? (service.status as StatusKey) : 'Pending';
             const style = STATUS_STYLES[statusKey];
             const StatusIcon = style.icon;
@@ -157,6 +161,13 @@ export default function ServiceHistory() {
                           <p className="text-xs italic text-muted-foreground leading-relaxed">"{service.notes}"</p>
                         </div>
                       )}
+                      {service.statusCode === 'work_done' && service.totalBill && (
+                        <div className="mt-3 p-3 rounded-xl bg-green-500/10 border border-green-500/20">
+                          <p className="text-xs text-green-400 font-semibold">Service Complete — Ready for Payment</p>
+                          <p className="text-sm text-foreground font-bold mt-1">Total: ₱{service.totalBill.toLocaleString()}</p>
+                          <p className="text-xs text-muted-foreground">Please proceed to the counter for payment.</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-3 shrink-0">
@@ -168,7 +179,7 @@ export default function ServiceHistory() {
                         <Calendar className="w-3 h-3" />
                         {new Date(service.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </p>
-                      {service.status === 'Pending' && (
+                      {service.statusCode === 'pending' && (
                         <button
                           onClick={() => setConfirmCancelId(service.id)}
                           disabled={cancellingId === service.id}
