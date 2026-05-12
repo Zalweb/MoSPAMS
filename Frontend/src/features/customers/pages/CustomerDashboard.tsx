@@ -69,9 +69,9 @@ export default function CustomerDashboard() {
   const recentServices = services.slice(0, 3);
 
   const STATUS_STYLES = {
-    Pending: { bg: 'bg-[#FFFBEB]', text: 'text-[#D97706]', icon: Clock },
-    Ongoing: { bg: 'bg-[#EFF6FF]', text: 'text-[#2563EB]', icon: Wrench },
-    Completed: { bg: 'bg-[#ECFDF5]', text: 'text-[#059669]', icon: CheckCircle2 },
+    Pending: { bg: 'bg-amber-500/10', text: 'text-amber-500', border: 'border-amber-500/20', icon: Clock },
+    Ongoing: { bg: 'bg-blue-500/10', text: 'text-blue-500', border: 'border-blue-500/20', icon: Wrench },
+    Completed: { bg: 'bg-green-500/10', text: 'text-green-500', border: 'border-green-500/20', icon: CheckCircle2 },
   };
 
   return (
@@ -203,8 +203,8 @@ export default function CustomerDashboard() {
                   className="flex items-center justify-between px-8 py-5 hover:bg-muted/30 transition-colors group"
                 >
                   <div className="flex items-center gap-5 min-w-0 flex-1">
-                    <div className={`w-12 h-12 rounded-2xl ${style.bg.replace('[#FFFBEB]', 'amber-500/10').replace('[#EFF6FF]', 'blue-500/10').replace('[#ECFDF5]', 'green-500/10')} flex items-center justify-center shrink-0 border border-border/50 group-hover:scale-105 transition-transform`}>
-                      <Icon className={`w-5 h-5 ${style.text.replace('[#D97706]', 'amber-500').replace('[#2563EB]', 'blue-500').replace('[#059669]', 'green-500')}`} strokeWidth={2} />
+                    <div className={`w-12 h-12 rounded-2xl ${style.bg} ${style.border} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}>
+                      <Icon className={`w-5 h-5 ${style.text}`} strokeWidth={2} />
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-bold text-foreground truncate group-hover:text-[rgb(var(--color-primary-rgb))] transition-colors">
@@ -224,7 +224,7 @@ export default function CustomerDashboard() {
                   </div>
                   
                   <div className="text-right flex flex-col items-end gap-2">
-                    <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest ${style.bg.replace('[#FFFBEB]', 'amber-500/10').replace('[#EFF6FF]', 'blue-500/10').replace('[#ECFDF5]', 'green-500/10')} ${style.text.replace('[#D97706]', 'amber-500').replace('[#2563EB]', 'blue-500').replace('[#059669]', 'green-500')} border border-border/50`}>
+                    <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest ${style.bg} ${style.text} border ${style.border}`}>
                       {service.status}
                     </span>
                     {service.status === 'Pending' && (

@@ -89,62 +89,64 @@ export default function CustomerVehicles() {
       {/* Header */}
       <motion.div {...fadeUp(0)} className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-[22px] font-bold text-[#1C1917] tracking-tight">My Garage</h2>
-          <p className="text-[13px] text-[#D6D3D1] mt-0.5">Manage your saved motorcycles</p>
+          <h2 className="text-2xl font-bold text-foreground tracking-tight">My Garage</h2>
+          <p className="text-sm text-muted-foreground mt-1">Manage your saved motorcycles</p>
         </div>
         <Button
           onClick={openAdd}
-          className="flex items-center gap-2 h-9 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-foreground text-[13px] font-medium px-4"
+          className="flex items-center gap-2 h-10 rounded-xl bg-[rgb(var(--color-primary-rgb))] hover:bg-[rgb(var(--color-primary-rgb))]/90 text-white font-semibold px-5 shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20 transition-all"
         >
           <Plus className="w-4 h-4" /> Add Vehicle
         </Button>
       </motion.div>
 
       {/* Vehicle list */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 className="w-8 h-8 text-[#D6D3D1] animate-spin" />
+            <Loader2 className="w-8 h-8 text-muted-foreground animate-spin" />
           </div>
         ) : vehicles.length === 0 ? (
-          <motion.div {...fadeUp(0.1)} className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-[#F5F5F4]">
-            <div className="w-14 h-14 rounded-full bg-[#F5F5F4] flex items-center justify-center mb-4">
-              <Bike className="w-7 h-7 text-[#D6D3D1]" />
+          <motion.div {...fadeUp(0.1)} className="flex flex-col items-center justify-center py-20 bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-[32px] border border-border/50 shadow-xl">
+            <div className="w-20 h-20 rounded-3xl bg-muted/50 flex items-center justify-center mb-6">
+              <Bike className="w-10 h-10 text-muted-foreground/30" />
             </div>
-            <p className="text-[13px] font-semibold text-[#78716C]">No vehicles yet</p>
-            <p className="text-[12px] text-[#A8A29E] mt-1">Add your motorcycle to book services faster.</p>
-            <button onClick={openAdd} className="mt-4 text-[12px] font-medium text-[#1C1917] underline underline-offset-2">
+            <p className="text-base font-semibold text-foreground">No vehicles yet</p>
+            <p className="text-sm text-muted-foreground mt-1">Add your motorcycle to book services faster.</p>
+            <button onClick={openAdd} className="mt-6 text-sm font-bold text-[rgb(var(--color-primary-rgb))] hover:underline underline-offset-4">
               Add your first vehicle
             </button>
           </motion.div>
         ) : (
           vehicles.map((v, i) => (
             <motion.div key={v.id} {...fadeUp(i * 0.06)}>
-              <div className="bg-white rounded-2xl border border-[#F5F5F4] shadow-[0_1px_2px_rgba(0,0,0,0.03)] p-4 flex items-center justify-between gap-4 hover:border-[#E7E5E4] transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#F5F5F4] flex items-center justify-center shrink-0">
-                    <Bike className="w-5 h-5 text-[#78716C]" strokeWidth={1.5} />
+              <div className="bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-border/50 shadow-sm p-5 flex items-center justify-between gap-4 group hover:border-[rgb(var(--color-primary-rgb))]/30 transition-all duration-300">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center shrink-0 border border-border/50 group-hover:scale-105 transition-transform">
+                    <Bike className="w-6 h-6 text-muted-foreground" strokeWidth={1.5} />
                   </div>
                   <div>
-                    <p className="text-[14px] font-semibold text-[#1C1917]">
+                    <p className="text-base font-bold text-foreground group-hover:text-[rgb(var(--color-primary-rgb))] transition-colors">
                       {v.year ? `${v.year} ` : ''}{v.make} {v.model}
                     </p>
                     {v.plate_number && (
-                      <p className="text-[11px] text-[#A8A29E] mt-0.5">Plate: {v.plate_number}</p>
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest mt-1">Plate: {v.plate_number}</p>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => openEdit(v)}
-                    className="w-8 h-8 flex items-center justify-center rounded-lg text-[#A8A29E] hover:text-[#1C1917] hover:bg-[#F5F5F4] transition-colors"
+                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted/50 text-muted-foreground hover:text-foreground hover:bg-muted transition-all active:scale-90"
+                    title="Edit Profile"
                   >
                     <Pencil className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(v.id)}
                     disabled={deletingId === v.id}
-                    className="w-8 h-8 flex items-center justify-center rounded-lg text-[#A8A29E] hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40"
+                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-red-500/5 text-red-400 hover:bg-red-500/10 transition-all active:scale-90 disabled:opacity-40"
+                    title="Remove Vehicle"
                   >
                     {deletingId === v.id
                       ? <Loader2 className="w-4 h-4 animate-spin" />
@@ -163,84 +165,87 @@ export default function CustomerVehicles() {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-background/40 backdrop-blur-sm"
+              className="absolute inset-0 bg-background/60 backdrop-blur-md"
               onClick={closeForm}
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden"
+              className="relative w-full max-w-md bg-card dark:bg-zinc-950 rounded-[32px] border border-border/50 shadow-2xl overflow-hidden"
             >
-              <div className="px-6 py-5 border-b border-[#F5F5F4] flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#F5F5F4] flex items-center justify-center">
-                    <Bike className="w-5 h-5 text-[#78716C]" strokeWidth={1.5} />
+              <div className="px-8 py-6 bg-gradient-to-r from-[rgb(var(--color-primary-rgb))]/10 to-[rgb(var(--color-secondary-rgb))]/10 border-b border-border/50 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center">
+                    <Bike className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
                   </div>
-                  <h3 className="text-[15px] font-bold text-[#1C1917]">
-                    {editingId ? 'Edit Vehicle' : 'Add Vehicle'}
-                  </h3>
+                  <div>
+                    <h3 className="text-lg font-bold text-foreground">
+                      {editingId ? 'Edit Vehicle' : 'Add Vehicle'}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">Garage management</p>
+                  </div>
                 </div>
-                <button onClick={closeForm} className="p-2 text-[#A8A29E] hover:text-[#1C1917] hover:bg-[#F5F5F4] rounded-full transition-colors">
+                <button onClick={closeForm} className="w-10 h-10 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-[11px] font-medium text-[#78716C] mb-1.5 block">Make *</Label>
+              <form onSubmit={handleSubmit} className="p-8 space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Make *</Label>
                     <Input
                       value={form.make}
                       onChange={e => setForm({ ...form, make: e.target.value })}
                       placeholder="e.g. Honda"
-                      className="h-10 rounded-xl border-[#E7E5E4] text-[13px]"
+                      className="h-12 rounded-2xl bg-muted/50 border-border/50 focus:ring-2 focus:ring-[rgb(var(--color-primary-rgb))]/20 transition-all"
                       required
                     />
                   </div>
-                  <div>
-                    <Label className="text-[11px] font-medium text-[#78716C] mb-1.5 block">Model *</Label>
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Model *</Label>
                     <Input
                       value={form.model}
                       onChange={e => setForm({ ...form, model: e.target.value })}
                       placeholder="e.g. Click 150i"
-                      className="h-10 rounded-xl border-[#E7E5E4] text-[13px]"
+                      className="h-12 rounded-2xl bg-muted/50 border-border/50 focus:ring-2 focus:ring-[rgb(var(--color-primary-rgb))]/20 transition-all"
                       required
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-[11px] font-medium text-[#78716C] mb-1.5 block">Year</Label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Year</Label>
                     <Input
                       value={form.year}
                       onChange={e => setForm({ ...form, year: e.target.value })}
                       placeholder="e.g. 2022"
-                      className="h-10 rounded-xl border-[#E7E5E4] text-[13px]"
+                      className="h-12 rounded-2xl bg-muted/50 border-border/50 focus:ring-2 focus:ring-[rgb(var(--color-primary-rgb))]/20 transition-all"
                     />
                   </div>
-                  <div>
-                    <Label className="text-[11px] font-medium text-[#78716C] mb-1.5 block">Plate Number</Label>
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Plate Number</Label>
                     <Input
                       value={form.plate_number}
                       onChange={e => setForm({ ...form, plate_number: e.target.value })}
                       placeholder="e.g. ABC 1234"
-                      className="h-10 rounded-xl border-[#E7E5E4] text-[13px]"
+                      className="h-12 rounded-2xl bg-muted/50 border-border/50 focus:ring-2 focus:ring-[rgb(var(--color-primary-rgb))]/20 transition-all"
                     />
                   </div>
                 </div>
-                <div className="pt-2 flex gap-2">
-                  <Button type="button" onClick={closeForm} variant="outline" className="flex-1 h-10 rounded-xl border-[#E7E5E4] text-[13px]">
-                    Cancel
-                  </Button>
-                  <Button
+                <div className="pt-4 flex gap-3">
+                  <Button 
                     type="submit"
                     disabled={submitting}
-                    className="flex-1 h-10 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-foreground text-[13px] font-medium disabled:opacity-50"
+                    className="flex-1 h-12 rounded-2xl bg-[rgb(var(--color-primary-rgb))] hover:bg-[rgb(var(--color-primary-rgb))]/90 text-white font-bold transition-all active:scale-95 shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20 disabled:opacity-50"
                   >
                     {submitting
-                      ? <Loader2 className="w-4 h-4 animate-spin" />
-                      : <><CheckCircle2 className="w-4 h-4 mr-1.5" />{editingId ? 'Save Changes' : 'Add Vehicle'}</>}
+                      ? <Loader2 className="w-5 h-5 animate-spin" />
+                      : <><CheckCircle2 className="w-5 h-5 mr-2" />{editingId ? 'Save Changes' : 'Confirm Vehicle'}</>}
+                  </Button>
+                  <Button type="button" onClick={closeForm} variant="ghost" className="h-12 rounded-2xl px-6 font-bold text-muted-foreground hover:bg-muted transition-all">
+                    Cancel
                   </Button>
                 </div>
               </form>

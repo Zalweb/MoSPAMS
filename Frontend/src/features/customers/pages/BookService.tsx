@@ -5,6 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { apiMutation, apiGet } from '@/shared/lib/api';
+import { motion } from 'framer-motion';
+
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
+});
 
 export default function BookService() {
   const navigate = useNavigate();
@@ -46,56 +53,96 @@ export default function BookService() {
   if (success) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
-        <div className="w-16 h-16 rounded-full bg-[#ECFDF5] flex items-center justify-center mb-4">
-          <CheckCircle2 className="w-8 h-8 text-[#059669]" strokeWidth={2} />
+        <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mb-4 border border-green-500/20">
+          <CheckCircle2 className="w-8 h-8 text-green-500" strokeWidth={2} />
         </div>
-        <h2 className="text-[22px] font-bold text-[#1C1917] mb-2">Service Booked!</h2>
-        <p className="text-[13px] text-[#A8A29E] mb-6">We'll contact you when your service is scheduled.</p>
-        <Button onClick={() => navigate('/dashboard/customer')} className="h-10 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-foreground text-sm">Back to Dashboard</Button>
+        <h2 className="text-2xl font-bold text-foreground mb-2">Service Booked!</h2>
+        <p className="text-sm text-muted-foreground mb-6">We'll contact you when your service is scheduled.</p>
+        <Button 
+          onClick={() => navigate('/dashboard/customer')} 
+          className="h-10 rounded-xl bg-foreground text-background hover:opacity-90 px-6"
+        >
+          Back to Dashboard
+        </Button>
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="mb-8">
-        <h2 className="text-[22px] font-bold text-[#1C1917] tracking-tight">Book a Service</h2>
-        <p className="text-[13px] text-[#D6D3D1] mt-0.5">Schedule your motorcycle service</p>
-      </div>
+    <div className="max-w-2xl">
+      <motion.div {...fadeUp(0)} className="mb-8">
+        <h2 className="text-2xl font-bold text-foreground tracking-tight">Book a Service</h2>
+        <p className="text-sm text-muted-foreground mt-1">Schedule your motorcycle service</p>
+      </motion.div>
 
-      <div className="bg-white rounded-2xl border border-[#F5F5F4] shadow-[0_1px_2px_rgba(0,0,0,0.03)] p-6 max-w-lg">
+      <motion.div 
+        {...fadeUp(0.1)} 
+        className="bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-[32px] border border-border/50 shadow-xl p-8"
+      >
         {error && (
-          <div className="p-3 rounded-xl bg-red-50/80 text-red-600 text-[12px] mb-4 border border-red-100/50">{error}</div>
+          <div className="p-4 rounded-2xl bg-red-500/10 text-red-400 text-xs mb-6 border border-red-500/20">
+            {error}
+          </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <Label className="text-[11px] font-medium text-[#78716C]">Motorcycle Model</Label>
-            <Input value={motorcycleModel} onChange={(e) => setMotorcycleModel(e.target.value)} placeholder="e.g., Honda Click 150i" className="mt-1.5 h-10 rounded-xl border-[#E7E5E4] text-[13px]" required />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Motorcycle Model</Label>
+            <Input 
+              value={motorcycleModel} 
+              onChange={(e) => setMotorcycleModel(e.target.value)} 
+              placeholder="e.g., Honda Click 150i" 
+              className="h-12 rounded-2xl bg-muted/50 border-border/50 focus:ring-2 focus:ring-[rgb(var(--color-primary-rgb))]/20 transition-all" 
+              required 
+            />
           </div>
 
-          <div>
-            <Label className="text-[11px] font-medium text-[#78716C]">Service Type</Label>
-            <div className="mt-1.5 grid grid-cols-2 gap-2">
+          <div className="space-y-2">
+            <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Service Type</Label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {serviceTypes.map(type => (
-                <button key={type} type="button" onClick={() => setServiceType(type)}
-                  className={`p-3 rounded-xl border text-left transition-all ${serviceType === type ? 'border-[#1C1917] bg-[#1C1917] text-foreground' : 'border-[#E7E5E4] bg-white text-[#78716C] hover:border-[#C4C0BC]'}`}>
-                  <div className="flex items-center gap-2"><Wrench className="w-4 h-4" strokeWidth={1.5} /><span className="text-[12px] font-medium">{type}</span></div>
+                <button 
+                  key={type} 
+                  type="button" 
+                  onClick={() => setServiceType(type)}
+                  className={`p-4 rounded-2xl border transition-all text-left group ${
+                    serviceType === type 
+                      ? 'border-[rgb(var(--color-primary-rgb))] bg-[rgb(var(--color-primary-rgb))]/10 text-[rgb(var(--color-primary-rgb))]' 
+                      : 'border-border/50 bg-muted/30 text-muted-foreground hover:border-border hover:bg-muted/50'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+                      serviceType === type ? 'bg-[rgb(var(--color-primary-rgb))] text-white' : 'bg-muted group-hover:bg-muted/80'
+                    }`}>
+                      <Wrench className="w-4 h-4" strokeWidth={2} />
+                    </div>
+                    <span className="text-sm font-semibold">{type}</span>
+                  </div>
                 </button>
               ))}
             </div>
           </div>
 
-          <div>
-            <Label className="text-[11px] font-medium text-[#78716C]">Notes (optional)</Label>
-            <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Any special requests or concerns..." className="mt-1.5 h-10 rounded-xl border-[#E7E5E4] text-[13px]" />
+          <div className="space-y-2">
+            <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Notes (optional)</Label>
+            <textarea 
+              value={notes} 
+              onChange={(e) => setNotes(e.target.value)} 
+              placeholder="Any special requests or concerns..." 
+              className="w-full p-4 rounded-2xl bg-muted/50 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary-rgb))]/20 transition-all resize-none h-24" 
+            />
           </div>
 
-          <Button type="submit" disabled={submitting} className="w-full h-10 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-foreground text-sm font-medium disabled:opacity-50">
-            {submitting ? 'Booking...' : 'Book Service'}
+          <Button 
+            type="submit" 
+            disabled={submitting} 
+            className="w-full h-12 rounded-2xl bg-[rgb(var(--color-primary-rgb))] hover:bg-[rgb(var(--color-primary-rgb))]/90 text-white font-bold transition-all active:scale-95 shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20 disabled:opacity-50"
+          >
+            {submitting ? 'Booking...' : 'Confirm Booking'}
           </Button>
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 }

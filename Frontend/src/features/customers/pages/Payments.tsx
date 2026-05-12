@@ -3,6 +3,7 @@ import { CreditCard, Calendar, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { apiGet } from '@/shared/lib/api';
 import InvoiceModal from '../components/InvoiceModal';
+import { motion } from 'framer-motion';
 
 interface Payment {
   id: string;
@@ -11,6 +12,12 @@ interface Payment {
   paymentMethod: string;
   createdAt: string;
 }
+
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0 },
+  transition: { delay, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] },
+});
 
 export default function Payments() {
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -44,72 +51,77 @@ export default function Payments() {
   const totalSpent = payments.reduce((sum, p) => sum + p.total, 0);
 
   return (
-    <div>
-      <div className="mb-8">
-        <h2 className="text-[22px] font-bold text-[#1C1917] tracking-tight">Payments</h2>
-        <p className="text-[13px] text-[#D6D3D1] mt-0.5">View your payment history</p>
-      </div>
+    <div className="max-w-4xl mx-auto">
+      <motion.div {...fadeUp(0)} className="mb-8">
+        <h2 className="text-2xl font-bold text-foreground tracking-tight">Payments</h2>
+        <p className="text-sm text-muted-foreground mt-1">View your payment history</p>
+      </motion.div>
 
       {/* Total Spent Card */}
-      <div className="bg-white rounded-2xl border border-[#F5F5F4] shadow-[0_1px_2px_rgba(0,0,0,0.03)] p-5 mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-[10px] bg-[#EFF6FF] flex items-center justify-center">
-            <CreditCard className="w-[18px] h-[18px] text-[#3B82F6]" strokeWidth={2} />
+      <motion.div 
+        {...fadeUp(0.1)} 
+        className="bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-[32px] border border-border/50 shadow-xl p-8 mb-8"
+      >
+        <div className="flex items-center gap-5">
+          <div className="w-16 h-16 rounded-[20px] bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+            <CreditCard className="w-8 h-8 text-blue-500" strokeWidth={2} />
           </div>
           <div>
-            <p className="text-[11px] font-medium text-[#A8A29E]">Total Spent</p>
-            <p className="text-[22px] font-bold text-[#1C1917] tracking-tight leading-none">
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Total Investment</p>
+            <p className="text-4xl font-bold text-foreground tracking-tight mt-1">
               ₱{totalSpent.toLocaleString()}
             </p>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="relative mb-5">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#D6D3D1]" />
+      <motion.div {...fadeUp(0.2)} className="relative mb-6">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
-          placeholder="Search payments…"
+          placeholder="Search payments by method or type…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 h-9 rounded-xl border-[#E7E5E4] bg-white text-[13px] focus:border-[#C4C0BC] focus:ring-0"
+          className="pl-12 h-12 rounded-2xl border-border/50 bg-muted/50 text-sm focus:ring-2 focus:ring-[rgb(var(--color-primary-rgb))]/20 transition-all"
         />
-      </div>
+      </motion.div>
 
-      <div className="space-y-2.5">
+      <div className="space-y-4">
         {loading ? (
-          <div className="text-center py-14 text-[13px] text-[#D6D3D1] bg-white rounded-2xl border border-[#F5F5F4]">
-            Loading...
+          <div className="flex items-center justify-center py-20 bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-[32px] border border-border/50">
+            <div className="w-8 h-8 border-4 border-muted border-t-[rgb(var(--color-primary-rgb))] rounded-full animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-14 text-[13px] text-[#D6D3D1] bg-white rounded-2xl border border-[#F5F5F4]">
-            No payment records found
+          <div className="text-center py-20 bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-[32px] border border-border/50">
+            <CreditCard className="w-12 h-12 text-muted-foreground/20 mx-auto mb-4" />
+            <p className="text-sm font-medium text-muted-foreground">No payment records found</p>
           </div>
         ) : (
-          filtered.map(payment => (
-            <button
+          filtered.map((payment, i) => (
+            <motion.button
               key={payment.id}
+              {...fadeUp(0.2 + (i * 0.05))}
               onClick={() => setSelectedPaymentId(payment.id)}
-              className="w-full text-left bg-white rounded-2xl border border-[#F5F5F4] shadow-[0_1px_2px_rgba(0,0,0,0.03)] p-4 hover:shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:border-[#E7E5E4] transition-all duration-300"
+              className="w-full text-left bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-border/50 shadow-sm p-5 hover:border-[rgb(var(--color-primary-rgb))]/30 hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 group"
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-[10px] bg-[#F5F3FF] flex items-center justify-center">
-                    <CreditCard className="w-[18px] h-[18px] text-[#8B5CF6]" strokeWidth={1.5} />
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20 group-hover:bg-purple-500/20 transition-colors">
+                    <CreditCard className="w-6 h-6 text-purple-500" strokeWidth={1.5} />
                   </div>
                   <div>
-                    <p className="text-[13px] font-semibold text-[#44403C]">{payment.type}</p>
-                    <p className="text-[11px] text-[#A8A29E]">{payment.paymentMethod}</p>
+                    <p className="text-base font-bold text-foreground group-hover:text-[rgb(var(--color-primary-rgb))] transition-colors">{payment.type}</p>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest mt-1">{payment.paymentMethod}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-[13px] font-bold text-[#1C1917]">₱{payment.total.toLocaleString()}</p>
-                  <div className="flex items-center gap-1 text-[10px] text-[#D6D3D1] mt-0.5">
-                    <Calendar className="w-3 h-3" strokeWidth={1.5} />
-                    {new Date(payment.createdAt).toLocaleDateString()}
+                  <p className="text-lg font-bold text-foreground">₱{payment.total.toLocaleString()}</p>
+                  <div className="flex items-center justify-end gap-1.5 text-xs text-muted-foreground mt-1 font-medium">
+                    <Calendar className="w-3.5 h-3.5" strokeWidth={2} />
+                    {new Date(payment.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </div>
                 </div>
               </div>
-            </button>
+            </motion.button>
           ))
         )}
       </div>

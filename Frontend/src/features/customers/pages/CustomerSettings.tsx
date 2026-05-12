@@ -95,7 +95,7 @@ export default function CustomerSettings() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-[#D6D3D1]" />
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -103,75 +103,75 @@ export default function CustomerSettings() {
   return (
     <div className="max-w-2xl mx-auto">
       <motion.div {...fadeUp(0)} className="mb-8">
-        <h2 className="text-[22px] font-bold text-[#1C1917] tracking-tight">Profile Settings</h2>
-        <p className="text-[13px] text-[#D6D3D1] mt-0.5">Manage your account information</p>
+        <h2 className="text-2xl font-bold text-foreground tracking-tight">Profile Settings</h2>
+        <p className="text-sm text-muted-foreground mt-1">Manage your account information</p>
       </motion.div>
 
-      <motion.div {...fadeUp(0.1)} className="bg-white rounded-2xl border border-[#F5F5F4] shadow-[0_1px_2px_rgba(0,0,0,0.03)] p-6">
+      <motion.div {...fadeUp(0.1)} className="bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-[32px] border border-border/50 shadow-xl p-8 mb-6">
         {error && (
-          <div className="p-3 rounded-xl bg-red-50 text-red-600 text-[12px] mb-5 border border-red-100/50">
+          <div className="p-4 rounded-2xl bg-red-500/10 text-red-400 text-xs mb-6 border border-red-500/20">
             {error}
           </div>
         )}
         {success && (
-          <div className="p-3 flex items-center gap-2 rounded-xl bg-green-50 text-green-700 text-[12px] mb-5 border border-green-100/50">
+          <div className="p-4 flex items-center gap-2 rounded-2xl bg-green-500/10 text-green-500 text-xs mb-6 border border-green-500/20">
             <CheckCircle2 className="w-4 h-4" />
             Profile updated successfully
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <Label className="text-[11px] font-medium text-[#78716C] flex items-center gap-1.5 mb-1.5">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1 flex items-center gap-2">
               <User className="w-3.5 h-3.5" /> Full Name
             </Label>
             <Input
               value={formData.full_name}
               onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-              className="h-10 rounded-xl border-[#E7E5E4] text-[13px]"
+              className="h-12 rounded-2xl bg-muted/50 border-border/50 focus:ring-2 focus:ring-[rgb(var(--color-primary-rgb))]/20 transition-all"
               required
             />
           </div>
 
-          <div>
-            <Label className="text-[11px] font-medium text-[#78716C] flex items-center gap-1.5 mb-1.5">
+          <div className="space-y-2">
+            <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1 flex items-center gap-2">
               <Mail className="w-3.5 h-3.5" /> Email Address
             </Label>
             <Input
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="h-10 rounded-xl border-[#E7E5E4] text-[13px]"
+              className="h-12 rounded-2xl bg-muted/50 border-border/50 focus:ring-2 focus:ring-[rgb(var(--color-primary-rgb))]/20 transition-all"
             />
           </div>
 
-          <div>
-            <Label className="text-[11px] font-medium text-[#78716C] flex items-center gap-1.5 mb-1.5">
+          <div className="space-y-2">
+            <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1 flex items-center gap-2">
               <Phone className="w-3.5 h-3.5" /> Phone Number
             </Label>
             <Input
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="h-10 rounded-xl border-[#E7E5E4] text-[13px]"
+              className="h-12 rounded-2xl bg-muted/50 border-border/50 focus:ring-2 focus:ring-[rgb(var(--color-primary-rgb))]/20 transition-all"
             />
           </div>
 
-          <div>
-            <Label className="text-[11px] font-medium text-[#78716C] flex items-center gap-1.5 mb-1.5">
+          <div className="space-y-2">
+            <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1 flex items-center gap-2">
               <MapPin className="w-3.5 h-3.5" /> Address
             </Label>
             <Input
               value={formData.address}
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              className="h-10 rounded-xl border-[#E7E5E4] text-[13px]"
+              className="h-12 rounded-2xl bg-muted/50 border-border/50 focus:ring-2 focus:ring-[rgb(var(--color-primary-rgb))]/20 transition-all"
             />
           </div>
 
-          <div className="pt-2">
+          <div className="pt-4">
             <Button
               type="submit"
               disabled={submitting}
-              className="w-full h-10 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-foreground text-sm font-medium disabled:opacity-50"
+              className="w-full h-12 rounded-2xl bg-[rgb(var(--color-primary-rgb))] hover:bg-[rgb(var(--color-primary-rgb))]/90 text-white font-bold transition-all active:scale-95 shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20 disabled:opacity-50"
             >
               {submitting ? 'Saving...' : 'Save Changes'}
             </Button>
@@ -180,40 +180,42 @@ export default function CustomerSettings() {
       </motion.div>
 
       {/* Change Password Card */}
-      <motion.div {...fadeUp(0.2)} className="bg-white rounded-2xl border border-[#F5F5F4] shadow-[0_1px_2px_rgba(0,0,0,0.03)] p-6 mt-4">
-        <div className="flex items-center gap-2 mb-5">
-          <Lock className="w-4 h-4 text-[#A8A29E]" />
-          <h3 className="text-[14px] font-bold text-[#1C1917]">Change Password</h3>
+      <motion.div {...fadeUp(0.2)} className="bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-[32px] border border-border/50 shadow-xl p-8">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center">
+            <Lock className="w-5 h-5 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-bold text-foreground">Security</h3>
         </div>
-        <form onSubmit={handlePasswordSubmit} className="space-y-4">
-          <div>
-            <Label className="text-[11px] font-medium text-[#78716C] mb-1.5 block">Current Password</Label>
+        <form onSubmit={handlePasswordSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1 block">Current Password</Label>
             <Input
               type="password"
               value={pwForm.current_password}
               onChange={e => setPwForm({ ...pwForm, current_password: e.target.value })}
-              className="h-10 rounded-xl border-[#E7E5E4] text-[13px]"
+              className="h-12 rounded-2xl bg-muted/50 border-border/50 focus:ring-2 focus:ring-[rgb(var(--color-primary-rgb))]/20 transition-all"
               required
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="text-[11px] font-medium text-[#78716C] mb-1.5 block">New Password</Label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1 block">New Password</Label>
               <Input
                 type="password"
                 value={pwForm.new_password}
                 onChange={e => setPwForm({ ...pwForm, new_password: e.target.value })}
-                className="h-10 rounded-xl border-[#E7E5E4] text-[13px]"
+                className="h-12 rounded-2xl bg-muted/50 border-border/50 focus:ring-2 focus:ring-[rgb(var(--color-primary-rgb))]/20 transition-all"
                 required
               />
             </div>
-            <div>
-              <Label className="text-[11px] font-medium text-[#78716C] mb-1.5 block">Confirm New Password</Label>
+            <div className="space-y-2">
+              <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1 block">Confirm Password</Label>
               <Input
                 type="password"
                 value={pwForm.confirm_password}
                 onChange={e => setPwForm({ ...pwForm, confirm_password: e.target.value })}
-                className="h-10 rounded-xl border-[#E7E5E4] text-[13px]"
+                className="h-12 rounded-2xl bg-muted/50 border-border/50 focus:ring-2 focus:ring-[rgb(var(--color-primary-rgb))]/20 transition-all"
                 required
               />
             </div>
@@ -221,9 +223,9 @@ export default function CustomerSettings() {
           <Button
             type="submit"
             disabled={pwSubmitting}
-            className="w-full h-10 rounded-xl bg-[#1C1917] hover:bg-[#292524] text-foreground text-sm font-medium disabled:opacity-50"
+            className="w-full h-12 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold transition-all active:scale-95 disabled:opacity-50"
           >
-            {pwSubmitting ? 'Changing...' : 'Change Password'}
+            {pwSubmitting ? 'Changing...' : 'Update Password'}
           </Button>
         </form>
       </motion.div>
