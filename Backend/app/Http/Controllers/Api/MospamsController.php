@@ -573,7 +573,7 @@ class MospamsController extends Controller
             ->leftJoin('service_job_items', 'service_job_items.job_id_fk', '=', 'service_jobs.job_id')
             ->leftJoin('service_types', 'service_types.service_type_id', '=', 'service_job_items.service_type_id_fk')
             ->where('service_jobs.shop_id_fk', $this->shopId())
-            ->select('service_jobs.*', 'customers.full_name as customer_name', 'service_job_statuses.status_name', 'service_types.service_name', 'service_job_items.labor_cost')
+            ->select('service_jobs.*', 'customers.full_name as customer_name', 'service_job_statuses.status_name', 'service_job_statuses.status_code', 'service_types.service_name', 'service_job_items.labor_cost')
             ->orderByDesc('service_jobs.created_at');
 
         if ($status = request()->query('status')) {
@@ -1962,7 +1962,7 @@ class MospamsController extends Controller
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
             ->leftJoin('service_job_items', 'service_job_items.job_id_fk', '=', 'service_jobs.job_id')
             ->leftJoin('service_types', 'service_types.service_type_id', '=', 'service_job_items.service_type_id_fk')
-            ->select('service_jobs.*', 'customers.full_name as customer_name', 'service_job_statuses.status_name', 'service_types.service_name', 'service_job_items.labor_cost')
+            ->select('service_jobs.*', 'customers.full_name as customer_name', 'service_job_statuses.status_name', 'service_job_statuses.status_code', 'service_types.service_name', 'service_job_items.labor_cost')
             ->where('service_jobs.job_id', $id)
             ->where('service_jobs.shop_id_fk', $this->shopId())
             ->first();
@@ -2071,6 +2071,7 @@ class MospamsController extends Controller
             'serviceType'     => $row->service_name ?? 'General Service',
             'laborCost'       => (float) ($row->labor_cost ?? 0),
             'status'          => $this->mapJobStatus($row->status_name),
+            'statusCode'      => $row->status_code ?? '',
             'partsUsed'    => $partsUsed,
             'partRequests' => $partRequests,
             'mechanics'       => $mechanics,
@@ -2085,6 +2086,8 @@ class MospamsController extends Controller
         return match (strtolower($statusName)) {
             'in_progress', 'ongoing', 'in progress' => 'Ongoing',
             'pending'                                => 'Pending',
+            'booked_confirmed', 'confirmed'          => 'Confirmed',
+            'work_done'                              => 'Work Done',
             'completed'                              => 'Completed',
             'cancelled'                              => 'Cancelled',
             default                                  => $statusName,
