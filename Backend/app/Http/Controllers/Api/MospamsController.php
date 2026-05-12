@@ -713,18 +713,13 @@ class MospamsController extends Controller
 
     public function startService(Request $request, int $service): JsonResponse
     {
-        $data = $request->validate([
-            'mechanicIds'   => ['required', 'array', 'min:1'],
-            'mechanicIds.*' => ['string'],
-        ]);
-
         abort_unless(
             DB::table('service_jobs')->where('job_id', $service)->where('shop_id_fk', $this->shopId())->exists(),
             404,
             'Service job not found.'
         );
 
-        DB::transaction(function () use ($request, $service, $data) {
+        DB::transaction(function () use ($request, $service) {
             $job = DB::table('service_jobs')
                 ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
                 ->where('service_jobs.job_id', $service)
@@ -733,32 +728,44 @@ class MospamsController extends Controller
                 ->first();
 
             abort_if(! $job, 404, 'Service job not found.');
-            abort_if($job->status_code !== 'pending', 422, 'Only pending jobs can be started.');
-
-            DB::table('service_job_mechanics')->where('job_id_fk', $service)->delete();
-
-            $inserted = 0;
-            foreach ($data['mechanicIds'] as $rawId) {
-                $mechId = $this->numericId($rawId);
-                if (DB::table('mechanics')->where('mechanic_id', $mechId)->where('shop_id_fk', $this->shopId())->exists()) {
-                    DB::table('service_job_mechanics')->insertOrIgnore([
-                        'job_id_fk'      => $service,
-                        'mechanic_id_fk' => $mechId,
-                        'shop_id_fk'     => $this->shopId(),
-                        'assigned_at'    => now(),
-                    ]);
-                    $inserted++;
-                }
-            }
-
-            abort_if($inserted === 0, 422, 'No valid mechanics found for this shop.');
+            abort_if($job->status_code !== 'pending', 422, 'Only pending jobs can be confirmed.');
 
             DB::table('service_jobs')->where('job_id', $service)->update([
-                'service_job_status_id_fk' => $this->statusId('service_job_statuses', 'service_job_status_id', 'in_progress'),
+                'service_job_status_id_fk' => $this->statusId('service_job_statuses', 'service_job_status_id', 'booked_confirmed'),
                 'updated_at'               => now(),
             ]);
 
-            $this->log($request, "Started service job #{$service}", 'service_jobs', $service);
+            // Collect assigned mechanic names for the customer notification
+            $mechanicNames = DB::table('service_job_mechanics')
+                ->join('mechanics', 'mechanics.mechanic_id', '=', 'service_job_mechanics.mechanic_id_fk')
+                ->where('service_job_mechanics.job_id_fk', $service)
+                ->pluck('mechanics.full_name')
+                ->toArray();
+
+            // Send notification to the customer's linked user account (if any)
+            $customerUserId = DB::table('service_jobs')
+                ->join('customers', 'customers.customer_id', '=', 'service_jobs.customer_id_fk')
+                ->where('service_jobs.job_id', $service)
+                ->value('customers.user_id_fk');
+
+            if ($customerUserId) {
+                $mechanicList = count($mechanicNames) > 0
+                    ? implode(', ', $mechanicNames)
+                    : 'our mechanics';
+
+                DB::table('notifications')->insert([
+                    'user_id_fk'        => $customerUserId,
+                    'notification_type' => 'booking_confirmed',
+                    'title'             => 'Booking Confirmed',
+                    'message'           => 'Your booking is confirmed! You can head to the shop now. Mechanics available to assist you: ' . $mechanicList . '.',
+                    'reference_type'    => 'service_jobs',
+                    'reference_id'      => $service,
+                    'is_read'           => 0,
+                    'created_at'        => now(),
+                ]);
+            }
+
+            $this->log($request, "Confirmed booking for service job #{$service}", 'service_jobs', $service);
         });
 
         return response()->json(['data' => $this->serviceById($service)]);
