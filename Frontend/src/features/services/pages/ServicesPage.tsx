@@ -137,19 +137,33 @@ export default function Services() {
   };
 
   const onSubmit = form.handleSubmit(async (values) => {
-    const payload = {
-      ...values,
-      partsUsed,
-      mechanicIds: selectedMechanicIds,
-      mechanics: selectedMechanicIds
-        .map(id => availableMechanics.find(m => m.id === id))
-        .filter((m): m is Mechanic => Boolean(m)),
-    };
+    const shapedParts = partsUsed.map(p => ({
+      jobPartId: '',
+      partId: p.partId,
+      quantity: p.quantity,
+      status: 'confirmed' as const,
+    }));
+    const mechanics = selectedMechanicIds
+      .map(id => availableMechanics.find(m => m.id === id))
+      .filter((m): m is Mechanic => Boolean(m));
     if (editing) {
-      const updated = await updateService(editing.id, payload);
+      const updated = await updateService(editing.id, {
+        ...values,
+        partsUsed: shapedParts,
+        mechanicIds: selectedMechanicIds,
+        mechanics,
+      } as Partial<import('@/shared/types').ServiceRecord>);
       updateItem(editing.id, 'id', updated);
     } else {
-      const created = await addService(payload);
+      const created = await addService({
+        ...values,
+        status: 'Pending',
+        partsUsed: shapedParts,
+        partRequests: [],
+        mechanicIds: selectedMechanicIds,
+        mechanics,
+        completedAt: undefined,
+      } as Omit<import('@/shared/types').ServiceRecord, 'id' | 'createdAt'>);
       prependItem(created);
     }
     setModalOpen(false);
