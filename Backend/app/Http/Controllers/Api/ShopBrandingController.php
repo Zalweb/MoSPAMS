@@ -19,18 +19,11 @@ class ShopBrandingController extends Controller
     {
         $shop = $request->attributes->get('shop') ?? $request->attributes->get('tenant_shop');
         
-        // If no shop found (localhost/development), return default branding
         if (!$shop) {
             return response()->json([
-                'data' => [
-                'shopName' => 'MoSPAMS',
-                'shopId' => null,
-                'subdomain' => null,
-                'logoUrl' => null,
-                    'primaryColor' => '#ef4444',
-                    'secondaryColor' => '#f97316',
-                ]
-            ]);
+                'error' => 'Shop not found',
+                'message' => 'No shop is associated with this domain.',
+            ], 404);
         }
         
         return response()->json([

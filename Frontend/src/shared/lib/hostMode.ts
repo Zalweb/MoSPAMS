@@ -5,7 +5,7 @@ const PLATFORM_HOSTS = (import.meta.env.VITE_PLATFORM_ADMIN_HOSTS ?? 'admin.mosp
   .map((host: string) => normalizeHost(host))
   .filter(Boolean);
 
-const PUBLIC_HOSTS = (import.meta.env.VITE_PUBLIC_HOSTS ?? 'mospams.local,mospams.shop')
+const PUBLIC_HOSTS = (import.meta.env.VITE_PUBLIC_HOSTS ?? 'mospams.app,mospams.local,mospams.shop')
   .split(',')
   .map((host: string) => normalizeHost(host))
   .filter(Boolean);
