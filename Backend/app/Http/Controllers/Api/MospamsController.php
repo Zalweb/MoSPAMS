@@ -1803,15 +1803,44 @@ class MospamsController extends Controller
 
     private function serviceResource(object $row): array
     {
-        $parts = DB::table('service_job_parts')
+        $allParts = DB::table('service_job_parts')
             ->join('parts', 'parts.part_id', '=', 'service_job_parts.part_id_fk')
+            ->leftJoin('users', 'users.user_id', '=', 'service_job_parts.requested_by_fk')
             ->where('service_job_parts.job_id_fk', $row->job_id)
-            ->get()
+            ->select(
+                'service_job_parts.job_part_id',
+                'service_job_parts.part_id_fk',
+                'service_job_parts.quantity',
+                'service_job_parts.unit_price',
+                'service_job_parts.status',
+                'service_job_parts.requested_by_fk',
+                'parts.part_name',
+                'users.full_name as requester_name',
+            )
+            ->get();
+
+        $partsUsed = $allParts
+            ->where('status', 'confirmed')
             ->map(fn ($p) => [
+                'jobPartId' => (string) $p->job_part_id,
                 'partId'    => (string) $p->part_id_fk,
                 'name'      => $p->part_name,
                 'quantity'  => (int) $p->quantity,
                 'unitPrice' => (float) $p->unit_price,
+                'status'    => $p->status,
+            ])
+            ->values();
+
+        $partRequests = $allParts
+            ->where('status', 'requested')
+            ->map(fn ($p) => [
+                'jobPartId'   => (string) $p->job_part_id,
+                'partId'      => (string) $p->part_id_fk,
+                'name'        => $p->part_name,
+                'quantity'    => (int) $p->quantity,
+                'unitPrice'   => (float) $p->unit_price,
+                'requestedBy' => $p->requester_name ?? 'Mechanic',
+                'status'      => $p->status,
             ])
             ->values();
 
@@ -1832,7 +1861,8 @@ class MospamsController extends Controller
             'serviceType'     => $row->service_name ?? 'General Service',
             'laborCost'       => (float) ($row->labor_cost ?? 0),
             'status'          => $this->mapJobStatus($row->status_name),
-            'partsUsed'       => $parts,
+            'partsUsed'    => $partsUsed,
+            'partRequests' => $partRequests,
             'mechanics'       => $mechanics,
             'notes'           => $row->notes ?? '',
             'createdAt'       => $this->iso($row->created_at),

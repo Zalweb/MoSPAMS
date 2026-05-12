@@ -306,6 +306,31 @@ class ServiceFlowTest extends TestCase
         ]);
     }
 
+    // --- part metadata ---
+
+    public function test_service_resource_includes_part_metadata(): void
+    {
+        $jobId = $this->createJob();
+
+        // Staff-add a confirmed part directly
+        DB::table('service_job_parts')->insert([
+            'job_id_fk'  => $jobId,
+            'part_id_fk' => $this->partId,
+            'quantity'   => 2,
+            'unit_price' => 220.00,
+            'subtotal'   => 440.00,
+            'status'     => 'confirmed',
+        ]);
+
+        $response = $this->withToken($this->token)
+            ->getJson("http://default.mospams.local/api/services/{$jobId}");
+
+        $response->assertOk()
+            ->assertJsonPath('data.partsUsed.0.status', 'confirmed')
+            ->assertJsonPath('data.partsUsed.0.jobPartId', fn ($v) => is_string($v))
+            ->assertJsonPath('data.partRequests', []);
+    }
+
     // --- helpers ---
 
     private function createJob(?int $customerUserId = null): int
