@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Wrench, Clock, CheckCircle2, Search, XCircle, Calendar, CreditCard, User, Package, Ban, Loader2 } from 'lucide-react';
+import { Wrench, Clock, CheckCircle2, Search, XCircle, Calendar, CreditCard, User, Package, Ban, Loader2, AlertTriangle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { apiGet, apiMutation } from '@/shared/lib/api';
 import type { CustomerService } from '@/shared/types';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 
 type StatusFilter = 'All' | 'Pending' | 'Ongoing' | 'Completed' | 'Cancelled';
@@ -20,6 +21,7 @@ export default function ServiceHistory() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('All');
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -36,7 +38,7 @@ export default function ServiceHistory() {
   }, []);
 
   const handleCancel = async (id: string) => {
-    if (!window.confirm('Are you sure you want to cancel this booking?')) return;
+    setConfirmCancelId(null);
     setCancellingId(id);
     try {
       await apiMutation(`/api/customer/services/${id}`, 'DELETE');
@@ -168,7 +170,7 @@ export default function ServiceHistory() {
                       </p>
                       {service.status === 'Pending' && (
                         <button
-                          onClick={() => handleCancel(service.id)}
+                          onClick={() => setConfirmCancelId(service.id)}
                           disabled={cancellingId === service.id}
                           className="mt-3 text-[11px] font-bold text-red-400 hover:text-red-500 transition-colors flex items-center gap-1.5 bg-red-500/5 px-3 py-1.5 rounded-lg border border-red-500/10 hover:border-red-500/20 active:scale-95 ml-auto disabled:opacity-50 disabled:cursor-not-allowed"
                         >
@@ -186,6 +188,46 @@ export default function ServiceHistory() {
           })
         )}
       </div>
+
+      {/* Cancel confirmation modal */}
+      <AnimatePresence>
+        {confirmCancelId && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-background/60 backdrop-blur-md"
+              onClick={() => setConfirmCancelId(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-sm bg-card dark:bg-zinc-950 rounded-[28px] border border-border/50 shadow-2xl p-8 text-center"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle className="w-6 h-6 text-red-400" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground mb-1">Cancel Booking?</h3>
+              <p className="text-sm text-muted-foreground mb-6">This will cancel your service request. This action cannot be undone.</p>
+              <div className="flex gap-3">
+                <Button
+                  variant="ghost"
+                  onClick={() => setConfirmCancelId(null)}
+                  className="flex-1 h-11 rounded-2xl font-bold text-muted-foreground hover:bg-muted"
+                >
+                  Keep
+                </Button>
+                <Button
+                  onClick={() => handleCancel(confirmCancelId)}
+                  className="flex-1 h-11 rounded-2xl bg-red-500 hover:bg-red-600 text-white font-bold shadow-lg shadow-red-500/20"
+                >
+                  Yes, Cancel
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
