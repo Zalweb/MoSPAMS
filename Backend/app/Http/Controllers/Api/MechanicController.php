@@ -84,8 +84,9 @@ class MechanicController extends Controller
             return response()->json(['message' => 'Mechanic profile not found'], 404);
         }
 
-        $data = $request->validate([
-            'status' => ['required', Rule::in(['Pending', 'In Progress', 'Completed'])],
+        $request->validate([
+            'action'    => 'required|in:start,complete',
+            'laborCost' => 'required_if:action,complete|numeric|min:0',
         ]);
 
         $jobData = $this->assignedJobsQuery((int) $mechanic->mechanic_id)
@@ -93,7 +94,10 @@ class MechanicController extends Controller
             ->select(
                 'service_jobs.*',
                 'customers.user_id_fk as customer_user_id',
-                'customers.full_name as customer_name'
+                'customers.full_name as customer_name',
+                'service_job_statuses.status_code',
+                'service_job_items.job_item_id',
+                'service_job_items.labor_cost'
             )
             ->first();
 
@@ -101,47 +105,120 @@ class MechanicController extends Controller
             return response()->json(['message' => 'Job not found or not assigned to you'], 404);
         }
 
-        $statusCode = strtolower(str_replace(' ', '_', $data['status']));
-        $statusId = DB::table('service_job_statuses')
-            ->where('status_code', $statusCode)
-            ->value('service_job_status_id');
+        $action = $request->action;
 
-        DB::transaction(function () use ($job, $jobData, $statusId, $statusCode, $data, $request) {
-            $patch = [
-                'service_job_status_id_fk' => $statusId,
-                'updated_at' => now(),
-                'completion_date' => $statusCode === 'completed' ? now()->toDateString() : null,
-            ];
-
-            DB::table('service_jobs')
-                ->where('job_id', $job)
-                ->update($patch);
-
-            $this->logActivity(
-                $request->user()->user_id,
-                $jobData->shop_id_fk,
-                'Updated job #' . $job . ' status to ' . $data['status'],
-                'service_jobs',
-                $job,
-                $request->user()->account_id_fk
-            );
-
-            if ($jobData->customer_user_id) {
-                DB::table('notifications')->insert([
-                    'user_id_fk' => $jobData->customer_user_id,
-                    'notification_type' => 'job_status_update',
-                    'title' => 'Service status updated',
-                    'message' => "Your service job for {$jobData->motorcycle_model} is now {$data['status']}.",
-                    'reference_type' => 'service_job',
-                    'reference_id' => $job,
-                    'is_read' => false,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+        if ($action === 'start') {
+            if ($jobData->status_code !== 'booked_confirmed') {
+                return response()->json(['message' => 'Only confirmed jobs can be started.'], 422);
             }
-        });
 
-        return $this->jobDetails($request, $job);
+            $inProgressId = DB::table('service_job_statuses')
+                ->where('status_code', 'in_progress')
+                ->value('service_job_status_id');
+
+            DB::transaction(function () use ($job, $jobData, $inProgressId, $request) {
+                DB::table('service_jobs')
+                    ->where('job_id', $job)
+                    ->update([
+                        'service_job_status_id_fk' => $inProgressId,
+                        'updated_at'               => now(),
+                    ]);
+
+                $this->logActivity(
+                    $request->user()->user_id,
+                    $jobData->shop_id_fk,
+                    'Started job #' . $job,
+                    'service_jobs',
+                    $job,
+                    $request->user()->account_id_fk
+                );
+
+                if ($jobData->customer_user_id) {
+                    DB::table('notifications')->insert([
+                        'user_id_fk'        => $jobData->customer_user_id,
+                        'notification_type' => 'service_started',
+                        'title'             => 'Service Started',
+                        'message'           => 'Your motorcycle service has started! Our mechanic is now working on your bike.',
+                        'reference_type'    => 'service_jobs',
+                        'reference_id'      => $job,
+                        'is_read'           => 0,
+                        'created_at'        => now(),
+                    ]);
+                }
+            });
+
+            return $this->jobDetails($request, $job);
+
+        } elseif ($action === 'complete') {
+            if ($jobData->status_code !== 'in_progress') {
+                return response()->json(['message' => 'Only in-progress jobs can be completed.'], 422);
+            }
+
+            $laborCost = (float) $request->laborCost;
+
+            $workDoneId = DB::table('service_job_statuses')
+                ->where('status_code', 'work_done')
+                ->value('service_job_status_id');
+
+            // Fetch confirmed parts for bill calculation
+            $confirmedParts = DB::table('service_job_parts')
+                ->join('parts', 'parts.part_id', '=', 'service_job_parts.part_id_fk')
+                ->where('service_job_parts.job_id_fk', $job)
+                ->where('service_job_parts.status', 'confirmed')
+                ->select('parts.part_name', 'service_job_parts.quantity', 'service_job_parts.unit_price')
+                ->get();
+
+            $partsCost  = $confirmedParts->sum(fn ($p) => $p->unit_price * $p->quantity);
+            $totalCost  = $laborCost + $partsCost;
+            $partsList  = $confirmedParts->map(fn ($p) => "{$p->part_name} x{$p->quantity}")->implode(', ');
+            $partsDetail = $partsList ? "Parts: {$partsList}. " : '';
+            $message = "Your service is done! Total Bill: ₱" . number_format($totalCost, 2)
+                . ". {$partsDetail}Labor: ₱" . number_format($laborCost, 2)
+                . ". Please proceed to the counter for payment.";
+
+            DB::transaction(function () use ($job, $jobData, $workDoneId, $laborCost, $message, $request) {
+                // Update labor cost on the service_job_items row for this job
+                if ($jobData->job_item_id) {
+                    DB::table('service_job_items')
+                        ->where('job_item_id', $jobData->job_item_id)
+                        ->update(['labor_cost' => $laborCost]);
+                }
+
+                DB::table('service_jobs')
+                    ->where('job_id', $job)
+                    ->update([
+                        'service_job_status_id_fk' => $workDoneId,
+                        'completion_date'           => now()->toDateString(),
+                        'updated_at'                => now(),
+                    ]);
+
+                $this->logActivity(
+                    $request->user()->user_id,
+                    $jobData->shop_id_fk,
+                    'Completed job #' . $job,
+                    'service_jobs',
+                    $job,
+                    $request->user()->account_id_fk
+                );
+
+                if ($jobData->customer_user_id) {
+                    DB::table('notifications')->insert([
+                        'user_id_fk'        => $jobData->customer_user_id,
+                        'notification_type' => 'work_done',
+                        'title'             => 'Service Complete',
+                        'message'           => $message,
+                        'reference_type'    => 'service_jobs',
+                        'reference_id'      => $job,
+                        'is_read'           => 0,
+                        'created_at'        => now(),
+                    ]);
+                }
+            });
+
+            return $this->jobDetails($request, $job);
+        }
+
+        return response()->json(['message' => 'Invalid action.'], 422);
     }
 
     public function addPartToJob(Request $request, int $job): JsonResponse
