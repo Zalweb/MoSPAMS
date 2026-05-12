@@ -29,7 +29,8 @@ export interface ServiceRecord {
   motorcycleModel: string;
   serviceType: string;
   laborCost: number;
-  status: 'Pending' | 'Ongoing' | 'Completed' | 'Cancelled';
+  status: 'Pending' | 'Confirmed' | 'Ongoing' | 'In Progress' | 'Work Done' | 'Completed' | 'Cancelled';
+  statusCode: string;
   partsUsed: { jobPartId: string; partId: string; name?: string; quantity: number; unitPrice?: number; status: string }[];
   partRequests: { jobPartId: string; partId: string; name: string; quantity: number; unitPrice: number; requestedBy: string; status: string }[];
   mechanics: { id: string; name: string }[];
@@ -45,6 +46,8 @@ export interface CustomerService {
   serviceType: string;
   laborCost: number;
   status: string;
+  statusCode: string;
+  totalBill?: number;
   notes: string;
   mechanics: { name: string }[];
   partsUsed: { name: string; quantity: number }[];
