@@ -27,7 +27,7 @@ class CustomerController extends Controller
             ->leftJoin('service_job_items', 'service_job_items.job_id_fk', '=', 'service_jobs.job_id')
             ->leftJoin('service_types', 'service_types.service_type_id', '=', 'service_job_items.service_type_id_fk')
             ->where('service_jobs.customer_id_fk', $customer->customer_id)
-            ->select('service_jobs.*', 'customers.full_name as customer_name', 'service_job_statuses.status_name', 'service_types.service_name', 'service_job_items.labor_cost')
+            ->select('service_jobs.*', 'customers.full_name as customer_name', 'service_job_statuses.status_name', 'service_job_statuses.status_code', 'service_types.service_name', 'service_job_items.labor_cost')
             ->orderByDesc('service_jobs.created_at')
             ->get();
 
@@ -48,13 +48,22 @@ class CustomerController extends Controller
             ->get()
             ->groupBy('job_id_fk');
 
+        $salesByJob = DB::table('sales')
+            ->whereIn('job_id_fk', $jobIds)
+            ->whereNotNull('job_id_fk')
+            ->select('job_id_fk', 'net_amount')
+            ->get()
+            ->keyBy('job_id_fk');
+
         $services = $rows->map(fn ($row) => [
             'id'               => (string) $row->job_id,
             'customerName'     => $row->customer_name,
             'motorcycleModel'  => $row->motorcycle_model ?? '',
             'serviceType'      => $row->service_name ?? 'General Service',
             'laborCost'        => (float) ($row->labor_cost ?? 0),
-            'status'           => match ($row->status_name) { 'In Progress' => 'Ongoing', default => $row->status_name },
+            'status'           => match ($row->status_name) { 'In Progress' => 'Ongoing', 'Booked & Confirmed' => 'Confirmed', default => $row->status_name },
+            'statusCode'       => $row->status_code ?? '',
+            'totalBill'        => isset($salesByJob[$row->job_id]) ? (float) $salesByJob[$row->job_id]->net_amount : null,
             'notes'            => $row->notes ?? '',
             'mechanics'        => collect($mechanicsByJob->get($row->job_id, []))->map(fn ($m) => ['name' => $m->full_name])->values(),
             'partsUsed'        => collect($partsByJob->get($row->job_id, []))->map(fn ($p) => ['name' => $p->part_name, 'quantity' => (int) $p->quantity])->values(),
