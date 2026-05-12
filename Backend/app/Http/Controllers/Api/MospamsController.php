@@ -788,7 +788,8 @@ class MospamsController extends Controller
                 ->first();
 
             abort_if(! $job, 404, 'Service job not found.');
-            abort_if($job->status_code !== 'pending', 422, 'Only pending jobs can be cancelled.');
+            $terminalCodes = ['completed', 'cancelled'];
+            abort_if(in_array($job->status_code, $terminalCodes), 422, 'Cannot cancel a job that is already completed or cancelled.');
 
             DB::table('service_jobs')->where('job_id', $service)->update([
                 'service_job_status_id_fk' => $this->statusId('service_job_statuses', 'service_job_status_id', 'cancelled'),
