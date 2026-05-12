@@ -482,10 +482,7 @@ class CustomerController extends Controller
     }
     public function serviceTypes(Request $request): JsonResponse
     {
-        $user = auth()->user();
-
-        $query = DB::table('service_types')
-            ->where('shop_id_fk', $user->shop_id_fk)
+        $query = $this->tenantTable('service_types')
             ->orderBy('service_name');
 
         $activeStatusId = DB::table('service_type_statuses')
