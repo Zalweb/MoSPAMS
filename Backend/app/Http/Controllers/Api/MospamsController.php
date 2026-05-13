@@ -2464,6 +2464,42 @@ class MospamsController extends Controller
         return (int) preg_replace('/\D+/', '', (string) $id);
     }
 
+    public function lookupBarcode($barcode)
+    {
+        $barcode_record = \App\Models\PartBarcode::where('barcode_value', $barcode)
+            ->where('shop_id_fk', auth()->user()->shop_id_fk)
+            ->with('part')
+            ->first();
+
+        if (!$barcode_record) {
+            return response()->json([
+                'status' => 'not_found',
+                'message' => 'No part found for barcode',
+            ], 404);
+        }
+
+        $part = $barcode_record->part;
+        $allBarcodes = \App\Models\PartBarcode::where('part_id', $part->id)
+            ->where('shop_id_fk', auth()->user()->shop_id_fk)
+            ->select('id', 'barcode_value', 'barcode_type', 'is_primary')
+            ->get();
+
+        return response()->json([
+            'status' => 'found',
+            'part' => [
+                'id' => $part->id,
+                'brand' => $part->brand ?? '',
+                'part_code' => $part->part_code ?? '',
+                'description' => $part->description ?? '',
+                'category' => $part->category?->category_name ?? '',
+                'price' => $part->unit_price ?? 0,
+                'stock_quantity' => $part->stock_quantity ?? 0,
+                'supplier_id' => $part->supplier_id ?? null,
+            ],
+            'barcodes' => $allBarcodes,
+        ]);
+    }
+
     private function iso(mixed $value): ?string
     {
         return $value ? \Illuminate\Support\Carbon::parse($value)->toISOString() : null;
