@@ -338,7 +338,9 @@ class ServiceFlowTest extends TestCase
         $jobId = $this->createJob();
 
         $response = $this->withToken($this->token)
-            ->postJson("http://default.mospams.local/api/services/{$jobId}/start");
+            ->postJson("http://default.mospams.local/api/services/{$jobId}/start", [
+                'mechanicIds' => [(string) $this->mechanicId]
+            ]);
 
         $response->assertOk()
             ->assertJsonPath('data.status', 'Booked & Confirmed');
@@ -358,7 +360,9 @@ class ServiceFlowTest extends TestCase
         ]);
 
         $this->withToken($this->token)
-            ->postJson("http://default.mospams.local/api/services/{$jobId}/start")
+            ->postJson("http://default.mospams.local/api/services/{$jobId}/start", [
+                'mechanicIds' => [(string) $this->mechanicId]
+            ])
             ->assertStatus(422);
     }
 
@@ -673,7 +677,9 @@ class ServiceFlowTest extends TestCase
         ]);
 
         $this->withToken($this->token)
-            ->postJson("http://default.mospams.local/api/services/{$jobId}/start")
+            ->postJson("http://default.mospams.local/api/services/{$jobId}/start", [
+                'mechanicIds' => [(string) $this->mechanicId]
+            ])
             ->assertOk();
 
         $this->assertDatabaseHas('notifications', [
