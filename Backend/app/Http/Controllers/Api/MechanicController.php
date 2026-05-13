@@ -551,13 +551,25 @@ class MechanicController extends Controller
             ')
             ->first();
 
-        // Rating average (queried separately for safety)
-        $avgRating = null;
+        // Rating average + breakdown (queried separately for safety)
+        $avgRating       = null;
+        $ratingBreakdown = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
         if (\Illuminate\Support\Facades\Schema::hasTable('ratings')) {
             $avgRating = DB::table('ratings')
                 ->where('mechanic_id_fk', $mid)
                 ->whereDate('created_at', '>=', $monthStart)
                 ->avg('rating');
+            $ratingRows = DB::table('ratings')
+                ->where('mechanic_id_fk', $mid)
+                ->selectRaw('rating, count(*) as cnt')
+                ->groupBy('rating')
+                ->get();
+            $sum = $total = 0;
+            foreach ($ratingRows as $r) {
+                $ratingBreakdown[(int) $r->rating] = (int) $r->cnt;
+                $sum   += $r->rating * $r->cnt;
+                $total += $r->cnt;
+            }
         }
 
         // 3-month trend
@@ -587,6 +599,7 @@ class MechanicController extends Controller
                 'avg_time_per_job_hours' => $currentMonthStats->avg_duration ? round((float)$currentMonthStats->avg_duration / 3600, 2) : 0,
                 'customer_rating' => !is_null($avgRating) ? round((float) $avgRating, 2) : null,
             ],
+            'rating_breakdown'        => $ratingBreakdown,
             'trend_last_three_months' => $trend,
         ]);
     }

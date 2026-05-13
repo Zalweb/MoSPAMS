@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import {
-  Wrench, CheckCircle2, Zap, DollarSign, Star,
-} from 'lucide-react';
+import { Wrench, CheckCircle2, DollarSign, Star } from 'lucide-react';
 import {
   AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -46,7 +44,7 @@ const fadeUp = (delay = 0) => ({
 
 function PeriodTabs({ value, onChange }: { value: Period; onChange: (p: Period) => void }) {
   return (
-    <div className="flex gap-1 bg-muted/50 dark:bg-zinc-800/60 p-1 rounded-xl w-fit">
+    <div className="flex gap-1 bg-muted/50 dark:bg-zinc-800/60 p-1 rounded-xl w-fit mt-4">
       {PERIODS.map(p => (
         <button
           key={p.key}
@@ -64,12 +62,67 @@ function PeriodTabs({ value, onChange }: { value: Period; onChange: (p: Period) 
   );
 }
 
+function RatingBreakdown({ breakdown, avg }: { breakdown: Record<string, number>; avg: number | null }) {
+  const total = Object.values(breakdown).reduce((s, c) => s + c, 0);
+  return (
+    <div className="bg-card dark:bg-zinc-900/40 border border-border/50 rounded-2xl p-6">
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <p className="font-bold text-foreground">Customer Ratings</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {total} rating{total !== 1 ? 's' : ''} total
+            {avg !== null && ` · ${avg.toFixed(1)} avg`}
+          </p>
+        </div>
+        {avg !== null && (
+          <div className="flex items-center gap-1">
+            {[1, 2, 3, 4, 5].map(s => (
+              <Star
+                key={s}
+                className="w-4 h-4"
+                fill={s <= Math.round(avg) ? '#FBBF24' : 'none'}
+                color={s <= Math.round(avg) ? '#FBBF24' : '#6b7280'}
+                strokeWidth={1.5}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="space-y-2.5">
+        {[5, 4, 3, 2, 1].map(star => {
+          const count = breakdown[star] ?? 0;
+          const pct   = total > 0 ? (count / total) * 100 : 0;
+          return (
+            <div key={star} className="flex items-center gap-3">
+              <div className="flex items-center gap-1 w-10 shrink-0">
+                <span className="text-xs font-bold text-muted-foreground">{star}</span>
+                <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+              </div>
+              <div className="flex-1 h-2 bg-muted dark:bg-zinc-800 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-amber-400 rounded-full transition-all duration-500"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+              <span className="text-xs text-muted-foreground w-6 text-right shrink-0">{count}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function MechanicDashboardPage() {
-  const [data, setData]           = useState<DashboardData | null>(null);
-  const [chartPoints, setChartPoints] = useState<ChartPoint[]>([]);
-  const [period, setPeriod]       = useState<Period>('week');
-  const [loadingStats, setLoadingStats]   = useState(true);
-  const [loadingChart, setLoadingChart]   = useState(true);
+  const [data, setData]             = useState<DashboardData | null>(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  const [laborPeriod, setLaborPeriod] = useState<Period>('week');
+  const [jobsPeriod, setJobsPeriod]   = useState<Period>('week');
+  const [laborPoints, setLaborPoints] = useState<ChartPoint[]>([]);
+  const [jobsPoints, setJobsPoints]   = useState<ChartPoint[]>([]);
+  const [loadingLabor, setLoadingLabor] = useState(true);
+  const [loadingJobs, setLoadingJobs]   = useState(true);
 
   useEffect(() => {
     void (async () => {
@@ -84,19 +137,32 @@ export default function MechanicDashboardPage() {
     })();
   }, []);
 
-  const fetchChart = useCallback(async (p: Period) => {
-    setLoadingChart(true);
+  const fetchLabor = useCallback(async (p: Period) => {
+    setLoadingLabor(true);
     try {
       const res = await apiGet<{ data: ChartPoint[] }>(`/api/mechanic/chart-data?period=${p}`);
-      setChartPoints(res.data);
+      setLaborPoints(res.data);
     } catch {
-      toast.error('Failed to load chart data');
+      toast.error('Failed to load revenue chart');
     } finally {
-      setLoadingChart(false);
+      setLoadingLabor(false);
     }
   }, []);
 
-  useEffect(() => { void fetchChart(period); }, [period, fetchChart]);
+  const fetchJobs = useCallback(async (p: Period) => {
+    setLoadingJobs(true);
+    try {
+      const res = await apiGet<{ data: ChartPoint[] }>(`/api/mechanic/chart-data?period=${p}`);
+      setJobsPoints(res.data);
+    } catch {
+      toast.error('Failed to load jobs chart');
+    } finally {
+      setLoadingJobs(false);
+    }
+  }, []);
+
+  useEffect(() => { void fetchLabor(laborPeriod); }, [laborPeriod, fetchLabor]);
+  useEffect(() => { void fetchJobs(jobsPeriod); },  [jobsPeriod, fetchJobs]);
 
   if (loadingStats) {
     return (
@@ -109,7 +175,6 @@ export default function MechanicDashboardPage() {
   if (!data) return null;
 
   const stats = data.stats;
-  const totalRatings = Object.values(stats.rating_breakdown).reduce((s, c) => s + c, 0);
 
   const statCards = [
     {
@@ -119,14 +184,6 @@ export default function MechanicDashboardPage() {
       gradient: 'from-violet-500/10',
       border: 'border-violet-500/20',
       text: 'text-violet-400',
-    },
-    {
-      label: 'In Progress',
-      value: stats.in_progress,
-      icon: Zap,
-      gradient: 'from-blue-500/10',
-      border: 'border-blue-500/20',
-      text: 'text-blue-400',
     },
     {
       label: 'Done This Month',
@@ -143,6 +200,14 @@ export default function MechanicDashboardPage() {
       gradient: 'from-emerald-500/10',
       border: 'border-emerald-500/20',
       text: 'text-emerald-400',
+    },
+    {
+      label: 'Customer Rating',
+      value: stats.avg_rating !== null ? `${stats.avg_rating.toFixed(1)} ★` : 'N/A',
+      icon: Star,
+      gradient: 'from-amber-500/10',
+      border: 'border-amber-500/20',
+      text: 'text-amber-400',
     },
   ];
 
@@ -173,118 +238,84 @@ export default function MechanicDashboardPage() {
       </motion.div>
 
       {/* Rating Breakdown */}
-      <motion.div {...fadeUp(0.1)} className="bg-card dark:bg-zinc-900/40 border border-border/50 rounded-2xl p-6">
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <p className="font-bold text-foreground">Customer Ratings</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {totalRatings} rating{totalRatings !== 1 ? 's' : ''} total
-              {stats.avg_rating !== null && ` · ${stats.avg_rating.toFixed(1)} avg`}
-            </p>
-          </div>
-          {stats.avg_rating !== null && (
-            <div className="flex items-center gap-1">
-              {[1, 2, 3, 4, 5].map(s => (
-                <Star
-                  key={s}
-                  className="w-4 h-4"
-                  fill={s <= Math.round(stats.avg_rating!) ? '#FBBF24' : 'none'}
-                  color={s <= Math.round(stats.avg_rating!) ? '#FBBF24' : '#6b7280'}
-                  strokeWidth={1.5}
-                />
-              ))}
+      <motion.div {...fadeUp(0.1)}>
+        <RatingBreakdown breakdown={stats.rating_breakdown} avg={stats.avg_rating} />
+      </motion.div>
+
+      {/* Charts — 2 columns, separate period selectors */}
+      <motion.div {...fadeUp(0.15)}>
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">Analytics</p>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+
+          {/* Labor Revenue Chart */}
+          <div className="bg-card dark:bg-zinc-900/40 border border-border/50 rounded-2xl p-6">
+            <p className="font-bold text-foreground">Labor Revenue</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Total labor income from completed jobs</p>
+            <PeriodTabs value={laborPeriod} onChange={setLaborPeriod} />
+            <div className="mt-4">
+              {loadingLabor ? (
+                <div className="h-44 flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={176}>
+                  <AreaChart data={laborPoints} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="laborGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%"  stopColor="#10b981" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                    <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#6b7280' }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 10, fill: '#6b7280' }} axisLine={false} tickLine={false} tickFormatter={v => `₱${v.toLocaleString()}`} width={58} />
+                    <Tooltip
+                      contentStyle={{ background: 'rgba(24,24,27,0.9)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, fontSize: 12 }}
+                      formatter={(v: number) => [`₱${v.toLocaleString()}`, 'Labor']}
+                      labelStyle={{ color: '#a1a1aa' }}
+                    />
+                    <Area type="monotone" dataKey="labor" stroke="#10b981" strokeWidth={2} fill="url(#laborGrad)" dot={false} activeDot={{ r: 4, fill: '#10b981' }} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
             </div>
-          )}
-        </div>
-        <div className="space-y-2.5">
-          {[5, 4, 3, 2, 1].map(star => {
-            const count = stats.rating_breakdown[star] ?? 0;
-            const pct   = totalRatings > 0 ? (count / totalRatings) * 100 : 0;
-            return (
-              <div key={star} className="flex items-center gap-3">
-                <div className="flex items-center gap-1 w-10 shrink-0">
-                  <span className="text-xs font-bold text-muted-foreground">{star}</span>
-                  <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                </div>
-                <div className="flex-1 h-2 bg-muted dark:bg-zinc-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-amber-400 rounded-full transition-all duration-500"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-                <span className="text-xs text-muted-foreground w-6 text-right shrink-0">{count}</span>
-              </div>
-            );
-          })}
-        </div>
-      </motion.div>
-
-      {/* Period selector shared by both charts */}
-      <motion.div {...fadeUp(0.15)} className="flex items-center justify-between">
-        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Analytics</p>
-        <PeriodTabs value={period} onChange={setPeriod} />
-      </motion.div>
-
-      {/* Labor Revenue Chart */}
-      <motion.div {...fadeUp(0.18)} className="bg-card dark:bg-zinc-900/40 border border-border/50 rounded-2xl p-6">
-        <p className="font-bold text-foreground mb-1">Labor Revenue</p>
-        <p className="text-xs text-muted-foreground mb-5">Total labor income from completed jobs</p>
-        {loadingChart ? (
-          <div className="h-48 flex items-center justify-center">
-            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
-        ) : (
-          <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={chartPoints} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="laborGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-              <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#6b7280' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: '#6b7280' }} axisLine={false} tickLine={false} tickFormatter={v => `₱${v.toLocaleString()}`} width={60} />
-              <Tooltip
-                contentStyle={{ background: 'rgba(24,24,27,0.9)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, fontSize: 12 }}
-                formatter={(v: number) => [`₱${v.toLocaleString()}`, 'Labor']}
-                labelStyle={{ color: '#a1a1aa' }}
-              />
-              <Area type="monotone" dataKey="labor" stroke="#10b981" strokeWidth={2} fill="url(#laborGrad)" dot={false} activeDot={{ r: 4, fill: '#10b981' }} />
-            </AreaChart>
-          </ResponsiveContainer>
-        )}
-      </motion.div>
 
-      {/* Jobs Completed Chart */}
-      <motion.div {...fadeUp(0.21)} className="bg-card dark:bg-zinc-900/40 border border-border/50 rounded-2xl p-6">
-        <p className="font-bold text-foreground mb-1">Jobs Completed</p>
-        <p className="text-xs text-muted-foreground mb-5">Number of jobs finished per period</p>
-        {loadingChart ? (
-          <div className="h-48 flex items-center justify-center">
-            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          {/* Jobs Completed Chart */}
+          <div className="bg-card dark:bg-zinc-900/40 border border-border/50 rounded-2xl p-6">
+            <p className="font-bold text-foreground">Jobs Completed</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Number of jobs finished per period</p>
+            <PeriodTabs value={jobsPeriod} onChange={setJobsPeriod} />
+            <div className="mt-4">
+              {loadingJobs ? (
+                <div className="h-44 flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={176}>
+                  <BarChart data={jobsPoints} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="jobsGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%"  stopColor="#6366f1" stopOpacity={0.9} />
+                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0.5} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                    <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#6b7280' }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 10, fill: '#6b7280' }} axisLine={false} tickLine={false} allowDecimals={false} width={28} />
+                    <Tooltip
+                      contentStyle={{ background: 'rgba(24,24,27,0.9)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, fontSize: 12 }}
+                      formatter={(v: number) => [v, 'Jobs']}
+                      labelStyle={{ color: '#a1a1aa' }}
+                    />
+                    <Bar dataKey="jobs" fill="url(#jobsGrad)" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
           </div>
-        ) : (
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={chartPoints} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="jobsGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.9} />
-                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0.5} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-              <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#6b7280' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: '#6b7280' }} axisLine={false} tickLine={false} allowDecimals={false} width={30} />
-              <Tooltip
-                contentStyle={{ background: 'rgba(24,24,27,0.9)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, fontSize: 12 }}
-                formatter={(v: number) => [v, 'Jobs']}
-                labelStyle={{ color: '#a1a1aa' }}
-              />
-              <Bar dataKey="jobs" fill="url(#jobsGrad)" radius={[4, 4, 0, 0]} maxBarSize={40} />
-            </BarChart>
-          </ResponsiveContainer>
-        )}
+
+        </div>
       </motion.div>
     </div>
   );

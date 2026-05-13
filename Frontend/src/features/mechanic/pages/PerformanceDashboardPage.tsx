@@ -9,6 +9,7 @@ interface PerformanceData {
     avg_time_per_job_hours: number;
     customer_rating: number | null;
   };
+  rating_breakdown: Record<string, number>;
   trend_last_three_months: Array<{
     month: string;
     jobs_completed: number;
@@ -20,19 +21,16 @@ export default function PerformanceDashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPerformance = async () => {
+    void (async () => {
       try {
-        setLoading(true);
         const response = await apiGet<PerformanceData>('/api/mechanic/performance');
         setData(response);
-      } catch (error) {
-        console.error('Failed to load performance data', error);
+      } catch {
         toast.error('Failed to load performance data');
       } finally {
         setLoading(false);
       }
-    };
-    void fetchPerformance();
+    })();
   }, []);
 
   if (loading) {
@@ -54,6 +52,8 @@ export default function PerformanceDashboardPage() {
     );
   }
 
+  const breakdown = data.rating_breakdown ?? {};
+  const totalRatings = Object.values(breakdown).reduce((s, c) => s + c, 0);
   const maxJobs = Math.max(...data.trend_last_three_months.map(m => m.jobs_completed), 1);
 
   return (
@@ -102,11 +102,64 @@ export default function PerformanceDashboardPage() {
                   <span className="text-yellow-400 text-2xl">★</span>
                 )}
               </div>
+              <p className="text-xs text-muted-foreground mt-1">this month</p>
             </div>
             <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg shrink-0">
               <Star className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Rating Breakdown */}
+      <div className="border border-border rounded-xl p-6">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">Customer Ratings</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {totalRatings} rating{totalRatings !== 1 ? 's' : ''} all-time
+              {data.current_period.customer_rating !== null && ` · ${data.current_period.customer_rating.toFixed(1)} avg this month`}
+            </p>
+          </div>
+          {totalRatings > 0 && (
+            <div className="flex items-center gap-1">
+              {[1, 2, 3, 4, 5].map(s => {
+                const avg = totalRatings > 0
+                  ? Object.entries(breakdown).reduce((sum, [k, v]) => sum + Number(k) * v, 0) / totalRatings
+                  : 0;
+                return (
+                  <Star
+                    key={s}
+                    className="w-4 h-4"
+                    fill={s <= Math.round(avg) ? '#FBBF24' : 'none'}
+                    color={s <= Math.round(avg) ? '#FBBF24' : '#6b7280'}
+                    strokeWidth={1.5}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
+        <div className="space-y-2.5">
+          {[5, 4, 3, 2, 1].map(star => {
+            const count = breakdown[star] ?? 0;
+            const pct   = totalRatings > 0 ? (count / totalRatings) * 100 : 0;
+            return (
+              <div key={star} className="flex items-center gap-3">
+                <div className="flex items-center gap-1 w-10 shrink-0">
+                  <span className="text-xs font-bold text-muted-foreground">{star}</span>
+                  <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                </div>
+                <div className="flex-1 h-2 bg-muted dark:bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-amber-400 rounded-full transition-all duration-500"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                <span className="text-xs text-muted-foreground w-6 text-right shrink-0">{count}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
