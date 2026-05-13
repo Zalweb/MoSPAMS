@@ -520,4 +520,69 @@ class MechanicController extends Controller
             ]
         ]);
     }
+
+    public function performance(Request $request): JsonResponse
+    {
+        $mechanic = $this->findMechanicProfile($request);
+
+        if (!$mechanic) {
+            return response()->json(['message' => 'Mechanic profile not found'], 404);
+        }
+
+        $now = now();
+        $monthStart = $now->copy()->startOfMonth();
+        $threeMonthsAgo = $now->copy()->subMonths(3);
+
+        // This month stats
+        $thisMonth = DB::table('service_jobs')
+            ->join('service_job_mechanics', 'service_job_mechanics.job_id_fk', '=', 'service_jobs.job_id')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->leftJoin('ratings', 'ratings.service_job_id_fk', '=', 'service_jobs.job_id')
+            ->where('service_job_mechanics.mechanic_id_fk', (int) $mechanic->mechanic_id)
+            ->where('service_job_statuses.status_code', 'work_done')
+            ->whereDate('service_jobs.completion_date', '>=', $monthStart)
+            ->select('service_jobs.*', 'ratings.rating')
+            ->get();
+
+        $thisMonthCount = $thisMonth->count();
+        $thisMonthDuration = $thisMonth->sum(function ($job) {
+            return $job->completion_date && $job->created_at
+                ? \Illuminate\Support\Carbon::parse($job->completion_date)->diffInSeconds(\Illuminate\Support\Carbon::parse($job->created_at)) / 3600
+                : 0;
+        }) / max($thisMonthCount, 1);
+
+        $thisMonthRating = $thisMonth->average(fn($job) => $job->rating);
+
+        // Last 3 months trend
+        $threeMonths = DB::table('service_jobs')
+            ->join('service_job_mechanics', 'service_job_mechanics.job_id_fk', '=', 'service_jobs.job_id')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->where('service_job_mechanics.mechanic_id_fk', (int) $mechanic->mechanic_id)
+            ->where('service_job_statuses.status_code', 'work_done')
+            ->whereDate('service_jobs.completion_date', '>=', $threeMonthsAgo)
+            ->select('service_jobs.*')
+            ->get();
+
+        $trend = [];
+        for ($i = 2; $i >= 0; $i--) {
+            $monthDate = $now->copy()->subMonths($i);
+            $monthStartDate = $monthDate->copy()->startOfMonth();
+            $monthEndDate = $monthDate->copy()->endOfMonth();
+
+            $count = $threeMonths->whereBetween('completion_date', [$monthStartDate, $monthEndDate])->count();
+            $trend[] = [
+                'month' => $monthDate->format('Y-m'),
+                'jobs_completed' => $count,
+            ];
+        }
+
+        return response()->json([
+            'current_period' => [
+                'jobs_completed_this_month' => $thisMonthCount,
+                'avg_time_per_job_hours' => round($thisMonthDuration, 2),
+                'customer_rating' => $thisMonthRating ? round($thisMonthRating, 2) : null,
+            ],
+            'trend_last_three_months' => $trend,
+        ]);
+    }
 }
