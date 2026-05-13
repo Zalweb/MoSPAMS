@@ -193,7 +193,7 @@ export default function ServiceHistory() {
                           {cancellingId === service.id ? 'Cancelling…' : 'Cancel Request'}
                         </button>
                       )}
-                      {service.statusCode === 'work_done' && !service.hasRating && service.mechanics.length > 0 && (
+                      {(['work_done', 'completed'] as string[]).includes(service.statusCode) && !service.hasRating && service.mechanics.length > 0 && (
                         <button
                           onClick={() => setRatingDialog({ jobId: service.id, mechanicName: service.mechanics[0].name, serviceType: service.serviceType })}
                           className="mt-3 text-[11px] font-bold text-yellow-500 hover:text-yellow-400 transition-colors flex items-center gap-1.5 bg-yellow-500/5 px-3 py-1.5 rounded-lg border border-yellow-500/10 hover:border-yellow-500/20 active:scale-95 ml-auto"
@@ -202,7 +202,7 @@ export default function ServiceHistory() {
                           Rate Mechanic
                         </button>
                       )}
-                      {service.statusCode === 'work_done' && service.hasRating && (
+                      {(['work_done', 'completed'] as string[]).includes(service.statusCode) && service.hasRating && (
                         <span className="mt-3 text-[11px] font-semibold text-green-500 flex items-center gap-1.5 ml-auto">
                           <CheckCircle2 className="w-3.5 h-3.5" /> Rated
                         </span>
