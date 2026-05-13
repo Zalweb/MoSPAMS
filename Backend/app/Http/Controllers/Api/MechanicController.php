@@ -599,13 +599,13 @@ class MechanicController extends Controller
             return response()->json(['message' => 'Mechanic profile not found'], 404);
         }
 
-        $mid = (int) $mechanic->mechanic_id;
+        $mid        = (int) $mechanic->mechanic_id;
+        $today      = now()->toDateString();
         $monthStart = now()->startOfMonth()->toDateString();
 
-        $activeStatuses = DB::table('service_job_statuses')
-            ->whereIn('status_code', ['booked_confirmed', 'in_progress'])
-            ->pluck('service_job_status_id')
-            ->all();
+        $todayStatuses = DB::table('service_job_statuses')
+            ->whereIn('status_code', ['pending', 'booked_confirmed', 'in_progress'])
+            ->pluck('service_job_status_id')->all();
 
         $inProgressStatusId = DB::table('service_job_statuses')
             ->where('status_code', 'in_progress')
@@ -613,13 +613,12 @@ class MechanicController extends Controller
 
         $doneStatuses = DB::table('service_job_statuses')
             ->whereIn('status_code', ['work_done', 'completed'])
-            ->pluck('service_job_status_id')
-            ->all();
+            ->pluck('service_job_status_id')->all();
 
-        $activeJobs = DB::table('service_jobs')
+        $todayJobs = DB::table('service_jobs')
             ->join('service_job_mechanics', 'service_job_mechanics.job_id_fk', '=', 'service_jobs.job_id')
             ->where('service_job_mechanics.mechanic_id_fk', $mid)
-            ->whereIn('service_jobs.service_job_status_id_fk', $activeStatuses)
+            ->whereIn('service_jobs.service_job_status_id_fk', $todayStatuses)
             ->count();
 
         $inProgressJobs = DB::table('service_jobs')
@@ -635,60 +634,133 @@ class MechanicController extends Controller
             ->whereDate('service_jobs.completion_date', '>=', $monthStart)
             ->count();
 
-        $pendingParts = DB::table('service_jobs')
+        $todayRevenue = DB::table('service_jobs')
             ->join('service_job_mechanics', 'service_job_mechanics.job_id_fk', '=', 'service_jobs.job_id')
-            ->join('service_job_parts', 'service_job_parts.job_id_fk', '=', 'service_jobs.job_id')
+            ->join('service_job_items', 'service_job_items.job_id_fk', '=', 'service_jobs.job_id')
             ->where('service_job_mechanics.mechanic_id_fk', $mid)
-            ->where('service_job_parts.status', 'requested')
-            ->count();
+            ->whereIn('service_jobs.service_job_status_id_fk', $doneStatuses)
+            ->whereDate('service_jobs.updated_at', $today)
+            ->sum('service_job_items.labor_cost');
 
-        $avgRating = null;
+        $avgRating       = null;
+        $ratingBreakdown = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
         if (\Illuminate\Support\Facades\Schema::hasTable('ratings')) {
-            $avgRating = DB::table('ratings')
+            $ratingRows = DB::table('ratings')
                 ->where('mechanic_id_fk', $mid)
-                ->avg('rating');
+                ->selectRaw('rating, count(*) as cnt')
+                ->groupBy('rating')
+                ->get();
+            $sum = $total = 0;
+            foreach ($ratingRows as $r) {
+                $ratingBreakdown[(int) $r->rating] = (int) $r->cnt;
+                $sum   += $r->rating * $r->cnt;
+                $total += $r->cnt;
+            }
+            $avgRating = $total > 0 ? round($sum / $total, 1) : null;
         }
-
-        // Last 3 recently touched jobs
-        $recentJobs = DB::table('service_jobs')
-            ->join('service_job_mechanics', 'service_job_mechanics.job_id_fk', '=', 'service_jobs.job_id')
-            ->join('customers', 'customers.customer_id', '=', 'service_jobs.customer_id_fk')
-            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
-            ->leftJoin('service_job_items', 'service_job_items.job_id_fk', '=', 'service_jobs.job_id')
-            ->leftJoin('service_types', 'service_types.service_type_id', '=', 'service_job_items.service_type_id_fk')
-            ->where('service_job_mechanics.mechanic_id_fk', $mid)
-            ->select(
-                'service_jobs.job_id',
-                'service_jobs.motorcycle_model',
-                'service_jobs.updated_at',
-                'customers.full_name as customer_name',
-                'service_job_statuses.status_name',
-                'service_job_statuses.status_code',
-                'service_types.service_name'
-            )
-            ->orderByDesc('service_jobs.updated_at')
-            ->limit(3)
-            ->get()
-            ->map(fn ($j) => [
-                'id' => (string) $j->job_id,
-                'customerName' => $j->customer_name,
-                'motorcycleModel' => $j->motorcycle_model ?? '',
-                'serviceType' => $j->service_name ?? 'General Service',
-                'statusCode' => $j->status_code,
-                'statusName' => $j->status_name,
-                'updatedAt' => $this->iso($j->updated_at),
-            ]);
 
         return response()->json([
             'mechanic_name' => $mechanic->full_name,
             'stats' => [
-                'active_jobs' => $activeJobs,
-                'in_progress' => $inProgressJobs,
+                'today_jobs'           => $todayJobs,
+                'in_progress'          => $inProgressJobs,
                 'completed_this_month' => $completedThisMonth,
-                'pending_parts' => $pendingParts,
-                'avg_rating' => !is_null($avgRating) ? round((float) $avgRating, 1) : null,
+                'today_labor_revenue'  => (float) $todayRevenue,
+                'avg_rating'           => $avgRating,
+                'rating_breakdown'     => $ratingBreakdown,
             ],
-            'recent_jobs' => $recentJobs,
         ]);
+    }
+
+    public function chartData(Request $request): JsonResponse
+    {
+        $mechanic = $this->findMechanicProfile($request);
+        if (!$mechanic) {
+            return response()->json(['message' => 'Mechanic profile not found'], 404);
+        }
+
+        $mid    = (int) $mechanic->mechanic_id;
+        $period = $request->query('period', 'week');
+        $now    = now();
+
+        $doneStatuses = DB::table('service_job_statuses')
+            ->whereIn('status_code', ['work_done', 'completed'])
+            ->pluck('service_job_status_id')->all();
+
+        $base = DB::table('service_jobs')
+            ->join('service_job_mechanics', 'service_job_mechanics.job_id_fk', '=', 'service_jobs.job_id')
+            ->leftJoin('service_job_items', 'service_job_items.job_id_fk', '=', 'service_jobs.job_id')
+            ->where('service_job_mechanics.mechanic_id_fk', $mid)
+            ->whereIn('service_jobs.service_job_status_id_fk', $doneStatuses);
+
+        switch ($period) {
+            case 'today':
+                $rows = (clone $base)
+                    ->whereDate('service_jobs.updated_at', $now->toDateString())
+                    ->selectRaw('HOUR(service_jobs.updated_at) as k, SUM(service_job_items.labor_cost) as labor, COUNT(DISTINCT service_jobs.job_id) as jobs')
+                    ->groupByRaw('HOUR(service_jobs.updated_at)')
+                    ->get()->keyBy('k');
+                $points = [];
+                for ($h = 0; $h < 24; $h++) {
+                    $lbl = $h === 0 ? '12am' : ($h < 12 ? "{$h}am" : ($h === 12 ? '12pm' : ($h - 12) . 'pm'));
+                    $points[] = ['label' => $lbl, 'labor' => (float)($rows->get($h)->labor ?? 0), 'jobs' => (int)($rows->get($h)->jobs ?? 0)];
+                }
+                break;
+
+            case 'month':
+                $rows = (clone $base)
+                    ->whereYear('service_jobs.updated_at', $now->year)
+                    ->whereMonth('service_jobs.updated_at', $now->month)
+                    ->selectRaw('DAY(service_jobs.updated_at) as k, SUM(service_job_items.labor_cost) as labor, COUNT(DISTINCT service_jobs.job_id) as jobs')
+                    ->groupByRaw('DAY(service_jobs.updated_at)')
+                    ->get()->keyBy('k');
+                $points = [];
+                for ($d = 1; $d <= $now->daysInMonth; $d++) {
+                    $points[] = ['label' => (string)$d, 'labor' => (float)($rows->get($d)->labor ?? 0), 'jobs' => (int)($rows->get($d)->jobs ?? 0)];
+                }
+                break;
+
+            case 'year':
+                $rows = (clone $base)
+                    ->whereYear('service_jobs.updated_at', $now->year)
+                    ->selectRaw('MONTH(service_jobs.updated_at) as k, SUM(service_job_items.labor_cost) as labor, COUNT(DISTINCT service_jobs.job_id) as jobs')
+                    ->groupByRaw('MONTH(service_jobs.updated_at)')
+                    ->get()->keyBy('k');
+                $months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                $points = [];
+                foreach ($months as $i => $m) {
+                    $points[] = ['label' => $m, 'labor' => (float)($rows->get($i + 1)->labor ?? 0), 'jobs' => (int)($rows->get($i + 1)->jobs ?? 0)];
+                }
+                break;
+
+            case 'all':
+                $rows = (clone $base)
+                    ->selectRaw('DATE_FORMAT(service_jobs.updated_at, "%Y-%m") as k, SUM(service_job_items.labor_cost) as labor, COUNT(DISTINCT service_jobs.job_id) as jobs')
+                    ->groupByRaw('DATE_FORMAT(service_jobs.updated_at, "%Y-%m")')
+                    ->orderByRaw('DATE_FORMAT(service_jobs.updated_at, "%Y-%m")')
+                    ->get();
+                $points = $rows->map(fn ($r) => [
+                    'label' => \Carbon\Carbon::createFromFormat('Y-m', $r->k)->format('M Y'),
+                    'labor' => (float) $r->labor,
+                    'jobs'  => (int) $r->jobs,
+                ])->values()->all();
+                break;
+
+            default: // week
+                $rows = (clone $base)
+                    ->where('service_jobs.updated_at', '>=', $now->copy()->subDays(6)->startOfDay())
+                    ->selectRaw('DATE(service_jobs.updated_at) as k, SUM(service_job_items.labor_cost) as labor, COUNT(DISTINCT service_jobs.job_id) as jobs')
+                    ->groupByRaw('DATE(service_jobs.updated_at)')
+                    ->get()->keyBy('k');
+                $points = [];
+                for ($i = 6; $i >= 0; $i--) {
+                    $date     = $now->copy()->subDays($i)->toDateString();
+                    $dayLabel = $now->copy()->subDays($i)->format('D');
+                    $points[] = ['label' => $dayLabel, 'labor' => (float)($rows->get($date)->labor ?? 0), 'jobs' => (int)($rows->get($date)->jobs ?? 0)];
+                }
+                break;
+        }
+
+        return response()->json(['data' => $points]);
     }
 }

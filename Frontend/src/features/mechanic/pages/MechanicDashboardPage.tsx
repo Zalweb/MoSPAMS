@@ -1,39 +1,42 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Wrench, CheckCircle2, BarChart3, Package, Star,
-  ArrowRight, Clock, Zap
+  Wrench, CheckCircle2, Zap, DollarSign, Star,
 } from 'lucide-react';
+import {
+  AreaChart, Area, BarChart, Bar,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+} from 'recharts';
 import { apiGet } from '@/shared/lib/api';
 import { toast } from 'sonner';
 
 interface DashboardData {
   mechanic_name: string;
   stats: {
-    active_jobs: number;
+    today_jobs: number;
     in_progress: number;
     completed_this_month: number;
-    pending_parts: number;
+    today_labor_revenue: number;
     avg_rating: number | null;
+    rating_breakdown: Record<string, number>;
   };
-  recent_jobs: {
-    id: string;
-    customerName: string;
-    motorcycleModel: string;
-    serviceType: string;
-    statusCode: string;
-    statusName: string;
-    updatedAt: string;
-  }[];
 }
 
-const STATUS_STYLE: Record<string, { bg: string; text: string; border: string }> = {
-  booked_confirmed: { bg: 'bg-violet-500/10', text: 'text-violet-400', border: 'border-violet-500/20' },
-  in_progress:      { bg: 'bg-blue-500/10',   text: 'text-blue-400',   border: 'border-blue-500/20' },
-  work_done:        { bg: 'bg-amber-500/10',  text: 'text-amber-400',  border: 'border-amber-500/20' },
-  completed:        { bg: 'bg-green-500/10',  text: 'text-green-400',  border: 'border-green-500/20' },
-};
+interface ChartPoint {
+  label: string;
+  labor: number;
+  jobs: number;
+}
+
+type Period = 'today' | 'week' | 'month' | 'year' | 'all';
+
+const PERIODS: { key: Period; label: string }[] = [
+  { key: 'today', label: 'Today' },
+  { key: 'week',  label: 'Week' },
+  { key: 'month', label: 'Month' },
+  { key: 'year',  label: 'Year' },
+  { key: 'all',   label: 'All' },
+];
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 16 },
@@ -41,26 +44,61 @@ const fadeUp = (delay = 0) => ({
   transition: { delay, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] },
 });
 
+function PeriodTabs({ value, onChange }: { value: Period; onChange: (p: Period) => void }) {
+  return (
+    <div className="flex gap-1 bg-muted/50 dark:bg-zinc-800/60 p-1 rounded-xl w-fit">
+      {PERIODS.map(p => (
+        <button
+          key={p.key}
+          onClick={() => onChange(p.key)}
+          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            value === p.key
+              ? 'bg-card dark:bg-zinc-700 text-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          {p.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function MechanicDashboardPage() {
-  const navigate = useNavigate();
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData]           = useState<DashboardData | null>(null);
+  const [chartPoints, setChartPoints] = useState<ChartPoint[]>([]);
+  const [period, setPeriod]       = useState<Period>('week');
+  const [loadingStats, setLoadingStats]   = useState(true);
+  const [loadingChart, setLoadingChart]   = useState(true);
 
   useEffect(() => {
-    const load = async () => {
+    void (async () => {
       try {
         const res = await apiGet<DashboardData>('/api/mechanic/dashboard');
         setData(res);
       } catch {
         toast.error('Failed to load dashboard');
       } finally {
-        setLoading(false);
+        setLoadingStats(false);
       }
-    };
-    void load();
+    })();
   }, []);
 
-  if (loading) {
+  const fetchChart = useCallback(async (p: Period) => {
+    setLoadingChart(true);
+    try {
+      const res = await apiGet<{ data: ChartPoint[] }>(`/api/mechanic/chart-data?period=${p}`);
+      setChartPoints(res.data);
+    } catch {
+      toast.error('Failed to load chart data');
+    } finally {
+      setLoadingChart(false);
+    }
+  }, []);
+
+  useEffect(() => { void fetchChart(period); }, [period, fetchChart]);
+
+  if (loadingStats) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -70,54 +108,41 @@ export default function MechanicDashboardPage() {
 
   if (!data) return null;
 
-  const stats = [
+  const stats = data.stats;
+  const totalRatings = Object.values(stats.rating_breakdown).reduce((s, c) => s + c, 0);
+
+  const statCards = [
     {
-      label: 'Active Jobs',
-      value: data.stats.active_jobs,
+      label: "Today's Jobs",
+      value: stats.today_jobs,
       icon: Wrench,
-      color: 'from-violet-500/10 to-transparent border-violet-500/20 text-violet-400',
+      gradient: 'from-violet-500/10',
+      border: 'border-violet-500/20',
+      text: 'text-violet-400',
     },
     {
       label: 'In Progress',
-      value: data.stats.in_progress,
+      value: stats.in_progress,
       icon: Zap,
-      color: 'from-blue-500/10 to-transparent border-blue-500/20 text-blue-400',
+      gradient: 'from-blue-500/10',
+      border: 'border-blue-500/20',
+      text: 'text-blue-400',
     },
     {
       label: 'Done This Month',
-      value: data.stats.completed_this_month,
+      value: stats.completed_this_month,
       icon: CheckCircle2,
-      color: 'from-green-500/10 to-transparent border-green-500/20 text-green-400',
+      gradient: 'from-green-500/10',
+      border: 'border-green-500/20',
+      text: 'text-green-400',
     },
     {
-      label: 'Pending Parts',
-      value: data.stats.pending_parts,
-      icon: Package,
-      color: 'from-amber-500/10 to-transparent border-amber-500/20 text-amber-400',
-    },
-  ];
-
-  const quickActions = [
-    {
-      label: 'Assigned Jobs',
-      description: 'View and manage your current jobs',
-      icon: Wrench,
-      to: '/dashboard/mechanic/jobs',
-      accent: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
-    },
-    {
-      label: 'Job History',
-      description: 'Review your completed work',
-      icon: CheckCircle2,
-      to: '/dashboard/mechanic/history',
-      accent: 'bg-green-500/10 text-green-400 border-green-500/20',
-    },
-    {
-      label: 'Performance',
-      description: 'Track your metrics and ratings',
-      icon: BarChart3,
-      to: '/dashboard/mechanic/performance',
-      accent: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+      label: "Today's Revenue",
+      value: `₱${stats.today_labor_revenue.toLocaleString()}`,
+      icon: DollarSign,
+      gradient: 'from-emerald-500/10',
+      border: 'border-emerald-500/20',
+      text: 'text-emerald-400',
     },
   ];
 
@@ -128,123 +153,139 @@ export default function MechanicDashboardPage() {
         <h2 className="text-2xl font-bold text-foreground tracking-tight">
           Welcome back, {data.mechanic_name.split(' ')[0]}
         </h2>
-        <p className="text-sm text-muted-foreground mt-1">Here's what's happening with your work today.</p>
+        <p className="text-sm text-muted-foreground mt-1">Here's your work overview for today.</p>
       </motion.div>
 
       {/* Stat Cards */}
       <motion.div {...fadeUp(0.05)} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => (
+        {statCards.map(card => (
           <div
-            key={stat.label}
-            className={`bg-gradient-to-br ${stat.color} border rounded-2xl p-5`}
+            key={card.label}
+            className={`bg-gradient-to-br ${card.gradient} to-transparent border ${card.border} rounded-2xl p-5`}
           >
-            <div className="flex items-center justify-between mb-3">
-              <stat.icon className="w-5 h-5" strokeWidth={2} />
-              {stat.label === 'Average Rating' && data.stats.avg_rating && (
-                <div className="flex items-center gap-1">
-                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                </div>
-              )}
+            <div className="mb-3">
+              <card.icon className={`w-5 h-5 ${card.text}`} strokeWidth={2} />
             </div>
-            <p className="text-3xl font-bold text-foreground">{stat.value}</p>
-            <p className="text-xs font-medium text-muted-foreground mt-1">{stat.label}</p>
+            <p className="text-3xl font-bold text-foreground">{card.value}</p>
+            <p className="text-xs font-medium text-muted-foreground mt-1">{card.label}</p>
           </div>
         ))}
       </motion.div>
 
-      {/* Rating Banner (if available) */}
-      {data.stats.avg_rating !== null && (
-        <motion.div
-          {...fadeUp(0.1)}
-          className="flex items-center gap-4 p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20"
-        >
-          <div className="flex items-center gap-1.5">
-            {[1, 2, 3, 4, 5].map((s) => (
-              <Star
-                key={s}
-                className="w-5 h-5"
-                fill={s <= Math.round(data.stats.avg_rating!) ? '#FBBF24' : 'none'}
-                color={s <= Math.round(data.stats.avg_rating!) ? '#FBBF24' : 'currentColor'}
-                strokeWidth={1.5}
-              />
-            ))}
-          </div>
+      {/* Rating Breakdown */}
+      <motion.div {...fadeUp(0.1)} className="bg-card dark:bg-zinc-900/40 border border-border/50 rounded-2xl p-6">
+        <div className="flex items-center justify-between mb-5">
           <div>
-            <p className="text-sm font-bold text-foreground">
-              {data.stats.avg_rating.toFixed(1)} — Your average customer rating
+            <p className="font-bold text-foreground">Customer Ratings</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {totalRatings} rating{totalRatings !== 1 ? 's' : ''} total
+              {stats.avg_rating !== null && ` · ${stats.avg_rating.toFixed(1)} avg`}
             </p>
-            <p className="text-xs text-muted-foreground">Based on all completed jobs</p>
           </div>
-        </motion.div>
-      )}
-
-      {/* Quick Actions */}
-      <motion.div {...fadeUp(0.15)}>
-        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">Quick Access</p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {quickActions.map((action) => (
-            <button
-              key={action.label}
-              onClick={() => navigate(action.to)}
-              className="group text-left p-5 rounded-2xl border border-border/50 bg-card dark:bg-zinc-900/40 hover:border-[rgb(var(--color-primary-rgb))]/30 transition-all duration-300"
-            >
-              <div className={`w-10 h-10 rounded-xl border ${action.accent} flex items-center justify-center mb-4 group-hover:scale-105 transition-transform`}>
-                <action.icon className="w-5 h-5" strokeWidth={1.5} />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-semibold text-foreground text-sm">{action.label}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{action.description}</p>
+          {stats.avg_rating !== null && (
+            <div className="flex items-center gap-1">
+              {[1, 2, 3, 4, 5].map(s => (
+                <Star
+                  key={s}
+                  className="w-4 h-4"
+                  fill={s <= Math.round(stats.avg_rating!) ? '#FBBF24' : 'none'}
+                  color={s <= Math.round(stats.avg_rating!) ? '#FBBF24' : '#6b7280'}
+                  strokeWidth={1.5}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="space-y-2.5">
+          {[5, 4, 3, 2, 1].map(star => {
+            const count = stats.rating_breakdown[star] ?? 0;
+            const pct   = totalRatings > 0 ? (count / totalRatings) * 100 : 0;
+            return (
+              <div key={star} className="flex items-center gap-3">
+                <div className="flex items-center gap-1 w-10 shrink-0">
+                  <span className="text-xs font-bold text-muted-foreground">{star}</span>
+                  <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
                 </div>
-                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                <div className="flex-1 h-2 bg-muted dark:bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-amber-400 rounded-full transition-all duration-500"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                <span className="text-xs text-muted-foreground w-6 text-right shrink-0">{count}</span>
               </div>
-            </button>
-          ))}
+            );
+          })}
         </div>
       </motion.div>
 
-      {/* Recent Jobs */}
-      {data.recent_jobs.length > 0 && (
-        <motion.div {...fadeUp(0.2)}>
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Recent Activity</p>
-            <button
-              onClick={() => navigate('/dashboard/mechanic/jobs')}
-              className="text-xs font-semibold text-[rgb(var(--color-primary-rgb))] hover:opacity-80 transition-opacity flex items-center gap-1"
-            >
-              View all <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+      {/* Period selector shared by both charts */}
+      <motion.div {...fadeUp(0.15)} className="flex items-center justify-between">
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Analytics</p>
+        <PeriodTabs value={period} onChange={setPeriod} />
+      </motion.div>
+
+      {/* Labor Revenue Chart */}
+      <motion.div {...fadeUp(0.18)} className="bg-card dark:bg-zinc-900/40 border border-border/50 rounded-2xl p-6">
+        <p className="font-bold text-foreground mb-1">Labor Revenue</p>
+        <p className="text-xs text-muted-foreground mb-5">Total labor income from completed jobs</p>
+        {loadingChart ? (
+          <div className="h-48 flex items-center justify-center">
+            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
-          <div className="space-y-3">
-            {data.recent_jobs.map((job) => {
-              const style = STATUS_STYLE[job.statusCode] ?? STATUS_STYLE.completed;
-              return (
-                <button
-                  key={job.id}
-                  onClick={() => navigate(`/dashboard/mechanic/jobs/${job.id}`)}
-                  className="w-full text-left flex items-center gap-4 p-4 rounded-2xl border border-border/50 bg-card dark:bg-zinc-900/40 hover:border-[rgb(var(--color-primary-rgb))]/30 transition-all duration-300 group"
-                >
-                  <div className={`w-10 h-10 rounded-xl ${style.bg} border ${style.border} flex items-center justify-center shrink-0`}>
-                    <Clock className={`w-4 h-4 ${style.text}`} strokeWidth={1.5} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{job.customerName}</p>
-                    <p className="text-xs text-muted-foreground truncate">{job.motorcycleModel} — {job.serviceType}</p>
-                  </div>
-                  <div className="shrink-0 text-right">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${style.bg} ${style.text} border ${style.border}`}>
-                      {job.statusName}
-                    </span>
-                    <p className="text-[10px] text-muted-foreground mt-1">
-                      {new Date(job.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                    </p>
-                  </div>
-                </button>
-              );
-            })}
+        ) : (
+          <ResponsiveContainer width="100%" height={200}>
+            <AreaChart data={chartPoints} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="laborGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+              <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#6b7280' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: '#6b7280' }} axisLine={false} tickLine={false} tickFormatter={v => `₱${v.toLocaleString()}`} width={60} />
+              <Tooltip
+                contentStyle={{ background: 'rgba(24,24,27,0.9)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, fontSize: 12 }}
+                formatter={(v: number) => [`₱${v.toLocaleString()}`, 'Labor']}
+                labelStyle={{ color: '#a1a1aa' }}
+              />
+              <Area type="monotone" dataKey="labor" stroke="#10b981" strokeWidth={2} fill="url(#laborGrad)" dot={false} activeDot={{ r: 4, fill: '#10b981' }} />
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
+      </motion.div>
+
+      {/* Jobs Completed Chart */}
+      <motion.div {...fadeUp(0.21)} className="bg-card dark:bg-zinc-900/40 border border-border/50 rounded-2xl p-6">
+        <p className="font-bold text-foreground mb-1">Jobs Completed</p>
+        <p className="text-xs text-muted-foreground mb-5">Number of jobs finished per period</p>
+        {loadingChart ? (
+          <div className="h-48 flex items-center justify-center">
+            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
-        </motion.div>
-      )}
+        ) : (
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={chartPoints} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="jobsGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.9} />
+                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0.5} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+              <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#6b7280' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: '#6b7280' }} axisLine={false} tickLine={false} allowDecimals={false} width={30} />
+              <Tooltip
+                contentStyle={{ background: 'rgba(24,24,27,0.9)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, fontSize: 12 }}
+                formatter={(v: number) => [v, 'Jobs']}
+                labelStyle={{ color: '#a1a1aa' }}
+              />
+              <Bar dataKey="jobs" fill="url(#jobsGrad)" radius={[4, 4, 0, 0]} maxBarSize={40} />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
+      </motion.div>
     </div>
   );
 }

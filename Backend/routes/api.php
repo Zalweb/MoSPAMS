@@ -187,6 +187,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Mechanic routes
         Route::middleware(['role:Mechanic'])->prefix('mechanic')->group(function () {
             Route::get('/dashboard', [MechanicController::class, 'dashboard']);
+            Route::get('/chart-data', [MechanicController::class, 'chartData']);
             Route::get('/jobs', [MechanicController::class, 'assignedJobs']);
             Route::get('/history', [MechanicController::class, 'history']);
             Route::get('/performance', [MechanicController::class, 'performance']);
