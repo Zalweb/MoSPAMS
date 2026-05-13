@@ -451,7 +451,7 @@ class MechanicController extends Controller
             ->leftJoin('service_job_items', 'service_job_items.job_id_fk', '=', 'service_jobs.job_id')
             ->leftJoin('service_types', 'service_types.service_type_id', '=', 'service_job_items.service_type_id_fk')
             ->where('service_job_mechanics.mechanic_id_fk', (int) $mechanic->mechanic_id)
-            ->where('service_job_statuses.status_code', 'work_done')
+            ->whereIn('service_job_statuses.status_code', ['work_done', 'completed'])
             ->select(
                 'service_jobs.*',
                 'customers.full_name as customer_name',
@@ -492,18 +492,22 @@ class MechanicController extends Controller
 
         $data = $jobs->map(function ($job) use ($ratings) {
             $rating = $ratings[$job->job_id] ?? null;
+            // completion_date may be null for jobs completed through the owner flow;
+            // fall back to updated_at so duration/date still shows something meaningful
+            $resolvedDate = $job->completion_date ?? $job->updated_at;
             $durationHours = null;
-            if ($job->completion_date && $job->created_at) {
-                $completedAt = \Illuminate\Support\Carbon::parse($job->completion_date);
+            if ($resolvedDate && $job->created_at) {
+                $completedAt = \Illuminate\Support\Carbon::parse($resolvedDate);
                 $createdAt = \Illuminate\Support\Carbon::parse($job->created_at);
-                $durationHours = round($completedAt->diffInSeconds($createdAt) / 3600, 2);
+                $diff = $completedAt->diffInSeconds($createdAt);
+                $durationHours = $diff > 0 ? round($diff / 3600, 2) : 0;
             }
 
             return [
                 'id' => (string) $job->job_id,
                 'service_type' => $job->service_name ?? 'General Service',
                 'customer_name' => $job->customer_name,
-                'completed_at' => $this->iso($job->completion_date),
+                'completed_at' => $this->iso($resolvedDate),
                 'duration_hours' => $durationHours,
                 'rating' => $rating ? (int) $rating->rating : null,
                 'comment' => $rating ? $rating->comment : null,
@@ -538,7 +542,7 @@ class MechanicController extends Controller
             ->join('service_job_mechanics', 'service_job_mechanics.job_id_fk', '=', 'service_jobs.job_id')
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
             ->where('service_job_mechanics.mechanic_id_fk', (int) $mechanic->mechanic_id)
-            ->where('service_job_statuses.status_code', 'work_done')
+            ->whereIn('service_job_statuses.status_code', ['work_done', 'completed'])
             ->whereDate('service_jobs.completion_date', '>=', $monthStartStr)
             ->select('service_jobs.job_id', 'service_jobs.completion_date', 'service_jobs.created_at')
             ->get();
@@ -563,7 +567,7 @@ class MechanicController extends Controller
             ->join('service_job_mechanics', 'service_job_mechanics.job_id_fk', '=', 'service_jobs.job_id')
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
             ->where('service_job_mechanics.mechanic_id_fk', (int) $mechanic->mechanic_id)
-            ->where('service_job_statuses.status_code', 'work_done')
+            ->whereIn('service_job_statuses.status_code', ['work_done', 'completed'])
             ->whereDate('service_jobs.completion_date', '>=', $threeMonthsAgoStr)
             ->select('service_jobs.completion_date')
             ->get();
@@ -612,9 +616,10 @@ class MechanicController extends Controller
             ->where('status_code', 'in_progress')
             ->value('service_job_status_id');
 
-        $workDoneStatusId = DB::table('service_job_statuses')
-            ->where('status_code', 'work_done')
-            ->value('service_job_status_id');
+        $doneStatuses = DB::table('service_job_statuses')
+            ->whereIn('status_code', ['work_done', 'completed'])
+            ->pluck('service_job_status_id')
+            ->all();
 
         $activeJobs = DB::table('service_jobs')
             ->join('service_job_mechanics', 'service_job_mechanics.job_id_fk', '=', 'service_jobs.job_id')
@@ -631,7 +636,7 @@ class MechanicController extends Controller
         $completedThisMonth = DB::table('service_jobs')
             ->join('service_job_mechanics', 'service_job_mechanics.job_id_fk', '=', 'service_jobs.job_id')
             ->where('service_job_mechanics.mechanic_id_fk', $mid)
-            ->where('service_jobs.service_job_status_id_fk', $workDoneStatusId)
+            ->whereIn('service_jobs.service_job_status_id_fk', $doneStatuses)
             ->whereDate('service_jobs.completion_date', '>=', $monthStart)
             ->count();
 

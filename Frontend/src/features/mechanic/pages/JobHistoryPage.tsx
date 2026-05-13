@@ -7,8 +7,8 @@ interface HistoryJob {
   id: string;
   service_type: string;
   customer_name: string;
-  completed_at: string;
-  duration_hours: number;
+  completed_at: string | null;
+  duration_hours: number | null;
   rating: number | null;
   comment: string | null;
 }
@@ -133,8 +133,8 @@ export default function JobHistoryPage() {
                   <tr key={job.id} className="hover:bg-secondary/50 dark:hover:bg-zinc-800/50 transition-colors">
                     <td className="px-6 py-4 text-sm font-medium text-foreground">{job.service_type}</td>
                     <td className="px-6 py-4 text-sm text-foreground">{job.customer_name}</td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">{formatDate(job.completed_at)}</td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">{job.duration_hours.toFixed(1)} hrs</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">{job.completed_at ? formatDate(job.completed_at) : '—'}</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">{job.duration_hours != null ? `${job.duration_hours.toFixed(1)} hrs` : '—'}</td>
                     <td className="px-6 py-4">
                       {job.rating ? (
                         <div className="flex items-center gap-2">
