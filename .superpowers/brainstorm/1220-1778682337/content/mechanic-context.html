@@ -1,0 +1,99 @@
+<h2>Mechanic Navigation — Current State</h2>
+<p class="subtitle">Let's understand what mechanics currently see and what gaps might exist</p>
+
+<div class="section" style="margin-bottom: 2rem;">
+  <h3>Current Mechanic Dashboard</h3>
+  <div class="mockup">
+    <div class="mockup-header">Mechanic View</div>
+    <div class="mockup-body">
+      <div style="display: flex; gap: 1rem; height: 300px;">
+        <!-- Sidebar -->
+        <div style="width: 200px; border-right: 1px solid #ccc; padding: 1rem; background: #f5f5f5;">
+          <div style="font-weight: bold; margin-bottom: 1.5rem;">MoSPAMS</div>
+          <div style="font-size: 0.85rem; color: #666; text-transform: uppercase; margin-bottom: 0.5rem;">MAIN</div>
+          <div style="padding: 0.5rem; background: #007bff; color: white; border-radius: 4px; font-size: 0.9rem;">
+            📊 Dashboard
+          </div>
+          <div style="margin-top: 1rem; font-size: 0.8rem; color: #999;">
+            (Mechanics only see Dashboard)
+          </div>
+        </div>
+        <!-- Main content -->
+        <div style="flex: 1; padding: 1.5rem;">
+          <h4>My Assigned Jobs</h4>
+          <div style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
+            <div style="padding: 0.75rem; background: #f9f9f9; border-left: 3px solid #28a745; margin-bottom: 0.5rem;">
+              Job #1: Oil Change - Customer Name
+            </div>
+            <div style="padding: 0.75rem; background: #f9f9f9; border-left: 3px solid #ffc107; margin-bottom: 0.5rem;">
+              Job #2: Brake Service - Another Customer
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>What Should Mechanics Access?</h3>
+  <p style="margin-bottom: 1rem; color: #666;">Below are possible mechanic-focused pages. Which of these would be useful?</p>
+
+  <div class="options" data-multiselect>
+    <div class="option" data-choice="jobs" onclick="toggleSelect(this)">
+      <div class="letter">✓</div>
+      <div class="content">
+        <h3>Assigned Jobs (Current)</h3>
+        <p>View jobs assigned to them, update status, mark complete. ← Already exists</p>
+      </div>
+    </div>
+
+    <div class="option" data-choice="history" onclick="toggleSelect(this)">
+      <div class="letter">?</div>
+      <div class="content">
+        <h3>Job History / Completed Jobs</h3>
+        <p>View past jobs they've completed, performance metrics, customer ratings</p>
+      </div>
+    </div>
+
+    <div class="option" data-choice="inventory" onclick="toggleSelect(this)">
+      <div class="letter">?</div>
+      <div class="content">
+        <h3>Parts Inventory</h3>
+        <p>View available parts, check stock levels while working on jobs</p>
+      </div>
+    </div>
+
+    <div class="option" data-choice="schedule" onclick="toggleSelect(this)">
+      <div class="letter">?</div>
+      <div class="content">
+        <h3>Work Schedule / Calendar</h3>
+        <p>View their scheduled jobs for the day/week, time availability</p>
+      </div>
+    </div>
+
+    <div class="option" data-choice="performance" onclick="toggleSelect(this)">
+      <div class="letter">?</div>
+      <div class="content">
+        <h3>Performance Dashboard</h3>
+        <p>View personal stats: jobs completed, avg time per job, ratings, earnings</p>
+      </div>
+    </div>
+
+    <div class="option" data-choice="notes" onclick="toggleSelect(this)">
+      <div class="letter">?</div>
+      <div class="content">
+        <h3>Knowledge Base / Service Guides</h3>
+        <p>Access service procedures, troubleshooting guides, motorcycle-specific info</p>
+      </div>
+    </div>
+
+    <div class="option" data-choice="messages" onclick="toggleSelect(this)">
+      <div class="letter">?</div>
+      <div class="content">
+        <h3>Messages / Notifications</h3>
+        <p>Communicate with shop owner/staff about job updates or issues</p>
+      </div>
+    </div>
+  </div>
+</div>
