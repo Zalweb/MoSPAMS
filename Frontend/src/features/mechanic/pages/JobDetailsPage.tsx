@@ -238,7 +238,7 @@ export default function JobDetailsPage() {
       <div className="bg-muted border border-border rounded-2xl p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-foreground">Parts Used</h2>
-          {job.statusCode !== 'completed' && (
+          {job.statusCode === 'in_progress' && (
             <button
               onClick={() => setShowAddPart(true)}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] text-foreground text-sm font-semibold hover:opacity-90 transition-opacity"

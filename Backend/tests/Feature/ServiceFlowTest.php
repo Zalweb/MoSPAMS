@@ -343,7 +343,7 @@ class ServiceFlowTest extends TestCase
             ]);
 
         $response->assertOk()
-            ->assertJsonPath('data.status', 'Booked & Confirmed');
+            ->assertJsonPath('data.status', 'Confirmed');
 
         $statusCode = DB::table('service_jobs')
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')

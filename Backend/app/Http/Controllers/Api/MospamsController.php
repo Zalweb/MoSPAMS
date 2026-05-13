@@ -740,15 +740,27 @@ class MospamsController extends Controller
                 'updated_at'               => now(),
             ]);
 
-            // Save assigned mechanics
+            // Save assigned mechanics - FIRST delete old assignments
             DB::table('service_job_mechanics')->where('job_id_fk', $service)->delete();
+
+            // THEN insert new ones - validate mechanic exists before inserting
             foreach ($data['mechanicIds'] as $mId) {
-                DB::table('service_job_mechanics')->insert([
-                    'job_id_fk'      => $service,
-                    'mechanic_id_fk' => $this->numericId($mId),
-                    'shop_id_fk'     => $this->shopId(),
-                    'assigned_at'    => now(),
-                ]);
+                $mechanicId = $this->numericId($mId);
+
+                // Verify mechanic exists and belongs to this shop
+                $mechanicExists = DB::table('mechanics')
+                    ->where('mechanic_id', $mechanicId)
+                    ->where('shop_id_fk', $this->shopId())
+                    ->exists();
+
+                if ($mechanicExists) {
+                    DB::table('service_job_mechanics')->insert([
+                        'job_id_fk'      => $service,
+                        'mechanic_id_fk' => $mechanicId,
+                        'shop_id_fk'     => $this->shopId(),
+                        'assigned_at'    => now(),
+                    ]);
+                }
             }
 
             // Collect assigned mechanic names for the customer notification

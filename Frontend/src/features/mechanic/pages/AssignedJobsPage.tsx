@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { Wrench, Search, CheckCircle2, AlertCircle, ArrowRight, Users, Package } from 'lucide-react';
-import { apiGet } from '@/shared/lib/api';
+import { Wrench, Search, CheckCircle2, AlertCircle, ArrowRight, Users, Package, Loader } from 'lucide-react';
+import { apiGet, apiMutation } from '@/shared/lib/api';
 import { toast } from 'sonner';
 
 interface Job {
@@ -25,6 +25,7 @@ export default function AssignedJobsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [executingJobId, setExecutingJobId] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -59,6 +60,23 @@ export default function AssignedJobsPage() {
       window.clearInterval(intervalId);
     };
   }, []);
+
+  const handleStartService = async (jobId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent navigation
+    setExecutingJobId(jobId);
+    try {
+      await apiMutation(`/api/mechanic/jobs/${jobId}/status`, 'PATCH', { action: 'start' });
+      toast.success('Service started!');
+      // Refresh the jobs list
+      const response = await apiGet<{ data: Job[] }>('/api/mechanic/jobs');
+      setJobs(response.data);
+    } catch (error) {
+      console.error('Failed to start service', error);
+      toast.error('Failed to start service');
+    } finally {
+      setExecutingJobId(null);
+    }
+  };
 
   const filteredJobs = jobs.filter(job => {
     const matchesSearch = 
@@ -238,10 +256,30 @@ export default function AssignedJobsPage() {
                 {(job.statusCode === 'booked_confirmed' || job.statusCode === 'in_progress') && (
                   <div className="mb-3">
                     {job.statusCode === 'booked_confirmed' && (
-                      <span className="text-xs font-semibold text-green-400">▶ Start Service</span>
+                      <button
+                        onClick={(e) => handleStartService(job.id, e)}
+                        disabled={executingJobId === job.id}
+                        className="flex items-center gap-1.5 text-xs font-semibold text-green-400 hover:text-green-300 transition-colors disabled:opacity-50"
+                      >
+                        {executingJobId === job.id ? (
+                          <Loader className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <span>▶</span>
+                        )}
+                        {executingJobId === job.id ? 'Starting...' : 'Start Service'}
+                      </button>
                     )}
                     {job.statusCode === 'in_progress' && (
-                      <span className="text-xs font-semibold text-blue-400">✓ Mark Complete</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/dashboard/mechanic/jobs/${job.id}`);
+                        }}
+                        className="flex items-center gap-1.5 text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
+                      >
+                        <span>✓</span>
+                        Mark Complete
+                      </button>
                     )}
                   </div>
                 )}
