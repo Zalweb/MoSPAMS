@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Package, Wrench, ShoppingCart,
   BarChart3, Shield, LogOut, Menu, X, ClipboardCheck,
   Home, Calendar, CreditCard, ScrollText, Settings, Bike, Bell, Users, Sun, Moon,
-  ChevronLeft
+  ChevronLeft, CheckCircle2
 } from 'lucide-react';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { useTenantBranding, hexToHsl } from '@/shared/contexts/TenantBrandingContext';
@@ -48,6 +48,14 @@ const navGroups = [
       { label: 'Payments', to: '/dashboard/customer/payments', icon: CreditCard },
       { label: 'Parts', to: '/dashboard/customer/parts', icon: Package },
       { label: 'My Garage', to: '/dashboard/customer/vehicles', icon: Bike },
+    ]
+  },
+  {
+    title: 'WORK',
+    items: [
+      { label: 'Assigned Jobs', to: '/dashboard/mechanic/jobs', icon: Wrench },
+      { label: 'Job History', to: '/dashboard/mechanic/history', icon: CheckCircle2 },
+      { label: 'Performance', to: '/dashboard/mechanic/performance', icon: BarChart3 },
     ]
   }
 ];
