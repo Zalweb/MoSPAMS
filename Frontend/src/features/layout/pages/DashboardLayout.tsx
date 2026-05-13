@@ -46,6 +46,7 @@ const navGroups = [
       { label: 'Book Service', to: '/dashboard/customer/book', icon: Calendar },
       { label: 'History', to: '/dashboard/customer/history', icon: Wrench },
       { label: 'Payments', to: '/dashboard/customer/payments', icon: CreditCard },
+      { label: 'Parts', to: '/dashboard/customer/parts', icon: Package },
       { label: 'My Garage', to: '/dashboard/customer/vehicles', icon: Bike },
     ]
   }

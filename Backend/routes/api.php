@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\DomainOnboardingController;
 use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\MechanicController;
 use App\Http\Controllers\Api\MospamsController;
+use App\Http\Controllers\Api\OwnerMechanicController;
 use App\Http\Controllers\Api\RatingController;
 use App\Http\Controllers\Api\RoleRequestController;
 use App\Http\Controllers\Api\ShopBrandingController;
@@ -192,6 +193,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::patch('/jobs/{job}/status', [MechanicController::class, 'updateJobStatus']);
             Route::post('/jobs/{job}/parts', [MechanicController::class, 'addPartToJob']);
             Route::delete('/jobs/{job}/parts/{jobPart}', [MechanicController::class, 'removePartFromJob']);
+        });
+
+        // Owner mechanic performance routes
+        Route::middleware(['role:Owner'])->group(function () {
+            Route::get('/owner/mechanics', [OwnerMechanicController::class, 'index']);
+            Route::get('/owner/mechanics/{mechanicId}', [OwnerMechanicController::class, 'show']);
         });
     });
 });

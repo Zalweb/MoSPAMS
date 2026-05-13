@@ -39,6 +39,7 @@ const ServiceHistory = lazy(() => import('@/features/customers/pages/ServiceHist
 const Payments = lazy(() => import('@/features/customers/pages/Payments'));
 const CustomerSettings = lazy(() => import('@/features/customers/pages/CustomerSettings'));
 const CustomerVehicles = lazy(() => import('@/features/customers/pages/CustomerVehicles'));
+const PartsCatalog = lazy(() => import('@/features/customers/pages/PartsCatalog'));
 const ActivityLogsPage = lazy(() => import('@/features/activity-logs/pages/ActivityLogsPage'));
 const SettingsPage = lazy(() => import('@/features/settings/pages/SettingsPage'));
 const NotFound = lazy(() => import('@/features/common/NotFound'));
@@ -257,6 +258,7 @@ function App() {
                             <Route path="customer/book" element={<BookService />} />
                             <Route path="customer/history" element={<ServiceHistory />} />
                             <Route path="customer/payments" element={<Payments />} />
+                            <Route path="customer/parts" element={<PartsCatalog />} />
                             <Route path="customer/settings" element={<CustomerSettings />} />
                             <Route path="customer/vehicles" element={<CustomerVehicles />} />
                           </Route>
