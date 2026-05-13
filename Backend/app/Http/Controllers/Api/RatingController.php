@@ -32,7 +32,7 @@ class RatingController extends \App\Http\Controllers\Controller
             return response()->json(['error' => 'Unauthorized or job not found'], 403);
         }
 
-        if ($job->status_code !== 'work_done') {
+        if (!in_array($job->status_code, ['work_done', 'completed'])) {
             return response()->json(['error' => 'Job is not yet completed'], 422);
         }
 
