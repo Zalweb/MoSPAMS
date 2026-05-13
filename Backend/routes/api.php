@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\DomainOnboardingController;
 use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\MechanicController;
 use App\Http\Controllers\Api\MospamsController;
+use App\Http\Controllers\Api\RatingController;
 use App\Http\Controllers\Api\RoleRequestController;
 use App\Http\Controllers\Api\ShopBrandingController;
 use App\Http\Controllers\Api\ShopRegistrationController;
@@ -177,6 +178,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/customer/notifications', [CustomerController::class, 'getNotifications']);
         Route::patch('/customer/notifications/read-all', [CustomerController::class, 'markAllNotificationsRead']);
         Route::patch('/customer/notifications/{notificationId}/read', [CustomerController::class, 'markNotificationRead']);
+
+        // Rating routes
+        Route::post('/ratings', [RatingController::class, 'store']);
+        Route::get('/ratings/{jobId}', [RatingController::class, 'show']);
 
         // Mechanic routes
         Route::middleware(['role:Mechanic'])->prefix('mechanic')->group(function () {
