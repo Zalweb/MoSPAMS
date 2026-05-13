@@ -2551,6 +2551,74 @@ class MospamsController extends Controller
         ], 201);
     }
 
+    public function storePartWithBarcode(\App\Http\Requests\StorePartWithBarcodeRequest $request)
+    {
+        $shop_id = auth()->user()->shop_id_fk;
+
+        $existingBarcode = \App\Models\PartBarcode::where('barcode_value', $request->barcode_value)
+            ->where('shop_id_fk', $shop_id)
+            ->first();
+
+        if ($existingBarcode) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'This barcode is already linked to a part.',
+                'linked_part' => [
+                    'id' => $existingBarcode->part->id,
+                    'part_code' => $existingBarcode->part->part_code,
+                ],
+            ], 409);
+        }
+
+        DB::beginTransaction();
+        try {
+            $part = \App\Models\Part::create([
+                'brand' => $request->brand,
+                'part_code' => $request->part_code,
+                'description' => $request->description,
+                'category_id_fk' => $request->category_id_fk,
+                'unit_price' => $request->price,
+                'stock_quantity' => $request->stock_quantity,
+                'shop_id_fk' => $shop_id,
+                'part_status_id_fk' => 1,
+            ]);
+
+            $barcode = \App\Models\PartBarcode::create([
+                'part_id' => $part->id,
+                'barcode_value' => $request->barcode_value,
+                'barcode_type' => $request->barcode_type,
+                'shop_id_fk' => $shop_id,
+                'is_primary' => true,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'part' => [
+                    'id' => $part->id,
+                    'brand' => $part->brand,
+                    'part_code' => $part->part_code,
+                    'description' => $part->description,
+                    'category_id_fk' => $part->category_id_fk,
+                    'price' => $part->unit_price,
+                    'stock_quantity' => $part->stock_quantity,
+                ],
+                'barcode' => [
+                    'id' => $barcode->id,
+                    'barcode_value' => $barcode->barcode_value,
+                    'is_primary' => $barcode->is_primary,
+                ],
+                'message' => 'Part and barcode created successfully',
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to create part: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
     private function iso(mixed $value): ?string
     {
         return $value ? \Illuminate\Support\Carbon::parse($value)->toISOString() : null;
