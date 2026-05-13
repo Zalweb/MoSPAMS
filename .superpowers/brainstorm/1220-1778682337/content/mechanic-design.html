@@ -1,0 +1,141 @@
+<h2>Mechanic Pages & Owner Integration — Design</h2>
+<p class="subtitle">Three new mechanic pages + enhanced owner visibility</p>
+
+<div class="section">
+  <h3>1. Mechanic Navigation Structure</h3>
+  <div class="mockup">
+    <div class="mockup-header">Mechanic Sidebar</div>
+    <div class="mockup-body" style="font-size: 0.9rem; padding: 1.5rem;">
+      <div style="color: #666; text-transform: uppercase; font-size: 0.75rem; font-weight: bold; margin-bottom: 1rem;">MAIN</div>
+      <div style="padding: 0.5rem; margin-bottom: 0.5rem;">📊 Dashboard</div>
+
+      <div style="color: #666; text-transform: uppercase; font-size: 0.75rem; font-weight: bold; margin: 1.5rem 0 1rem 0;">WORK</div>
+      <div style="margin-left: 1rem; border-left: 2px solid #ccc; padding-left: 1rem;">
+        <div style="padding: 0.5rem 0; color: #007bff; font-weight: 500;">➤ Assigned Jobs</div>
+        <div style="padding: 0.5rem 0; color: #666;">Job History</div>
+        <div style="padding: 0.5rem 0; color: #666;">Performance</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>2. Mechanic Pages</h3>
+
+  <div style="margin-bottom: 2rem;">
+    <h4 style="color: #007bff; margin-bottom: 0.5rem;">Assigned Jobs (Enhanced)</h4>
+    <div class="mockup" style="max-height: 180px; overflow: hidden;">
+      <div class="mockup-body" style="font-size: 0.85rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div><strong>Customer</strong></div>
+          <div><strong>Service Type</strong></div>
+          <div><strong>Status</strong></div>
+          <div><strong>Action</strong></div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem; border-top: 1px solid #eee; padding-top: 0.5rem;">
+          <div>John D.</div>
+          <div>Oil Change</div>
+          <div style="color: #ffc107;">🔄 In Progress</div>
+          <div><button style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">View</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 2rem;">
+    <h4 style="color: #007bff; margin-bottom: 0.5rem;">Job History (New)</h4>
+    <p style="color: #666; margin-bottom: 1rem; font-size: 0.9rem;">View all completed jobs with details and duration</p>
+    <div class="mockup" style="max-height: 200px; overflow: hidden;">
+      <div class="mockup-body" style="font-size: 0.85rem;">
+        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+          <input class="mock-input" placeholder="Search jobs..." style="flex: 1; padding: 0.4rem; font-size: 0.85rem;">
+          <select class="mock-input" style="padding: 0.4rem; font-size: 0.85rem;"><option>All Time</option><option>This Month</option><option>Last 3 Months</option></select>
+        </div>
+        <div style="border-top: 1px solid #eee; padding-top: 0.5rem;">
+          <div style="padding: 0.5rem 0; border-bottom: 1px solid #f0f0f0;">
+            <strong style="font-size: 0.9rem;">Oil Change</strong> - Jane Smith
+            <div style="font-size: 0.8rem; color: #666; margin-top: 0.25rem;">Completed: 2 hours ago | Time: 1.5 hrs</div>
+          </div>
+          <div style="padding: 0.5rem 0; border-bottom: 1px solid #f0f0f0;">
+            <strong style="font-size: 0.9rem;">Brake Service</strong> - Mike Johnson
+            <div style="font-size: 0.8rem; color: #666; margin-top: 0.25rem;">Completed: 1 day ago | Time: 3.5 hrs</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 2rem;">
+    <h4 style="color: #007bff; margin-bottom: 0.5rem;">Performance Dashboard (New)</h4>
+    <p style="color: #666; margin-bottom: 1rem; font-size: 0.9rem;">View personal stats and trends over time</p>
+    <div class="mockup">
+      <div class="mockup-body" style="font-size: 0.85rem;">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+          <div style="border: 1px solid #eee; padding: 1rem; border-radius: 4px;">
+            <div style="color: #666; font-size: 0.8rem;">Jobs Completed (This Month)</div>
+            <div style="font-size: 1.5rem; font-weight: bold; color: #007bff; margin-top: 0.5rem;">12</div>
+          </div>
+          <div style="border: 1px solid #eee; padding: 1rem; border-radius: 4px;">
+            <div style="color: #666; font-size: 0.8rem;">Avg Time per Job</div>
+            <div style="font-size: 1.5rem; font-weight: bold; color: #28a745; margin-top: 0.5rem;">2.3 hrs</div>
+          </div>
+          <div style="border: 1px solid #eee; padding: 1rem; border-radius: 4px;">
+            <div style="color: #666; font-size: 0.8rem;">Customer Rating</div>
+            <div style="font-size: 1.5rem; font-weight: bold; color: #ffc107; margin-top: 0.5rem;">4.8 ⭐</div>
+          </div>
+        </div>
+        <div style="border-top: 1px solid #eee; padding-top: 1rem;">
+          <h5 style="margin-bottom: 0.5rem; font-size: 0.9rem;">Jobs Trend (Last 3 Months)</h5>
+          <div style="height: 120px; background: #f9f9f9; border: 1px solid #eee; border-radius: 4px; display: flex; align-items: flex-end; justify-content: space-around; padding: 1rem;">
+            <div style="width: 12%; background: #007bff; height: 60%;"></div>
+            <div style="width: 12%; background: #007bff; height: 75%;"></div>
+            <div style="width: 12%; background: #007bff; height: 100%;"></div>
+          </div>
+          <div style="font-size: 0.8rem; color: #666; margin-top: 0.5rem; display: flex; justify-content: space-around;">
+            <div>Month 1</div><div>Month 2</div><div>Month 3</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>3. Owner Integration — Mechanic Management Enhanced</h3>
+  <p style="color: #666; margin-bottom: 1rem;">The existing "Mechanics" page (Owner access) gains new insights:</p>
+
+  <div class="mockup">
+    <div class="mockup-body" style="font-size: 0.85rem;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem;">
+        <div><strong>Name</strong></div>
+        <div><strong>Status</strong></div>
+        <div><strong>Jobs (Month)</strong></div>
+        <div><strong>Avg Rating</strong></div>
+        <div><strong>Action</strong></div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 0.5rem; border-top: 1px solid #eee; padding-top: 0.5rem;">
+        <div>John Smith</div>
+        <div style="color: #28a745;">🟢 Active</div>
+        <div>12</div>
+        <div>4.8 ⭐</div>
+        <div><button style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">View Details</button></div>
+      </div>
+    </div>
+  </div>
+
+  <p style="color: #666; margin-top: 1rem; font-size: 0.9rem;">Owners can click "View Details" to see individual mechanic performance trends</p>
+</div>
+
+<div class="section" style="margin-top: 2rem; padding: 1rem; background: #f0f7ff; border-left: 3px solid #007bff; border-radius: 4px;">
+  <h4 style="margin-top: 0;">Database Changes Needed</h4>
+  <ul style="margin: 0.5rem 0 0 1rem; color: #666; font-size: 0.9rem;">
+    <li>Track job completion time (created_at → completed_at)</li>
+    <li>Store customer ratings for each completed job</li>
+    <li>Aggregate mechanic stats (jobs/month, avg time, ratings)</li>
+    <li>Support date-range filtering in queries</li>
+  </ul>
+</div>
+
+<div style="margin-top: 2rem; text-align: center;">
+  <p style="color: #666; font-size: 0.9rem;">Does this design match your vision?</p>
+</div>

@@ -1,5 +1,0 @@
-{"type":"click","text":"✓\n      \n        Assigned Jobs (Current)\n        View jobs assigned to them, update status, mark complete. ← Already exists","choice":"jobs","id":null,"timestamp":1778682475148}
-{"type":"click","text":"✓\n      \n        Assigned Jobs (Current)\n        View jobs assigned to them, update status, mark complete. ← Already exists","choice":"jobs","id":null,"timestamp":1778682475983}
-{"type":"click","text":"?\n      \n        Performance Dashboard\n        View personal stats: jobs completed, avg time per job, ratings, earnings","choice":"performance","id":null,"timestamp":1778682498410}
-{"type":"click","text":"✓\n      \n        Assigned Jobs (Current)\n        View jobs assigned to them, update status, mark complete. ← Already exists","choice":"jobs","id":null,"timestamp":1778682512424}
-{"type":"click","text":"?\n      \n        Job History / Completed Jobs\n        View past jobs they've completed, performance metrics, customer ratings","choice":"history","id":null,"timestamp":1778682513738}
