@@ -1,9 +1,8 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Package, Plus, ShoppingCart, Filter } from 'lucide-react';
+import { Search, Package, Filter } from 'lucide-react';
 import { usePaginatedFetch } from '@/shared/hooks/usePaginatedFetch';
 import type { Part } from '@/shared/types';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 const fadeUp = (delay = 0) => ({
@@ -15,15 +14,8 @@ const fadeUp = (delay = 0) => ({
 export default function PartsCatalog() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
-  const [cart, setCart] = useState<Record<string, number>>({});
 
   const { data: parts, loading } = usePaginatedFetch<Part>('/api/parts');
-
-  const cartCount = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
-
-  const addToCart = (partId: string) => {
-    setCart(prev => ({ ...prev, [partId]: (prev[partId] ?? 0) + 1 }));
-  };
 
   const categories = useMemo(() => {
     const cats = new Set(parts.map(p => p.category));
@@ -44,7 +36,7 @@ export default function PartsCatalog() {
       <motion.div {...fadeUp(0)} className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h2 className="text-3xl font-bold text-foreground tracking-tight">Parts Catalog</h2>
-          <p className="text-muted-foreground mt-2">Browse and find genuine parts for your motorcycle.</p>
+          <p className="text-muted-foreground mt-2">Check availability and pricing for genuine motorcycle parts.</p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
@@ -115,14 +107,9 @@ export default function PartsCatalog() {
                     </span>
                   </div>
 
-                  <Button
-                    size="icon"
-                    className="w-12 h-12 rounded-2xl bg-foreground text-background hover:scale-110 active:scale-95 transition-all duration-300"
-                    onClick={() => addToCart(part.id)}
-                    disabled={part.stock === 0}
-                  >
-                    <Plus className="w-6 h-6" />
-                  </Button>
+                  <div className={`px-3 py-1 rounded-full text-[10px] font-bold tracking-tight ${part.stock > 0 ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                    {part.stock > 0 ? 'AVAILABLE' : 'UNAVAILABLE'}
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -137,21 +124,6 @@ export default function PartsCatalog() {
           </div>
         )}
       </div>
-
-      {/* Floating Cart Button (Optional Mockup) */}
-      <motion.div
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="fixed bottom-8 right-8 z-50"
-      >
-        <Button
-          size="lg"
-          className="h-16 px-8 rounded-3xl bg-primary text-primary-foreground shadow-2xl shadow-primary/20 flex gap-3 hover:scale-105 active:scale-95 transition-all"
-        >
-          <ShoppingCart className="w-6 h-6" />
-          <span className="font-bold">Cart ({cartCount})</span>
-        </Button>
-      </motion.div>
     </div>
   );
 }
