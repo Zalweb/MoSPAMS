@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\phpunit.xml" tests="30" assertions="142" errors="0" failures="2" skipped="0" time="3.269828">
+    <testsuite name="Feature" tests="30" assertions="142" errors="0" failures="2" skipped="0" time="3.269828">
+      <testsuite name="Tests\Feature\ServiceFlowTest" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" tests="30" assertions="142" errors="0" failures="2" skipped="0" time="3.269828">
+        <testcase name="test_store_service_assigns_mechanics" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="114" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="5" time="0.600410"/>
+        <testcase name="test_store_service_records_named_parts" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="136" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="5" time="0.083529"/>
+        <testcase name="test_update_service_syncs_mechanics" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="157" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="6" time="0.100354"/>
+        <testcase name="test_bill_service_creates_sale_without_deducting_stock_again" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="180" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="13" time="0.086768"/>
+        <testcase name="test_bill_service_rejects_double_billing" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="206" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="4" time="0.094553"/>
+        <testcase name="test_mechanic_jobs_are_loaded_from_pivot_assignments" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="219" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="6" time="0.083964"/>
+        <testcase name="test_mechanic_status_update_creates_customer_notification" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="238" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="4" time="0.087188"/>
+        <testcase name="test_assign_mechanic_to_job" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="277" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="4" time="0.081462"/>
+        <testcase name="test_remove_mechanic_from_job" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="289" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="4" time="0.082721"/>
+        <testcase name="test_service_resource_includes_part_metadata" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="311" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="6" time="0.114998"/>
+        <testcase name="test_start_service_transitions_to_booked_confirmed" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="336" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="3" time="0.113049">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\ServiceFlowTest::test_start_service_transitions_to_booked_confirmed&#13;
+Expected response status code [200] but received 422.
+Failed asserting that 422 is identical to 200.&#13;
+&#13;
+The following errors occurred during the last request:
+
+{
+    "message": "The mechanic ids field is required.",
+    "errors": {
+        "mechanicIds": [
+            "The mechanic ids field is required."
+        ]
+    }
+}
+&#13;
+C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:45
+C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:176
+C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\vendor\laravel\framework\src\Illuminate\Testing\Concerns\AssertsStatusCodes.php:16
+C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php:343</failure>
+        </testcase>
+        <testcase name="test_start_service_rejects_non_pending_job" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="353" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="3" time="0.085183"/>
+        <testcase name="test_cancel_service_transitions_to_cancelled" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="367" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="5" time="0.086521"/>
+        <testcase name="test_cancel_service_rejects_terminal_states" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="384" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="3" time="0.080413"/>
+        <testcase name="test_cancel_service_allows_active_states" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="396" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="4" time="0.088412"/>
+        <testcase name="test_staff_add_part_to_service_deducts_stock" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="411" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="7" time="0.089024"/>
+        <testcase name="test_staff_add_part_rejects_insufficient_stock" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="436" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="3" time="0.084233"/>
+        <testcase name="test_confirm_part_request_deducts_stock" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="450" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="6" time="0.088642"/>
+        <testcase name="test_remove_confirmed_part_restores_stock" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="479" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="5" time="0.116955"/>
+        <testcase name="test_remove_requested_part_does_not_restore_stock" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="504" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="4" time="0.112168"/>
+        <testcase name="test_mechanic_add_part_lands_as_requested_no_stock_change" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="529" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="5" time="0.143056"/>
+        <testcase name="test_bill_service_uses_only_confirmed_parts_and_accepts_labor_cost" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="562" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="5" time="0.091499"/>
+        <testcase name="test_update_service_ignores_status_field" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="607" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="4" time="0.091237"/>
+        <testcase name="test_stale_pending_jobs_are_auto_cancelled" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="626" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="5" time="0.072388"/>
+        <testcase name="test_confirm_booking_notifies_customer" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="652" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="3" time="0.082938">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\ServiceFlowTest::test_confirm_booking_notifies_customer&#13;
+Expected response status code [200] but received 422.
+Failed asserting that 422 is identical to 200.&#13;
+&#13;
+The following errors occurred during the last request:
+
+{
+    "message": "The mechanic ids field is required.",
+    "errors": {
+        "mechanicIds": [
+            "The mechanic ids field is required."
+        ]
+    }
+}
+&#13;
+C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:45
+C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:176
+C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\vendor\laravel\framework\src\Illuminate\Testing\Concerns\AssertsStatusCodes.php:16
+C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php:677</failure>
+        </testcase>
+        <testcase name="test_mechanic_start_action_transitions_booked_confirmed_to_in_progress" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="687" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="4" time="0.080645"/>
+        <testcase name="test_mechanic_complete_action_transitions_in_progress_to_work_done" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="711" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="5" time="0.085268"/>
+        <testcase name="test_mechanic_complete_requires_labor_cost" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="741" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="3" time="0.081409"/>
+        <testcase name="test_bill_service_rejects_non_work_done_job" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="759" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="3" time="0.087091"/>
+        <testcase name="test_work_done_notifies_customer_with_total" file="C:\Users\frien\Documents\Rizal_V1 MVP\MoSPAMS\Backend\tests\Feature\ServiceFlowTest.php" line="770" class="Tests\Feature\ServiceFlowTest" classname="Tests.Feature.ServiceFlowTest" assertions="5" time="0.093749"/>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+</testsuites>
