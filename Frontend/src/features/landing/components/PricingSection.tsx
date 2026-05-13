@@ -67,11 +67,14 @@ export default function PricingSection() {
       .catch(() => { /* use fallback */ });
   }, []);
 
-  const plansWithFeatures = plans.map(plan => ({
-    ...plan,
-    features: PLAN_FEATURES[plan.planCode] ?? PLAN_FEATURES.basic,
-    popular: plan.planCode === POPULAR_PLAN,
-  }));
+  const plansWithFeatures = plans.map(plan => {
+    const code = plan.planCode.toLowerCase();
+    return {
+      ...plan,
+      features: PLAN_FEATURES[code] ?? PLAN_FEATURES.basic,
+      popular: code === POPULAR_PLAN,
+    };
+  });
 
   return (
     <section id="pricing" className="relative py-32 overflow-hidden">

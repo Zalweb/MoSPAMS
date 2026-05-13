@@ -156,9 +156,9 @@ export default function ShopRegistrationPage() {
         subdomain: data.data.subdomain,
         invitationCode: data.data.invitationCode,
         ownerEmail: data.data.ownerEmail,
-        temporaryPassword: data.data.temporaryPassword,
-        trialDays: data.data.trialDays,
-        trialEndsAt: data.data.trialEndsAt,
+        temporaryPassword: data.data.temporaryPassword || '',
+        trialDays: data.data.trialDays || 14,
+        trialEndsAt: data.data.trialEndsAt || '',
       });
       setStep('success');
       toast.success('Your shop is ready!');
@@ -171,9 +171,13 @@ export default function ShopRegistrationPage() {
   };
 
   if (step === 'success' && registrationResult) {
-    const trialEnd = new Date(registrationResult.trialEndsAt).toLocaleDateString('en-US', {
-      year: 'numeric', month: 'long', day: 'numeric',
-    });
+    const trialEnd = registrationResult.trialEndsAt 
+      ? new Date(registrationResult.trialEndsAt).toLocaleDateString('en-US', {
+          year: 'numeric', month: 'long', day: 'numeric',
+        })
+      : 'TBD (Pending Approval)';
+
+    const isPending = !registrationResult.temporaryPassword;
 
     return (
       <div className="dark text-foreground min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
@@ -187,33 +191,47 @@ export default function ShopRegistrationPage() {
             <div className="w-16 h-16 bg-green-500/10 border border-green-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Check className="w-8 h-8 text-green-400" strokeWidth={2} />
             </div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Your Shop is Ready!</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              {isPending ? 'Registration Submitted!' : 'Your Shop is Ready!'}
+            </h1>
             <p className="text-muted-foreground">
-              {registrationResult.trialDays}-day free trial active &mdash; expires {trialEnd}
+              {isPending 
+                ? 'Your registration is pending approval by the platform administrator.'
+                : `${registrationResult.trialDays}-day free trial active — expires ${trialEnd}`
+              }
             </p>
           </div>
 
-          {/* Temporary login credentials */}
-          <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-6 mb-6">
-            <h2 className="font-semibold text-green-400 mb-4">Your Login Credentials</h2>
-            <div className="space-y-3">
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">Email</p>
-                <p className="font-mono text-sm text-foreground bg-zinc-800/50 rounded-lg px-3 py-2 border border-zinc-700/30">
-                  {registrationResult.ownerEmail}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">Temporary Password</p>
-                <p className="font-mono font-bold text-lg text-foreground bg-zinc-800/50 rounded-lg px-3 py-2 border border-zinc-700/30 tracking-widest">
-                  {registrationResult.temporaryPassword}
-                </p>
-              </div>
+          {isPending ? (
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-6 mb-6">
+              <h2 className="font-semibold text-blue-400 mb-2">Next Steps</h2>
+              <p className="text-sm text-muted-foreground">
+                Once an administrator approves your request, you will receive an email at <span className="text-foreground font-medium">{registrationResult.ownerEmail}</span> with your temporary login password.
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground mt-3">
-              Save this password — it won't be shown again. Change it after your first login.
-            </p>
-          </div>
+          ) : (
+            /* Temporary login credentials */
+            <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-6 mb-6">
+              <h2 className="font-semibold text-green-400 mb-4">Your Login Credentials</h2>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Email</p>
+                  <p className="font-mono text-sm text-foreground bg-zinc-800/50 rounded-lg px-3 py-2 border border-zinc-700/30">
+                    {registrationResult.ownerEmail}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Temporary Password</p>
+                  <p className="font-mono font-bold text-lg text-foreground bg-zinc-800/50 rounded-lg px-3 py-2 border border-zinc-700/30 tracking-widest">
+                    {registrationResult.temporaryPassword}
+                  </p>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">
+                Save this password — it won't be shown again. Change it after your first login.
+              </p>
+            </div>
+          )}
 
           {/* Shop details */}
           <div className="bg-zinc-800/30 rounded-2xl border border-zinc-700/30 p-6 mb-6">
