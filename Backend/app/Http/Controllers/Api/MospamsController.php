@@ -2619,6 +2619,33 @@ class MospamsController extends Controller
         }
     }
 
+    public function getPartBarcodes($part_id)
+    {
+        $part = \App\Models\Part::where('id', $part_id)
+            ->where('shop_id_fk', auth()->user()->shop_id_fk)
+            ->first();
+
+        if (!$part) {
+            return response()->json(['message' => 'Part not found'], 404);
+        }
+
+        $barcodes = \App\Models\PartBarcode::where('part_id', $part_id)
+            ->where('shop_id_fk', auth()->user()->shop_id_fk)
+            ->select('id', 'barcode_value', 'barcode_type', 'is_primary', 'created_at')
+            ->orderBy('is_primary', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'part' => [
+                'id' => $part->id,
+                'part_code' => $part->part_code,
+                'description' => $part->description,
+            ],
+            'barcodes' => $barcodes,
+        ]);
+    }
+
     private function iso(mixed $value): ?string
     {
         return $value ? \Illuminate\Support\Carbon::parse($value)->toISOString() : null;
