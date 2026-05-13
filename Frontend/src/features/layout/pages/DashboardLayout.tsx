@@ -53,6 +53,7 @@ const navGroups = [
   {
     title: 'WORK',
     items: [
+      { label: 'Overview', to: '/dashboard/mechanic', icon: LayoutDashboard, end: true },
       { label: 'Assigned Jobs', to: '/dashboard/mechanic/jobs', icon: Wrench },
       { label: 'Job History', to: '/dashboard/mechanic/history', icon: CheckCircle2 },
       { label: 'Performance', to: '/dashboard/mechanic/performance', icon: BarChart3 },

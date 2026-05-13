@@ -479,10 +479,10 @@ class MechanicController extends Controller
             ->distinct()
             ->paginate(20);
 
-        // Get ratings for these jobs
+        // Get ratings for these jobs (safe if ratings table not yet migrated)
         $jobIds = $jobs->pluck('job_id')->all();
         $ratings = [];
-        if ($jobIds) {
+        if ($jobIds && \Illuminate\Support\Facades\Schema::hasTable('ratings')) {
             $ratings = DB::table('ratings')
                 ->whereIn('service_job_id_fk', $jobIds)
                 ->get()
@@ -586,9 +586,109 @@ class MechanicController extends Controller
             'current_period' => [
                 'jobs_completed_this_month' => $thisMonthCount,
                 'avg_time_per_job_hours' => round($thisMonthDuration, 2),
-                'customer_rating' => $thisMonthRating ? round((float) $thisMonthRating, 2) : null,
+                'customer_rating' => !is_null($thisMonthRating) ? round((float) $thisMonthRating, 2) : null,
             ],
             'trend_last_three_months' => $trend,
+        ]);
+    }
+
+    public function dashboard(Request $request): JsonResponse
+    {
+        $mechanic = $this->findMechanicProfile($request);
+
+        if (!$mechanic) {
+            return response()->json(['message' => 'Mechanic profile not found'], 404);
+        }
+
+        $mid = (int) $mechanic->mechanic_id;
+        $monthStart = now()->startOfMonth()->toDateString();
+
+        $activeStatuses = DB::table('service_job_statuses')
+            ->whereIn('status_code', ['booked_confirmed', 'in_progress'])
+            ->pluck('service_job_status_id')
+            ->all();
+
+        $inProgressStatusId = DB::table('service_job_statuses')
+            ->where('status_code', 'in_progress')
+            ->value('service_job_status_id');
+
+        $workDoneStatusId = DB::table('service_job_statuses')
+            ->where('status_code', 'work_done')
+            ->value('service_job_status_id');
+
+        $activeJobs = DB::table('service_jobs')
+            ->join('service_job_mechanics', 'service_job_mechanics.job_id_fk', '=', 'service_jobs.job_id')
+            ->where('service_job_mechanics.mechanic_id_fk', $mid)
+            ->whereIn('service_jobs.service_job_status_id_fk', $activeStatuses)
+            ->count();
+
+        $inProgressJobs = DB::table('service_jobs')
+            ->join('service_job_mechanics', 'service_job_mechanics.job_id_fk', '=', 'service_jobs.job_id')
+            ->where('service_job_mechanics.mechanic_id_fk', $mid)
+            ->where('service_jobs.service_job_status_id_fk', $inProgressStatusId)
+            ->count();
+
+        $completedThisMonth = DB::table('service_jobs')
+            ->join('service_job_mechanics', 'service_job_mechanics.job_id_fk', '=', 'service_jobs.job_id')
+            ->where('service_job_mechanics.mechanic_id_fk', $mid)
+            ->where('service_jobs.service_job_status_id_fk', $workDoneStatusId)
+            ->whereDate('service_jobs.completion_date', '>=', $monthStart)
+            ->count();
+
+        $pendingParts = DB::table('service_jobs')
+            ->join('service_job_mechanics', 'service_job_mechanics.job_id_fk', '=', 'service_jobs.job_id')
+            ->join('service_job_parts', 'service_job_parts.job_id_fk', '=', 'service_jobs.job_id')
+            ->where('service_job_mechanics.mechanic_id_fk', $mid)
+            ->where('service_job_parts.status', 'requested')
+            ->count();
+
+        $avgRating = null;
+        if (\Illuminate\Support\Facades\Schema::hasTable('ratings')) {
+            $avgRating = DB::table('ratings')
+                ->where('mechanic_id_fk', $mid)
+                ->avg('rating');
+        }
+
+        // Last 3 recently touched jobs
+        $recentJobs = DB::table('service_jobs')
+            ->join('service_job_mechanics', 'service_job_mechanics.job_id_fk', '=', 'service_jobs.job_id')
+            ->join('customers', 'customers.customer_id', '=', 'service_jobs.customer_id_fk')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->leftJoin('service_job_items', 'service_job_items.job_id_fk', '=', 'service_jobs.job_id')
+            ->leftJoin('service_types', 'service_types.service_type_id', '=', 'service_job_items.service_type_id_fk')
+            ->where('service_job_mechanics.mechanic_id_fk', $mid)
+            ->select(
+                'service_jobs.job_id',
+                'service_jobs.motorcycle_model',
+                'service_jobs.updated_at',
+                'customers.full_name as customer_name',
+                'service_job_statuses.status_name',
+                'service_job_statuses.status_code',
+                'service_types.service_name'
+            )
+            ->orderByDesc('service_jobs.updated_at')
+            ->limit(3)
+            ->get()
+            ->map(fn ($j) => [
+                'id' => (string) $j->job_id,
+                'customerName' => $j->customer_name,
+                'motorcycleModel' => $j->motorcycle_model ?? '',
+                'serviceType' => $j->service_name ?? 'General Service',
+                'statusCode' => $j->status_code,
+                'statusName' => $j->status_name,
+                'updatedAt' => $this->iso($j->updated_at),
+            ]);
+
+        return response()->json([
+            'mechanic_name' => $mechanic->full_name,
+            'stats' => [
+                'active_jobs' => $activeJobs,
+                'in_progress' => $inProgressJobs,
+                'completed_this_month' => $completedThisMonth,
+                'pending_parts' => $pendingParts,
+                'avg_rating' => !is_null($avgRating) ? round((float) $avgRating, 1) : null,
+            ],
+            'recent_jobs' => $recentJobs,
         ]);
     }
 }

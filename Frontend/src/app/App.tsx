@@ -46,6 +46,7 @@ const NotFound = lazy(() => import('@/features/common/NotFound'));
 const ShopBlockedScreen = lazy(() => import('@/features/common/ShopBlockedScreen'));
 
 // Mechanic pages
+const MechanicDashboardPage = lazy(() => import('@/features/mechanic/pages/MechanicDashboardPage'));
 const AssignedJobsPage = lazy(() => import('@/features/mechanic/pages/AssignedJobsPage'));
 const JobDetailsPage = lazy(() => import('@/features/mechanic/pages/JobDetailsPage'));
 const JobHistoryPage = lazy(() => import('@/features/mechanic/pages/JobHistoryPage'));
@@ -150,7 +151,7 @@ function DashboardIndexRedirect() {
   const { user } = useAuth();
   const role = normalizeRole(user?.role);
   if (role === 'Customer') return <Navigate to="/dashboard/customer" replace />;
-  if (role === 'Mechanic') return <Navigate to="/dashboard/mechanic/jobs" replace />;
+  if (role === 'Mechanic') return <Navigate to="/dashboard/mechanic" replace />;
   return <Suspense fallback={<PageLoader />}><NewDashboardWrapper /></Suspense>;
 }
 
@@ -265,6 +266,7 @@ function App() {
                             <Route path="customer/vehicles" element={<CustomerVehicles />} />
                           </Route>
                           <Route element={<RequireMechanic />}>
+                            <Route path="mechanic" element={<MechanicDashboardPage />} />
                             <Route path="mechanic/jobs" element={<AssignedJobsPage />} />
                             <Route path="mechanic/jobs/:id" element={<JobDetailsPage />} />
                             <Route path="mechanic/history" element={<JobHistoryPage />} />
