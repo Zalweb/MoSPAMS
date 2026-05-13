@@ -533,53 +533,48 @@ class MechanicController extends Controller
             return response()->json(['message' => 'Mechanic profile not found'], 404);
         }
 
+        $mid = (int) $mechanic->mechanic_id;
         $now = now();
-        $monthStartStr = $now->copy()->startOfMonth()->toDateString();
-        $threeMonthsAgoStr = $now->copy()->subMonths(3)->toDateString();
+        $monthStart = $now->copy()->startOfMonth()->toDateString();
+        $threeMonthsAgo = $now->copy()->subMonths(3)->toDateString();
 
-        // This month completed jobs (no ratings join — query separately)
-        $thisMonth = DB::table('service_jobs')
+        // Stats for current month
+        $currentMonthStats = DB::table('service_jobs')
             ->join('service_job_mechanics', 'service_job_mechanics.job_id_fk', '=', 'service_jobs.job_id')
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
-            ->where('service_job_mechanics.mechanic_id_fk', (int) $mechanic->mechanic_id)
+            ->where('service_job_mechanics.mechanic_id_fk', $mid)
             ->whereIn('service_job_statuses.status_code', ['work_done', 'completed'])
-            ->whereDate('service_jobs.completion_date', '>=', $monthStartStr)
-            ->select('service_jobs.job_id', 'service_jobs.completion_date', 'service_jobs.created_at')
-            ->get();
+            ->whereDate('service_jobs.completion_date', '>=', $monthStart)
+            ->selectRaw('
+                COUNT(*) as count,
+                AVG(TIMESTAMPDIFF(SECOND, service_jobs.created_at, service_jobs.completion_date)) as avg_duration
+            ')
+            ->first();
 
-        $thisMonthCount = $thisMonth->count();
-        $thisMonthDuration = $thisMonth->sum(function ($job) {
-            return $job->completion_date && $job->created_at
-                ? \Illuminate\Support\Carbon::parse($job->completion_date)->diffInSeconds(\Illuminate\Support\Carbon::parse($job->created_at)) / 3600
-                : 0;
-        }) / max($thisMonthCount, 1);
-
-        // Ratings queried separately so a missing ratings table doesn't crash the endpoint
-        $thisMonthRating = null;
-        if ($thisMonth->isNotEmpty() && \Illuminate\Support\Facades\Schema::hasTable('ratings')) {
-            $thisMonthRating = DB::table('ratings')
-                ->whereIn('service_job_id_fk', $thisMonth->pluck('job_id')->all())
+        // Rating average (queried separately for safety)
+        $avgRating = null;
+        if (\Illuminate\Support\Facades\Schema::hasTable('ratings')) {
+            $avgRating = DB::table('ratings')
+                ->where('mechanic_id_fk', $mid)
+                ->whereDate('created_at', '>=', $monthStart)
                 ->avg('rating');
         }
 
-        // Last 3 months trend
-        $threeMonths = DB::table('service_jobs')
-            ->join('service_job_mechanics', 'service_job_mechanics.job_id_fk', '=', 'service_jobs.job_id')
-            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
-            ->where('service_job_mechanics.mechanic_id_fk', (int) $mechanic->mechanic_id)
-            ->whereIn('service_job_statuses.status_code', ['work_done', 'completed'])
-            ->whereDate('service_jobs.completion_date', '>=', $threeMonthsAgoStr)
-            ->select('service_jobs.completion_date')
-            ->get();
-
+        // 3-month trend
         $trend = [];
         for ($i = 2; $i >= 0; $i--) {
             $monthDate = $now->copy()->subMonths($i);
-            $monthStartStr2 = $monthDate->copy()->startOfMonth()->toDateString();
-            $monthEndStr2 = $monthDate->copy()->endOfMonth()->toDateString();
+            $start = $monthDate->copy()->startOfMonth()->toDateString();
+            $end = $monthDate->copy()->endOfMonth()->toDateString();
 
-            // Use string date comparison so Collection::whereBetween works correctly
-            $count = $threeMonths->whereBetween('completion_date', [$monthStartStr2, $monthEndStr2])->count();
+            $count = DB::table('service_jobs')
+                ->join('service_job_mechanics', 'service_job_mechanics.job_id_fk', '=', 'service_jobs.job_id')
+                ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+                ->where('service_job_mechanics.mechanic_id_fk', $mid)
+                ->whereIn('service_job_statuses.status_code', ['work_done', 'completed'])
+                ->whereBetween('service_jobs.completion_date', [$start, $end])
+                ->count();
+
             $trend[] = [
                 'month' => $monthDate->format('M Y'),
                 'jobs_completed' => $count,
@@ -588,9 +583,9 @@ class MechanicController extends Controller
 
         return response()->json([
             'current_period' => [
-                'jobs_completed_this_month' => $thisMonthCount,
-                'avg_time_per_job_hours' => round($thisMonthDuration, 2),
-                'customer_rating' => !is_null($thisMonthRating) ? round((float) $thisMonthRating, 2) : null,
+                'jobs_completed_this_month' => (int) ($currentMonthStats->count ?? 0),
+                'avg_time_per_job_hours' => $currentMonthStats->avg_duration ? round((float)$currentMonthStats->avg_duration / 3600, 2) : 0,
+                'customer_rating' => !is_null($avgRating) ? round((float) $avgRating, 2) : null,
             ],
             'trend_last_three_months' => $trend,
         ]);
