@@ -5,7 +5,6 @@ import { usePaginatedFetch } from '@/shared/hooks/usePaginatedFetch';
 import type { Part } from '@/shared/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useTenantBranding } from '@/shared/contexts/TenantBrandingContext';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 20 },
@@ -14,7 +13,6 @@ const fadeUp = (delay = 0) => ({
 });
 
 export default function PartsCatalog() {
-  const { branding } = useTenantBranding();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
   
