@@ -2500,6 +2500,57 @@ class MospamsController extends Controller
         ]);
     }
 
+    public function linkBarcode(\App\Http\Requests\LinkBarcodeRequest $request)
+    {
+        $shop_id = auth()->user()->shop_id_fk;
+
+        $existing = \App\Models\PartBarcode::where('barcode_value', $request->barcode_value)
+            ->where('shop_id_fk', $shop_id)
+            ->first();
+
+        if ($existing && $existing->part_id !== $request->part_id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'This barcode is already linked to another part.',
+                'linked_part' => [
+                    'id' => $existing->part->id,
+                    'part_code' => $existing->part->part_code,
+                    'description' => $existing->part->description,
+                ],
+            ], 409);
+        }
+
+        if ($existing && $existing->part_id === $request->part_id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'This barcode is already linked to this part.',
+            ], 409);
+        }
+
+        $barcode = \App\Models\PartBarcode::create([
+            'part_id' => $request->part_id,
+            'barcode_value' => $request->barcode_value,
+            'barcode_type' => $request->barcode_type,
+            'shop_id_fk' => $shop_id,
+            'is_primary' => false,
+        ]);
+
+        $part = \App\Models\Part::find($request->part_id);
+
+        return response()->json([
+            'id' => $barcode->id,
+            'barcode_value' => $barcode->barcode_value,
+            'part_id' => $barcode->part_id,
+            'part' => [
+                'id' => $part->id,
+                'brand' => $part->brand,
+                'part_code' => $part->part_code,
+                'description' => $part->description,
+            ],
+            'message' => 'Barcode linked successfully',
+        ], 201);
+    }
+
     private function iso(mixed $value): ?string
     {
         return $value ? \Illuminate\Support\Carbon::parse($value)->toISOString() : null;

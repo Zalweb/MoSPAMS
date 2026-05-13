@@ -93,6 +93,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/stock-movements', [MospamsController::class, 'stockMovements'])->middleware('role:Owner,Staff');
         Route::post('/stock-movements', [MospamsController::class, 'storeStockMovement'])->middleware('role:Owner,Staff');
         Route::get('/inventory/barcode/{barcode}', [MospamsController::class, 'lookupBarcode'])->name('barcode.lookup')->middleware('role:Owner,Staff');
+        Route::post('/inventory/barcode/link', [MospamsController::class, 'linkBarcode'])->name('barcode.link')->middleware('role:Owner,Staff');
 
         Route::get('/services', [MospamsController::class, 'services'])->middleware('role:Owner,Staff');
         Route::get('/services/{service}', [MospamsController::class, 'showService'])->middleware('role:Owner,Staff');
