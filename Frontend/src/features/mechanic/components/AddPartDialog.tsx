@@ -87,9 +87,9 @@ export function AddPartDialog({ jobId, onClose, onSuccess }: AddPartDialogProps)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/60 backdrop-blur-sm">
-      <div className="w-full max-w-2xl bg-muted border border-border rounded-2xl shadow-2xl">
+      <div className="w-full max-w-2xl bg-muted border border-border rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-border">
+        <div className="flex items-center justify-between p-6 border-b border-border shrink-0">
           <h2 className="text-xl font-bold text-foreground">Add Part to Job</h2>
           <button
             onClick={onClose}
@@ -100,7 +100,7 @@ export function AddPartDialog({ jobId, onClose, onSuccess }: AddPartDialogProps)
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 overflow-y-auto flex-1">
           {/* Search */}
           <div>
             <label className="block text-sm font-medium text-muted-foreground mb-2">
@@ -215,7 +215,7 @@ export function AddPartDialog({ jobId, onClose, onSuccess }: AddPartDialogProps)
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-border">
+        <div className="flex items-center justify-end gap-3 p-6 border-t border-border shrink-0">
           <button
             onClick={onClose}
             className="px-4 py-2 rounded-xl bg-secondary dark:bg-zinc-800 text-foreground text-sm font-semibold hover:bg-muted dark:bg-zinc-700 transition-colors"

@@ -15,8 +15,15 @@ const fadeUp = (delay = 0) => ({
 export default function PartsCatalog() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
-  
+  const [cart, setCart] = useState<Record<string, number>>({});
+
   const { data: parts, loading } = usePaginatedFetch<Part>('/api/parts');
+
+  const cartCount = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+
+  const addToCart = (partId: string) => {
+    setCart(prev => ({ ...prev, [partId]: (prev[partId] ?? 0) + 1 }));
+  };
 
   const categories = useMemo(() => {
     const cats = new Set(parts.map(p => p.category));
@@ -111,9 +118,8 @@ export default function PartsCatalog() {
                   <Button
                     size="icon"
                     className="w-12 h-12 rounded-2xl bg-foreground text-background hover:scale-110 active:scale-95 transition-all duration-300"
-                    onClick={() => {
-                      // Future implementation: Add to cart or inquiry
-                    }}
+                    onClick={() => addToCart(part.id)}
+                    disabled={part.stock === 0}
                   >
                     <Plus className="w-6 h-6" />
                   </Button>
@@ -143,7 +149,7 @@ export default function PartsCatalog() {
           className="h-16 px-8 rounded-3xl bg-primary text-primary-foreground shadow-2xl shadow-primary/20 flex gap-3 hover:scale-105 active:scale-95 transition-all"
         >
           <ShoppingCart className="w-6 h-6" />
-          <span className="font-bold">Cart (0)</span>
+          <span className="font-bold">Cart ({cartCount})</span>
         </Button>
       </motion.div>
     </div>

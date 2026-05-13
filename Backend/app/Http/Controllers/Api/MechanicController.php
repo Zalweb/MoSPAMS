@@ -530,18 +530,17 @@ class MechanicController extends Controller
         }
 
         $now = now();
-        $monthStart = $now->copy()->startOfMonth();
-        $threeMonthsAgo = $now->copy()->subMonths(3);
+        $monthStartStr = $now->copy()->startOfMonth()->toDateString();
+        $threeMonthsAgoStr = $now->copy()->subMonths(3)->toDateString();
 
-        // This month stats
+        // This month completed jobs (no ratings join — query separately)
         $thisMonth = DB::table('service_jobs')
             ->join('service_job_mechanics', 'service_job_mechanics.job_id_fk', '=', 'service_jobs.job_id')
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
-            ->leftJoin('ratings', 'ratings.service_job_id_fk', '=', 'service_jobs.job_id')
             ->where('service_job_mechanics.mechanic_id_fk', (int) $mechanic->mechanic_id)
             ->where('service_job_statuses.status_code', 'work_done')
-            ->whereDate('service_jobs.completion_date', '>=', $monthStart)
-            ->select('service_jobs.*', 'ratings.rating')
+            ->whereDate('service_jobs.completion_date', '>=', $monthStartStr)
+            ->select('service_jobs.job_id', 'service_jobs.completion_date', 'service_jobs.created_at')
             ->get();
 
         $thisMonthCount = $thisMonth->count();
@@ -551,7 +550,13 @@ class MechanicController extends Controller
                 : 0;
         }) / max($thisMonthCount, 1);
 
-        $thisMonthRating = $thisMonth->average(fn($job) => $job->rating);
+        // Ratings queried separately so a missing ratings table doesn't crash the endpoint
+        $thisMonthRating = null;
+        if ($thisMonth->isNotEmpty() && \Illuminate\Support\Facades\Schema::hasTable('ratings')) {
+            $thisMonthRating = DB::table('ratings')
+                ->whereIn('service_job_id_fk', $thisMonth->pluck('job_id')->all())
+                ->avg('rating');
+        }
 
         // Last 3 months trend
         $threeMonths = DB::table('service_jobs')
@@ -559,19 +564,20 @@ class MechanicController extends Controller
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
             ->where('service_job_mechanics.mechanic_id_fk', (int) $mechanic->mechanic_id)
             ->where('service_job_statuses.status_code', 'work_done')
-            ->whereDate('service_jobs.completion_date', '>=', $threeMonthsAgo)
-            ->select('service_jobs.*')
+            ->whereDate('service_jobs.completion_date', '>=', $threeMonthsAgoStr)
+            ->select('service_jobs.completion_date')
             ->get();
 
         $trend = [];
         for ($i = 2; $i >= 0; $i--) {
             $monthDate = $now->copy()->subMonths($i);
-            $monthStartDate = $monthDate->copy()->startOfMonth();
-            $monthEndDate = $monthDate->copy()->endOfMonth();
+            $monthStartStr2 = $monthDate->copy()->startOfMonth()->toDateString();
+            $monthEndStr2 = $monthDate->copy()->endOfMonth()->toDateString();
 
-            $count = $threeMonths->whereBetween('completion_date', [$monthStartDate, $monthEndDate])->count();
+            // Use string date comparison so Collection::whereBetween works correctly
+            $count = $threeMonths->whereBetween('completion_date', [$monthStartStr2, $monthEndStr2])->count();
             $trend[] = [
-                'month' => $monthDate->format('Y-m'),
+                'month' => $monthDate->format('M Y'),
                 'jobs_completed' => $count,
             ];
         }
@@ -580,7 +586,7 @@ class MechanicController extends Controller
             'current_period' => [
                 'jobs_completed_this_month' => $thisMonthCount,
                 'avg_time_per_job_hours' => round($thisMonthDuration, 2),
-                'customer_rating' => $thisMonthRating ? round($thisMonthRating, 2) : null,
+                'customer_rating' => $thisMonthRating ? round((float) $thisMonthRating, 2) : null,
             ],
             'trend_last_three_months' => $trend,
         ]);

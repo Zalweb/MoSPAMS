@@ -55,10 +55,13 @@ class CustomerController extends Controller
             ->get()
             ->keyBy('job_id_fk');
 
-        $ratedJobIds = DB::table('ratings')
-            ->whereIn('service_job_id_fk', $jobIds)
-            ->pluck('service_job_id_fk')
-            ->flip();
+        $ratedJobIds = [];
+        if ($jobIds && \Illuminate\Support\Facades\Schema::hasTable('ratings')) {
+            $ratedJobIds = DB::table('ratings')
+                ->whereIn('service_job_id_fk', $jobIds)
+                ->pluck('service_job_id_fk')
+                ->toArray();
+        }
 
         $services = $rows->map(fn ($row) => [
             'id'               => (string) $row->job_id,
@@ -74,7 +77,7 @@ class CustomerController extends Controller
             'partsUsed'        => collect($partsByJob->get($row->job_id, []))->map(fn ($p) => ['name' => $p->part_name, 'quantity' => (int) $p->quantity])->values(),
             'createdAt'        => $row->created_at ? \Illuminate\Support\Carbon::parse($row->created_at)->toISOString() : null,
             'completedAt'      => $row->completion_date ? \Illuminate\Support\Carbon::parse($row->completion_date)->toISOString() : null,
-            'hasRating'        => isset($ratedJobIds[$row->job_id]),
+            'hasRating'        => in_array($row->job_id, $ratedJobIds),
         ]);
 
         return response()->json(['data' => $services]);
