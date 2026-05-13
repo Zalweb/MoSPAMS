@@ -181,6 +181,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Mechanic routes
         Route::middleware(['role:Mechanic'])->prefix('mechanic')->group(function () {
             Route::get('/jobs', [MechanicController::class, 'assignedJobs']);
+            Route::get('/history', [MechanicController::class, 'history']);
             Route::get('/jobs/{job}', [MechanicController::class, 'jobDetails']);
             Route::patch('/jobs/{job}/status', [MechanicController::class, 'updateJobStatus']);
             Route::post('/jobs/{job}/parts', [MechanicController::class, 'addPartToJob']);

@@ -435,4 +435,89 @@ class MechanicController extends Controller
     {
         return $value ? \Illuminate\Support\Carbon::parse($value)->toISOString() : null;
     }
+
+    public function history(Request $request): JsonResponse
+    {
+        $mechanic = $this->findMechanicProfile($request);
+
+        if (!$mechanic) {
+            return response()->json(['message' => 'Mechanic profile not found'], 404);
+        }
+
+        $query = DB::table('service_jobs')
+            ->join('service_job_mechanics', 'service_job_mechanics.job_id_fk', '=', 'service_jobs.job_id')
+            ->join('customers', 'customers.customer_id', '=', 'service_jobs.customer_id_fk')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->leftJoin('service_job_items', 'service_job_items.job_id_fk', '=', 'service_jobs.job_id')
+            ->leftJoin('service_types', 'service_types.service_type_id', '=', 'service_job_items.service_type_id_fk')
+            ->where('service_job_mechanics.mechanic_id_fk', (int) $mechanic->mechanic_id)
+            ->where('service_job_statuses.status_code', 'work_done')
+            ->select(
+                'service_jobs.*',
+                'customers.full_name as customer_name',
+                'service_types.service_name'
+            );
+
+        // Date range filter
+        if ($request->filled('date_from')) {
+            $query->whereDate('service_jobs.completion_date', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('service_jobs.completion_date', '<=', $request->date_to);
+        }
+
+        // Search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('customers.full_name', 'like', "%$search%")
+                  ->orWhere('service_types.service_name', 'like', "%$search%");
+            });
+        }
+
+        $jobs = $query->orderByDesc('service_jobs.completion_date')
+            ->distinct()
+            ->paginate(20);
+
+        // Get ratings for these jobs
+        $jobIds = $jobs->pluck('job_id')->all();
+        $ratings = [];
+        if ($jobIds) {
+            $ratings = DB::table('ratings')
+                ->whereIn('service_job_id_fk', $jobIds)
+                ->get()
+                ->keyBy('service_job_id_fk')
+                ->toArray();
+        }
+
+        $data = $jobs->map(function ($job) use ($ratings) {
+            $rating = $ratings[$job->job_id] ?? null;
+            $durationHours = null;
+            if ($job->completion_date && $job->created_at) {
+                $completedAt = \Illuminate\Support\Carbon::parse($job->completion_date);
+                $createdAt = \Illuminate\Support\Carbon::parse($job->created_at);
+                $durationHours = round($completedAt->diffInSeconds($createdAt) / 3600, 2);
+            }
+
+            return [
+                'id' => (string) $job->job_id,
+                'service_type' => $job->service_name ?? 'General Service',
+                'customer_name' => $job->customer_name,
+                'completed_at' => $this->iso($job->completion_date),
+                'duration_hours' => $durationHours,
+                'rating' => $rating ? (int) $rating->rating : null,
+                'comment' => $rating ? $rating->comment : null,
+            ];
+        });
+
+        return response()->json([
+            'data' => $data,
+            'pagination' => [
+                'current_page' => $jobs->currentPage(),
+                'total' => $jobs->total(),
+                'per_page' => $jobs->perPage(),
+                'last_page' => $jobs->lastPage(),
+            ]
+        ]);
+    }
 }
