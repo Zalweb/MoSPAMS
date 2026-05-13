@@ -53,6 +53,7 @@ export interface CustomerService {
   partsUsed: { name: string; quantity: number }[];
   createdAt: string;
   completedAt?: string;
+  hasRating?: boolean;
 }
 
 export interface Transaction {

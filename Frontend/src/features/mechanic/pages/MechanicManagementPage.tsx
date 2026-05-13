@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Pencil, Trash2, Search, Wrench, Phone, Mail, Power, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Wrench, Phone, Mail, Power, ChevronLeft, ChevronRight, BarChart3, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,6 +19,22 @@ interface Mechanic {
   status: string;
   statusCode: string;
   createdAt: string;
+}
+
+interface MechanicPerf {
+  id: string | number;
+  name: string;
+  jobs_this_month: number;
+  avg_rating: number | null;
+  last_activity: string | null;
+}
+
+interface MechanicDetail {
+  mechanic_name: string;
+  jobs_completed_this_month: number;
+  avg_rating: number | null;
+  trend_last_three_months: Array<{ month: string; jobs_completed: number }>;
+  recent_jobs: Array<{ id: number; service_type: string; customer_name: string; completed_at: string; rating: number | null; comment: string | null }>;
 }
 
 const mechanicSchema = z.object({
@@ -38,6 +54,9 @@ export default function MechanicManagementPage() {
   const [confirmDelete, setConfirmDelete] = useState<Mechanic | null>(null);
   const [meta, setMeta] = useState<{ currentPage: number; lastPage: number; total: number } | null>(null);
   const [page, setPage] = useState(1);
+  const [perfMap, setPerfMap] = useState<Record<string, MechanicPerf>>({});
+  const [selectedPerf, setSelectedPerf] = useState<MechanicDetail | null>(null);
+  const [perfLoading, setPerfLoading] = useState(false);
 
   const form = useForm<MechanicForm>({
     resolver: zodResolver(mechanicSchema),
@@ -63,6 +82,31 @@ export default function MechanicManagementPage() {
   }, [search]);
 
   useEffect(() => { void fetchMechanics(); }, [fetchMechanics]);
+
+  useEffect(() => {
+    const fetchPerf = async () => {
+      try {
+        const res = await apiGet<{ data: MechanicPerf[] }>('/api/owner/mechanics');
+        const map: Record<string, MechanicPerf> = {};
+        res.data.forEach(p => { map[String(p.id)] = p; });
+        setPerfMap(map);
+      } catch { /* non-critical */ }
+    };
+    void fetchPerf();
+  }, []);
+
+  const openPerfDetail = async (mechanicId: string) => {
+    setPerfLoading(true);
+    setSelectedPerf(null);
+    try {
+      const res = await apiGet<{ data: MechanicDetail }>(`/api/owner/mechanics/${mechanicId}`);
+      setSelectedPerf(res.data);
+    } catch {
+      toast.error('Failed to load performance details');
+    } finally {
+      setPerfLoading(false);
+    }
+  };
 
   const openAdd = () => { setEditing(null); form.reset({ name: '', phone: '', email: '', address: '' }); setModalOpen(true); };
   const openEdit = (m: Mechanic) => { setEditing(m); form.reset({ name: m.name, phone: m.phone || '', email: m.email || '', address: m.address || '' }); setModalOpen(true); };
@@ -140,6 +184,8 @@ export default function MechanicManagementPage() {
                 <th className="text-left px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Contact</th>
                 <th className="text-left px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
                 <th className="text-left px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Joined</th>
+                <th className="text-left px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Jobs (Mo.)</th>
+                <th className="text-left px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Avg Rating</th>
                 <th className="text-right px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider"></th>
               </tr>
             </thead>
@@ -173,8 +219,22 @@ export default function MechanicManagementPage() {
                   <td className="px-5 py-4 hidden sm:table-cell text-xs text-muted-foreground tabular-nums">
                     {new Date(m.createdAt).toLocaleDateString()}
                   </td>
+                  <td className="px-5 py-4 hidden md:table-cell text-sm font-semibold text-foreground">
+                    {perfMap[m.id]?.jobs_this_month ?? '—'}
+                  </td>
+                  <td className="px-5 py-4 hidden md:table-cell text-sm">
+                    {perfMap[m.id]?.avg_rating != null ? (
+                      <span className="flex items-center gap-1">
+                        <span className="font-semibold text-foreground">{perfMap[m.id].avg_rating}</span>
+                        <span className="text-yellow-400">★</span>
+                      </span>
+                    ) : <span className="text-muted-foreground">—</span>}
+                  </td>
                   <td className="px-5 py-4 text-right">
                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button onClick={() => openPerfDetail(m.id)} className="p-2 rounded-lg hover:bg-blue-500/10 text-muted-foreground hover:text-blue-400 transition-colors" title="View Performance">
+                        <BarChart3 className="w-4 h-4" />
+                      </button>
                       <button onClick={() => toggleStatus(m)} className="p-2 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-muted-foreground dark:text-zinc-300 transition-colors" title={m.statusCode === 'active' ? 'Deactivate' : 'Activate'}>
                         <Power className="w-4 h-4" />
                       </button>
@@ -259,6 +319,74 @@ export default function MechanicManagementPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Performance Detail Modal */}
+      {(perfLoading || selectedPerf) && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-background border border-border rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b border-border sticky top-0 bg-background">
+              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-primary" />
+                {selectedPerf?.mechanic_name ?? 'Performance'}
+              </h3>
+              <button onClick={() => setSelectedPerf(null)} className="p-1 hover:bg-secondary rounded-lg transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            {perfLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : selectedPerf && (
+              <div className="p-6 space-y-5">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="border border-border rounded-xl p-4">
+                    <p className="text-xs text-muted-foreground">Jobs This Month</p>
+                    <p className="text-2xl font-bold text-foreground mt-1">{selectedPerf.jobs_completed_this_month}</p>
+                  </div>
+                  <div className="border border-border rounded-xl p-4">
+                    <p className="text-xs text-muted-foreground">Avg Rating</p>
+                    <p className="text-2xl font-bold text-foreground mt-1">
+                      {selectedPerf.avg_rating != null ? <>{selectedPerf.avg_rating} <span className="text-yellow-400 text-xl">★</span></> : 'N/A'}
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground mb-3">3-Month Trend</p>
+                  <div className="flex items-end gap-4 h-28">
+                    {selectedPerf.trend_last_three_months.map((t, i) => {
+                      const max = Math.max(...selectedPerf.trend_last_three_months.map(x => x.jobs_completed), 1);
+                      return (
+                        <div key={i} className="flex-1 flex flex-col items-center justify-end gap-1">
+                          <span className="text-xs font-bold text-foreground">{t.jobs_completed}</span>
+                          <div className="w-full bg-primary/70 rounded-t" style={{ height: `${(t.jobs_completed / max) * 64}px`, minHeight: '3px' }} />
+                          <span className="text-[10px] text-muted-foreground">{t.month}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                {selectedPerf.recent_jobs.length > 0 && (
+                  <div>
+                    <p className="text-sm font-semibold text-foreground mb-2">Recent Jobs</p>
+                    <div className="space-y-2">
+                      {selectedPerf.recent_jobs.slice(0, 5).map(job => (
+                        <div key={job.id} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                          <div>
+                            <p className="text-sm text-foreground">{job.service_type}</p>
+                            <p className="text-xs text-muted-foreground">{job.customer_name}</p>
+                          </div>
+                          {job.rating && <span className="text-sm font-medium text-yellow-500">{job.rating} ★</span>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

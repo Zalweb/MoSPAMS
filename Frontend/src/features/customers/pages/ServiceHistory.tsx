@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Wrench, Clock, CheckCircle2, Search, XCircle, Calendar, CreditCard, User, Package, Ban, Loader2, AlertTriangle } from 'lucide-react';
+import { Wrench, Clock, CheckCircle2, Search, XCircle, Calendar, CreditCard, User, Package, Ban, Loader2, AlertTriangle, Star } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { apiGet, apiMutation } from '@/shared/lib/api';
 import type { CustomerService } from '@/shared/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import RatingDialog from '@/features/mechanic/components/RatingDialog';
 
 type StatusFilter = 'All' | 'Pending' | 'Confirmed' | 'Ongoing' | 'Work Done' | 'Completed' | 'Cancelled';
 
@@ -22,6 +23,7 @@ export default function ServiceHistory() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('All');
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null);
+  const [ratingDialog, setRatingDialog] = useState<{ jobId: string; mechanicName: string; serviceType: string } | null>(null);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -191,6 +193,20 @@ export default function ServiceHistory() {
                           {cancellingId === service.id ? 'Cancelling…' : 'Cancel Request'}
                         </button>
                       )}
+                      {service.statusCode === 'work_done' && !service.hasRating && service.mechanics.length > 0 && (
+                        <button
+                          onClick={() => setRatingDialog({ jobId: service.id, mechanicName: service.mechanics[0].name, serviceType: service.serviceType })}
+                          className="mt-3 text-[11px] font-bold text-yellow-500 hover:text-yellow-400 transition-colors flex items-center gap-1.5 bg-yellow-500/5 px-3 py-1.5 rounded-lg border border-yellow-500/10 hover:border-yellow-500/20 active:scale-95 ml-auto"
+                        >
+                          <Star className="w-3.5 h-3.5" />
+                          Rate Mechanic
+                        </button>
+                      )}
+                      {service.statusCode === 'work_done' && service.hasRating && (
+                        <span className="mt-3 text-[11px] font-semibold text-green-500 flex items-center gap-1.5 ml-auto">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Rated
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -199,6 +215,21 @@ export default function ServiceHistory() {
           })
         )}
       </div>
+
+      {/* Rating dialog */}
+      {ratingDialog && (
+        <RatingDialog
+          jobId={ratingDialog.jobId}
+          mechanicName={ratingDialog.mechanicName}
+          serviceType={ratingDialog.serviceType}
+          isOpen={true}
+          onClose={() => setRatingDialog(null)}
+          onSubmit={() => {
+            setServices(prev => prev.map(s => s.id === ratingDialog.jobId ? { ...s, hasRating: true } : s));
+            setRatingDialog(null);
+          }}
+        />
+      )}
 
       {/* Cancel confirmation modal */}
       <AnimatePresence>

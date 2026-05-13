@@ -48,6 +48,8 @@ const ShopBlockedScreen = lazy(() => import('@/features/common/ShopBlockedScreen
 // Mechanic pages
 const AssignedJobsPage = lazy(() => import('@/features/mechanic/pages/AssignedJobsPage'));
 const JobDetailsPage = lazy(() => import('@/features/mechanic/pages/JobDetailsPage'));
+const JobHistoryPage = lazy(() => import('@/features/mechanic/pages/JobHistoryPage'));
+const PerformanceDashboardPage = lazy(() => import('@/features/mechanic/pages/PerformanceDashboardPage'));
 
 // SuperAdmin pages
 const MechanicManagementPage = lazy(() => import('@/features/mechanic/pages/MechanicManagementPage'));
@@ -265,6 +267,8 @@ function App() {
                           <Route element={<RequireMechanic />}>
                             <Route path="mechanic/jobs" element={<AssignedJobsPage />} />
                             <Route path="mechanic/jobs/:id" element={<JobDetailsPage />} />
+                            <Route path="mechanic/history" element={<JobHistoryPage />} />
+                            <Route path="mechanic/performance" element={<PerformanceDashboardPage />} />
                           </Route>
                           <Route path="*" element={<NotFound />} />
                         </Route>
