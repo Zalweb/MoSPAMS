@@ -119,11 +119,32 @@ export default function Inventory() {
   };
   const handlePartAdded = () => { setShowAddForm(false); setPage(1); };
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const compressImage = (file: File): Promise<File> =>
+    new Promise((resolve) => {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        const MAX = 1920;
+        let { width, height } = img;
+        if (width > MAX) { height = Math.round((height * MAX) / width); width = MAX; }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d')!.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => resolve(new File([blob!], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' })),
+          'image/jpeg', 0.85
+        );
+      };
+      img.src = objectUrl;
+    });
+
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setPendingImage(file);
     setImagePreview(URL.createObjectURL(file));
+    const toUpload = file.size > 500 * 1024 ? await compressImage(file) : file;
+    setPendingImage(toUpload);
   };
 
   const clearImage = () => {

@@ -421,7 +421,7 @@ class MospamsController extends Controller
         abort_if(! $existing, 404);
 
         $request->validate([
-            'image' => ['required', 'image', 'max:2048', 'mimes:jpg,jpeg,png,webp'],
+            'image' => ['required', 'image', 'max:10240', 'mimes:jpg,jpeg,png,webp'],
         ]);
 
         if ($existing->image_path) {
