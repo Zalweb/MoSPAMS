@@ -116,7 +116,7 @@ export function BarcodeScannerModal({
 
       {/* Camera View or Manual Input */}
       {!showManualInput ? (
-        <div className="flex-1 relative flex items-center justify-center overflow-hidden">
+        <div className="flex-1 relative flex items-center justify-center overflow-hidden bg-black">
           {error ? (
             <div className="text-white text-center p-4">
               <p className="mb-4">{error}</p>
@@ -124,49 +124,57 @@ export function BarcodeScannerModal({
                 Enter Manually
               </Button>
             </div>
-          ) : cameraEnabled ? (
+          ) : (
             <>
               <video
                 ref={videoRef}
                 autoPlay
                 playsInline
                 muted
-                className="w-full h-full object-cover"
+                className={`w-full h-full object-cover ${cameraEnabled ? 'opacity-100' : 'opacity-0'}`}
                 style={{ transform: 'scaleX(-1)' }}
               />
               <canvas ref={canvasRef} style={{ display: 'none' }} />
 
-              {/* Corner Markers */}
-              <div className="absolute inset-0 pointer-events-none">
-                <svg className="w-full h-full" viewBox="0 0 400 400" preserveAspectRatio="none">
-                  {/* Top Left */}
-                  <line x1="20" y1="20" x2="80" y2="20" stroke="white" strokeWidth="3" />
-                  <line x1="20" y1="20" x2="20" y2="80" stroke="white" strokeWidth="3" />
-
-                  {/* Top Right */}
-                  <line x1="380" y1="20" x2="320" y2="20" stroke="white" strokeWidth="3" />
-                  <line x1="380" y1="20" x2="380" y2="80" stroke="white" strokeWidth="3" />
-
-                  {/* Bottom Left */}
-                  <line x1="20" y1="380" x2="80" y2="380" stroke="white" strokeWidth="3" />
-                  <line x1="20" y1="380" x2="20" y2="320" stroke="white" strokeWidth="3" />
-
-                  {/* Bottom Right */}
-                  <line x1="380" y1="380" x2="320" y2="380" stroke="white" strokeWidth="3" />
-                  <line x1="380" y1="380" x2="380" y2="320" stroke="white" strokeWidth="3" />
-                </svg>
-              </div>
-
-              {detectedBarcode && (
-                <div className="absolute top-1/2 -translate-y-1/2 bg-green-500 text-white px-4 py-2 rounded-lg font-semibold">
-                  ✓ Detected
+              {!cameraEnabled && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black">
+                  <div className="text-white text-center">
+                    <p className="mb-4">Starting camera...</p>
+                  </div>
                 </div>
               )}
+
+              {cameraEnabled && (
+                <>
+                  {/* Corner Markers */}
+                  <div className="absolute inset-0 pointer-events-none">
+                    <svg className="w-full h-full" viewBox="0 0 400 400" preserveAspectRatio="none">
+                      {/* Top Left */}
+                      <line x1="20" y1="20" x2="80" y2="20" stroke="white" strokeWidth="3" />
+                      <line x1="20" y1="20" x2="20" y2="80" stroke="white" strokeWidth="3" />
+
+                      {/* Top Right */}
+                      <line x1="380" y1="20" x2="320" y2="20" stroke="white" strokeWidth="3" />
+                      <line x1="380" y1="20" x2="380" y2="80" stroke="white" strokeWidth="3" />
+
+                      {/* Bottom Left */}
+                      <line x1="20" y1="380" x2="80" y2="380" stroke="white" strokeWidth="3" />
+                      <line x1="20" y1="380" x2="20" y2="320" stroke="white" strokeWidth="3" />
+
+                      {/* Bottom Right */}
+                      <line x1="380" y1="380" x2="320" y2="380" stroke="white" strokeWidth="3" />
+                      <line x1="380" y1="380" x2="380" y2="320" stroke="white" strokeWidth="3" />
+                    </svg>
+                  </div>
+
+                  {detectedBarcode && (
+                    <div className="absolute top-1/2 -translate-y-1/2 bg-green-500 text-white px-4 py-2 rounded-lg font-semibold">
+                      ✓ Detected
+                    </div>
+                  )}
+                </>
+              )}
             </>
-          ) : (
-            <div className="text-white text-center">
-              <p className="mb-4">Starting camera...</p>
-            </div>
           )}
         </div>
       ) : (
