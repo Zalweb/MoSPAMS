@@ -164,7 +164,6 @@ export function BarcodeScannerModal({
                 muted
                 controls={false}
                 className={`w-full h-full object-cover ${cameraEnabled ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
-                style={{ transform: 'scaleX(-1)', WebkitTransform: 'scaleX(-1)' }}
               />
               <canvas ref={canvasRef} style={{ display: 'none' }} />
 
