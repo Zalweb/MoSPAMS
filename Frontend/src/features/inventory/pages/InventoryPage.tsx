@@ -98,6 +98,7 @@ export default function Inventory() {
   });
 
   const openAdd = () => { setShowAddForm(true); };
+  const openAddFormManually = () => { setEditing(null); form.reset({ brand: '', name: '', partCode: '', category: defaultCategory, stock: 0, minStock: 5, price: 0, barcode: '' }); setModalOpen(true); setShowAddForm(false); };
   const openEdit = (part: Part) => { setEditing(part); form.reset({ brand: part.brand || '', name: part.name, partCode: part.partCode || '', category: part.category, stock: part.stock, minStock: part.minStock, price: part.price, barcode: part.barcode }); setModalOpen(true); };
   const handlePartAdded = () => { setShowAddForm(false); setPage(1); };
 
@@ -433,6 +434,7 @@ export default function Inventory() {
       {showAddForm && (
         <PartFormWithScanning
           onClose={() => setShowAddForm(false)}
+          onManualEntry={openAddFormManually}
           onPartAdded={handlePartAdded}
         />
       )}
