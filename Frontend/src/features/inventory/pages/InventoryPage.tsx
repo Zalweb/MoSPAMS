@@ -17,7 +17,9 @@ import { PartFormWithScanning } from '@/features/inventory/components/PartFormWi
 import type { Part, StockMovement } from '@/shared/types';
 
 const partSchema = z.object({
+  brand: z.string().min(0),
   name: z.string().min(2, 'Name is too short'),
+  partCode: z.string().min(0),
   category: z.string().min(1, 'Required'),
   stock: z.number().int().min(0),
   minStock: z.number().int().min(0),
@@ -78,7 +80,7 @@ export default function Inventory() {
 
   const form = useForm<PartForm>({
     resolver: zodResolver(partSchema),
-    defaultValues: { name: '', category: defaultCategory, stock: 0, minStock: 5, price: 0, barcode: '' },
+    defaultValues: { brand: '', name: '', partCode: '', category: defaultCategory, stock: 0, minStock: 5, price: 0, barcode: '' },
   });
   const categoryForm = useForm<CategoryForm>({
     resolver: zodResolver(categorySchema),
@@ -95,8 +97,8 @@ export default function Inventory() {
     return matchesSearch && matchesCat;
   });
 
-  const openAdd = () => { setEditing(null); form.reset({ name: '', category: defaultCategory, stock: 0, minStock: 5, price: 0, barcode: '' }); setModalOpen(true); };
-  const openEdit = (part: Part) => { setEditing(part); form.reset({ name: part.name, category: part.category, stock: part.stock, minStock: part.minStock, price: part.price, barcode: part.barcode }); setModalOpen(true); };
+  const openAdd = () => { setEditing(null); form.reset({ brand: '', name: '', partCode: '', category: defaultCategory, stock: 0, minStock: 5, price: 0, barcode: '' }); setModalOpen(true); };
+  const openEdit = (part: Part) => { setEditing(part); form.reset({ brand: part.brand || '', name: part.name, partCode: part.partCode || '', category: part.category, stock: part.stock, minStock: part.minStock, price: part.price, barcode: part.barcode }); setModalOpen(true); };
   const handlePartAdded = () => { setShowScanForm(false); setPage(1); };
 
   const onSubmit = form.handleSubmit(async (values) => {
@@ -289,6 +291,16 @@ export default function Inventory() {
             <DialogTitle className="text-base font-semibold text-foreground">{editing ? 'Edit Part' : 'Add New Part'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4 pt-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs font-medium text-muted-foreground">Brand</Label>
+                <Input {...form.register('brand')} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="e.g. Yamaha" />
+              </div>
+              <div>
+                <Label className="text-xs font-medium text-muted-foreground">Part Code</Label>
+                <Input {...form.register('partCode')} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="e.g. 1LB-H3912-00" />
+              </div>
+            </div>
             <div>
               <Label className="text-xs font-medium text-muted-foreground">Part Name</Label>
               <Input {...form.register('name')} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="e.g. Brake Pad Set" />

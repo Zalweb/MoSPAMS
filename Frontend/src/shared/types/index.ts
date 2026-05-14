@@ -9,6 +9,8 @@ export interface Category {
 export interface Part {
   id: string;
   name: string;
+  brand?: string;
+  partCode?: string;
   category: string;
   stock: number;
   minStock: number;
