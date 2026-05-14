@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { X, Settings } from 'lucide-react';
 import {
   detectBarcode,
   requestCameraPermission,
@@ -23,27 +24,30 @@ export function BarcodeScannerModal({
   const [manualInput, setManualInput] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [detectedBarcode, setDetectedBarcode] = useState<string | null>(null);
+  const [showManualInput, setShowManualInput] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
 
     const startCamera = async () => {
-      const hasPermission = await requestCameraPermission();
-      if (!hasPermission) {
-        setError('Camera access required. Please grant permission in settings.');
-        return;
-      }
-
       try {
+        const hasPermission = await requestCameraPermission();
+        if (!hasPermission) {
+          setError('Camera access required');
+          return;
+        }
+
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'environment' },
         });
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           setCameraEnabled(true);
+          setError(null);
         }
       } catch (err) {
         setError('Unable to access camera');
+        setCameraEnabled(false);
       }
     };
 
@@ -86,56 +90,117 @@ export function BarcodeScannerModal({
     setManualInput('');
     setDetectedBarcode(null);
     setCameraEnabled(false);
+    setShowManualInput(false);
     onClose();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4">Scan Barcode</h2>
+    <div className="fixed inset-0 bg-black z-50 flex flex-col">
+      {/* Header */}
+      <div className="pt-6 px-4 pb-4">
+        <h2 className="text-white text-center text-lg font-medium">
+          {showManualInput ? 'Enter Barcode' : 'Scan Barcode/QR'}
+        </h2>
+      </div>
 
-        {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>}
+      {/* Camera View or Manual Input */}
+      {!showManualInput ? (
+        <div className="flex-1 relative flex items-center justify-center overflow-hidden">
+          {error ? (
+            <div className="text-white text-center p-4">
+              <p className="mb-4">{error}</p>
+              <Button onClick={() => setShowManualInput(true)} className="bg-blue-600 hover:bg-blue-700">
+                Enter Manually
+              </Button>
+            </div>
+          ) : cameraEnabled ? (
+            <>
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                className="w-full h-full object-cover"
+              />
+              <canvas ref={canvasRef} style={{ display: 'none' }} />
 
-        {cameraEnabled && !error && (
-          <div className="mb-4">
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              className="w-full aspect-square bg-gray-900 rounded border-2 border-gray-400"
-            />
-            <canvas ref={canvasRef} style={{ display: 'none' }} />
-            {detectedBarcode && (
-              <p className="mt-2 text-green-600 font-semibold">
-                Detected: {detectedBarcode}
-              </p>
-            )}
-          </div>
-        )}
+              {/* Corner Markers */}
+              <div className="absolute inset-0 pointer-events-none">
+                <svg className="w-full h-full" viewBox="0 0 400 400" preserveAspectRatio="none">
+                  {/* Top Left */}
+                  <line x1="20" y1="20" x2="80" y2="20" stroke="white" strokeWidth="3" />
+                  <line x1="20" y1="20" x2="20" y2="80" stroke="white" strokeWidth="3" />
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Or enter manually:</label>
-          <Input
-            placeholder="Type barcode..."
-            value={manualInput}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setManualInput(e.target.value)}
-            onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleManualSubmit()}
-          />
+                  {/* Top Right */}
+                  <line x1="380" y1="20" x2="320" y2="20" stroke="white" strokeWidth="3" />
+                  <line x1="380" y1="20" x2="380" y2="80" stroke="white" strokeWidth="3" />
+
+                  {/* Bottom Left */}
+                  <line x1="20" y1="380" x2="80" y2="380" stroke="white" strokeWidth="3" />
+                  <line x1="20" y1="380" x2="20" y2="320" stroke="white" strokeWidth="3" />
+
+                  {/* Bottom Right */}
+                  <line x1="380" y1="380" x2="320" y2="380" stroke="white" strokeWidth="3" />
+                  <line x1="380" y1="380" x2="380" y2="320" stroke="white" strokeWidth="3" />
+                </svg>
+              </div>
+
+              {detectedBarcode && (
+                <div className="absolute top-1/2 -translate-y-1/2 bg-green-500 text-white px-4 py-2 rounded-lg font-semibold">
+                  ✓ Detected
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-white text-center">
+              <p className="mb-4">Starting camera...</p>
+            </div>
+          )}
         </div>
+      ) : (
+        <div className="flex-1 flex items-center justify-center px-4">
+          <div className="w-full max-w-sm">
+            <Input
+              autoFocus
+              placeholder="Enter barcode..."
+              value={manualInput}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setManualInput(e.target.value)}
+              onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleManualSubmit()}
+              className="h-14 text-lg"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Footer Buttons */}
+      <div className="px-4 pb-6 pt-4 flex justify-between items-center">
+        <button
+          onClick={handleClose}
+          className="text-white hover:bg-white/10 rounded-full p-3 transition-colors"
+          aria-label="Close"
+        >
+          <X size={24} />
+        </button>
 
         <div className="flex gap-2">
-          <Button
-            onClick={handleManualSubmit}
-            disabled={!manualInput.trim()}
-            className="flex-1"
-          >
-            Use Barcode
-          </Button>
-          <Button onClick={handleClose} variant="outline" className="flex-1">
-            Cancel
-          </Button>
+          {showManualInput ? (
+            <Button
+              onClick={handleManualSubmit}
+              disabled={!manualInput.trim()}
+              className="bg-blue-600 hover:bg-blue-700 h-12 px-6"
+            >
+              Use Barcode
+            </Button>
+          ) : (
+            <button
+              onClick={() => setShowManualInput(true)}
+              className="text-white hover:bg-white/10 rounded-full p-3 transition-colors"
+              aria-label="Manual input"
+            >
+              <Settings size={24} />
+            </button>
+          )}
         </div>
       </div>
     </div>

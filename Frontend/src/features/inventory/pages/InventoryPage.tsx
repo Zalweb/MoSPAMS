@@ -58,13 +58,13 @@ export default function Inventory() {
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('All');
   const [modalOpen, setModalOpen] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [editing, setEditing] = useState<Part | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [stockMoveTarget, setStockMoveTarget] = useState<Part | null>(null);
   const [historyTarget, setHistoryTarget] = useState<Part | null>(null);
   const [partHistory, setPartHistory] = useState<StockMovement[]>([]);
-  const [showScanForm, setShowScanForm] = useState(false);
 
   const { data: parts, loading, meta, page, setPage, prependItem, updateItem, removeItem } = usePaginatedFetch<Part>('/api/parts');
 
@@ -97,9 +97,9 @@ export default function Inventory() {
     return matchesSearch && matchesCat;
   });
 
-  const openAdd = () => { setEditing(null); form.reset({ brand: '', name: '', partCode: '', category: defaultCategory, stock: 0, minStock: 5, price: 0, barcode: '' }); setModalOpen(true); };
+  const openAdd = () => { setShowAddForm(true); };
   const openEdit = (part: Part) => { setEditing(part); form.reset({ brand: part.brand || '', name: part.name, partCode: part.partCode || '', category: part.category, stock: part.stock, minStock: part.minStock, price: part.price, barcode: part.barcode }); setModalOpen(true); };
-  const handlePartAdded = () => { setShowScanForm(false); setPage(1); };
+  const handlePartAdded = () => { setShowAddForm(false); setPage(1); };
 
   const onSubmit = form.handleSubmit(async (values) => {
     if (editing) {
@@ -144,14 +144,9 @@ export default function Inventory() {
           </p>
         </div>
         {canCreate && (
-          <div className="flex gap-2">
-            <Button onClick={() => setShowScanForm(true)} size="sm" className="h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 transition-opacity">
-              📱 Scan Part
-            </Button>
-            <Button onClick={openAdd} size="sm" className="h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold px-5 transition-opacity">
-              <Plus className="w-4 h-4 mr-2" /> Add Part
-            </Button>
-          </div>
+          <Button onClick={openAdd} size="sm" className="h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold px-5 transition-opacity">
+            <Plus className="w-4 h-4 mr-2" /> Add Part
+          </Button>
         )}
       </motion.div>
 
@@ -435,9 +430,9 @@ export default function Inventory() {
         </DialogContent>
       </Dialog>
 
-      {showScanForm && (
+      {showAddForm && (
         <PartFormWithScanning
-          onClose={() => setShowScanForm(false)}
+          onClose={() => setShowAddForm(false)}
           onPartAdded={handlePartAdded}
         />
       )}

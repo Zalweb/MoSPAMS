@@ -133,6 +133,21 @@ export function PartFormWithScanning({
     }
   };
 
+  const resetForm = () => {
+    setFormData({
+      brand: '',
+      part_code: '',
+      description: '',
+      category_id_fk: '',
+      price: 0,
+      stock_quantity: 1,
+      barcode_value: '',
+      barcode_type: 'EAN-13',
+    });
+    setScannedBarcode(null);
+    setLookupResult(null);
+  };
+
   if (step === 'choice') {
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -166,7 +181,10 @@ export function PartFormWithScanning({
       <BarcodeScannerModal
         isOpen
         onBarcodeDetected={handleScanBarcode}
-        onClose={() => setStep('choice')}
+        onClose={() => {
+          resetForm();
+          setStep('choice');
+        }}
       />
     );
   }
@@ -182,8 +200,8 @@ export function PartFormWithScanning({
           onUseOCR={() => setStep('ocr')}
           onManualEntry={() => setStep('manual')}
           onBack={() => {
+            resetForm();
             setStep('scanner');
-            setLookupResult(null);
           }}
         />
       </div>
@@ -280,7 +298,14 @@ export function PartFormWithScanning({
               Save Part
             </Button>
             <Button
-              onClick={() => (step === 'form' ? setStep('lookup') : setStep('choice'))}
+              onClick={() => {
+                if (step === 'form') {
+                  setStep('lookup');
+                } else {
+                  resetForm();
+                  setStep('choice');
+                }
+              }}
               variant="outline"
               className="flex-1"
             >
