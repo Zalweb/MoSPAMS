@@ -1,3 +1,5 @@
+import Tesseract from 'tesseract.js';
+
 export interface OCRExtractionResult {
   text: string;
   confidence: number;
@@ -13,27 +15,53 @@ export async function extractTextFromImage(
   try {
     // Use native Text Detection API if available
     if ('TextDetector' in window) {
-      const detector = new (window as any).TextDetector();
-      const textDetections = await detector.detect(image);
+      try {
+        const detector = new (window as any).TextDetector();
+        const textDetections = await detector.detect(image);
 
-      if (!textDetections || textDetections.length === 0) {
+        if (!textDetections || textDetections.length === 0) {
+          // Fall through to Tesseract fallback
+        } else {
+          const allText = textDetections.map((t: any) => t.rawValue).join('\n');
+
+          return {
+            text: allText,
+            confidence: 0.9,
+            lines: textDetections.map((t: any) => ({
+              text: t.rawValue || '',
+              confidence: 0.9,
+            })),
+          };
+        }
+      } catch (error) {
+        console.debug('TextDetector failed, falling back to Tesseract');
+      }
+    }
+
+    // Fallback: Use Tesseract.js for OCR
+    console.log('Extracting text with Tesseract.js...');
+    const worker = await Tesseract.createWorker();
+
+    try {
+      const result = await worker.recognize(image);
+
+      if (!result.data.text || result.data.text.trim().length === 0) {
         return null;
       }
 
-      const allText = textDetections.map((t: any) => t.rawValue).join('\n');
-
       return {
-        text: allText,
-        confidence: 0.9,
-        lines: textDetections.map((t: any) => ({
-          text: t.rawValue || '',
-          confidence: 0.9,
-        })),
+        text: result.data.text,
+        confidence: result.data.confidence / 100,
+        lines: [
+          {
+            text: result.data.text,
+            confidence: result.data.confidence / 100,
+          },
+        ],
       };
+    } finally {
+      await worker.terminate();
     }
-
-    console.warn('TextDetector not available in this browser');
-    return null;
   } catch (error) {
     console.error('OCR error:', error);
     return null;

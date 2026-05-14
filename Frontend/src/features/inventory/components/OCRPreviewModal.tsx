@@ -35,26 +35,37 @@ export function OCRPreviewModal({ onExtracted, onCancel }: OCRPreviewModalProps)
       const img = new Image();
       img.src = url;
       img.onload = async () => {
-        const result = await extractTextFromImage(img);
+        try {
+          const result = await extractTextFromImage(img);
 
-        if (result) {
-          setExtractedText(result.text);
-          setConfidence(result.confidence);
+          if (result) {
+            setExtractedText(result.text);
+            setConfidence(result.confidence);
 
-          const suggestions = suggestPartsFromOCR(result.text);
-          setFormData({
-            brand: suggestions.brand || '',
-            partCode: suggestions.partCode || '',
-            description: suggestions.description || '',
-          });
-        } else {
-          setExtractedText('No text detected. Please enter details manually.');
+            const suggestions = suggestPartsFromOCR(result.text);
+            setFormData({
+              brand: suggestions.brand || '',
+              partCode: suggestions.partCode || '',
+              description: suggestions.description || '',
+            });
+          } else {
+            setExtractedText('No text detected. Please enter details manually.');
+          }
+        } catch (extractError) {
+          console.error('Text extraction error:', extractError);
+          setExtractedText('Error extracting text. Please enter details manually.');
         }
+        setLoading(false);
+      };
+
+      img.onerror = () => {
+        console.error('Failed to load image');
+        setExtractedText('Error loading image. Please try another photo.');
+        setLoading(false);
       };
     } catch (error) {
       console.error('Error processing image:', error);
       setExtractedText('Error reading image. Please try another photo.');
-    } finally {
       setLoading(false);
     }
   };
@@ -67,12 +78,17 @@ export function OCRPreviewModal({ onExtracted, onCancel }: OCRPreviewModalProps)
   };
 
   const handleSubmit = () => {
-    onExtracted({
-      brand: formData.brand,
-      partCode: formData.partCode,
-      description: formData.description,
-      rawText: extractedText,
-    });
+    try {
+      onExtracted({
+        brand: formData.brand,
+        partCode: formData.partCode,
+        description: formData.description,
+        rawText: extractedText,
+      });
+    } catch (error) {
+      console.error('Error submitting OCR data:', error);
+      alert('Error saving details. Please try again.');
+    }
   };
 
   return (
@@ -142,8 +158,12 @@ export function OCRPreviewModal({ onExtracted, onCancel }: OCRPreviewModalProps)
         </div>
 
         <div className="flex gap-2">
-          <Button onClick={handleSubmit} className="flex-1 bg-green-600 hover:bg-green-700">
-            Use These Details
+          <Button
+            onClick={handleSubmit}
+            disabled={!imageUrl || loading}
+            className="flex-1 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Processing...' : 'Use These Details'}
           </Button>
           <Button onClick={onCancel} variant="outline" className="flex-1">
             Cancel

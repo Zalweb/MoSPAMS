@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { apiGet } from '@/shared/lib/api';
 import { BarcodeScannerModal } from './BarcodeScannerModal';
 import { PartLookupResult } from './PartLookupResult';
 import { OCRPreviewModal } from './OCRPreviewModal';
 
 interface PartFormWithScanningProps {
   onClose: () => void;
-  onManualEntry: () => void;
+  onManualEntry: (ocrData?: { brand: string; partCode: string; description: string; rawText: string }) => void;
   onPartAdded?: () => void;
 }
 
@@ -30,15 +31,9 @@ export function PartFormWithScanning({
     setScannedBarcode({ value: barcode });
 
     try {
-      const response = await fetch(`/api/inventory/barcode/${barcode}`);
-      if (response.ok) {
-        const data = await response.json();
-        setLookupResult(data);
-        setStep('lookup');
-      } else {
-        setLookupResult({ status: 'not_found' });
-        setStep('lookup');
-      }
+      const data = await apiGet<{ status: string; part?: any }>(`/inventory/barcode/${barcode}`);
+      setLookupResult(data);
+      setStep('lookup');
     } catch (error) {
       console.error('Barcode lookup failed:', error);
       setLookupResult({ status: 'not_found' });
@@ -63,9 +58,18 @@ export function PartFormWithScanning({
     }
   };
 
-  const handleOCRExtracted = () => {
+  const handleOCRExtracted = (data: {
+    brand: string;
+    partCode: string;
+    description: string;
+    rawText: string;
+  }) => {
+    // Include the scanned barcode with OCR data
+    onManualEntry({
+      ...data,
+      barcode: scannedBarcode?.value || '',
+    } as any);
     onClose();
-    onManualEntry();
   };
 
   const resetForm = () => {
@@ -125,7 +129,10 @@ export function PartFormWithScanning({
           part={lookupResult.part}
           onQuickAdd={handleQuickAdd}
           onReviewFirst={handleReviewFirst}
-          onUseOCR={() => setStep('ocr')}
+          onUseOCR={() => {
+            console.log('OCR clicked, scannedBarcode:', scannedBarcode);
+            setStep('ocr');
+          }}
           onManualEntry={() => {
             onClose();
             onManualEntry();
@@ -139,7 +146,24 @@ export function PartFormWithScanning({
     );
   }
 
-  if (step === 'ocr' && scannedBarcode) {
+  if (step === 'ocr') {
+    if (!scannedBarcode) {
+      return (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
+            <p className="text-gray-700 mb-6">No barcode was scanned. Please try scanning again.</p>
+            <button
+              onClick={() => setStep('lookup')}
+              className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg"
+            >
+              Go Back
+            </button>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <OCRPreviewModal
         barcode={scannedBarcode.value}

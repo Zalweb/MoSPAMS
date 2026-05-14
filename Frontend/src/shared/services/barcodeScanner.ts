@@ -1,3 +1,5 @@
+import jsQR from 'jsqr';
+
 export interface BarcodeDetectionResult {
   barcode: string;
   format: string;
@@ -31,20 +33,20 @@ export async function detectBarcode(
           confidence: 0.95,
         };
       } catch (detectorError) {
-        // BarcodeDetector exists but failed, fall through to manual detection
-        console.debug('BarcodeDetector failed, trying manual detection');
+        // BarcodeDetector exists but failed, fall through to jsQR detection
+        console.debug('BarcodeDetector failed, trying jsQR detection');
       }
     }
 
-    // Fallback: Try to detect QR codes manually using edge detection
-    return await detectQRCodeManually(image);
+    // Fallback: Try jsQR for QR code detection
+    return await detectQRCodeWithJsQR(image);
   } catch (error) {
     console.error('Barcode detection error:', error);
     return null;
   }
 }
 
-async function detectQRCodeManually(
+async function detectQRCodeWithJsQR(
   image: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement
 ): Promise<BarcodeDetectionResult | null> {
   try {
@@ -71,43 +73,25 @@ async function detectQRCodeManually(
       }
     }
 
-    // Simple edge detection to find potential QR code regions
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
 
-    // Look for high contrast areas (characteristic of QR codes)
-    let darkPixels = 0;
-    let totalPixels = data.length / 4;
+    // Use jsQR to detect QR codes in the image
+    const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
 
-    for (let i = 0; i < data.length; i += 4) {
-      const r = data[i];
-      const g = data[i + 1];
-      const b = data[i + 2];
-      const brightness = (r + g + b) / 3;
-
-      if (brightness < 128) {
-        darkPixels++;
-      }
-    }
-
-    const darkRatio = darkPixels / totalPixels;
-
-    // QR codes typically have 50% dark and 50% light pixels
-    if (darkRatio > 0.3 && darkRatio < 0.7) {
-      // Good contrast detected, likely a QR/barcode
+    if (qrCode) {
       return {
-        barcode: 'DETECTED',
+        barcode: qrCode.data,
         format: 'qr_code',
-        confidence: 0.5,
+        confidence: 0.95,
       };
     }
 
     return null;
   } catch (error) {
-    console.error('Manual detection error:', error);
+    console.error('jsQR detection error:', error);
     return null;
   }
 }

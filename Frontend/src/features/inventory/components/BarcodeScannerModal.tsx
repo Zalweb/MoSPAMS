@@ -2,9 +2,6 @@ import { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { X, Settings } from 'lucide-react';
-import {
-  detectBarcode,
-} from '@/shared/services/barcodeScanner';
 
 interface BarcodeScannerModalProps {
   onBarcodeDetected: (barcode: string) => void;
@@ -22,7 +19,6 @@ export function BarcodeScannerModal({
   const [cameraEnabled, setCameraEnabled] = useState(false);
   const [manualInput, setManualInput] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [detectedBarcode, setDetectedBarcode] = useState<string | null>(null);
   const [showManualInput, setShowManualInput] = useState(false);
 
   useEffect(() => {
@@ -102,22 +98,11 @@ export function BarcodeScannerModal({
     };
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!cameraEnabled || !videoRef.current) return;
-
-    const interval = setInterval(async () => {
-      if (videoRef.current && canvasRef.current) {
-        const result = await detectBarcode(videoRef.current);
-        if (result) {
-          setDetectedBarcode(result.barcode);
-          onBarcodeDetected(result.barcode);
-          handleClose();
-        }
-      }
-    }, 500);
-
-    return () => clearInterval(interval);
-  }, [cameraEnabled, onBarcodeDetected]);
+  const handleCaptureBarcode = () => {
+    // Switch to manual input mode
+    setShowManualInput(true);
+    setError(null);
+  };
 
   const handleManualSubmit = () => {
     if (manualInput.trim()) {
@@ -127,8 +112,14 @@ export function BarcodeScannerModal({
   };
 
   const handleClose = () => {
+    // Stop camera stream immediately
+    if (videoRef.current?.srcObject) {
+      (videoRef.current.srcObject as MediaStream)
+        .getTracks()
+        .forEach((track) => track.stop());
+    }
+
     setManualInput('');
-    setDetectedBarcode(null);
     setCameraEnabled(false);
     setShowManualInput(false);
     onClose();
@@ -136,6 +127,7 @@ export function BarcodeScannerModal({
 
   if (!isOpen) return null;
 
+  // Cache bust: v2
   return (
     <div className="fixed inset-0 bg-black z-50 flex flex-col">
       {/* Header */}
@@ -198,11 +190,15 @@ export function BarcodeScannerModal({
                     </svg>
                   </div>
 
-                  {detectedBarcode && (
-                    <div className="absolute top-1/2 -translate-y-1/2 bg-green-500 text-white px-4 py-2 rounded-lg font-semibold">
-                      ✓ Detected
-                    </div>
-                  )}
+                  {/* Manual Input Button */}
+                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
+                    <button
+                      onClick={handleCaptureBarcode}
+                      className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+                    >
+                      Enter Barcode Manually
+                    </button>
+                  </div>
                 </>
               )}
             </>
