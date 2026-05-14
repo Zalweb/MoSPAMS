@@ -31,6 +31,8 @@ export function BarcodeScannerModal({
     let isMounted = true;
     const startCamera = async () => {
       try {
+        console.log('[Camera] Starting camera access...');
+
         // Try with rear camera first, fallback to any camera
         const constraints = {
           video: {
@@ -42,17 +44,46 @@ export function BarcodeScannerModal({
         };
 
         const stream = await navigator.mediaDevices.getUserMedia(constraints as any);
+        console.log('[Camera] Stream obtained:', stream);
 
-        if (isMounted && videoRef.current) {
-          videoRef.current.srcObject = stream;
-          setCameraEnabled(true);
-          setError(null);
-        } else if (!isMounted) {
+        if (!isMounted) {
+          console.log('[Camera] Component unmounted, cleaning up stream');
           stream.getTracks().forEach((track) => track.stop());
+          return;
         }
+
+        if (!videoRef.current) {
+          console.error('[Camera] Video ref is null');
+          stream.getTracks().forEach((track) => track.stop());
+          setError('Video element not ready');
+          return;
+        }
+
+        console.log('[Camera] Setting srcObject on video element');
+        videoRef.current.srcObject = stream;
+
+        // Wait for video to be ready before enabling
+        videoRef.current.onloadedmetadata = () => {
+          console.log('[Camera] Video metadata loaded');
+          if (isMounted) {
+            videoRef.current?.play().then(() => {
+              console.log('[Camera] Video playing');
+              setCameraEnabled(true);
+              setError(null);
+            }).catch((err) => {
+              console.error('[Camera] Play error:', err);
+              setError('Video playback error');
+            });
+          }
+        };
+
+        videoRef.current.onerror = (err) => {
+          console.error('[Camera] Video error:', err);
+          setError('Video error');
+        };
       } catch (err: any) {
         if (isMounted) {
-          console.error('Camera error:', err);
+          console.error('[Camera] getUserMedia error:', err);
           setError('Camera access denied or unavailable. Tap the settings icon to enter barcode manually.');
           setCameraEnabled(false);
         }
@@ -131,8 +162,9 @@ export function BarcodeScannerModal({
                 autoPlay
                 playsInline
                 muted
-                className={`w-full h-full object-cover ${cameraEnabled ? 'opacity-100' : 'opacity-0'}`}
-                style={{ transform: 'scaleX(-1)' }}
+                controls={false}
+                className={`w-full h-full object-cover ${cameraEnabled ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
+                style={{ transform: 'scaleX(-1)', WebkitTransform: 'scaleX(-1)' }}
               />
               <canvas ref={canvasRef} style={{ display: 'none' }} />
 
