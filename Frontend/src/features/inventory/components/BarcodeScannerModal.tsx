@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { X, Settings } from 'lucide-react';
+import { detectBarcode } from '@/shared/services/barcodeScanner';
 
 interface BarcodeScannerModalProps {
   onBarcodeDetected: (barcode: string) => void;
@@ -19,6 +20,7 @@ export function BarcodeScannerModal({
   const [cameraEnabled, setCameraEnabled] = useState(false);
   const [manualInput, setManualInput] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [detectedBarcode, setDetectedBarcode] = useState<string | null>(null);
   const [showManualInput, setShowManualInput] = useState(false);
 
   useEffect(() => {
@@ -98,11 +100,87 @@ export function BarcodeScannerModal({
     };
   }, [isOpen]);
 
-  const handleCaptureBarcode = () => {
-    // Switch to manual input mode
-    setShowManualInput(true);
-    setError(null);
+  // Strict barcode validation - only accept real barcodes
+  const isValidBarcode = (barcode: string): boolean => {
+    if (!barcode) return false;
+
+    // QR codes: typically 6-100+ chars, alphanumeric
+    const isQRCode = barcode.length >= 6 && /^[A-Za-z0-9]{6,}$/.test(barcode);
+    if (isQRCode) {
+      console.log('[Barcode] Valid QR code:', barcode);
+      return true;
+    }
+
+    // EAN/UPC barcodes: exactly 8, 12, 13, or 14 digits
+    const isEAN = /^\d{8}$|^\d{12}$|^\d{13}$|^\d{14}$/.test(barcode);
+    if (isEAN) {
+      console.log('[Barcode] Valid EAN barcode:', barcode);
+      return true;
+    }
+
+    // Code-128/Code-39: 5-20 chars, mostly numbers with some symbols/letters
+    const codeFormat = /^[A-Z0-9\-\.]{5,20}$/.test(barcode);
+    if (codeFormat && /\d/.test(barcode)) {
+      console.log('[Barcode] Valid Code-128/Code-39:', barcode);
+      return true;
+    }
+
+    console.log('[Barcode] Rejected - invalid format:', barcode);
+    return false;
   };
+
+  useEffect(() => {
+    if (!cameraEnabled || !videoRef.current) return;
+
+    let isDetecting = false;
+    let consecutiveDetections = 0;
+    let lastDetectedBarcode: string | null = null;
+
+    const interval = setInterval(async () => {
+      if (videoRef.current && canvasRef.current && !isDetecting) {
+        isDetecting = true;
+        try {
+          const result = await detectBarcode(videoRef.current);
+
+          if (result && result.barcode && result.barcode !== 'DETECTED') {
+            // Strict validation
+            if (isValidBarcode(result.barcode) && result.barcode === lastDetectedBarcode) {
+              consecutiveDetections++;
+
+              // Require 2 consecutive valid detections
+              if (consecutiveDetections >= 2) {
+                console.log('[Barcode] Confirmed after', consecutiveDetections, 'detections');
+                setDetectedBarcode(result.barcode);
+                onBarcodeDetected(result.barcode);
+                handleClose();
+                clearInterval(interval);
+              }
+            } else if (isValidBarcode(result.barcode)) {
+              // New valid barcode, reset counter
+              lastDetectedBarcode = result.barcode;
+              consecutiveDetections = 1;
+            } else {
+              // Invalid format, reset
+              lastDetectedBarcode = null;
+              consecutiveDetections = 0;
+            }
+          } else {
+            // No barcode detected
+            lastDetectedBarcode = null;
+            consecutiveDetections = 0;
+          }
+        } catch (error) {
+          console.error('[Barcode] Detection error:', error);
+          lastDetectedBarcode = null;
+          consecutiveDetections = 0;
+        } finally {
+          isDetecting = false;
+        }
+      }
+    }, 300);
+
+    return () => clearInterval(interval);
+  }, [cameraEnabled, onBarcodeDetected]);
 
   const handleManualSubmit = () => {
     if (manualInput.trim()) {
@@ -120,6 +198,7 @@ export function BarcodeScannerModal({
     }
 
     setManualInput('');
+    setDetectedBarcode(null);
     setCameraEnabled(false);
     setShowManualInput(false);
     onClose();
@@ -190,15 +269,16 @@ export function BarcodeScannerModal({
                     </svg>
                   </div>
 
-                  {/* Manual Input Button */}
-                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
-                    <button
-                      onClick={handleCaptureBarcode}
-                      className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
-                    >
-                      Enter Barcode Manually
-                    </button>
+                  {/* Corner Markers Info */}
+                  <div className="absolute top-20 left-1/2 -translate-x-1/2 text-white text-center">
+                    <p className="text-sm">Align barcode within corners</p>
                   </div>
+
+                  {detectedBarcode && (
+                    <div className="absolute top-1/2 -translate-y-1/2 bg-green-500 text-white px-4 py-2 rounded-lg font-semibold">
+                      ✓ Detected
+                    </div>
+                  )}
                 </>
               )}
             </>
