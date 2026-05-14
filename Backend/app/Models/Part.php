@@ -18,6 +18,7 @@ class Part extends Model
         'brand',
         'part_code',
         'barcode',
+        'image_path',
         'description',
         'unit_price',
         'stock_quantity',

@@ -1,9 +1,9 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
-import { Plus, Pencil, Trash2, Search, AlertTriangle, Package, ArrowDownToLine, ArrowUpFromLine, History, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, AlertTriangle, Package, ArrowDownToLine, ArrowUpFromLine, History, X, ChevronLeft, ChevronRight, ImagePlus, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -48,7 +48,7 @@ const fadeUp = (delay = 0) => ({
 });
 
 export default function Inventory() {
-  const { addPart, updatePart, deletePart, recordStockMovement, categories, addCategory } = useData();
+  const { addPart, updatePart, uploadPartImage, deletePart, recordStockMovement, categories, addCategory } = useData();
   const { user } = useAuth();
   const role = user?.role;
   const canCreate = can(role, 'inventory', 'create');
@@ -65,6 +65,10 @@ export default function Inventory() {
   const [stockMoveTarget, setStockMoveTarget] = useState<Part | null>(null);
   const [historyTarget, setHistoryTarget] = useState<Part | null>(null);
   const [partHistory, setPartHistory] = useState<StockMovement[]>([]);
+  const [pendingImage, setPendingImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageUploading, setImageUploading] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const { data: parts, loading, meta, page, setPage, prependItem, updateItem, removeItem } = usePaginatedFetch<Part>('/api/parts');
 
@@ -98,18 +102,58 @@ export default function Inventory() {
   });
 
   const openAdd = () => { setShowAddForm(true); };
-  const openAddFormManually = (ocrData?: { brand: string; partCode: string; description: string; rawText: string; barcode?: string }) => { setEditing(null); form.reset({ brand: ocrData?.brand || '', name: ocrData?.description || '', partCode: ocrData?.partCode || '', category: defaultCategory, stock: 0, minStock: 5, price: 0, barcode: ocrData?.barcode || '' }); setModalOpen(true); setShowAddForm(false); };
-  const openEdit = (part: Part) => { setEditing(part); form.reset({ brand: part.brand || '', name: part.name, partCode: part.partCode || '', category: part.category, stock: part.stock, minStock: part.minStock, price: part.price, barcode: part.barcode }); setModalOpen(true); };
+  const openAddFormManually = (ocrData?: { brand: string; partCode: string; description: string; rawText: string; barcode?: string }) => {
+    setEditing(null);
+    setPendingImage(null);
+    setImagePreview(null);
+    form.reset({ brand: ocrData?.brand || '', name: ocrData?.description || '', partCode: ocrData?.partCode || '', category: defaultCategory, stock: 0, minStock: 5, price: 0, barcode: ocrData?.barcode || '' });
+    setModalOpen(true);
+    setShowAddForm(false);
+  };
+  const openEdit = (part: Part) => {
+    setEditing(part);
+    setPendingImage(null);
+    setImagePreview(part.imageUrl ?? null);
+    form.reset({ brand: part.brand || '', name: part.name, partCode: part.partCode || '', category: part.category, stock: part.stock, minStock: part.minStock, price: part.price, barcode: part.barcode });
+    setModalOpen(true);
+  };
   const handlePartAdded = () => { setShowAddForm(false); setPage(1); };
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPendingImage(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const clearImage = () => {
+    setPendingImage(null);
+    setImagePreview(null);
+    if (imageInputRef.current) imageInputRef.current.value = '';
+  };
+
   const onSubmit = form.handleSubmit(async (values) => {
+    let savedPart: Part;
     if (editing) {
-      const updated = await updatePart(editing.id, values);
-      updateItem(editing.id, 'id', updated);
+      savedPart = await updatePart(editing.id, values);
+      updateItem(editing.id, 'id', savedPart);
     } else {
-      const created = await addPart(values);
-      prependItem(created);
+      savedPart = await addPart(values);
+      prependItem(savedPart);
     }
+
+    if (pendingImage) {
+      setImageUploading(true);
+      try {
+        const withImage = await uploadPartImage(savedPart.id, pendingImage);
+        updateItem(savedPart.id, 'id', withImage);
+      } finally {
+        setImageUploading(false);
+        setPendingImage(null);
+        setImagePreview(null);
+      }
+    }
+
     setModalOpen(false);
   });
 
@@ -203,8 +247,12 @@ export default function Inventory() {
                   <tr key={part.id} className="hover:bg-secondary dark:bg-zinc-800/30 transition-colors group">
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 flex items-center justify-center shrink-0 group-hover:bg-secondary dark:bg-zinc-800 transition-colors">
-                          <Package className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
+                        <div className="w-10 h-10 rounded-xl bg-secondary/50 dark:bg-zinc-800/50 shrink-0 overflow-hidden flex items-center justify-center group-hover:bg-secondary dark:group-hover:bg-zinc-800 transition-colors">
+                          {part.imageUrl ? (
+                            <img src={part.imageUrl} alt={part.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <Package className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
+                          )}
                         </div>
                         <div>
                           <p className="text-sm font-medium text-foreground">{part.name}</p>
@@ -324,8 +372,36 @@ export default function Inventory() {
               <div><Label className="text-xs font-medium text-muted-foreground">Min Stock</Label><Input type="number" {...form.register('minStock', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground focus:border-border dark:border-zinc-600" /></div>
               <div><Label className="text-xs font-medium text-muted-foreground">Price (₱)</Label><Input type="number" {...form.register('price', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground focus:border-border dark:border-zinc-600" /></div>
             </div>
+
+            {/* Part Image */}
+            <div>
+              <Label className="text-xs font-medium text-muted-foreground">Part Image</Label>
+              <input ref={imageInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleImageSelect} />
+              {imagePreview ? (
+                <div className="mt-1.5 relative group w-full h-36 rounded-xl overflow-hidden border border-border dark:border-zinc-700 bg-secondary/50 dark:bg-zinc-800/50">
+                  <img src={imagePreview} alt="Part preview" className="w-full h-full object-contain" />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <button type="button" onClick={() => imageInputRef.current?.click()} className="bg-white/20 hover:bg-white/30 text-white text-xs px-3 py-1.5 rounded-lg transition-colors">Change</button>
+                    <button type="button" onClick={clearImage} className="bg-red-500/80 hover:bg-red-500 text-white text-xs px-3 py-1.5 rounded-lg transition-colors">Remove</button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => imageInputRef.current?.click()}
+                  className="mt-1.5 w-full h-24 rounded-xl border-2 border-dashed border-border dark:border-zinc-700 hover:border-muted-foreground transition-colors flex flex-col items-center justify-center gap-1.5 text-muted-foreground hover:text-foreground"
+                >
+                  <ImagePlus className="w-5 h-5" />
+                  <span className="text-xs">Click to upload image</span>
+                  <span className="text-[10px] opacity-60">JPG, PNG, WEBP · Max 2MB</span>
+                </button>
+              )}
+            </div>
+
             <div className="flex gap-3 pt-2">
-              <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold transition-opacity">{editing ? 'Save Changes' : 'Add Part'}</Button>
+              <Button type="submit" disabled={imageUploading} className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold transition-opacity disabled:opacity-60">
+                {imageUploading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Uploading…</> : editing ? 'Save Changes' : 'Add Part'}
+              </Button>
               <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-10 rounded-xl text-sm border-border dark:border-zinc-700 text-muted-foreground hover:bg-secondary dark:bg-zinc-800">Cancel</Button>
             </div>
           </form>

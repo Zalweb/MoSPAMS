@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class MospamsController extends Controller
@@ -323,26 +324,30 @@ class MospamsController extends Controller
     public function storePart(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:100'],
+            'name'     => ['required', 'string', 'max:100'],
+            'brand'    => ['nullable', 'string', 'max:100'],
+            'partCode' => ['nullable', 'string', 'max:100', 'unique:parts,part_code'],
             'category' => ['required', 'string', 'max:100'],
-            'stock' => ['required', 'integer', 'min:0'],
+            'stock'    => ['required', 'integer', 'min:0'],
             'minStock' => ['required', 'integer', 'min:0'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'barcode' => ['nullable', 'string', 'max:100', 'unique:parts,barcode'],
+            'price'    => ['required', 'numeric', 'min:0'],
+            'barcode'  => ['nullable', 'string', 'max:100', 'unique:parts,barcode'],
         ]);
 
         return DB::transaction(function () use ($request, $data) {
             $partId = DB::table('parts')->insertGetId([
-                'shop_id_fk' => $this->shopId(),
-                'category_id_fk' => $this->categoryId($data['category']),
-                'part_name' => $data['name'],
-                'barcode' => $data['barcode'] ?? null,
-                'unit_price' => $data['price'],
-                'stock_quantity' => $data['stock'],
-                'reorder_level' => $data['minStock'],
-                'part_status_id_fk' => $this->statusId('part_statuses', 'part_status_id', 'in_stock'),
-                'created_at' => now(),
-                'updated_at' => now(),
+                'shop_id_fk'         => $this->shopId(),
+                'category_id_fk'     => $this->categoryId($data['category']),
+                'part_name'          => $data['name'],
+                'brand'              => $data['brand'] ?? null,
+                'part_code'          => $data['partCode'] ?? null,
+                'barcode'            => $data['barcode'] ?? null,
+                'unit_price'         => $data['price'],
+                'stock_quantity'     => $data['stock'],
+                'reorder_level'      => $data['minStock'],
+                'part_status_id_fk'  => $this->statusId('part_statuses', 'part_status_id', 'in_stock'),
+                'created_at'         => now(),
+                'updated_at'         => now(),
             ]);
 
             if ($data['stock'] > 0) {
@@ -361,22 +366,26 @@ class MospamsController extends Controller
         abort_if(! $existing, 404);
 
         $data = $request->validate([
-            'name' => ['sometimes', 'string', 'max:100'],
+            'name'     => ['sometimes', 'string', 'max:100'],
+            'brand'    => ['sometimes', 'nullable', 'string', 'max:100'],
+            'partCode' => ['sometimes', 'nullable', 'string', 'max:100', Rule::unique('parts', 'part_code')->ignore($part, 'part_id')],
             'category' => ['sometimes', 'string', 'max:100'],
-            'stock' => ['sometimes', 'integer', 'min:0'],
+            'stock'    => ['sometimes', 'integer', 'min:0'],
             'minStock' => ['sometimes', 'integer', 'min:0'],
-            'price' => ['sometimes', 'numeric', 'min:0'],
-            'barcode' => ['sometimes', 'nullable', 'string', 'max:100', Rule::unique('parts', 'barcode')->ignore($part, 'part_id')],
+            'price'    => ['sometimes', 'numeric', 'min:0'],
+            'barcode'  => ['sometimes', 'nullable', 'string', 'max:100', Rule::unique('parts', 'barcode')->ignore($part, 'part_id')],
         ]);
 
         return DB::transaction(function () use ($request, $part, $existing, $data) {
             $patch = ['updated_at' => now()];
-            if (array_key_exists('name', $data)) $patch['part_name'] = $data['name'];
+            if (array_key_exists('name', $data))     $patch['part_name']      = $data['name'];
+            if (array_key_exists('brand', $data))    $patch['brand']          = $data['brand'];
+            if (array_key_exists('partCode', $data)) $patch['part_code']      = $data['partCode'];
             if (array_key_exists('category', $data)) $patch['category_id_fk'] = $this->categoryId($data['category']);
-            if (array_key_exists('stock', $data)) $patch['stock_quantity'] = $data['stock'];
-            if (array_key_exists('minStock', $data)) $patch['reorder_level'] = $data['minStock'];
-            if (array_key_exists('price', $data)) $patch['unit_price'] = $data['price'];
-            if (array_key_exists('barcode', $data)) $patch['barcode'] = $data['barcode'];
+            if (array_key_exists('stock', $data))    $patch['stock_quantity'] = $data['stock'];
+            if (array_key_exists('minStock', $data)) $patch['reorder_level']  = $data['minStock'];
+            if (array_key_exists('price', $data))    $patch['unit_price']     = $data['price'];
+            if (array_key_exists('barcode', $data))  $patch['barcode']        = $data['barcode'];
 
             DB::table('parts')->where('part_id', $part)->where('shop_id_fk', $this->shopId())->update($patch);
 
@@ -396,10 +405,57 @@ class MospamsController extends Controller
         $existing = DB::table('parts')->where('part_id', $part)->where('shop_id_fk', $this->shopId())->first();
         abort_if(! $existing, 404);
 
+        if ($existing->image_path) {
+            Storage::disk('public')->delete($existing->image_path);
+        }
+
         DB::table('parts')->where('part_id', $part)->where('shop_id_fk', $this->shopId())->delete();
         $this->log($request, 'Deleted part: '.$existing->part_name, 'parts', $part);
 
         return response()->json(['message' => 'Part deleted.']);
+    }
+
+    public function uploadPartImage(Request $request, int $part): JsonResponse
+    {
+        $existing = DB::table('parts')->where('part_id', $part)->where('shop_id_fk', $this->shopId())->first();
+        abort_if(! $existing, 404);
+
+        $request->validate([
+            'image' => ['required', 'image', 'max:2048', 'mimes:jpg,jpeg,png,webp'],
+        ]);
+
+        if ($existing->image_path) {
+            Storage::disk('public')->delete($existing->image_path);
+        }
+
+        $path = $request->file('image')->store('parts', 'public');
+
+        DB::table('parts')->where('part_id', $part)->where('shop_id_fk', $this->shopId())->update([
+            'image_path' => $path,
+            'updated_at' => now(),
+        ]);
+
+        $this->log($request, 'Uploaded image for part: '.$existing->part_name, 'parts', $part);
+
+        return response()->json(['data' => $this->partById($part)]);
+    }
+
+    public function deletePartImage(Request $request, int $part): JsonResponse
+    {
+        $existing = DB::table('parts')->where('part_id', $part)->where('shop_id_fk', $this->shopId())->first();
+        abort_if(! $existing, 404);
+
+        if ($existing->image_path) {
+            Storage::disk('public')->delete($existing->image_path);
+            DB::table('parts')->where('part_id', $part)->where('shop_id_fk', $this->shopId())->update([
+                'image_path' => null,
+                'updated_at' => now(),
+            ]);
+        }
+
+        $this->log($request, 'Removed image for part: '.$existing->part_name, 'parts', $part);
+
+        return response()->json(['data' => $this->partById($part)]);
     }
 
     public function categories(): JsonResponse
@@ -2144,13 +2200,18 @@ class MospamsController extends Controller
     private function partResource(object $part): array
     {
         return [
-            'id' => (string) $part->part_id,
-            'name' => $part->part_name,
-            'category' => $part->category_name,
-            'stock' => (int) $part->stock_quantity,
-            'minStock' => (int) $part->reorder_level,
-            'price' => (float) $part->unit_price,
-            'barcode' => $part->barcode ?? '',
+            'id'        => (string) $part->part_id,
+            'name'      => $part->part_name,
+            'brand'     => $part->brand ?? null,
+            'partCode'  => $part->part_code ?? null,
+            'category'  => $part->category_name,
+            'stock'     => (int) $part->stock_quantity,
+            'minStock'  => (int) $part->reorder_level,
+            'price'     => (float) $part->unit_price,
+            'barcode'   => $part->barcode ?? '',
+            'imageUrl'  => isset($part->image_path) && $part->image_path
+                            ? Storage::disk('public')->url($part->image_path)
+                            : null,
             'createdAt' => $this->iso($part->created_at),
         ];
     }

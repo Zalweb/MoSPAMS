@@ -88,6 +88,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/parts', [MospamsController::class, 'storePart'])->middleware('role:Owner,Staff');
         Route::patch('/parts/{part}', [MospamsController::class, 'updatePart'])->middleware('role:Owner,Staff');
         Route::delete('/parts/{part}', [MospamsController::class, 'deletePart'])->middleware('role:Owner');
+        Route::post('/parts/{part}/image', [MospamsController::class, 'uploadPartImage'])->middleware('role:Owner,Staff');
+        Route::delete('/parts/{part}/image', [MospamsController::class, 'deletePartImage'])->middleware('role:Owner,Staff');
         Route::get('/categories', [MospamsController::class, 'categories'])->middleware('role:Owner,Staff');
         Route::post('/categories', [MospamsController::class, 'storeCategory'])->middleware('role:Owner,Staff');
         Route::get('/stock-movements', [MospamsController::class, 'stockMovements'])->middleware('role:Owner,Staff');

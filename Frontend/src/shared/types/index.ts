@@ -16,6 +16,7 @@ export interface Part {
   minStock: number;
   price: number;
   barcode: string;
+  imageUrl?: string;
   createdAt: string;
 }
 
