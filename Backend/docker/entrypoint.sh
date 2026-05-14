@@ -43,6 +43,8 @@ php artisan storage:link || true
 echo "Setting permissions..."
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+chown -R www-data:www-data /var/lib/nginx/tmp
+chmod -R 755 /var/lib/nginx/tmp
 
 # Create supervisor log directory
 mkdir -p /var/log/supervisor
