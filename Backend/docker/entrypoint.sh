@@ -31,8 +31,10 @@ if [ "$SEED_DATABASE" = "true" ]; then
     php artisan db:seed --force --no-interaction
 fi
 
-# Clear and cache config (skip for now to get app running)
-echo "Skipping optimization for initial startup..."
+# Clear any stale config/route caches so new routes and config are always live
+echo "Clearing application caches..."
+php artisan config:clear || true
+php artisan route:clear || true
 
 # Create storage link
 php artisan storage:link || true
