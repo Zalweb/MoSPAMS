@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
-import { Plus, Pencil, Trash2, Search, AlertTriangle, Package, ArrowDownToLine, ArrowUpFromLine, History, X, ChevronLeft, ChevronRight, ImagePlus, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, AlertTriangle, Package, ArrowDownToLine, ArrowUpFromLine, History, X, ChevronLeft, ChevronRight, ImagePlus, Loader2, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -376,25 +376,52 @@ export default function Inventory() {
             {/* Part Image */}
             <div>
               <Label className="text-xs font-medium text-muted-foreground">Part Image</Label>
-              <input ref={imageInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleImageSelect} />
+              {/* sr-only (not display:none) so iOS Safari allows label-triggered click */}
+              <input
+                ref={imageInputRef}
+                id="part-image-input"
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={handleImageSelect}
+              />
               {imagePreview ? (
-                <div className="mt-1.5 relative group w-full h-36 rounded-xl overflow-hidden border border-border dark:border-zinc-700 bg-secondary/50 dark:bg-zinc-800/50">
-                  <img src={imagePreview} alt="Part preview" className="w-full h-full object-contain" />
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    <button type="button" onClick={() => imageInputRef.current?.click()} className="bg-white/20 hover:bg-white/30 text-white text-xs px-3 py-1.5 rounded-lg transition-colors">Change</button>
-                    <button type="button" onClick={clearImage} className="bg-red-500/80 hover:bg-red-500 text-white text-xs px-3 py-1.5 rounded-lg transition-colors">Remove</button>
+                <div className="mt-1.5 space-y-2">
+                  <div className="relative w-full h-40 rounded-xl overflow-hidden border border-border dark:border-zinc-700 bg-secondary/50 dark:bg-zinc-800/50">
+                    <img src={imagePreview} alt="Part preview" className="w-full h-full object-contain" />
+                  </div>
+                  <div className="flex gap-2">
+                    <label
+                      htmlFor="part-image-input"
+                      className="flex-1 cursor-pointer flex items-center justify-center gap-1.5 h-9 rounded-lg border border-border dark:border-zinc-700 text-xs text-muted-foreground hover:bg-secondary dark:hover:bg-zinc-800 transition-colors select-none"
+                    >
+                      <Camera className="w-3.5 h-3.5" /> Change Photo
+                    </label>
+                    <button
+                      type="button"
+                      onClick={clearImage}
+                      className="flex items-center gap-1.5 h-9 px-3 rounded-lg border border-red-500/30 text-xs text-red-400 hover:bg-red-500/10 transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" /> Remove
+                    </button>
                   </div>
                 </div>
               ) : (
-                <button
-                  type="button"
-                  onClick={() => imageInputRef.current?.click()}
-                  className="mt-1.5 w-full h-24 rounded-xl border-2 border-dashed border-border dark:border-zinc-700 hover:border-muted-foreground transition-colors flex flex-col items-center justify-center gap-1.5 text-muted-foreground hover:text-foreground"
+                <label
+                  htmlFor="part-image-input"
+                  className="mt-1.5 block cursor-pointer"
                 >
-                  <ImagePlus className="w-5 h-5" />
-                  <span className="text-xs">Click to upload image</span>
-                  <span className="text-[10px] opacity-60">JPG, PNG, WEBP · Max 2MB</span>
-                </button>
+                  <div className="w-full rounded-xl border-2 border-dashed border-border dark:border-zinc-700 hover:border-muted-foreground active:border-muted-foreground transition-colors p-6 flex flex-col items-center gap-2 text-muted-foreground">
+                    <div className="w-12 h-12 rounded-full bg-secondary/50 dark:bg-zinc-800 flex items-center justify-center">
+                      <ImagePlus className="w-6 h-6" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm font-medium text-foreground">Add product photo</p>
+                      <p className="text-xs opacity-60 mt-0.5">Tap to take a photo or choose from library</p>
+                    </div>
+                    <p className="text-[10px] opacity-40">JPG · PNG · WEBP · Max 2MB</p>
+                  </div>
+                </label>
               )}
             </div>
 
