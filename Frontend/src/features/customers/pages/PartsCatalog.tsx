@@ -79,7 +79,11 @@ export default function PartsCatalog() {
             >
               {/* Image Container */}
               <div className="relative aspect-square rounded-[2rem] bg-secondary/50 dark:bg-zinc-800/50 overflow-hidden flex items-center justify-center group-hover:scale-[1.02] transition-transform duration-500">
-                <Package className="w-16 h-16 text-muted-foreground/30 group-hover:text-primary/30 transition-colors duration-500" strokeWidth={1} />
+                {part.imageUrl ? (
+                  <img src={part.imageUrl} alt={part.name} className="w-full h-full object-cover" />
+                ) : (
+                  <Package className="w-16 h-16 text-muted-foreground/30 group-hover:text-primary/30 transition-colors duration-500" strokeWidth={1} />
+                )}
                 {/* Available Badge */}
                 <div className="absolute top-4 left-4 px-3 py-1 bg-background/80 backdrop-blur-md rounded-full border border-border/50">
                   <p className="text-[10px] font-bold tracking-wider uppercase">
