@@ -1,5 +1,4 @@
-import React from 'react';
-import { Button } from '@/shared/components/ui/button';
+import { Button } from '@/components/ui/button';
 
 interface PartLookupResultProps {
   status: 'found' | 'not_found';

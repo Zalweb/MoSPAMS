@@ -1,4 +1,5 @@
-import { openDB, DBSchema, IDBPDatabase } from 'idb';
+import { openDB } from 'idb';
+import type { DBSchema, IDBPDatabase } from 'idb';
 
 export interface OfflineDBSchema extends DBSchema {
   parts: {
@@ -107,15 +108,19 @@ export async function lookupBarcodeOffline(
 ): Promise<any | null> {
   if (!db) await initializeOfflineDB();
 
-  const barcode_record = await db!
-    .index('part_barcodes', 'by-barcode')
-    .get(barcode);
+  if (!db) return null;
 
-  if (!barcode_record || barcode_record.shop_id_fk !== shopId) {
+  // Search part_barcodes table by barcode_value
+  const allBarcodes = await db.getAll('part_barcodes');
+  const barcode_record = allBarcodes.find(
+    (b) => b.barcode_value === barcode && b.shop_id_fk === shopId
+  );
+
+  if (!barcode_record) {
     return null;
   }
 
-  const part = await db!.get('parts', barcode_record.part_id);
+  const part = await db.get('parts', barcode_record.part_id);
   return part || null;
 }
 

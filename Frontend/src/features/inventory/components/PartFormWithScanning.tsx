@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Button } from '@/shared/components/ui/button';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { BarcodeScannerModal } from './BarcodeScannerModal';
 import { PartLookupResult } from './PartLookupResult';
 import { OCRPreviewModal } from './OCRPreviewModal';
-import { Input } from '@/shared/components/ui/input';
+import { Input } from '@/components/ui/input';
 
 interface PartFormWithScanningProps {
   onClose: () => void;
@@ -211,7 +211,7 @@ export function PartFormWithScanning({
               <label className="block text-sm font-medium mb-1">Brand *</label>
               <Input
                 value={formData.brand}
-                onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, brand: e.target.value })}
                 placeholder="e.g., Yamaha"
               />
             </div>
@@ -220,7 +220,7 @@ export function PartFormWithScanning({
               <label className="block text-sm font-medium mb-1">Part Code *</label>
               <Input
                 value={formData.part_code}
-                onChange={(e) => setFormData({ ...formData, part_code: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, part_code: e.target.value })}
                 placeholder="e.g., 1LB-H3912-00"
               />
             </div>
@@ -229,7 +229,7 @@ export function PartFormWithScanning({
               <label className="block text-sm font-medium mb-1">Description *</label>
               <Input
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="e.g., Lever LH"
               />
             </div>
@@ -238,7 +238,7 @@ export function PartFormWithScanning({
               <label className="block text-sm font-medium mb-1">Category *</label>
               <select
                 value={formData.category_id_fk}
-                onChange={(e) => setFormData({ ...formData, category_id_fk: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, category_id_fk: e.target.value })}
                 className="w-full border rounded px-3 py-2"
               >
                 <option value="">Select category</option>
@@ -251,7 +251,7 @@ export function PartFormWithScanning({
                 type="number"
                 step="0.01"
                 value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
                 placeholder="0.00"
               />
             </div>
@@ -261,7 +261,7 @@ export function PartFormWithScanning({
               <Input
                 type="number"
                 value={formData.stock_quantity}
-                onChange={(e) =>
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setFormData({ ...formData, stock_quantity: parseInt(e.target.value) })
                 }
               />

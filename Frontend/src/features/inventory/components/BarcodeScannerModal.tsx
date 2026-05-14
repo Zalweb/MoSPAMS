@@ -1,10 +1,9 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { Button } from '@/shared/components/ui/button';
-import { Input } from '@/shared/components/ui/input';
+import { useRef, useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   detectBarcode,
   requestCameraPermission,
-  BarcodeDetectionResult,
 } from '@/shared/services/barcodeScanner';
 
 interface BarcodeScannerModalProps {
@@ -121,8 +120,8 @@ export function BarcodeScannerModal({
           <Input
             placeholder="Type barcode..."
             value={manualInput}
-            onChange={(e) => setManualInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleManualSubmit()}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setManualInput(e.target.value)}
+            onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleManualSubmit()}
           />
         </div>
 

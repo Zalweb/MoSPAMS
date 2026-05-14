@@ -1,6 +1,6 @@
-import React, { useRef, useState } from 'react';
-import { Button } from '@/shared/components/ui/button';
-import { Input } from '@/shared/components/ui/input';
+import { useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { extractTextFromImage, suggestPartsFromOCR } from '@/shared/services/ocrService';
 
 interface OCRPreviewModalProps {
@@ -14,7 +14,7 @@ interface OCRPreviewModalProps {
   barcode: string;
 }
 
-export function OCRPreviewModal({ onExtracted, onCancel, barcode }: OCRPreviewModalProps) {
+export function OCRPreviewModal({ onExtracted, onCancel }: OCRPreviewModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [extractedText, setExtractedText] = useState<string>('');
@@ -117,7 +117,7 @@ export function OCRPreviewModal({ onExtracted, onCancel, barcode }: OCRPreviewMo
             <label className="block text-sm font-medium mb-1">Brand</label>
             <Input
               value={formData.brand}
-              onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, brand: e.target.value })}
               placeholder="e.g., Yamaha"
             />
           </div>
@@ -126,7 +126,7 @@ export function OCRPreviewModal({ onExtracted, onCancel, barcode }: OCRPreviewMo
             <label className="block text-sm font-medium mb-1">Part Code</label>
             <Input
               value={formData.partCode}
-              onChange={(e) => setFormData({ ...formData, partCode: e.target.value })}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, partCode: e.target.value })}
               placeholder="e.g., 1LB-H3912-00"
             />
           </div>
@@ -135,7 +135,7 @@ export function OCRPreviewModal({ onExtracted, onCancel, barcode }: OCRPreviewMo
             <label className="block text-sm font-medium mb-1">Description</label>
             <Input
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, description: e.target.value })}
               placeholder="e.g., Lever LH"
             />
           </div>
