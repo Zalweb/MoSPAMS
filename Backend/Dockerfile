@@ -139,6 +139,10 @@ RUN mkdir -p \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
+# Fix nginx tmp dir ownership so www-data (nginx worker) can write upload buffers
+RUN chown -R www-data:www-data /var/lib/nginx \
+    && chmod -R 755 /var/lib/nginx
+
 # Copy entrypoint script
 COPY Backend/docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
