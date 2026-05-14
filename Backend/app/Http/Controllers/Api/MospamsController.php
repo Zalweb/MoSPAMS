@@ -2494,7 +2494,6 @@ class MospamsController extends Controller
                 'category' => $part->category?->category_name ?? '',
                 'price' => $part->unit_price ?? 0,
                 'stock_quantity' => $part->stock_quantity ?? 0,
-                'supplier_id' => $part->supplier_id ?? null,
             ],
             'barcodes' => $allBarcodes,
         ]);

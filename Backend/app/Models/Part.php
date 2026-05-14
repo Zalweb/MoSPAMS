@@ -15,6 +15,8 @@ class Part extends Model
         'shop_id_fk',
         'category_id_fk',
         'part_name',
+        'brand',
+        'part_code',
         'barcode',
         'description',
         'unit_price',
