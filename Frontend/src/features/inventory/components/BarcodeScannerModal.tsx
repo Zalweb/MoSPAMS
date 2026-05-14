@@ -4,7 +4,6 @@ import { Input } from '@/components/ui/input';
 import { X, Settings } from 'lucide-react';
 import {
   detectBarcode,
-  requestCameraPermission,
 } from '@/shared/services/barcodeScanner';
 
 interface BarcodeScannerModalProps {
@@ -29,31 +28,41 @@ export function BarcodeScannerModal({
   useEffect(() => {
     if (!isOpen) return;
 
+    let isMounted = true;
     const startCamera = async () => {
       try {
-        const hasPermission = await requestCameraPermission();
-        if (!hasPermission) {
-          setError('Camera access required');
-          return;
-        }
+        // Try with rear camera first, fallback to any camera
+        const constraints = {
+          video: {
+            facingMode: { ideal: 'environment' },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+          audio: false,
+        };
 
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' },
-        });
-        if (videoRef.current) {
+        const stream = await navigator.mediaDevices.getUserMedia(constraints as any);
+
+        if (isMounted && videoRef.current) {
           videoRef.current.srcObject = stream;
           setCameraEnabled(true);
           setError(null);
+        } else if (!isMounted) {
+          stream.getTracks().forEach((track) => track.stop());
         }
-      } catch (err) {
-        setError('Unable to access camera');
-        setCameraEnabled(false);
+      } catch (err: any) {
+        if (isMounted) {
+          console.error('Camera error:', err);
+          setError('Camera access denied or unavailable. Tap the settings icon to enter barcode manually.');
+          setCameraEnabled(false);
+        }
       }
     };
 
     startCamera();
 
     return () => {
+      isMounted = false;
       if (videoRef.current?.srcObject) {
         (videoRef.current.srcObject as MediaStream)
           .getTracks()
@@ -121,7 +130,9 @@ export function BarcodeScannerModal({
                 ref={videoRef}
                 autoPlay
                 playsInline
+                muted
                 className="w-full h-full object-cover"
+                style={{ transform: 'scaleX(-1)' }}
               />
               <canvas ref={canvasRef} style={{ display: 'none' }} />
 
