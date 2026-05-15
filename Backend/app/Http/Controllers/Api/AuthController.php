@@ -422,6 +422,12 @@ class AuthController extends Controller
             $existingAccount = $this->accounts->findAccountByLogin($data['email']);
 
             if ($existingAccount) {
+                if ($existingAccount->platformAdmin) {
+                    return response()->json([
+                        'message' => 'Platform admin accounts cannot be registered as shop customers.',
+                    ], 422);
+                }
+
                 if (! $existingAccount->password_hash || ! Hash::check($data['password'], $existingAccount->password_hash)) {
                     return response()->json([
                         'message' => 'Wrong password. Please sign in first to join this shop as a Customer.',
@@ -524,6 +530,7 @@ class AuthController extends Controller
 
         $account = Account::query()->with(['status', 'platformAdmin.status'])->find($joinContext['account_id']);
         abort_if(! $account, 422, 'This join request is invalid.');
+        abort_if($account->platformAdmin, 422, 'Platform admin accounts cannot join shops as customers.');
         abort_if($account->status?->status_code !== 'active', 422, 'This account is inactive.');
 
         $customerRoleId = (int) DB::table('roles')->where('role_name', 'Customer')->value('role_id');
