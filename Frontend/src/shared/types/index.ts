@@ -45,6 +45,7 @@ export interface ServiceRecord {
 export interface CustomerService {
   id: string;
   customerName: string;
+  vehicleId?: string | null;
   motorcycleModel: string;
   serviceType: string;
   laborCost: number;

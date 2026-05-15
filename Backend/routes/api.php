@@ -88,6 +88,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/parts', [MospamsController::class, 'storePart'])->middleware('role:Owner,Staff');
         Route::patch('/parts/{part}', [MospamsController::class, 'updatePart'])->middleware('role:Owner,Staff');
         Route::delete('/parts/{part}', [MospamsController::class, 'deletePart'])->middleware('role:Owner');
+        Route::post('/parts/import-csv', [MospamsController::class, 'importPartsCsv'])->middleware('role:Owner,Staff');
         Route::post('/parts/{part}/image', [MospamsController::class, 'uploadPartImage'])->middleware('role:Owner,Staff');
         Route::delete('/parts/{part}/image', [MospamsController::class, 'deletePartImage'])->middleware('role:Owner,Staff');
         Route::get('/categories', [MospamsController::class, 'categories'])->middleware('role:Owner,Staff');
@@ -173,6 +174,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/customer/services', [CustomerController::class, 'services']);
         Route::post('/customer/services', [CustomerController::class, 'createService']);
         Route::delete('/customer/services/{jobId}', [CustomerController::class, 'cancelService']);
+        Route::post('/customer/services/{jobId}/cancel-request', [CustomerController::class, 'requestCancellation']);
         Route::get('/customer/payments', [CustomerController::class, 'payments']);
         Route::get('/customer/payments/{paymentId}', [CustomerController::class, 'paymentDetails']);
         Route::get('/customer/profile', [CustomerController::class, 'getProfile']);

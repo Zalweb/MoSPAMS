@@ -22,6 +22,7 @@ export default function BookService() {
   const [typesError, setTypesError] = useState('');
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [motorcycleModel, setMotorcycleModel] = useState('');
+  const [selectedVehicleId, setSelectedVehicleId] = useState('');
   const [serviceType, setServiceType] = useState('');
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -60,6 +61,7 @@ export default function BookService() {
         motorcycle_model: motorcycleModel.trim(),
         service_type: serviceType,
         notes: notes.trim() || null,
+        vehicle_id: selectedVehicleId ? parseInt(selectedVehicleId, 10) : null,
       });
       setSuccess(true);
     } catch {
@@ -113,6 +115,7 @@ export default function BookService() {
               <div className="relative">
                 <select
                   onChange={e => {
+                    setSelectedVehicleId(e.target.value);
                     const v = vehicles.find(x => x.id === e.target.value);
                     if (v) setMotorcycleModel(`${v.year ? v.year + ' ' : ''}${v.make} ${v.model}`.trim());
                   }}

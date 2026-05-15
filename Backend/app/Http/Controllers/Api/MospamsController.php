@@ -428,7 +428,25 @@ class MospamsController extends Controller
             Storage::disk('public')->delete($existing->image_path);
         }
 
-        $path = $request->file('image')->store('parts', 'public');
+        $uploadedFile = $request->file('image');
+        $ext = 'jpg';
+        $filename = 'parts/' . uniqid('part_', true) . '.' . $ext;
+        $tmpPath = $uploadedFile->getRealPath();
+        $mime = mime_content_type($tmpPath);
+
+        $src = match (true) {
+            str_contains($mime, 'png')  => imagecreatefrompng($tmpPath),
+            str_contains($mime, 'webp') => imagecreatefromwebp($tmpPath),
+            default                     => imagecreatefromjpeg($tmpPath),
+        };
+
+        ob_start();
+        imagejpeg($src, null, 90);
+        $imageData = ob_get_clean();
+        imagedestroy($src);
+
+        Storage::disk('public')->put($filename, $imageData);
+        $path = $filename;
 
         DB::table('parts')->where('part_id', $part)->where('shop_id_fk', $this->shopId())->update([
             'image_path' => $path,
@@ -438,6 +456,78 @@ class MospamsController extends Controller
         $this->log($request, 'Uploaded image for part: '.$existing->part_name, 'parts', $part);
 
         return response()->json(['data' => $this->partById($part)]);
+    }
+
+    public function importPartsCsv(Request $request): JsonResponse
+    {
+        $request->validate([
+            'csv' => ['required', 'file', 'mimes:csv,txt', 'max:2048'],
+        ]);
+
+        $shopId = $this->shopId();
+        $handle = fopen($request->file('csv')->getRealPath(), 'r');
+        $header = fgetcsv($handle);
+        $header = array_map('strtolower', array_map('trim', $header));
+
+        foreach (['name', 'price'] as $col) {
+            if (!in_array($col, $header)) {
+                fclose($handle);
+                return response()->json(['error' => "CSV missing required column: {$col}"], 422);
+            }
+        }
+
+        $imported = 0;
+        $skipped  = 0;
+        $now = now();
+
+        while (($row = fgetcsv($handle)) !== false) {
+            if (count($row) < count($header)) { $skipped++; continue; }
+            $data = array_combine($header, $row);
+
+            $name = trim($data['name'] ?? '');
+            if (!$name) { $skipped++; continue; }
+
+            $price       = (float) ($data['price'] ?? 0);
+            $stock       = (int) ($data['stock'] ?? 0);
+            $reorder     = (int) ($data['reorder_level'] ?? 5);
+            $description = trim($data['description'] ?? '');
+
+            $categoryName = trim($data['category'] ?? 'Uncategorized');
+            $categoryId   = DB::table('categories')
+                ->where('shop_id_fk', $shopId)
+                ->where('category_name', $categoryName)
+                ->value('category_id');
+            if (!$categoryId) {
+                $categoryId = DB::table('categories')->insertGetId([
+                    'shop_id_fk'    => $shopId,
+                    'category_name' => $categoryName,
+                    'created_at'    => $now,
+                    'updated_at'    => $now,
+                ]);
+            }
+
+            DB::table('parts')->insert([
+                'shop_id_fk'     => $shopId,
+                'category_id_fk' => $categoryId,
+                'part_name'      => $name,
+                'description'    => $description ?: null,
+                'price'          => $price,
+                'stock_quantity' => $stock,
+                'reorder_level'  => $reorder,
+                'created_at'     => $now,
+                'updated_at'     => $now,
+            ]);
+            $imported++;
+        }
+        fclose($handle);
+
+        $this->log($request, "Imported {$imported} parts via CSV", 'parts', null);
+
+        return response()->json([
+            'message'  => "Imported {$imported} part(s). Skipped {$skipped} row(s).",
+            'imported' => $imported,
+            'skipped'  => $skipped,
+        ]);
     }
 
     public function deletePartImage(Request $request, int $part): JsonResponse

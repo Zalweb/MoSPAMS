@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Wrench, Clock, CheckCircle2, Search, XCircle, Calendar, CreditCard, User, Package, Ban, Loader2, AlertTriangle, Star } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -23,7 +23,10 @@ export default function ServiceHistory() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('All');
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null);
+  const [requestingCancelId, setRequestingCancelId] = useState<string | null>(null);
+  const [requestedIds, setRequestedIds] = useState<Set<string>>(new Set());
   const [ratingDialog, setRatingDialog] = useState<{ jobId: string; mechanicName: string; serviceType: string } | null>(null);
+  const [vehicleFilter, setVehicleFilter] = useState('all');
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -53,11 +56,33 @@ export default function ServiceHistory() {
     }
   };
 
+  const handleRequestCancel = async (id: string) => {
+    setRequestingCancelId(id);
+    try {
+      await apiMutation(`/api/customer/services/${id}/cancel-request`, 'POST');
+      setRequestedIds(prev => new Set(prev).add(id));
+      toast.success('Cancellation request sent to the shop.');
+    } catch {
+      toast.error('Failed to send cancellation request. Please try again.');
+    } finally {
+      setRequestingCancelId(null);
+    }
+  };
+
+  const vehicleMap = useMemo(() => {
+    const seen = new Map<string, string>();
+    services.forEach(s => {
+      if (s.vehicleId) seen.set(s.vehicleId, s.motorcycleModel);
+    });
+    return seen;
+  }, [services]);
+
   const filtered = services.filter(s => {
     const q = search.toLowerCase();
     return (
       (s.motorcycleModel.toLowerCase().includes(q) || s.serviceType.toLowerCase().includes(q)) &&
-      (statusFilter === 'All' || s.status === statusFilter)
+      (statusFilter === 'All' || s.status === statusFilter) &&
+      (vehicleFilter === 'all' || s.vehicleId === vehicleFilter)
     );
   });
 
@@ -112,6 +137,21 @@ export default function ServiceHistory() {
           className="pl-12 h-12 rounded-2xl border-border/50 bg-muted/50 text-sm focus:ring-2 focus:ring-[rgb(var(--color-primary-rgb))]/20 transition-all"
         />
       </motion.div>
+
+      {vehicleMap.size > 0 && (
+        <motion.div {...fadeUp(0.25)} className="relative mb-6">
+          <select
+            value={vehicleFilter}
+            onChange={e => setVehicleFilter(e.target.value)}
+            className="w-full h-12 pl-5 pr-10 rounded-2xl bg-muted/50 border border-border/50 text-sm text-foreground appearance-none focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary-rgb))]/20 transition-all"
+          >
+            <option value="all">All Vehicles</option>
+            {Array.from(vehicleMap.entries()).map(([id, label]) => (
+              <option key={id} value={id}>{label}</option>
+            ))}
+          </select>
+        </motion.div>
+      )}
 
       <div className="space-y-4">
         {loading ? (
@@ -192,6 +232,24 @@ export default function ServiceHistory() {
                             : <XCircle className="w-3.5 h-3.5" />}
                           {cancellingId === service.id ? 'Cancelling…' : 'Cancel Request'}
                         </button>
+                      )}
+                      {service.statusCode === 'booked_confirmed' && (
+                        requestedIds.has(service.id) ? (
+                          <span className="mt-3 text-[11px] font-semibold text-amber-500 flex items-center gap-1.5 ml-auto">
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Request Sent
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleRequestCancel(service.id)}
+                            disabled={requestingCancelId === service.id}
+                            className="mt-3 text-[11px] font-bold text-amber-400 hover:text-amber-500 transition-colors flex items-center gap-1.5 bg-amber-500/5 px-3 py-1.5 rounded-lg border border-amber-500/10 hover:border-amber-500/20 active:scale-95 ml-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {requestingCancelId === service.id
+                              ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              : <XCircle className="w-3.5 h-3.5" />}
+                            {requestingCancelId === service.id ? 'Sending…' : 'Request Cancellation'}
+                          </button>
+                        )
                       )}
                       {(['work_done', 'completed'] as string[]).includes(service.statusCode) && !service.hasRating && service.mechanics.length > 0 && (
                         <button

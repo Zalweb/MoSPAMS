@@ -66,6 +66,7 @@ class CustomerController extends Controller
         $services = $rows->map(fn ($row) => [
             'id'               => (string) $row->job_id,
             'customerName'     => $row->customer_name,
+            'vehicleId'        => $row->vehicle_id_fk ? (string) $row->vehicle_id_fk : null,
             'motorcycleModel'  => $row->motorcycle_model ?? '',
             'serviceType'      => $row->service_name ?? 'General Service',
             'laborCost'        => (float) ($row->labor_cost ?? 0),
@@ -89,6 +90,7 @@ class CustomerController extends Controller
             'motorcycle_model' => ['required', 'string', 'max:150'],
             'service_type'     => ['required', 'string', 'max:100'],
             'notes'            => ['nullable', 'string', 'max:500'],
+            'vehicle_id'       => ['nullable', 'integer'],
         ]);
 
         $user = auth()->user();
@@ -105,15 +107,16 @@ class CustomerController extends Controller
                 : 0;
 
             $jobId = DB::table('service_jobs')->insertGetId([
-                'shop_id_fk' => $user->shop_id_fk,
-                'customer_id_fk' => $customer->customer_id,
-                'created_by_fk' => $user->user_id,
+                'shop_id_fk'               => $user->shop_id_fk,
+                'customer_id_fk'           => $customer->customer_id,
+                'vehicle_id_fk'            => $request->vehicle_id ?: null,
+                'created_by_fk'            => $user->user_id,
                 'service_job_status_id_fk' => DB::table('service_job_statuses')->where('status_code', 'pending')->value('service_job_status_id'),
-                'job_date' => now()->toDateString(),
-                'motorcycle_model' => $request->motorcycle_model,
-                'notes' => $request->notes,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'job_date'                 => now()->toDateString(),
+                'motorcycle_model'         => $request->motorcycle_model,
+                'notes'                    => $request->notes,
+                'created_at'               => now(),
+                'updated_at'               => now(),
             ]);
 
             DB::table('service_job_items')->insert([
@@ -202,6 +205,54 @@ class CustomerController extends Controller
         $this->logActivity($user->user_id, $user->shop_id_fk, 'Cancelled service request', 'service_jobs', $jobId, $user->account_id_fk);
 
         return response()->json(['message' => 'Service cancelled successfully']);
+    }
+
+    public function requestCancellation(Request $request, $jobId): JsonResponse
+    {
+        $user = auth()->user();
+        $customer = $this->tenantTable('customers')->where('user_id_fk', $user->user_id)->first();
+
+        if (!$customer) {
+            return response()->json(['error' => 'Customer not found'], 404);
+        }
+
+        $job = $this->tenantTable('service_jobs')
+            ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->where('service_jobs.job_id', $jobId)
+            ->where('service_jobs.customer_id_fk', $customer->customer_id)
+            ->select('service_jobs.*', 'service_job_statuses.status_code')
+            ->first();
+
+        if (!$job) {
+            return response()->json(['error' => 'Job not found'], 404);
+        }
+
+        if ($job->status_code !== 'booked_confirmed') {
+            return response()->json(['error' => 'Only confirmed bookings can request cancellation'], 400);
+        }
+
+        $shopId = $user->shop_id_fk;
+        $ownerId = DB::table('shop_memberships')
+            ->join('roles', 'roles.role_id', '=', 'shop_memberships.role_id_fk')
+            ->where('shop_memberships.shop_id_fk', $shopId)
+            ->where('roles.role_name', 'Owner')
+            ->value('shop_memberships.user_id_fk');
+
+        if ($ownerId) {
+            DB::table('notifications')->insert([
+                'user_id_fk'        => $ownerId,
+                'shop_id_fk'        => $shopId,
+                'notification_type' => 'cancellation_request',
+                'title'             => 'Cancellation Requested',
+                'message'           => "{$customer->full_name} is requesting to cancel their confirmed service booking (Job #{$jobId}).",
+                'reference_type'    => 'service_jobs',
+                'reference_id'      => $jobId,
+                'is_read'           => 0,
+                'created_at'        => now(),
+            ]);
+        }
+
+        return response()->json(['message' => 'Cancellation request sent to the shop.']);
     }
 
     public function paymentDetails(Request $request, $paymentId): JsonResponse

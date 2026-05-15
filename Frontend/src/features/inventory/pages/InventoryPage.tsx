@@ -3,14 +3,15 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
-import { Plus, Pencil, Trash2, Search, AlertTriangle, Package, ArrowDownToLine, ArrowUpFromLine, History, X, ChevronLeft, ChevronRight, ImagePlus, Loader2, Camera } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, AlertTriangle, Package, ArrowDownToLine, ArrowUpFromLine, History, X, ChevronLeft, ChevronRight, ImagePlus, Loader2, Camera, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useData } from '@/shared/contexts/DataContext';
 import { usePaginatedFetch } from '@/shared/hooks/usePaginatedFetch';
-import { apiGet } from '@/shared/lib/api';
+import { apiGet, apiMutation } from '@/shared/lib/api';
+import { toast } from 'sonner';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { can } from '@/shared/lib/permissions';
 import { PartFormWithScanning } from '@/features/inventory/components/PartFormWithScanning';
@@ -69,6 +70,8 @@ export default function Inventory() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageUploading, setImageUploading] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const csvInputRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
 
   const { data: parts, loading, meta, page, setPage, prependItem, updateItem, removeItem } = usePaginatedFetch<Part>('/api/parts');
 
@@ -116,6 +119,24 @@ export default function Inventory() {
     setImagePreview(part.imageUrl ?? null);
     form.reset({ brand: part.brand || '', name: part.name, partCode: part.partCode || '', category: part.category, stock: part.stock, minStock: part.minStock, price: part.price, barcode: part.barcode });
     setModalOpen(true);
+  };
+
+  const handleCsvImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+    setImporting(true);
+    const form = new FormData();
+    form.append('csv', file);
+    try {
+      const data = await apiMutation<{ message: string }>('/api/parts/import-csv', 'POST', form);
+      toast.success(data.message ?? 'Import complete');
+      window.location.reload();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Import failed');
+    } finally {
+      setImporting(false);
+    }
   };
   const handlePartAdded = () => { setShowAddForm(false); setPage(1); };
 
@@ -210,9 +231,26 @@ export default function Inventory() {
           </p>
         </div>
         {canCreate && (
-          <Button onClick={openAdd} size="sm" className="h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold px-5 transition-opacity">
-            <Plus className="w-4 h-4 mr-2" /> Add Part
-          </Button>
+          <div className="flex items-center gap-2">
+            <input
+              ref={csvInputRef}
+              type="file"
+              accept=".csv"
+              className="sr-only"
+              onChange={handleCsvImport}
+            />
+            <button
+              onClick={() => csvInputRef.current?.click()}
+              disabled={importing}
+              className="flex items-center gap-2 h-10 px-4 rounded-xl border border-border/50 text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-all disabled:opacity-50"
+            >
+              <Upload className="w-4 h-4" />
+              {importing ? 'Importing…' : 'Import CSV'}
+            </button>
+            <Button onClick={openAdd} size="sm" className="h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold px-5 transition-opacity">
+              <Plus className="w-4 h-4 mr-2" /> Add Part
+            </Button>
+          </div>
         )}
       </motion.div>
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Receipt, Loader2 } from 'lucide-react';
+import { X, Receipt, Loader2, Printer } from 'lucide-react';
 import { apiGet } from '@/shared/lib/api';
 
 interface InvoiceModalProps {
@@ -76,7 +76,7 @@ export default function InvoiceModal({ paymentId, onClose }: InvoiceModalProps) 
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-md bg-card dark:bg-zinc-950 rounded-[32px] border border-border shadow-2xl overflow-hidden"
+          className="relative w-full max-w-md bg-card dark:bg-zinc-950 rounded-[32px] border border-border shadow-2xl overflow-hidden print-target"
         >
           {/* Header */}
           <div className="px-8 py-6 border-b border-border/50 flex items-center justify-between bg-muted/20">
@@ -89,12 +89,23 @@ export default function InvoiceModal({ paymentId, onClose }: InvoiceModalProps) 
                 <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">#{paymentId.toString().padStart(6, '0')}</p>
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-all"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              {details && (
+                <button
+                  onClick={() => window.print()}
+                  className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-all"
+                  title="Print invoice"
+                >
+                  <Printer className="w-5 h-5" />
+                </button>
+              )}
+              <button
+                onClick={onClose}
+                className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-all"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* Content */}

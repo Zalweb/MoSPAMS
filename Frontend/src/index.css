@@ -249,4 +249,9 @@
   }
 }
 
+@media print {
+  body > *:not(.print-target) { display: none !important; }
+  .print-target { display: block !important; position: static !important; }
+}
+
 
