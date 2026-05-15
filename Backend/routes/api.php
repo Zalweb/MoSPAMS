@@ -20,6 +20,8 @@ Route::post('/register', [AuthController::class, 'register'])->middleware('throt
 Route::post('/join-shop', [AuthController::class, 'joinShop'])->middleware('throttle:auth', 'google.auth.headers');
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:forgot-password');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:6,1');
+Route::post('/verify-email', [AuthController::class, 'verifyEmail'])->middleware('throttle:10,1');
+Route::post('/resend-verification', [AuthController::class, 'resendVerification'])->middleware('throttle:forgot-password');
 Route::post('/auth/google', [GoogleAuthController::class, 'googleLogin'])->middleware('google.auth.headers');
 Route::post('/auth/google/register', [GoogleAuthController::class, 'googleRegister'])->middleware('google.auth.headers');
 Route::post('/auth/google/proxy', [GoogleAuthController::class, 'googleLoginProxy'])->middleware('google.auth.headers');
