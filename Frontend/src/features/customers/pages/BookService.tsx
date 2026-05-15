@@ -17,6 +17,7 @@ interface MechanicOption {
   avgRating: number | null;
   ratingCount: number;
   completedJobs: number;
+  pendingQueueCount: number;
 }
 
 const fadeUp = (delay = 0) => ({
@@ -41,6 +42,8 @@ export default function BookService() {
   const [isOpen, setIsOpen] = useState(false);
   const [mechanics, setMechanics] = useState<MechanicOption[]>([]);
   const [selectedMechanicId, setSelectedMechanicId] = useState<string | null>(null);
+  const [queuePosition, setQueuePosition] = useState<number | null>(null);
+  const [queueMechanicName, setQueueMechanicName] = useState<string | null>(null);
 
   useEffect(() => {
     setLoadingTypes(true);
@@ -72,13 +75,19 @@ export default function BookService() {
 
     setSubmitting(true);
     try {
-      await apiMutation('/api/customer/services', 'POST', {
-        motorcycle_model: motorcycleModel.trim(),
-        service_type: serviceType,
-        notes: notes.trim() || null,
-        vehicle_id: selectedVehicleId ? parseInt(selectedVehicleId, 10) : null,
-        preferred_mechanic_id: selectedMechanicId ? parseInt(selectedMechanicId, 10) : null,
-      });
+      const res = await apiMutation<{ queuePosition?: number | null; mechanicName?: string | null }>(
+        '/api/customer/services', 'POST', {
+          motorcycle_model: motorcycleModel.trim(),
+          service_type: serviceType,
+          notes: notes.trim() || null,
+          vehicle_id: selectedVehicleId ? parseInt(selectedVehicleId, 10) : null,
+          preferred_mechanic_id: selectedMechanicId ? parseInt(selectedMechanicId, 10) : null,
+        }
+      );
+      if (res.queuePosition) {
+        setQueuePosition(res.queuePosition);
+        setQueueMechanicName(res.mechanicName ?? null);
+      }
       setSuccess(true);
     } catch {
       setError('Failed to book service. Please try again.');
@@ -94,7 +103,16 @@ export default function BookService() {
           <CheckCircle2 className="w-8 h-8 text-green-500" strokeWidth={2} />
         </div>
         <h2 className="text-2xl font-bold text-foreground mb-2">Service Booked!</h2>
-        <p className="text-sm text-muted-foreground mb-6">We'll contact you when your service is scheduled.</p>
+        {queuePosition && queueMechanicName ? (
+          <div className="text-center mb-4">
+            <p className="text-sm text-muted-foreground">
+              You're <span className="font-bold text-amber-400">#{queuePosition}</span> in queue for <span className="font-semibold text-foreground">{queueMechanicName}</span>.
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">They'll be assigned to your service as soon as they're free.</p>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground mb-6">We'll contact you when your service is scheduled.</p>
+        )}
         <Button 
           onClick={() => navigate('/dashboard/customer')} 
           className="h-10 rounded-xl bg-foreground text-background hover:opacity-90 px-6"
@@ -284,6 +302,7 @@ export default function BookService() {
                     m.statusCode === 'busy'      ? 'bg-amber-500/15 text-amber-400 border-amber-500/20' :
                                                    'bg-zinc-500/15 text-zinc-400 border-zinc-500/20';
                   const isSelected = selectedMechanicId === m.id;
+                  const isBusy = m.statusCode !== 'available';
                   return (
                     <button
                       key={m.id}
@@ -292,7 +311,7 @@ export default function BookService() {
                       className={`p-3 rounded-2xl border text-left transition-all ${
                         isSelected
                           ? 'border-[rgb(var(--color-primary-rgb))] bg-[rgb(var(--color-primary-rgb))]/10 ring-2 ring-[rgb(var(--color-primary-rgb))]/20'
-                          : m.statusCode !== 'available'
+                          : isBusy
                             ? 'border-border/30 bg-muted/20 opacity-60 hover:opacity-80'
                             : 'border-border/50 bg-muted/30 hover:bg-muted/50'
                       }`}
@@ -313,10 +332,22 @@ export default function BookService() {
                         )}
                       </div>
                       <p className="text-[10px] text-muted-foreground mt-0.5">{m.completedJobs} jobs done</p>
+                      {isBusy && m.pendingQueueCount > 0 && (
+                        <p className="text-[10px] text-amber-400/80 mt-0.5">{m.pendingQueueCount} in queue</p>
+                      )}
                     </button>
                   );
                 })}
               </div>
+            </div>
+          )}
+
+          {selectedMechanicId && mechanics.find(m => m.id === selectedMechanicId)?.statusCode !== 'available' && (
+            <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400">
+              <p className="font-semibold mb-0.5">This mechanic is currently busy</p>
+              <p className="text-amber-400/80">
+                You'll be placed in their queue. They'll be assigned to your service as soon as they finish their current job.
+              </p>
             </div>
           )}
 

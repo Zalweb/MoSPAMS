@@ -140,20 +140,37 @@ class CustomerController extends Controller
 
             $this->logActivity($user->user_id, $user->shop_id_fk, 'Created service request', 'service_jobs', $jobId, $user->account_id_fk);
 
-            return $jobId;
+            return ['jobId' => $jobId, 'preferredMechanicId' => $preferredMechanicId];
         });
+
+        $jobId             = $service['jobId'];
+        $preferredMechanicId = $service['preferredMechanicId'];
+
+        $queuePosition = null;
+        $mechanicName  = null;
+        if ($preferredMechanicId) {
+            $pendingStatusId = DB::table('service_job_statuses')->where('status_code', 'pending')->value('service_job_status_id');
+            $queuePosition   = DB::table('service_jobs')
+                ->where('assigned_mechanic_id_fk', $preferredMechanicId)
+                ->where('service_job_status_id_fk', $pendingStatusId)
+                ->where('shop_id_fk', $user->shop_id_fk)
+                ->count();
+            $mechanicName = DB::table('mechanics')->where('mechanic_id', $preferredMechanicId)->value('full_name');
+        }
 
         $service = $this->tenantTable('service_jobs')
             ->join('customers', 'customers.customer_id', '=', 'service_jobs.customer_id_fk')
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
-            ->where('service_jobs.job_id', $service)
+            ->where('service_jobs.job_id', $jobId)
             ->select('service_jobs.*', 'customers.full_name as customer_name', 'service_job_statuses.status_name')
             ->first();
 
         return response()->json([
-            'id'           => (string) $service->job_id,
+            'id'            => (string) $service->job_id,
             'customer_name' => $service->customer_name,
-            'status'       => $service->status_name,
+            'status'        => $service->status_name,
+            'queuePosition' => $queuePosition,
+            'mechanicName'  => $mechanicName,
         ]);
     }
 
@@ -571,6 +588,10 @@ class CustomerController extends Controller
             ->where('status_code', 'completed')
             ->value('service_job_status_id');
 
+        $pendingStatusId = DB::table('service_job_statuses')
+            ->where('status_code', 'pending')
+            ->value('service_job_status_id');
+
         $mechanics = DB::table('mechanics')
             ->join('mechanic_statuses', 'mechanic_statuses.mechanic_status_id', '=', 'mechanics.mechanic_status_id_fk')
             ->where('mechanics.shop_id_fk', $shopId)
@@ -603,17 +624,28 @@ class CustomerController extends Controller
             ->get()
             ->keyBy('mechanic_id_fk');
 
-        $data = $mechanics->map(function ($row) use ($ratings, $completedJobs) {
+        $pendingQueues = DB::table('service_jobs')
+            ->whereIn('assigned_mechanic_id_fk', $mechanicIds)
+            ->where('service_job_status_id_fk', $pendingStatusId)
+            ->where('shop_id_fk', $shopId)
+            ->selectRaw('assigned_mechanic_id_fk, COUNT(*) as queue_count')
+            ->groupBy('assigned_mechanic_id_fk')
+            ->get()
+            ->keyBy('assigned_mechanic_id_fk');
+
+        $data = $mechanics->map(function ($row) use ($ratings, $completedJobs, $pendingQueues) {
             $r = $ratings->get($row->mechanic_id);
             $c = $completedJobs->get($row->mechanic_id);
+            $q = $pendingQueues->get($row->mechanic_id);
             return [
-                'id'            => (string) $row->mechanic_id,
-                'name'          => $row->full_name,
-                'statusCode'    => $row->status_code,
-                'statusName'    => $row->status_name,
-                'avgRating'     => $r ? round((float) $r->avg_rating, 1) : null,
-                'ratingCount'   => $r ? (int) $r->rating_count : 0,
-                'completedJobs' => $c ? (int) $c->completed : 0,
+                'id'                => (string) $row->mechanic_id,
+                'name'              => $row->full_name,
+                'statusCode'        => $row->status_code,
+                'statusName'        => $row->status_name,
+                'avgRating'         => $r ? round((float) $r->avg_rating, 1) : null,
+                'ratingCount'       => $r ? (int) $r->rating_count : 0,
+                'completedJobs'     => $c ? (int) $c->completed : 0,
+                'pendingQueueCount' => $q ? (int) $q->queue_count : 0,
             ];
         });
 

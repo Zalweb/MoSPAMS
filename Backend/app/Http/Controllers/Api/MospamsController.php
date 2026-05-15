@@ -721,17 +721,47 @@ class MospamsController extends Controller
             ->leftJoin('service_types', 'service_types.service_type_id', '=', 'service_job_items.service_type_id_fk')
             ->leftJoin('mechanics as preferred_mech', 'preferred_mech.mechanic_id', '=', 'service_jobs.assigned_mechanic_id_fk')
             ->where('service_jobs.shop_id_fk', $this->shopId())
-            ->select('service_jobs.*', 'customers.full_name as customer_name', 'service_job_statuses.status_name', 'service_job_statuses.status_code', 'service_types.service_name', 'service_job_items.labor_cost', 'preferred_mech.full_name as preferred_mech_name')
-            ->orderByDesc('service_jobs.created_at');
+            ->select('service_jobs.*', 'customers.full_name as customer_name', 'service_job_statuses.status_name', 'service_job_statuses.status_code', 'service_types.service_name', 'service_job_items.labor_cost', 'preferred_mech.full_name as preferred_mech_name');
 
-        if ($status = request()->query('status')) {
+        $status = request()->query('status');
+        if ($status) {
             $query->where('service_job_statuses.status_name', $status);
+        }
+
+        // FIFO queue order for pending, newest-first for everything else
+        if ($status && strtolower($status) === 'pending') {
+            $query->orderBy('service_jobs.created_at', 'asc');
+        } else {
+            $query->orderByDesc('service_jobs.created_at');
         }
 
         $result = $this->paginateOrLimit($query);
 
+        // Batch-compute queue positions for pending jobs that have a preferred mechanic
+        $queuePositions = [];
+        $pendingRows = collect($result['data'])->filter(
+            fn ($r) => isset($r->status_code) && $r->status_code === 'pending' && ! empty($r->assigned_mechanic_id_fk)
+        );
+        if ($pendingRows->isNotEmpty()) {
+            $pendingStatusId = DB::table('service_job_statuses')->where('status_code', 'pending')->value('service_job_status_id');
+            $mechIds         = $pendingRows->pluck('assigned_mechanic_id_fk')->unique()->values();
+            $allPending      = DB::table('service_jobs')
+                ->whereIn('assigned_mechanic_id_fk', $mechIds)
+                ->where('service_job_status_id_fk', $pendingStatusId)
+                ->where('shop_id_fk', $this->shopId())
+                ->orderBy('created_at', 'asc')
+                ->select('job_id', 'assigned_mechanic_id_fk')
+                ->get()
+                ->groupBy('assigned_mechanic_id_fk');
+            foreach ($allPending as $jobs) {
+                foreach ($jobs as $pos => $job) {
+                    $queuePositions[$job->job_id] = $pos + 1;
+                }
+            }
+        }
+
         return response()->json([
-            'data' => collect($result['data'])->map(fn ($row) => $this->serviceResource($row)),
+            'data' => collect($result['data'])->map(fn ($row) => $this->serviceResource($row, $queuePositions[$row->job_id] ?? null)),
             'meta' => $result['meta'],
         ]);
     }
@@ -2262,7 +2292,7 @@ class MospamsController extends Controller
         ];
     }
 
-    private function serviceResource(object $row): array
+    private function serviceResource(object $row, ?int $queuePosition = null): array
     {
         $allParts = DB::table('service_job_parts')
             ->join('parts', 'parts.part_id', '=', 'service_job_parts.part_id_fk')
@@ -2331,6 +2361,7 @@ class MospamsController extends Controller
                 'id'   => (string) $row->assigned_mechanic_id_fk,
                 'name' => $row->preferred_mech_name,
             ] : null,
+            'queuePosition'   => $queuePosition,
             'createdAt'       => $this->iso($row->created_at),
             'completedAt'     => $row->completion_date ? $this->iso($row->completion_date) : null,
         ];

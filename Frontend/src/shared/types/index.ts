@@ -39,6 +39,7 @@ export interface ServiceRecord {
   partRequests: { jobPartId: string; partId: string; name: string; quantity: number; unitPrice: number; requestedBy: string; status: string }[];
   mechanics: { id: string; name: string }[];
   preferredMechanic?: { id: string; name: string } | null;
+  queuePosition?: number | null;
   notes: string;
   createdAt: string;
   completedAt?: string;

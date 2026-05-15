@@ -364,6 +364,11 @@ export default function Services() {
                     {service.preferredMechanic && (service.mechanics ?? []).length === 0 && (
                       <p className="text-xs text-amber-400 mt-0.5">
                         ★ Customer prefers: {service.preferredMechanic.name}
+                        {service.queuePosition != null && (
+                          <span className="ml-1.5 text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/20 px-1.5 py-0.5 rounded-full">
+                            #{service.queuePosition} in queue
+                          </span>
+                        )}
                       </p>
                     )}
                   </div>
