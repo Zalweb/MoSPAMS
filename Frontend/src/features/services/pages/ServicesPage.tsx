@@ -361,6 +361,11 @@ export default function Services() {
                         <span className="text-muted-foreground dark:text-zinc-600">Mechanic:</span> {service.mechanics.map(m => m.name).join(', ')}
                       </p>
                     )}
+                    {service.preferredMechanic && (service.mechanics ?? []).length === 0 && (
+                      <p className="text-xs text-amber-400 mt-0.5">
+                        ★ Customer prefers: {service.preferredMechanic.name}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap justify-end">

@@ -719,8 +719,9 @@ class MospamsController extends Controller
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
             ->leftJoin('service_job_items', 'service_job_items.job_id_fk', '=', 'service_jobs.job_id')
             ->leftJoin('service_types', 'service_types.service_type_id', '=', 'service_job_items.service_type_id_fk')
+            ->leftJoin('mechanics as preferred_mech', 'preferred_mech.mechanic_id', '=', 'service_jobs.assigned_mechanic_id_fk')
             ->where('service_jobs.shop_id_fk', $this->shopId())
-            ->select('service_jobs.*', 'customers.full_name as customer_name', 'service_job_statuses.status_name', 'service_job_statuses.status_code', 'service_types.service_name', 'service_job_items.labor_cost')
+            ->select('service_jobs.*', 'customers.full_name as customer_name', 'service_job_statuses.status_name', 'service_job_statuses.status_code', 'service_types.service_name', 'service_job_items.labor_cost', 'preferred_mech.full_name as preferred_mech_name')
             ->orderByDesc('service_jobs.created_at');
 
         if ($status = request()->query('status')) {
@@ -2211,7 +2212,8 @@ class MospamsController extends Controller
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
             ->leftJoin('service_job_items', 'service_job_items.job_id_fk', '=', 'service_jobs.job_id')
             ->leftJoin('service_types', 'service_types.service_type_id', '=', 'service_job_items.service_type_id_fk')
-            ->select('service_jobs.*', 'customers.full_name as customer_name', 'service_job_statuses.status_name', 'service_job_statuses.status_code', 'service_types.service_name', 'service_job_items.labor_cost')
+            ->leftJoin('mechanics as preferred_mech', 'preferred_mech.mechanic_id', '=', 'service_jobs.assigned_mechanic_id_fk')
+            ->select('service_jobs.*', 'customers.full_name as customer_name', 'service_job_statuses.status_name', 'service_job_statuses.status_code', 'service_types.service_name', 'service_job_items.labor_cost', 'preferred_mech.full_name as preferred_mech_name')
             ->where('service_jobs.job_id', $id)
             ->where('service_jobs.shop_id_fk', $this->shopId())
             ->first();
@@ -2325,6 +2327,10 @@ class MospamsController extends Controller
             'partRequests' => $partRequests,
             'mechanics'       => $mechanics,
             'notes'           => $row->notes ?? '',
+            'preferredMechanic' => isset($row->preferred_mech_name) && $row->preferred_mech_name ? [
+                'id'   => (string) $row->assigned_mechanic_id_fk,
+                'name' => $row->preferred_mech_name,
+            ] : null,
             'createdAt'       => $this->iso($row->created_at),
             'completedAt'     => $row->completion_date ? $this->iso($row->completion_date) : null,
         ];
