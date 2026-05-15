@@ -35,7 +35,6 @@ class ShopRegistrationApprovalTest extends TestCase
             'subdomain'  => 'trial-moto',
             'ownerName'  => 'Applicant Owner',
             'ownerEmail' => 'applicant@example.com',
-            'planCode'   => 'BASIC',
         ], $override);
     }
 

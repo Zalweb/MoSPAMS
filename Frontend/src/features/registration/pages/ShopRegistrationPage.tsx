@@ -10,51 +10,8 @@ interface RegistrationForm {
   ownerEmail: string;
   phone: string;
   address: string;
-  selectedPlan: 'BASIC' | 'PREMIUM' | 'ENTERPRISE';
   agreeToTerms: boolean;
 }
-
-const PLANS = [
-  {
-    code: 'BASIC',
-    name: 'Basic',
-    price: 499,
-    features: [
-      'Up to 3 staff users',
-      'Inventory management',
-      'Service job tracking',
-      'Basic reports',
-      'Email support',
-    ],
-  },
-  {
-    code: 'PREMIUM',
-    name: 'Premium',
-    price: 999,
-    features: [
-      'Up to 10 staff users',
-      'Everything in Basic',
-      'Advanced reports',
-      'Customer portal',
-      'Priority support',
-      'Custom branding',
-    ],
-    popular: true,
-  },
-  {
-    code: 'ENTERPRISE',
-    name: 'Enterprise',
-    price: 1999,
-    features: [
-      'Unlimited users',
-      'Everything in Premium',
-      'Custom domain support',
-      'API access',
-      'Dedicated support',
-      'Custom features',
-    ],
-  },
-];
 
 const RESEND_COOLDOWN = 60;
 
@@ -90,7 +47,6 @@ export default function ShopRegistrationPage() {
     ownerEmail: '',
     phone: '',
     address: '',
-    selectedPlan: 'PREMIUM',
     agreeToTerms: false,
   });
 
@@ -153,7 +109,6 @@ export default function ShopRegistrationPage() {
           ownerEmail: form.ownerEmail,
           phone: form.phone || null,
           address: form.address || null,
-          planCode: form.selectedPlan,
         }),
       });
       const data = await response.json();
@@ -531,57 +486,14 @@ export default function ShopRegistrationPage() {
           </div>
 
           <div className="bg-muted/40 backdrop-blur-2xl rounded-3xl border border-border/50 p-8">
-            <h2 className="text-2xl font-bold text-foreground mb-2">Choose Your Plan</h2>
-            <p className="text-muted-foreground mb-6">14-day free trial • No credit card required</p>
-
-            <div className="grid md:grid-cols-3 gap-6">
-              {PLANS.map(plan => (
-                <button
-                  key={plan.code}
-                  type="button"
-                  onClick={() => updateForm('selectedPlan', plan.code)}
-                  className={`relative text-left p-6 rounded-2xl border-2 transition-all ${
-                    form.selectedPlan === plan.code
-                      ? 'border-white bg-zinc-800/50 scale-105'
-                      : 'border-zinc-700/50 hover:border-zinc-600/50 bg-zinc-800/20'
-                  }`}
-                >
-                  {plan.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span className="bg-white text-black text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-                        POPULAR
-                      </span>
-                    </div>
-                  )}
-                  <div className="mb-4">
-                    <h3 className="text-xl font-bold text-foreground">{plan.name}</h3>
-                    <div className="mt-2">
-                      <span className="text-3xl font-bold text-foreground">₱{plan.price}</span>
-                      <span className="text-muted-foreground">/month</span>
-                    </div>
-                  </div>
-                  <div className="h-px bg-gradient-to-r from-transparent via-zinc-700 to-transparent mb-4" />
-                  <ul className="space-y-2">
-                    {plan.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
-                        <div className="mt-0.5">
-                          <div className="w-4 h-4 rounded-full bg-zinc-700 flex items-center justify-center">
-                            <Check className="w-2.5 h-2.5 text-muted-foreground" strokeWidth={3} />
-                          </div>
-                        </div>
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  {form.selectedPlan === plan.code && (
-                    <div className="absolute top-4 right-4">
-                      <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                        <Check className="w-4 h-4 text-black" strokeWidth={3} />
-                      </div>
-                    </div>
-                  )}
-                </button>
-              ))}
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0">
+                <Sparkles className="w-5 h-5 text-zinc-300" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-foreground mb-1">14-Day Free Trial</h2>
+                <p className="text-muted-foreground text-sm">Your shop starts with a free 14-day trial — no credit card required. Full access to all features from day one.</p>
+              </div>
             </div>
           </div>
 

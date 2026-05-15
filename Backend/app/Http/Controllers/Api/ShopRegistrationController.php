@@ -22,13 +22,7 @@ class ShopRegistrationController extends Controller
             'ownerEmail' => ['required', 'email', 'max:100'],
             'phone'      => ['nullable', 'string', 'max:20'],
             'address'    => ['nullable', 'string', 'max:500'],
-            'planCode'   => ['required', 'in:BASIC,PREMIUM,ENTERPRISE'],
         ]);
-
-        abort_unless(
-            DB::table('subscription_plans')->where('plan_code', $data['planCode'])->exists(),
-            422, 'Invalid subscription plan.'
-        );
 
         $ownerEmail = strtolower($data['ownerEmail']);
 
@@ -53,7 +47,6 @@ class ShopRegistrationController extends Controller
             'ownerEmail'  => $ownerEmail,
             'phone'       => $data['phone'] ?? null,
             'address'     => $data['address'] ?? null,
-            'planCode'    => $data['planCode'],
             'initiatedAt' => now()->unix(),
         ]);
 
@@ -140,7 +133,7 @@ class ShopRegistrationController extends Controller
         $trialDays      = max(1, (int) config('tenancy.shop_trial_days', 14));
         $ownerRoleId    = (int) DB::table('roles')->where('role_name', 'Owner')->value('role_id');
         $activeStatusId = (int) DB::table('shop_statuses')->where('status_code', 'ACTIVE')->value('shop_status_id');
-        $planId         = (int) DB::table('subscription_plans')->where('plan_code', $pending['planCode'])->value('plan_id');
+        $planId         = (int) DB::table('subscription_plans')->orderBy('plan_id')->value('plan_id');
 
         abort_unless($ownerRoleId && $activeStatusId && $planId, 422, 'Configuration error. Please try again.');
 
