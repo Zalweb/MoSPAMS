@@ -49,8 +49,8 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
       <div className="relative bg-card dark:bg-card/80 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 overflow-hidden dark:hover:border-border dark:border-zinc-800/50 hover:border-zinc-300/50 transition-all duration-300">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-card-foreground mb-1">Your Assets</h3>
-            <p className="text-sm text-muted-foreground">Revenue trend</p>
+            <h3 className="text-lg font-semibold text-card-foreground mb-1">Revenue Analytics</h3>
+            <p className="text-sm text-muted-foreground">Income trend over time</p>
           </div>
 
           <select

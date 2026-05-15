@@ -74,14 +74,16 @@ export default function DashboardPage() {
           trend: `₱${(metrics?.todayRevenue ?? 0).toLocaleString()} today`,
           icon: ShoppingCart,
           sparklineData: revenueSparkline,
+          accentColor: 'emerald' as const,
         },
         {
           title: 'Service Completion Rate',
           value: `${completionRate.toFixed(0)}%`,
-          change: completionRate - 75, // Compare to 75% target
+          change: completionRate - 75,
           comparison: `${completedServices} of ${totalJobs} jobs`,
           trend: `Avg time: ${avgJobTime}`,
           icon: CheckCircle2,
+          accentColor: 'blue' as const,
         },
         {
           title: 'Active Pipeline',
@@ -90,6 +92,7 @@ export default function DashboardPage() {
           comparison: `${pendingServices} pending, ${ongoingServices} ongoing`,
           trend: `${completedServices} completed`,
           icon: Clock,
+          accentColor: 'violet' as const,
         },
         {
           title: 'Inventory Health',
@@ -99,6 +102,7 @@ export default function DashboardPage() {
           trend: `${metrics?.totalParts ?? 0} total parts`,
           icon: AlertTriangle,
           sparklineData: partsUsageSparkline,
+          accentColor: lowStockCount > 0 ? 'amber' as const : 'emerald' as const,
         },
       ];
     } else if (user?.role === 'Customer') {
@@ -150,9 +154,13 @@ export default function DashboardPage() {
             title={kpi.title}
             value={kpi.value}
             change={'change' in kpi ? kpi.change : undefined}
+            comparison={'comparison' in kpi ? kpi.comparison : undefined}
+            trend={'trend' in kpi ? kpi.trend : undefined}
             icon={kpi.icon}
             loading={loading}
             delay={index * 0.1}
+            sparklineData={'sparklineData' in kpi ? kpi.sparklineData : undefined}
+            accentColor={'accentColor' in kpi ? kpi.accentColor : 'primary'}
           />
         ))}
       </div>
