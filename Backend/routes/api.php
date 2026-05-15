@@ -136,6 +136,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/notifications/{notificationId}/read', [MospamsController::class, 'markNotificationRead'])->middleware('role:Owner');
 
         Route::get('/customers', [MospamsController::class, 'customers'])->middleware('role:Owner');
+        Route::get('/customers/search', [MospamsController::class, 'searchCustomers'])->middleware('role:Owner,Staff');
         Route::post('/customers', [MospamsController::class, 'storeCustomer'])->middleware('role:Owner');
         Route::patch('/customers/{customerId}', [MospamsController::class, 'updateCustomer'])->middleware('role:Owner');
         Route::delete('/customers/{customerId}', [MospamsController::class, 'deleteCustomer'])->middleware('role:Owner');

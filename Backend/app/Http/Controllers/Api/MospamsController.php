@@ -743,6 +743,7 @@ class MospamsController extends Controller
     {
         $data = $request->validate([
             'customerName'         => ['required', 'string', 'max:100'],
+            'customerId'           => ['nullable', 'integer'],
             'motorcycleModel'      => ['nullable', 'string', 'max:150'],
             'serviceType'          => ['required', 'string', 'max:100'],
             'laborCost'            => ['required', 'numeric', 'min:0'],
@@ -756,7 +757,9 @@ class MospamsController extends Controller
         ]);
 
         $jobId = DB::transaction(function () use ($request, $data) {
-            $customerId = $this->customerId($data['customerName']);
+            $customerId = !empty($data['customerId'])
+                ? (int) $data['customerId']
+                : $this->customerId($data['customerName']);
             $statusCode = strtolower($data['status'] ?? 'Pending');
             $jobId = DB::table('service_jobs')->insertGetId([
                 'shop_id_fk' => $this->shopId(),
@@ -1267,20 +1270,29 @@ class MospamsController extends Controller
     public function storeTransaction(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'type' => ['required', Rule::in(['parts-only', 'service+parts'])],
-            'items' => ['array'],
-            'items.*.partId' => ['required'],
+            'customerName'     => ['nullable', 'string', 'max:100'],
+            'customerId'       => ['nullable', 'integer'],
+            'type'             => ['required', Rule::in(['parts-only', 'service+parts'])],
+            'items'            => ['array'],
+            'items.*.partId'   => ['required'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
-            'items.*.price' => ['required', 'numeric', 'min:0'],
-            'serviceId' => ['nullable'],
+            'items.*.price'    => ['required', 'numeric', 'min:0'],
+            'serviceId'        => ['nullable'],
             'serviceLaborCost' => ['nullable', 'numeric', 'min:0'],
-            'paymentMethod' => ['required', Rule::in(['Cash', 'GCash'])],
-            'total' => ['required', 'numeric', 'min:0'],
+            'paymentMethod'    => ['required', Rule::in(['Cash', 'GCash'])],
+            'total'            => ['required', 'numeric', 'min:0'],
         ]);
 
         $saleId = DB::transaction(function () use ($request, $data) {
             $jobId = isset($data['serviceId']) ? $this->numericId($data['serviceId']) : null;
-            $customerId = $jobId ? DB::table('service_jobs')->where('job_id', $jobId)->value('customer_id_fk') : null;
+            $customerId = null;
+            if ($jobId) {
+                $customerId = DB::table('service_jobs')->where('job_id', $jobId)->value('customer_id_fk');
+            } elseif (!empty($data['customerId'])) {
+                $customerId = (int) $data['customerId'];
+            } elseif (!empty($data['customerName'])) {
+                $customerId = $this->customerId($data['customerName']);
+            }
             $saleId = DB::table('sales')->insertGetId([
                 'shop_id_fk' => $this->shopId(),
                 'customer_id_fk' => $customerId,
@@ -1866,6 +1878,28 @@ class MospamsController extends Controller
             'address' => $customer->address,
             'createdAt' => $this->iso($customer->created_at),
         ], 201);
+    }
+
+    public function searchCustomers(Request $request): JsonResponse
+    {
+        $q = trim($request->query('q', ''));
+        if (strlen($q) < 1) {
+            return response()->json(['data' => []]);
+        }
+
+        $rows = DB::table('customers')
+            ->where('shop_id_fk', $this->shopId())
+            ->where('full_name', 'like', '%'.$q.'%')
+            ->orderBy('full_name')
+            ->limit(10)
+            ->get(['customer_id', 'full_name', 'phone', 'email']);
+
+        return response()->json(['data' => $rows->map(fn ($r) => [
+            'id'    => (string) $r->customer_id,
+            'name'  => $r->full_name,
+            'phone' => $r->phone ?? null,
+            'email' => $r->email ?? null,
+        ])]);
     }
 
     public function updateCustomer(Request $request, $customerId): JsonResponse
