@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Search, UserCheck, X } from 'lucide-react';
-import { apiGet } from '@/shared/lib/api';
+import { getAuthToken } from '@/shared/lib/api';
 
 interface CustomerResult {
   id: string;
@@ -22,6 +22,7 @@ export function CustomerSearchInput({ value, customerId, onChange, placeholder =
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -34,22 +35,43 @@ export function CustomerSearchInput({ value, customerId, onChange, placeholder =
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (abortRef.current) abortRef.current.abort();
+    };
+  }, []);
+
   const handleInput = (raw: string) => {
-    onChange(raw, null); // clear linked ID when user types manually
+    onChange(raw, null);
     setOpen(true);
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (abortRef.current) abortRef.current.abort();
+
     if (raw.trim().length < 1) { setResults([]); return; }
 
     debounceRef.current = setTimeout(async () => {
+      const controller = new AbortController();
+      abortRef.current = controller;
       setLoading(true);
       try {
-        const data = await apiGet<{ data: CustomerResult[] }>(`/api/customers/search?q=${encodeURIComponent(raw)}`);
+        const token = getAuthToken();
+        const res = await fetch(`/api/customers/search?q=${encodeURIComponent(raw)}`, {
+          signal: controller.signal,
+          headers: {
+            'Accept': 'application/json',
+            'X-Tenant-Host': window.location.host,
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        });
+        if (!res.ok) throw new Error('Search failed');
+        const data: { data: CustomerResult[] } = await res.json();
         setResults(data.data);
-      } catch {
-        setResults([]);
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') setResults([]);
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     }, 300);
   };
