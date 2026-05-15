@@ -28,8 +28,10 @@ Route::post('/auth/google/proxy', [GoogleAuthController::class, 'googleLoginProx
 Route::get('/stats', [MospamsController::class, 'publicStats']);
 Route::get('/plans', [MospamsController::class, 'publicPlans']);
 
-// Public shop registration
-Route::post('/shop-registration', [ShopRegistrationController::class, 'register'])->middleware('throttle:shop-registration');
+// Public shop registration (two-step: initiate → OTP → confirm)
+Route::post('/shop-registration/initiate', [ShopRegistrationController::class, 'initiate'])->middleware('throttle:shop-registration');
+Route::post('/shop-registration/confirm',  [ShopRegistrationController::class, 'confirm'])->middleware('throttle:10,1');
+Route::post('/shop-registration/resend',   [ShopRegistrationController::class, 'resend'])->middleware('throttle:forgot-password');
 
 // Public shop branding (no auth required)
 Route::get('/shop/info', [ShopBrandingController::class, 'publicShopInfo']);
