@@ -3,102 +3,120 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ShopRegistrationOtpMail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class ShopRegistrationController extends Controller
 {
-    public function register(Request $request): JsonResponse
+    public function initiate(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'shopName' => ['required', 'string', 'max:100'],
-            'subdomain' => ['required', 'string', 'max:50', 'alpha_dash', 'unique:shops,subdomain'],
-            'ownerName' => ['required', 'string', 'max:100'],
+            'shopName'   => ['required', 'string', 'max:100'],
+            'subdomain'  => ['required', 'string', 'max:50', 'alpha_dash', 'unique:shops,subdomain'],
+            'ownerName'  => ['required', 'string', 'max:100'],
             'ownerEmail' => ['required', 'email', 'max:100'],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'address' => ['nullable', 'string', 'max:500'],
-            'planCode' => ['required', 'in:BASIC,PREMIUM,ENTERPRISE'],
+            'phone'      => ['nullable', 'string', 'max:20'],
+            'address'    => ['nullable', 'string', 'max:500'],
+            'planCode'   => ['required', 'in:BASIC,PREMIUM,ENTERPRISE'],
         ]);
 
-        $pendingShopStatusId = DB::table('shop_statuses')
-            ->where('status_code', 'PENDING')
-            ->value('shop_status_id');
+        abort_unless(
+            DB::table('subscription_plans')->where('plan_code', $data['planCode'])->exists(),
+            422, 'Invalid subscription plan.'
+        );
 
-        abort_unless($pendingShopStatusId, 422, 'Shop status configuration missing.');
+        $ownerEmail = strtolower($data['ownerEmail']);
 
-        $planId = DB::table('subscription_plans')
-            ->where('plan_code', $data['planCode'])
-            ->value('plan_id');
+        $alreadyUsedTrial = DB::table('shops as s')
+            ->join('shop_subscriptions as ss', 'ss.shop_id_fk', '=', 's.shop_id')
+            ->whereRaw('LOWER(s.registration_owner_email) = ?', [$ownerEmail])
+            ->whereIn('ss.subscription_status', ['ACTIVE', 'EXPIRED', 'CANCELLED'])
+            ->exists();
 
-        abort_unless($planId, 422, 'Invalid subscription plan.');
-
-        return DB::transaction(function () use ($data, $pendingShopStatusId, $planId) {
-            $invitationCode = strtoupper(Str::random(8));
-            $ownerEmail = strtolower($data['ownerEmail']);
-
-            $shopId = DB::table('shops')->insertGetId([
-                'shop_name' => $data['shopName'],
-                'registration_owner_name' => $data['ownerName'],
-                'registration_owner_email' => $ownerEmail,
-                'subdomain' => strtolower($data['subdomain']),
-                'invitation_code' => $invitationCode,
-                'phone' => $data['phone'] ?? null,
-                'address' => $data['address'] ?? null,
-                'shop_status_id_fk' => $pendingShopStatusId,
-                'registration_status' => 'PENDING_APPROVAL',
-                'registration_rejection_reason' => null,
-                'registration_approved_at' => null,
-                'registration_rejected_at' => null,
-                'primary_color' => '#3B82F6',
-                'secondary_color' => '#10B981',
-                'business_hours' => json_encode([
-                    'monday' => ['open' => '08:00', 'close' => '18:00'],
-                    'tuesday' => ['open' => '08:00', 'close' => '18:00'],
-                    'wednesday' => ['open' => '08:00', 'close' => '18:00'],
-                    'thursday' => ['open' => '08:00', 'close' => '18:00'],
-                    'friday' => ['open' => '08:00', 'close' => '18:00'],
-                    'saturday' => ['open' => '08:00', 'close' => '16:00'],
-                    'sunday' => ['closed' => true],
-                ]),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            DB::table('shop_subscriptions')->insert([
-                'shop_id_fk' => $shopId,
-                'plan_id_fk' => $planId,
-                'subscription_status' => 'PENDING',
-                'starts_at' => null,
-                'ends_at' => null,
-                'renews_at' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            DB::table('activity_logs')->insert([
-                'shop_id_fk' => $shopId,
-                'user_id_fk' => null,
-                'action' => "Shop registration submitted: {$data['shopName']}",
-                'table_name' => 'shops',
-                'record_id' => $shopId,
-                'log_date' => now(),
-                'description' => "Pending registration by {$data['ownerName']} ({$ownerEmail})",
-            ]);
-
+        if ($alreadyUsedTrial) {
             return response()->json([
-                'data' => [
-                    'shopId' => $shopId,
-                    'shopName' => $data['shopName'],
-                    'subdomain' => $data['subdomain'],
-                    'invitationCode' => $invitationCode,
-                    'ownerName' => $data['ownerName'],
-                    'ownerEmail' => $ownerEmail,
-                    'status' => 'PENDING_APPROVAL',
-                    'message' => 'Your shop registration has been submitted for approval.',
-                ],
-            ], 201);
-        });
+                'message' => 'This email has already been used for a shop trial. Each email address can only register one shop.',
+            ], 422);
+        }
+
+        $this->sendShopOtp($ownerEmail, $data['ownerName'], $data['shopName']);
+
+        $pendingToken = encrypt([
+            'shopName'    => $data['shopName'],
+            'subdomain'   => strtolower($data['subdomain']),
+            'ownerName'   => $data['ownerName'],
+            'ownerEmail'  => $ownerEmail,
+            'phone'       => $data['phone'] ?? null,
+            'address'     => $data['address'] ?? null,
+            'planCode'    => $data['planCode'],
+            'initiatedAt' => now()->unix(),
+        ]);
+
+        return response()->json([
+            'requiresVerification' => true,
+            'email'        => $ownerEmail,
+            'shopName'     => $data['shopName'],
+            'pendingToken' => $pendingToken,
+        ]);
+    }
+
+    public function resend(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'email'        => ['required', 'email'],
+            'pendingToken' => ['required', 'string'],
+        ]);
+
+        try {
+            $pending = decrypt($data['pendingToken']);
+        } catch (\Throwable) {
+            return response()->json(['message' => 'Invalid session. Please start again.'], 422);
+        }
+
+        if (strtolower($pending['ownerEmail'] ?? '') !== strtolower($data['email'])) {
+            return response()->json(['message' => 'Invalid session.'], 422);
+        }
+
+        $last = DB::table('email_otp_verifications')
+            ->where('email', strtolower($data['email']))
+            ->orderByDesc('created_at')
+            ->first();
+
+        if ($last && now()->diffInSeconds($last->created_at) < 60) {
+            return response()->json(['message' => 'Please wait before requesting another code.'], 429);
+        }
+
+        $this->sendShopOtp(strtolower($data['email']), $pending['ownerName'], $pending['shopName']);
+
+        return response()->json(['message' => 'A new verification code has been sent to your email.']);
+    }
+
+    public function confirm(Request $request): JsonResponse
+    {
+        return response()->json(['message' => 'not implemented'], 501);
+    }
+
+    private function sendShopOtp(string $email, string $ownerName, string $shopName): void
+    {
+        DB::table('email_otp_verifications')
+            ->where('email', $email)
+            ->where('used', false)
+            ->update(['used' => true]);
+
+        $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        DB::table('email_otp_verifications')->insert([
+            'email'      => $email,
+            'otp_code'   => $code,
+            'expires_at' => now()->addMinutes(15),
+            'used'       => false,
+            'created_at' => now(),
+        ]);
+
+        Mail::to($email)->send(new ShopRegistrationOtpMail($ownerName, $code, $shopName));
     }
 }
