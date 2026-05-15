@@ -1,5 +1,12 @@
 type ApiMethod = 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
+export class ApiError extends Error {
+  constructor(message: string, public readonly status: number, public readonly data: Record<string, unknown> = {}) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
 const TOKEN_STORAGE_KEY = 'mospams_auth_token';
 
@@ -57,13 +64,15 @@ async function apiRequest<T>(path: string, method: ApiMethod | 'GET', body?: unk
 
   if (!response.ok) {
     let message = `API request failed (${response.status})`;
+    let data: Record<string, unknown> = {};
     try {
       const payload = await response.json();
       if (typeof payload?.message === 'string') message = payload.message;
+      if (payload && typeof payload === 'object') data = payload as Record<string, unknown>;
     } catch {
       // Keep the default error when the backend does not return JSON.
     }
-    throw new Error(message);
+    throw new ApiError(message, response.status, data);
   }
 
   if (response.status === 204) return undefined as T;

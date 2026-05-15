@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '@/features/auth/context/AuthContext';
-import { ArrowLeft, Shield, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Shield, Eye, EyeOff, MailWarning } from 'lucide-react';
 import { toast } from 'sonner';
 import { currentHostMode } from '@/shared/lib/hostMode';
 import { useTenantBranding } from '@/shared/contexts/TenantBrandingContext';
@@ -24,6 +24,7 @@ export default function LoginPage() {
   const [signUpModal, setSignUpModal] = useState<{ open: boolean; googleData: GoogleData | null }>({ open: false, googleData: null });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
 
   const handleGoogleSuccess = async (response: CredentialResponse) => {
     if (!response.credential) return;
@@ -65,6 +66,7 @@ export default function LoginPage() {
     }
 
     setLoading(true);
+    setUnverifiedEmail(null);
     try {
       const result = await login(emailOrUsername, password, rememberMe);
       if ('success' in result && result.success) {
@@ -72,6 +74,8 @@ export default function LoginPage() {
         // Navigation handled by AuthContext
       } else if ('needsMembership' in result && result.needsMembership) {
         toast.message('Account found. Confirm to join this shop as Customer.');
+      } else if ('requiresVerification' in result && result.requiresVerification) {
+        setUnverifiedEmail(result.email);
       } else {
         toast.error(('error' in result && result.error) || 'Invalid credentials');
       }
@@ -191,6 +195,27 @@ export default function LoginPage() {
                 >
                   Cancel
                 </button>
+              </div>
+            </div>
+          )}
+
+          {unverifiedEmail && (
+            <div className="mb-6 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4">
+              <div className="flex items-start gap-3">
+                <MailWarning className="w-5 h-5 text-amber-400 mt-0.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-amber-300">Email not verified</p>
+                  <p className="mt-1 text-xs text-amber-400/80">
+                    Please verify your email before signing in.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/register?verify=${encodeURIComponent(unverifiedEmail)}`)}
+                    className="mt-3 text-xs font-semibold text-amber-300 hover:text-amber-200 underline underline-offset-2 transition-colors"
+                  >
+                    Enter verification code →
+                  </button>
+                </div>
               </div>
             </div>
           )}

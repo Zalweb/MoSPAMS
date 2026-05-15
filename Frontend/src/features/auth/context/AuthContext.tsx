@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import type { Account, Membership, PendingShopJoin, TenantShopSummary, User, GoogleData } from '@/shared/types';
-import { apiGet, apiMutation, getAuthToken, setAuthToken } from '@/shared/lib/api';
+import { apiGet, apiMutation, getAuthToken, setAuthToken, ApiError } from '@/shared/lib/api';
 import { normalizeRole } from '@/shared/lib/roles';
 
 interface AuthContextType {
@@ -8,7 +8,7 @@ interface AuthContextType {
   account: Account | null;
   membership: Membership | null;
   pendingJoin: PendingShopJoin | null;
-  login: (email: string, password: string, remember?: boolean) => Promise<{ success: true } | { success: false; error?: string } | { needsMembership: true }>;
+  login: (email: string, password: string, remember?: boolean) => Promise<{ success: true } | { success: false; error?: string } | { needsMembership: true } | { requiresVerification: true; email: string }>;
   googleLogin: (credential: string) => Promise<{ needsRegistration: true; googleData: GoogleData } | { needsMembership: true } | { needsRegistration: false }>;
   googleRegister: (payload: {
     google_id: string;
@@ -138,6 +138,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAccount(null);
       setMembership(null);
       setPendingJoin(null);
+      if (error instanceof ApiError && error.status === 403 && error.data.requiresVerification) {
+        return { requiresVerification: true as const, email: error.data.email as string };
+      }
       const errorMessage = error instanceof Error ? error.message : 'Login failed';
       if (errorMessage.includes('Failed to fetch') || errorMessage.includes('ERR_CONNECTION_REFUSED') || errorMessage.includes('NetworkError')) {
         return { success: false, error: 'Internal Server Error. Please check your connection.' };
