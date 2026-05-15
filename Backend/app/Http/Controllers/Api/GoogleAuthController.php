@@ -216,7 +216,12 @@ class GoogleAuthController extends Controller
 
         // ── Tenant isolation checks ─────────────────────────────────────
         $platformAdmin = $account->platformAdmin;
-        if ($shop && ! $platformAdmin && ! $this->accounts->membership($account, (int) $shop->shop_id)) {
+
+        if ($platformAdmin) {
+            throw ValidationException::withMessages(['credential' => 'SuperAdmin accounts must log in through the platform portal.']);
+        }
+
+        if ($shop && ! $this->accounts->membership($account, (int) $shop->shop_id)) {
             $payload = $this->membershipRequiredPayload($account, $shop);
             $payload['return_to'] = $request->return_to;
             $payload['tenant_host'] = $tenantHost;
@@ -224,7 +229,7 @@ class GoogleAuthController extends Controller
             return response()->json($payload);
         }
 
-        if (! $shop && ! $platformAdmin) {
+        if (! $shop) {
             throw ValidationException::withMessages(['credential' => 'This domain is not associated with your shop account.']);
         }
 
@@ -233,16 +238,6 @@ class GoogleAuthController extends Controller
         }
 
         // ── Issue token ─────────────────────────────────────────────────
-        if ($platformAdmin) {
-            $user = $this->accounts->ensurePlatformUser($account);
-            $this->logActivity($user->user_id, null, 'Logged in via Google (proxy)', 'users', $user->user_id, (int) $account->account_id);
-
-            $payload = $this->authPayload($user, null, ['platform:*']);
-            $payload['return_to'] = $request->return_to;
-
-            return response()->json($payload);
-        }
-
         $membership = $this->accounts->membership($account, (int) $shop->shop_id);
         if (! $membership || $membership->status?->status_code !== 'active') {
             $payload = $this->membershipRequiredPayload($account, $shop);
