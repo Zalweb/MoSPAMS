@@ -757,9 +757,18 @@ class MospamsController extends Controller
         ]);
 
         $jobId = DB::transaction(function () use ($request, $data) {
-            $customerId = !empty($data['customerId'])
-                ? (int) $data['customerId']
-                : $this->customerId($data['customerName']);
+            if (!empty($data['customerId'])) {
+                $shopId = $this->shopId();
+                $exists = DB::table('customers')
+                    ->where('customer_id', (int) $data['customerId'])
+                    ->where('shop_id_fk', $shopId)
+                    ->exists();
+                $customerId = $exists
+                    ? (int) $data['customerId']
+                    : $this->customerId($data['customerName']);
+            } else {
+                $customerId = $this->customerId($data['customerName']);
+            }
             $statusCode = strtolower($data['status'] ?? 'Pending');
             $jobId = DB::table('service_jobs')->insertGetId([
                 'shop_id_fk' => $this->shopId(),
@@ -1289,7 +1298,15 @@ class MospamsController extends Controller
             if ($jobId) {
                 $customerId = DB::table('service_jobs')->where('job_id', $jobId)->value('customer_id_fk');
             } elseif (!empty($data['customerId'])) {
-                $customerId = (int) $data['customerId'];
+                $shopId = $this->shopId();
+                $exists = DB::table('customers')
+                    ->where('customer_id', (int) $data['customerId'])
+                    ->where('shop_id_fk', $shopId)
+                    ->exists();
+                $customerId = $exists ? (int) $data['customerId'] : null;
+                if (!$customerId && !empty($data['customerName'])) {
+                    $customerId = $this->customerId($data['customerName']);
+                }
             } elseif (!empty($data['customerName'])) {
                 $customerId = $this->customerId($data['customerName']);
             }
