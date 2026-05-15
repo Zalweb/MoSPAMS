@@ -87,10 +87,11 @@ class CustomerController extends Controller
     public function createService(Request $request): JsonResponse
     {
         $request->validate([
-            'motorcycle_model' => ['required', 'string', 'max:150'],
-            'service_type'     => ['required', 'string', 'max:100'],
-            'notes'            => ['nullable', 'string', 'max:500'],
-            'vehicle_id'       => ['nullable', 'integer'],
+            'motorcycle_model'      => ['required', 'string', 'max:150'],
+            'service_type'          => ['required', 'string', 'max:100'],
+            'notes'                 => ['nullable', 'string', 'max:500'],
+            'vehicle_id'            => ['nullable', 'integer'],
+            'preferred_mechanic_id' => ['nullable', 'integer'],
         ]);
 
         $user = auth()->user();
@@ -106,10 +107,21 @@ class CustomerController extends Controller
                 ? DB::table('service_types')->where('shop_id_fk', $user->shop_id_fk)->where('service_type_id', $serviceTypeId)->value('labor_cost')
                 : 0;
 
+            // Validate preferred mechanic belongs to this shop
+            $preferredMechanicId = null;
+            if ($request->preferred_mechanic_id) {
+                $exists = DB::table('mechanics')
+                    ->where('mechanic_id', (int) $request->preferred_mechanic_id)
+                    ->where('shop_id_fk', $user->shop_id_fk)
+                    ->exists();
+                $preferredMechanicId = $exists ? (int) $request->preferred_mechanic_id : null;
+            }
+
             $jobId = DB::table('service_jobs')->insertGetId([
                 'shop_id_fk'               => $user->shop_id_fk,
                 'customer_id_fk'           => $customer->customer_id,
                 'vehicle_id_fk'            => $request->vehicle_id ?: null,
+                'assigned_mechanic_id_fk'  => $preferredMechanicId,
                 'created_by_fk'            => $user->user_id,
                 'service_job_status_id_fk' => DB::table('service_job_statuses')->where('status_code', 'pending')->value('service_job_status_id'),
                 'job_date'                 => now()->toDateString(),
@@ -550,6 +562,64 @@ class CustomerController extends Controller
 
         return response()->json(['message' => 'All notifications marked as read']);
     }
+    public function mechanics(Request $request): JsonResponse
+    {
+        $user   = auth()->user();
+        $shopId = $user->shop_id_fk;
+
+        $completedStatusId = DB::table('service_job_statuses')
+            ->where('status_code', 'completed')
+            ->value('service_job_status_id');
+
+        $mechanics = DB::table('mechanics')
+            ->join('mechanic_statuses', 'mechanic_statuses.mechanic_status_id', '=', 'mechanics.mechanic_status_id_fk')
+            ->where('mechanics.shop_id_fk', $shopId)
+            ->orderBy('mechanics.full_name')
+            ->select(
+                'mechanics.mechanic_id',
+                'mechanics.full_name',
+                'mechanic_statuses.status_code',
+                'mechanic_statuses.status_name'
+            )
+            ->get();
+
+        $mechanicIds = $mechanics->pluck('mechanic_id');
+
+        $ratings = DB::table('ratings')
+            ->whereIn('mechanic_id_fk', $mechanicIds)
+            ->where('shop_id_fk', $shopId)
+            ->selectRaw('mechanic_id_fk, AVG(rating) as avg_rating, COUNT(*) as rating_count')
+            ->groupBy('mechanic_id_fk')
+            ->get()
+            ->keyBy('mechanic_id_fk');
+
+        $completedJobs = DB::table('service_job_mechanics')
+            ->join('service_jobs', 'service_jobs.job_id', '=', 'service_job_mechanics.job_id_fk')
+            ->whereIn('service_job_mechanics.mechanic_id_fk', $mechanicIds)
+            ->where('service_jobs.shop_id_fk', $shopId)
+            ->where('service_jobs.service_job_status_id_fk', $completedStatusId)
+            ->selectRaw('mechanic_id_fk, COUNT(*) as completed')
+            ->groupBy('mechanic_id_fk')
+            ->get()
+            ->keyBy('mechanic_id_fk');
+
+        $data = $mechanics->map(function ($row) use ($ratings, $completedJobs) {
+            $r = $ratings->get($row->mechanic_id);
+            $c = $completedJobs->get($row->mechanic_id);
+            return [
+                'id'            => (string) $row->mechanic_id,
+                'name'          => $row->full_name,
+                'statusCode'    => $row->status_code,
+                'statusName'    => $row->status_name,
+                'avgRating'     => $r ? round((float) $r->avg_rating, 1) : null,
+                'ratingCount'   => $r ? (int) $r->rating_count : 0,
+                'completedJobs' => $c ? (int) $c->completed : 0,
+            ];
+        });
+
+        return response()->json(['data' => $data]);
+    }
+
     public function serviceTypes(Request $request): JsonResponse
     {
         $user = auth()->user();

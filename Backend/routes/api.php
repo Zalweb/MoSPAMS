@@ -188,6 +188,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/customer/notifications', [CustomerController::class, 'getNotifications']);
         Route::patch('/customer/notifications/read-all', [CustomerController::class, 'markAllNotificationsRead']);
         Route::patch('/customer/notifications/{notificationId}/read', [CustomerController::class, 'markNotificationRead']);
+        Route::get('/customer/mechanics', [CustomerController::class, 'mechanics']);
 
         // Rating routes
         Route::post('/ratings', [RatingController::class, 'store']);
