@@ -15,6 +15,7 @@ import { useAuth } from '@/features/auth/context/AuthContext';
 import { can } from '@/shared/lib/permissions';
 import type { Part, ServiceRecord } from '@/shared/types';
 import { StartServiceModal } from '../components/StartServiceModal';
+import { CustomerSearchInput } from '../components/CustomerSearchInput';
 
 type StatusFilter = 'All' | 'Pending' | 'Confirmed' | 'Ongoing' | 'Work Done' | 'Completed' | 'Cancelled';
 
@@ -86,6 +87,8 @@ export default function Services() {
   const [addPartQty, setAddPartQty] = useState<number>(1);
   const [addingPart, setAddingPart] = useState(false);
   const [addPartsSearch, setAddPartsSearch] = useState('');
+  const [linkedCustomerId, setLinkedCustomerId] = useState<string | null>(null);
+  const [newPartsSearch, setNewPartsSearch] = useState('');
 
   const { data: services, loading, meta, page, setPage, prependItem, updateItem, removeItem } = usePaginatedFetch<ServiceRecord>('/api/services', 25, {}, 10000);
 
@@ -135,6 +138,8 @@ export default function Services() {
     form.reset({ customerName: '', motorcycleModel: '', serviceType: '', laborCost: 0, notes: '' });
     setPartsUsed([]);
     setSelectedMechanicIds([]);
+    setLinkedCustomerId(null);
+    setNewPartsSearch('');
     setModalOpen(true);
   };
   const openEdit = (s: ServiceRecord) => {
@@ -142,6 +147,8 @@ export default function Services() {
     form.reset({ customerName: s.customerName, motorcycleModel: s.motorcycleModel, serviceType: s.serviceType, laborCost: s.laborCost, notes: s.notes });
     setPartsUsed(s.partsUsed.map(p => ({ partId: p.partId, quantity: p.quantity })));
     setSelectedMechanicIds((s.mechanics ?? []).map(m => m.id));
+    setLinkedCustomerId(null);
+    setNewPartsSearch('');
     setModalOpen(true);
   };
 
@@ -166,6 +173,7 @@ export default function Services() {
     } else {
       const created = await addService({
         ...values,
+        customerId: linkedCustomerId ?? undefined,
         status: 'Pending',
         statusCode: 'pending',
         partsUsed: shapedParts,
@@ -491,7 +499,13 @@ export default function Services() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="text-xs font-medium text-muted-foreground">Customer Name</Label>
-                <Input {...form.register('customerName')} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="Juan Dela Cruz" />
+                <CustomerSearchInput
+                  value={form.watch('customerName')}
+                  customerId={linkedCustomerId}
+                  onChange={(name, id) => { form.setValue('customerName', name, { shouldValidate: true }); setLinkedCustomerId(id); }}
+                  placeholder="Juan Dela Cruz"
+                  className="mt-1.5"
+                />
                 {form.formState.errors.customerName && <p className="text-xs text-red-400 mt-1">{form.formState.errors.customerName.message}</p>}
               </div>
               <div>
@@ -540,11 +554,29 @@ export default function Services() {
 
             <div>
               <Label className="text-xs font-medium text-muted-foreground">Parts Used</Label>
-              <div className="mt-1.5 flex flex-wrap gap-2">
-                {availableParts.filter(p => p.stock > 0).map(part => (
-                  <button type="button" key={part.id} onClick={() => addPartToService(part.id)} className="text-xs font-medium bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 hover:bg-secondary dark:bg-zinc-800 text-muted-foreground px-3 py-1.5 rounded-lg border border-border dark:border-zinc-700 transition-colors">+ {part.name}</button>
-                ))}
+              <div className="relative mt-1.5">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Search parts to add…"
+                  value={newPartsSearch}
+                  onChange={e => setNewPartsSearch(e.target.value)}
+                  className="w-full h-10 pl-9 pr-3 rounded-xl bg-secondary/50 dark:bg-zinc-800/50 border border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-white/10"
+                />
               </div>
+              {newPartsSearch && (
+                <div className="mt-1 max-h-32 overflow-y-auto rounded-xl border border-border dark:border-zinc-700 p-1">
+                  {availableParts.filter(p => p.stock > 0 && p.name.toLowerCase().includes(newPartsSearch.toLowerCase())).length === 0 ? (
+                    <p className="text-xs text-muted-foreground text-center py-2">No parts found</p>
+                  ) : availableParts.filter(p => p.stock > 0 && p.name.toLowerCase().includes(newPartsSearch.toLowerCase())).map(p => (
+                    <button key={p.id} type="button" onClick={() => { addPartToService(p.id); setNewPartsSearch(''); }}
+                      className="w-full text-left px-3 py-2 rounded-lg text-sm text-foreground hover:bg-muted flex items-center justify-between transition-colors">
+                      <span className="font-medium">{p.name}</span>
+                      <span className="text-xs text-muted-foreground ml-2 shrink-0">₱{p.price} · {p.stock} left</span>
+                    </button>
+                  ))}
+                </div>
+              )}
               {partsUsed.length > 0 && (
                 <div className="mt-2 space-y-1">
                   {partsUsed.map(pu => {

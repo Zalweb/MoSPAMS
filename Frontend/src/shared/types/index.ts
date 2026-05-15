@@ -28,6 +28,7 @@ export interface ServiceType {
 
 export interface ServiceRecord {
   id: string;
+  customerId?: string | null;
   customerName: string;
   motorcycleModel: string;
   serviceType: string;
@@ -63,6 +64,8 @@ export interface CustomerService {
 export interface Transaction {
   id: string;
   type: 'parts-only' | 'service+parts';
+  customerName?: string | null;
+  customerId?: string | null;
   items: { partId: string; name: string; quantity: number; price: number }[];
   serviceId?: string;
   serviceLaborCost?: number;

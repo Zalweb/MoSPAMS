@@ -10,6 +10,7 @@ import { usePaginatedFetch } from '@/shared/hooks/usePaginatedFetch';
 import { apiGet } from '@/shared/lib/api';
 import { inPeriod, type Period } from '@/shared/lib/period';
 import type { Part, ServiceRecord, Transaction } from '@/shared/types';
+import { CustomerSearchInput } from '@/features/services/components/CustomerSearchInput';
 
 interface CartItem { partId: string; name: string; price: number; quantity: number }
 
@@ -36,6 +37,8 @@ export default function Sales() {
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>('All');
   const [modalParts, setModalParts] = useState<Part[]>([]);
   const [modalServices, setModalServices] = useState<ServiceRecord[]>([]);
+  const [txCustomerName, setTxCustomerName] = useState('');
+  const [txCustomerId, setTxCustomerId] = useState<string | null>(null);
 
   const { data: transactions, loading, meta, page, setPage, prependItem } = usePaginatedFetch<Transaction>('/api/transactions');
   const selectedServiceRef = useRef<ServiceRecord | undefined>(undefined);
@@ -74,10 +77,17 @@ export default function Sales() {
   const partsTotal = cart.reduce((s, c) => s + c.price * c.quantity, 0);
   const grandTotal = partsTotal + (selectedService ? serviceLabor : 0);
 
+  const resetModal = () => {
+    setCart([]); setSelectedService(''); setServiceLabor(0); setPaymentMethod('Cash');
+    setTxCustomerName(''); setTxCustomerId(null); setSearch('');
+  };
+
   const handleCheckout = async () => {
     if (cart.length === 0 && !selectedService) return;
     const newTx = await addTransaction({
       type: selectedService ? 'service+parts' : 'parts-only',
+      customerName: txCustomerName.trim() || undefined,
+      customerId: txCustomerId ?? undefined,
       items: cart.map(c => ({ partId: c.partId, name: c.name, quantity: c.quantity, price: c.price })),
       serviceId: selectedService || undefined,
       serviceLaborCost: selectedService ? serviceLabor : undefined,
@@ -85,7 +95,8 @@ export default function Sales() {
       total: grandTotal,
     });
     prependItem(newTx);
-    setModalOpen(false); setCart([]); setSelectedService(''); setServiceLabor(0); setPaymentMethod('Cash');
+    setModalOpen(false);
+    resetModal();
   };
 
   const filteredParts = modalParts.filter(p => (p.name.toLowerCase().includes(search.toLowerCase()) || p.barcode.includes(search)) && p.stock > 0);
@@ -196,11 +207,19 @@ export default function Sales() {
         )}
       </motion.div>
 
-      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+      <Dialog open={modalOpen} onOpenChange={open => { setModalOpen(open); if (!open) resetModal(); }}>
         <DialogContent className="sm:max-w-2xl rounded-2xl border-border bg-card dark:bg-zinc-950 p-6 max-h-[90vh] overflow-y-auto">
           <DialogHeader className="pb-2"><DialogTitle className="text-base font-semibold text-foreground">New Transaction</DialogTitle></DialogHeader>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-3">
             <div>
+              <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">Customer (optional)</Label>
+              <CustomerSearchInput
+                value={txCustomerName}
+                customerId={txCustomerId}
+                onChange={(name, id) => { setTxCustomerName(name); setTxCustomerId(id); }}
+                placeholder="Walk-in customer name…"
+                className="mb-4"
+              />
               <Label className="text-xs font-medium text-muted-foreground">Search Parts (or scan barcode)</Label>
               <div className="relative mt-1.5 mb-3">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
