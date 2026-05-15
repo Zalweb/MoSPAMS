@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Mail\PasswordChangedMail;
+use App\Mail\EmailVerificationMail;
 use App\Mail\PasswordResetMail;
 use App\Models\Account;
 use App\Models\ShopMembership;
@@ -154,6 +155,117 @@ class AuthController extends Controller
         return response()->json(['message' => 'Password reset successfully. You can now log in.']);
     }
 
+    public function verifyEmail(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'email' => ['required', 'email'],
+            'code'  => ['required', 'string', 'size:6'],
+        ]);
+
+        $email = strtolower($data['email']);
+
+        $otp = DB::table('email_otp_verifications')
+            ->where('email', $email)
+            ->where('otp_code', $data['code'])
+            ->where('used', false)
+            ->where('expires_at', '>', now())
+            ->orderByDesc('id')
+            ->first();
+
+        if (! $otp) {
+            return response()->json(['message' => 'Invalid or expired code. Please request a new one.'], 422);
+        }
+
+        DB::table('email_otp_verifications')->where('id', $otp->id)->update(['used' => true]);
+
+        DB::table('accounts')
+            ->whereRaw('LOWER(email) = ?', [$email])
+            ->whereNull('email_verified_at')
+            ->update(['email_verified_at' => now(), 'updated_at' => now()]);
+
+        return response()->json(['message' => 'Email verified successfully. You can now log in.']);
+    }
+
+    public function resendVerification(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'email' => ['required', 'email'],
+        ]);
+
+        $email = strtolower($data['email']);
+
+        $account = DB::table('accounts')->whereRaw('LOWER(email) = ?', [$email])->first();
+
+        // Always return success — never reveal whether email exists.
+        if (! $account || $account->email_verified_at) {
+            return response()->json(['message' => 'If that email is pending verification, a new code has been sent.']);
+        }
+
+        // 60-second cooldown
+        $recentlySent = DB::table('email_otp_verifications')
+            ->where('email', $email)
+            ->where('created_at', '>', now()->subSeconds(60))
+            ->exists();
+
+        if ($recentlySent) {
+            return response()->json(['message' => 'Please wait before requesting another code.'], 429);
+        }
+
+        $this->sendOtp($email, $account->full_name);
+
+        return response()->json(['message' => 'If that email is pending verification, a new code has been sent.']);
+    }
+
+    private function sendOtp(string $email, string $name): void
+    {
+        // Invalidate any previous unused OTPs for this email.
+        DB::table('email_otp_verifications')
+            ->where('email', strtolower($email))
+            ->where('used', false)
+            ->update(['used' => true]);
+
+        $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        DB::table('email_otp_verifications')->insert([
+            'email'      => strtolower($email),
+            'otp_code'   => $code,
+            'expires_at' => now()->addMinutes(15),
+            'used'       => false,
+            'created_at' => now(),
+        ]);
+
+        try {
+            Mail::to($email)->send(new EmailVerificationMail($name, $code));
+        } catch (\Throwable $e) {
+            Log::error('OTP email failed', ['email' => $email, 'error' => $e->getMessage()]);
+        }
+    }
+
+    private function isDisposableEmail(string $email): bool
+    {
+        $domain = strtolower(substr($email, strpos($email, '@') + 1));
+
+        $blocklist = [
+            'mailinator.com', 'guerrillamail.com', 'guerrillamail.net', 'guerrillamail.org',
+            'guerrillamail.biz', 'guerrillamail.de', 'guerrillamail.info', 'grr.la',
+            'sharklasers.com', 'guerrillamailblock.com', 'spam4.me', 'trashmail.com',
+            'trashmail.me', 'trashmail.net', 'trashmail.org', 'trashmail.at',
+            'temp-mail.org', 'tempmail.com', 'throwaway.email', 'throwam.com',
+            'fakeinbox.com', 'mailnesia.com', 'dispostable.com', 'maildrop.cc',
+            'yopmail.com', 'yopmail.fr', 'cool.fr.nf', 'jetable.fr.nf',
+            '10minutemail.com', '10minutemail.net', '20minutemail.com',
+            'getairmail.com', 'filzmail.com', 'tempr.email', 'discard.email',
+            'spamgourmet.com', 'spamgourmet.net', 'spamgourmet.org',
+            'spamspot.com', 'spam.la', 'mailnull.com', 'spamfree24.org',
+            'mohmal.com', 'tempomail.fr', 'mailscrap.com', 'mailmetrash.com',
+            'spamevader.com', 'spambog.com', 'spamcero.com',
+            'nospam.ze.tc', 'nomail.xl.cx', 'mega.zik.dj', 'speed.1s.fr',
+            'courriel.fr.nf', 'moncourrier.fr.nf', 'monemail.fr.nf', 'monmail.fr.nf',
+        ];
+
+        return in_array($domain, $blocklist, true);
+    }
+
     public function login(Request $request): JsonResponse
     {
         $credentials = $request->validate([
@@ -175,6 +287,15 @@ class AuthController extends Controller
 
         if (! $account || ! $account->password_hash || ! Hash::check($credentials['password'], $account->password_hash)) {
             throw ValidationException::withMessages(['email' => 'Invalid credentials.']);
+        }
+
+        // Block login for unverified email accounts (Google accounts are pre-verified).
+        if (! $account->email_verified_at && ! $account->google_id) {
+            return response()->json([
+                'message'              => 'Please verify your email before logging in.',
+                'requiresVerification' => true,
+                'email'                => $account->email,
+            ], 403);
         }
 
         $shop = $request->attributes->get('shop');
@@ -265,7 +386,6 @@ class AuthController extends Controller
 
     public function register(Request $request): JsonResponse
     {
-        // The shop is already resolved from the subdomain by IdentifyShopByDomain middleware
         $shop = $request->attributes->get('shop');
 
         if (!$shop) {
@@ -280,7 +400,12 @@ class AuthController extends Controller
             'password' => ['required', 'string', 'min:8'],
         ]);
 
-        // Check if shop is active
+        if ($this->isDisposableEmail($data['email'])) {
+            return response()->json([
+                'message' => 'Please use a real email address. Disposable email services are not allowed.',
+            ], 422);
+        }
+
         $shopStatus = DB::table('shop_statuses')
             ->where('shop_status_id', $shop->shop_status_id_fk)
             ->value('status_code');
@@ -292,13 +417,11 @@ class AuthController extends Controller
         }
 
         $customerRoleId = DB::table('roles')->where('role_name', 'Customer')->value('role_id');
-        $activeStatusId = DB::table('user_statuses')->where('status_code', 'active')->value('user_status_id');
 
-        return DB::transaction(function () use ($data, $shop, $customerRoleId, $activeStatusId) {
+        $result = DB::transaction(function () use ($data, $shop, $customerRoleId) {
             $existingAccount = $this->accounts->findAccountByLogin($data['email']);
 
             if ($existingAccount) {
-                // Smart hybrid: existing email — verify the supplied password before joining.
                 if (! $existingAccount->password_hash || ! Hash::check($data['password'], $existingAccount->password_hash)) {
                     return response()->json([
                         'message' => 'Wrong password. Please sign in first to join this shop as a Customer.',
@@ -306,7 +429,6 @@ class AuthController extends Controller
                     ], 422);
                 }
 
-                // Correct password — check they are not already a member.
                 if ($this->accounts->membership($existingAccount, (int) $shop->shop_id)) {
                     return response()->json([
                         'message' => 'You already have an account in this shop. Please sign in.',
@@ -314,23 +436,23 @@ class AuthController extends Controller
                     ], 422);
                 }
 
-                // All good — join the shop with the existing global account.
                 $membership = $this->accounts->createOrUpdateMembership($existingAccount, (int) $shop->shop_id, (int) $customerRoleId);
                 $user = $this->accounts->ensureTenantUser($existingAccount, (int) $shop->shop_id, (int) $customerRoleId);
 
                 $this->logActivity($user->user_id, $shop->shop_id, "Joined shop {$shop->shop_name} as Customer via registration form", 'users', $user->user_id, (int) $existingAccount->account_id);
 
                 return response()->json([
-                    'message'       => 'Welcome back! You have joined this shop as a Customer.',
-                    'userId'        => (string) $user->user_id,
-                    'accountId'     => (string) $existingAccount->account_id,
-                    'membershipId'  => (string) $membership->membership_id,
-                    'shopName'      => $shop->shop_name,
-                    'requestedRole' => 'Customer',
+                    'message'              => 'Welcome back! You have joined this shop as a Customer.',
+                    'userId'               => (string) $user->user_id,
+                    'accountId'            => (string) $existingAccount->account_id,
+                    'membershipId'         => (string) $membership->membership_id,
+                    'shopName'             => $shop->shop_name,
+                    'requestedRole'        => 'Customer',
+                    'requiresVerification' => false,
                 ], 201);
             }
 
-            // New email — create a fresh global account and join the shop.
+            // New account — created unverified (email_verified_at stays null).
             $account = $this->accounts->createOrUpdateAccount($data['fullName'], $data['email'], $data['password'], null, true);
 
             $membership = $this->accounts->createOrUpdateMembership($account, (int) $shop->shop_id, (int) $customerRoleId);
@@ -338,15 +460,28 @@ class AuthController extends Controller
 
             $this->logActivity($user->user_id, $shop->shop_id, "Registered as Customer in shop {$shop->shop_name}", 'users', $user->user_id, (int) $account->account_id);
 
-            return response()->json([
-                'message'       => 'Account created successfully! You can now log in.',
-                'userId'        => (string) $user->user_id,
-                'accountId'     => (string) $account->account_id,
-                'membershipId'  => (string) $membership->membership_id,
-                'shopName'      => $shop->shop_name,
-                'requestedRole' => 'Customer',
-            ], 201);
+            return [
+                'accountId' => $account->account_id,
+                'fullName'  => $data['fullName'],
+                'email'     => $data['email'],
+                'shopName'  => $shop->shop_name,
+            ];
         });
+
+        // If it's already a JsonResponse (existing account path), return it directly.
+        if ($result instanceof \Illuminate\Http\JsonResponse) {
+            return $result;
+        }
+
+        // New account — send OTP.
+        $this->sendOtp($result['email'], $result['fullName']);
+
+        return response()->json([
+            'message'              => 'Account created. Please check your email for a verification code.',
+            'shopName'             => $result['shopName'],
+            'requiresVerification' => true,
+            'email'                => $result['email'],
+        ], 201);
     }
 
     public function joinShop(Request $request): JsonResponse
