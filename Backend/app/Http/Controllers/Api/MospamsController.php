@@ -8,6 +8,7 @@ use App\Models\ShopMembership;
 use App\Models\User;
 use App\Services\Identity\AccountProvisioner;
 use App\Support\Auth\AuthenticatedContext;
+use App\Support\MechanicStatusSync;
 use App\Traits\LogsActivity;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\JsonResponse;
@@ -985,6 +986,8 @@ class MospamsController extends Controller
             $this->log($request, "Cancelled service job #{$service}", 'service_jobs', $service);
         });
 
+        MechanicStatusSync::releaseForJob($service, $this->shopId());
+
         return response()->json(['data' => $this->serviceById($service)]);
     }
 
@@ -1248,6 +1251,8 @@ class MospamsController extends Controller
 
             return $saleId;
         });
+
+        MechanicStatusSync::releaseForJob($service, $this->shopId());
 
         return response()->json(['data' => $this->transactionById($saleId)], 201);
     }
@@ -1998,7 +2003,7 @@ class MospamsController extends Controller
             'address' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $activeStatusId = DB::table('mechanic_statuses')->where('status_code', 'active')->value('mechanic_status_id');
+        $activeStatusId = DB::table('mechanic_statuses')->where('status_code', 'available')->value('mechanic_status_id');
 
         $id = DB::table('mechanics')->insertGetId([
             'shop_id_fk' => $this->shopId(),
@@ -2019,8 +2024,8 @@ class MospamsController extends Controller
             'phone' => $request->phone,
             'email' => $request->email,
             'address' => $request->address,
-            'status' => 'Active',
-            'statusCode' => 'active',
+            'status' => 'Available',
+            'statusCode' => 'available',
             'createdAt' => now()->toISOString(),
         ], 201);
     }

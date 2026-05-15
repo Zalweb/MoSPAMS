@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Support\MechanicStatusSync;
 use App\Traits\LogsActivity;
 use Illuminate\Support\Collection;
 use Illuminate\Http\JsonResponse;
@@ -147,6 +148,8 @@ class MechanicController extends Controller
                 }
             });
 
+            MechanicStatusSync::markBusyForJob($job);
+
             return $this->jobDetails($request, $job);
 
         } elseif ($action === 'complete') {
@@ -214,6 +217,8 @@ class MechanicController extends Controller
                     ]);
                 }
             });
+
+            MechanicStatusSync::releaseForJob($job, $jobData->shop_id_fk);
 
             return $this->jobDetails($request, $job);
         }
