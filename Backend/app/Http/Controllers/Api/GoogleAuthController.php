@@ -295,6 +295,13 @@ class GoogleAuthController extends Controller
             $existingAccount = $this->accounts->findAccountByLogin($data['email']);
             abort_if($existingAccount, 422, 'This Google account already exists. Sign in first, then join this shop as Customer.');
             $account = $this->accounts->createOrUpdateAccount($data['name'], $data['email'], $data['password'], $data['google_id'], ! $existingAccount);
+            // Google-verified emails are trusted — mark the account as verified.
+            if (! $account->email_verified_at) {
+                DB::table('accounts')
+                    ->where('account_id', $account->account_id)
+                    ->update(['email_verified_at' => now(), 'updated_at' => now()]);
+                $account->email_verified_at = now();
+            }
             abort_if($this->accounts->membership($account, (int) $shopId), 422, 'This email already has an account in this shop.');
 
             $membership = $this->accounts->createOrUpdateMembership($account, (int) $shopId, (int) $customerRole->role_id);
