@@ -6,8 +6,6 @@ import {
   CreditCard,
   Store,
   TrendingUp,
-  TrendingDown,
-  Users,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import {
