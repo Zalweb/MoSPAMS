@@ -9,6 +9,16 @@ import { apiMutation, apiGet } from '@/shared/lib/api';
 
 interface Vehicle { id: string; make: string; model: string; year?: string }
 
+interface MechanicOption {
+  id: string;
+  name: string;
+  statusCode: 'available' | 'busy' | 'on_leave';
+  statusName: string;
+  avgRating: number | null;
+  ratingCount: number;
+  completedJobs: number;
+}
+
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
@@ -29,6 +39,8 @@ export default function BookService() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [mechanics, setMechanics] = useState<MechanicOption[]>([]);
+  const [selectedMechanicId, setSelectedMechanicId] = useState<string | null>(null);
 
   useEffect(() => {
     setLoadingTypes(true);
@@ -47,6 +59,9 @@ export default function BookService() {
     apiGet<{ data: Vehicle[] }>('/api/customer/vehicles')
       .then(r => setVehicles(r.data))
       .catch(() => {});
+    apiGet<{ data: MechanicOption[] }>('/api/customer/mechanics')
+      .then(r => setMechanics(r.data))
+      .catch(() => {});
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,6 +77,7 @@ export default function BookService() {
         service_type: serviceType,
         notes: notes.trim() || null,
         vehicle_id: selectedVehicleId ? parseInt(selectedVehicleId, 10) : null,
+        preferred_mechanic_id: selectedMechanicId ? parseInt(selectedMechanicId, 10) : null,
       });
       setSuccess(true);
     } catch {
@@ -243,9 +259,70 @@ export default function BookService() {
             />
           </div>
 
-          <Button 
-            type="submit" 
-            disabled={submitting} 
+          {mechanics.length > 0 && (
+            <div className="space-y-2">
+              <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1">
+                Preferred Mechanic (optional)
+              </Label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedMechanicId(null)}
+                  className={`p-3 rounded-2xl border text-left transition-all ${
+                    selectedMechanicId === null
+                      ? 'border-[rgb(var(--color-primary-rgb))] bg-[rgb(var(--color-primary-rgb))]/10 ring-2 ring-[rgb(var(--color-primary-rgb))]/20'
+                      : 'border-border/50 bg-muted/30 hover:bg-muted/50'
+                  }`}
+                >
+                  <p className="text-sm font-semibold text-foreground">Assign me anyone</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Shop will assign the best available</p>
+                </button>
+
+                {mechanics.map(m => {
+                  const badgeColor =
+                    m.statusCode === 'available' ? 'bg-green-500/15 text-green-400 border-green-500/20' :
+                    m.statusCode === 'busy'      ? 'bg-amber-500/15 text-amber-400 border-amber-500/20' :
+                                                   'bg-zinc-500/15 text-zinc-400 border-zinc-500/20';
+                  const isSelected = selectedMechanicId === m.id;
+                  return (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setSelectedMechanicId(m.id)}
+                      className={`p-3 rounded-2xl border text-left transition-all ${
+                        isSelected
+                          ? 'border-[rgb(var(--color-primary-rgb))] bg-[rgb(var(--color-primary-rgb))]/10 ring-2 ring-[rgb(var(--color-primary-rgb))]/20'
+                          : m.statusCode !== 'available'
+                            ? 'border-border/30 bg-muted/20 opacity-60 hover:opacity-80'
+                            : 'border-border/50 bg-muted/30 hover:bg-muted/50'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-1 mb-1">
+                        <p className="text-sm font-semibold text-foreground leading-tight">{m.name}</p>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border shrink-0 ${badgeColor}`}>
+                          {m.statusName}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {m.avgRating !== null ? (
+                          <span className="text-xs text-amber-400 font-semibold">
+                            {'★'.repeat(Math.round(m.avgRating))}{'☆'.repeat(5 - Math.round(m.avgRating))} {m.avgRating}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">No ratings yet</span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">{m.completedJobs} jobs done</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <Button
+            type="submit"
+            disabled={submitting}
             className="w-full h-12 rounded-2xl bg-[rgb(var(--color-primary-rgb))] hover:bg-[rgb(var(--color-primary-rgb))]/90 text-white font-bold transition-all active:scale-95 shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20 disabled:opacity-50"
           >
             {submitting ? 'Booking...' : 'Confirm Booking'}
