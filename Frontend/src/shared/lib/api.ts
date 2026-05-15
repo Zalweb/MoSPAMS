@@ -1,9 +1,13 @@
 type ApiMethod = 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 export class ApiError extends Error {
-  constructor(message: string, public readonly status: number, public readonly data: Record<string, unknown> = {}) {
+  readonly status: number;
+  readonly data: Record<string, unknown>;
+  constructor(message: string, status: number, data: Record<string, unknown> = {}) {
     super(message);
     this.name = 'ApiError';
+    this.status = status;
+    this.data = data;
   }
 }
 
