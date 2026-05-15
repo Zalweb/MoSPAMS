@@ -25,7 +25,6 @@ class SuperAdminController extends Controller
         $period = $request->query('period', 'day');
         abort_unless(in_array($period, ['day', 'week', 'month'], true), 422, 'Invalid period filter.');
 
-        $platformSalesRevenue = (float) DB::table('sales')->sum('net_amount');
         $subscriptionRevenue = (float) DB::table('subscription_payments')
             ->whereRaw('UPPER(payment_status) = ?', ['PAID'])
             ->sum('amount');
@@ -45,9 +44,9 @@ class SuperAdminController extends Controller
 
         return response()->json([
             'summary' => [
-                'platformSalesRevenue' => $platformSalesRevenue,
+                'platformSalesRevenue' => 0,
                 'subscriptionRevenue' => $subscriptionRevenue,
-                'totalRevenue' => $platformSalesRevenue + $subscriptionRevenue,
+                'totalRevenue' => $subscriptionRevenue,
                 'totalShops' => (int) DB::table('shops')->count(),
                 'totalPlatformAdmins' => (int) $this->superAdminQuery()->count(),
             ],
@@ -1376,10 +1375,11 @@ class SuperAdminController extends Controller
         $start = now()->subDays($days - 1)->startOfDay();
         $end = now()->endOfDay();
 
-        $rows = DB::table('sales')
-            ->selectRaw('DATE(sale_date) as date, SUM(net_amount) as amount')
-            ->whereBetween('sale_date', [$start, $end])
-            ->groupByRaw('DATE(sale_date)')
+        $rows = DB::table('subscription_payments')
+            ->selectRaw('DATE(paid_at) as date, SUM(amount) as amount')
+            ->whereRaw('UPPER(payment_status) = ?', ['PAID'])
+            ->whereBetween('paid_at', [$start, $end])
+            ->groupByRaw('DATE(paid_at)')
             ->pluck('amount', 'date');
 
         $chart = [];

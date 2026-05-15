@@ -100,9 +100,9 @@ export default function SuperAdminAnalyticsPage() {
         {/* ── KPI STAT CARDS ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           <StatCard
-            title="Total Revenue"
-            value={`${CURRENCY}${totalRevenue.toLocaleString()}`}
-            sub={`Subscription: ${CURRENCY}${subRevenue.toLocaleString()}`}
+            title="Subscription Revenue"
+            value={`${CURRENCY}${subRevenue.toLocaleString()}`}
+            sub="Paid shop subscriptions"
             trend={`${periodLabel}`}
             icon={CreditCard}
             accent="violet"
@@ -145,8 +145,8 @@ export default function SuperAdminAnalyticsPage() {
             <div className="absolute top-0 right-0 w-72 h-72 bg-violet-500/5 rounded-full blur-[80px] pointer-events-none" />
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h2 className="text-[15px] font-bold text-foreground">Revenue Trend</h2>
-                <p className="text-[12px] text-muted-foreground mt-0.5">Daily subscription income — last 30 days</p>
+                <h2 className="text-[15px] font-bold text-foreground">Subscription Revenue</h2>
+                <p className="text-[12px] text-muted-foreground mt-0.5">Daily payments from shops — last 30 days</p>
               </div>
               {hasRevenue && (
                 <div className="text-right">
