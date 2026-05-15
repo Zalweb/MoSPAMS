@@ -129,6 +129,7 @@ class ResolveTenantContext
             || $request->is('api/webhooks/*')
             || $request->is('api/stats')
             || $request->is('api/shop-registration')
+            || $request->is('api/shop-registration/*')
             || $request->is('api/join-shop')
             || $request->is('api/auth/google/*')) {
             return false;
@@ -139,7 +140,9 @@ class ResolveTenantContext
 
     private function isPublicOnlyRoute(Request $request): bool
     {
-        return $request->is('api/stats') || $request->is('api/shop-registration');
+        return $request->is('api/stats')
+            || $request->is('api/shop-registration')
+            || $request->is('api/shop-registration/*');
     }
 
     private function resolveShop(Request $request, string $host, string $hostMode): ?Shop
