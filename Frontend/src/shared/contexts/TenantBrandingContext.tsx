@@ -41,10 +41,16 @@ function applyBranding(branding: TenantBranding) {
   // Convert hex to RGB for dashboard colors
   const primaryRgb = hexToRgb(branding.primaryColor || '#3B82F6');
   const secondaryRgb = hexToRgb(branding.secondaryColor || '#10B981');
-  
+
+  // Compute 50% blend of primary and secondary
+  const [pr, pg, pb] = primaryRgb.split(' ').map(Number);
+  const [sr, sg, sb] = secondaryRgb.split(' ').map(Number);
+  const mixedRgb = `${Math.round((pr + sr) / 2)} ${Math.round((pg + sg) / 2)} ${Math.round((pb + sb) / 2)}`;
+
   // Set dashboard color variables
   root.style.setProperty('--color-primary-rgb', primaryRgb);
   root.style.setProperty('--color-secondary-rgb', secondaryRgb);
+  root.style.setProperty('--color-mixed-rgb', mixedRgb);
   
   // Also update HSL format for Tailwind
   const primaryHsl = hexToHsl(branding.primaryColor || '#3B82F6');

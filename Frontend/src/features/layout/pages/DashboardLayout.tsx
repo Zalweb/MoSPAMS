@@ -165,7 +165,12 @@ export default function DashboardLayout() {
         {/* Logo */}
         <div className={`flex items-center border-b border-border shrink-0 h-[70px] transition-all duration-300 ${isCollapsed ? 'px-0 justify-center' : 'px-6'}`}>
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-8 h-8 rounded-xl bg-muted border border-border dark:border-zinc-700 flex items-center justify-center overflow-hidden shrink-0">
+            <div
+              className="w-8 h-8 rounded-xl flex items-center justify-center overflow-hidden shrink-0"
+              style={branding?.primaryColor && branding?.secondaryColor ? {
+                background: `linear-gradient(135deg, ${branding.primaryColor}, ${branding.secondaryColor})`,
+              } : { background: 'rgb(var(--color-primary-rgb))' }}
+            >
               <img
                 src={branding?.logoUrl || '/images/logo.svg'}
                 alt={branding?.shopName || 'MoSPAMS'}
@@ -225,10 +230,24 @@ export default function DashboardLayout() {
                 {group.items.map((item) => {
                   const isActive = item.end ? location.pathname === item.to : location.pathname === item.to || location.pathname.startsWith(item.to + '/');
                   
+                  const mixedColor = branding?.primaryColor && branding?.secondaryColor
+                    ? (() => {
+                        const hex = (h: string) => { h = h.replace('#',''); return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)]; };
+                        const [pr,pg,pb] = hex(branding.primaryColor);
+                        const [sr,sg,sb] = hex(branding.secondaryColor);
+                        const r = Math.round((pr+sr)/2).toString(16).padStart(2,'0');
+                        const g = Math.round((pg+sg)/2).toString(16).padStart(2,'0');
+                        const b = Math.round((pb+sb)/2).toString(16).padStart(2,'0');
+                        return `#${r}${g}${b}`;
+                      })()
+                    : branding?.primaryColor;
+
                   const activeStyle = isActive && branding?.primaryColor ? {
-                    backgroundColor: theme === 'dark' ? `${branding.primaryColor}20` : `${branding.primaryColor}15`,
-                    color: branding.primaryColor,
-                    borderLeftColor: branding.primaryColor,
+                    background: theme === 'dark'
+                      ? `linear-gradient(135deg, ${branding.primaryColor}25, ${branding.secondaryColor || branding.primaryColor}25)`
+                      : `linear-gradient(135deg, ${branding.primaryColor}18, ${branding.secondaryColor || branding.primaryColor}18)`,
+                    color: mixedColor,
+                    borderLeftColor: mixedColor,
                   } : undefined;
 
                   return (
@@ -249,7 +268,7 @@ export default function DashboardLayout() {
                         <item.icon 
                           className={`w-[18px] h-[18px] shrink-0 transition-colors ${isActive ? (branding?.primaryColor ? '' : 'text-accent-foreground dark:text-foreground') : 'text-muted-foreground group-hover:text-foreground'}`} 
                           strokeWidth={1.75} 
-                          style={isActive && branding?.primaryColor ? { color: branding.primaryColor } : undefined}
+                          style={isActive && mixedColor ? { color: mixedColor } : undefined}
                         />
                         {!isCollapsed && (
                           <motion.span
