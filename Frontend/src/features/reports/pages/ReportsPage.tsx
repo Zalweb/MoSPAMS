@@ -154,7 +154,12 @@ export default function Reports() {
 
       <div className="flex gap-2 mb-5 flex-wrap">
         {tabs.map(r => (
-          <button key={r.key} onClick={() => setReportType(r.key)} className={`flex items-center gap-2 px-4 py-[9px] rounded-xl text-[12px] font-medium transition-all ${reportType === r.key ? 'bg-[rgb(var(--color-primary-rgb))] text-white shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20' : 'bg-muted text-muted-foreground border border-border hover:border-border dark:border-zinc-700 hover:text-foreground dark:text-zinc-200'}`}>
+          <button
+            key={r.key}
+            onClick={() => setReportType(r.key)}
+            className={`flex items-center gap-2 px-4 py-[9px] rounded-xl text-[12px] font-medium transition-all ${reportType === r.key ? 'shadow-lg' : 'bg-muted text-muted-foreground border border-border hover:border-border dark:border-zinc-700 hover:text-foreground dark:text-zinc-200'}`}
+            style={reportType === r.key ? { background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' } : undefined}
+          >
             <r.icon className="w-3.5 h-3.5" strokeWidth={1.5} />
             {r.label}
           </button>
@@ -163,7 +168,12 @@ export default function Reports() {
 
       <div className="flex gap-1 mb-6 flex-wrap items-center">
         {(['daily', 'weekly', 'monthly', 'yearly', 'custom'] as const).map(p => (
-          <button key={p} onClick={() => setPeriod(p)} className={`px-3 py-[6px] rounded-full text-[12px] font-medium capitalize transition-all ${period === p ? 'bg-secondary dark:bg-zinc-800 text-zinc-100' : 'text-muted-foreground hover:text-muted-foreground dark:text-zinc-300'}`}>{p}</button>
+          <button
+            key={p}
+            onClick={() => setPeriod(p)}
+            className={`px-3 py-[6px] rounded-full text-[12px] font-medium capitalize transition-all ${period === p ? '' : 'text-muted-foreground hover:text-foreground dark:text-zinc-300'}`}
+            style={period === p ? { background: 'var(--brand-surface-gradient)', color: 'var(--brand-mixed)', border: '1px solid var(--brand-border)' } : undefined}
+          >{p}</button>
         ))}
 
       {period === 'custom' && (
@@ -179,14 +189,18 @@ export default function Reports() {
         <div className="space-y-4">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {[
-              { label: 'Total Revenue', value: `₱${totalRevenue.toLocaleString()}`, accent: 'bg-[rgb(var(--color-primary-rgb))] text-white' },
+              { label: 'Total Revenue', value: `₱${totalRevenue.toLocaleString()}`, accent: 'bg-blue-500/20 text-blue-400', primary: true },
               { label: 'Transactions', value: filteredTx.length.toString(), accent: 'bg-blue-500/20 text-blue-400' },
               { label: 'Cash', value: `₱${cashTotal.toLocaleString()}`, accent: 'bg-green-500/20 text-green-400' },
               { label: 'GCash', value: `₱${gcashTotal.toLocaleString()}`, accent: 'bg-purple-500/20 text-purple-400' },
-            ].map((s, i) => (
-              <div key={s.label} className={`rounded-2xl p-4 shadow-sm border border-border/50 backdrop-blur-md ${i === 0 ? s.accent : 'bg-card dark:bg-zinc-900/40 ' + s.accent.split(' ')[0]}`}>
-                <p className={`text-[11px] font-medium ${i === 0 ? 'text-white/80' : 'text-muted-foreground'}`}>{s.label}</p>
-                <p className={`text-xl font-bold mt-1 tracking-tight ${i === 0 ? 'text-white' : 'text-foreground'}`}>{s.value}</p>
+            ].map((s) => (
+              <div
+                key={s.label}
+                className={`rounded-2xl p-4 shadow-sm border backdrop-blur-md ${s.primary ? 'border-transparent' : 'border-border/50 bg-card dark:bg-zinc-900/40 ' + s.accent.split(' ')[0]}`}
+                style={s.primary ? { background: 'var(--brand-gradient)', boxShadow: 'var(--brand-glow)', borderColor: 'transparent' } : undefined}
+              >
+                <p className={`text-[11px] font-medium ${s.primary ? '' : 'text-muted-foreground'}`} style={s.primary ? { color: 'var(--brand-text-on-primary)', opacity: 0.8 } : undefined}>{s.label}</p>
+                <p className={`text-xl font-bold mt-1 tracking-tight ${s.primary ? '' : 'text-foreground'}`} style={s.primary ? { color: 'var(--brand-text-on-primary)' } : undefined}>{s.value}</p>
               </div>
             ))}
           </div>
@@ -213,7 +227,7 @@ export default function Reports() {
                     <span className="text-[10px] font-bold text-muted-foreground w-5 text-right">#{i + 1}</span>
                     <div className="flex-1">
                       <div className="flex justify-between mb-1"><span className="text-[12px] font-medium text-foreground dark:text-zinc-200">{p.name}</span><span className="text-[11px] text-muted-foreground">{p.count} sold — ₱{p.revenue.toLocaleString()}</span></div>
-                      <div className="h-[3px] bg-secondary dark:bg-zinc-800 rounded-full overflow-hidden"><div className="h-full bg-white rounded-full transition-all" style={{ width: `${Math.min(100, (p.count / (partsUsed[0]?.count || 1)) * 100)}%` }} /></div>
+                      <div className="h-[3px] bg-secondary dark:bg-zinc-800 rounded-full overflow-hidden"><div className="h-full rounded-full transition-all" style={{ width: `${Math.min(100, (p.count / (partsUsed[0]?.count || 1)) * 100)}%`, background: 'var(--brand-gradient)' }} /></div>
                     </div>
                   </div>
                 ))}
@@ -297,7 +311,7 @@ export default function Reports() {
                     <span className="text-[10px] font-bold text-muted-foreground w-5 text-right">#{i + 1}</span>
                     <div className="flex-1">
                       <div className="flex justify-between mb-1"><span className="text-[12px] font-medium text-foreground dark:text-zinc-200">{type}</span><span className="text-[11px] text-muted-foreground">{count} jobs</span></div>
-                      <div className="h-[3px] bg-secondary dark:bg-zinc-800 rounded-full overflow-hidden"><div className="h-full bg-white rounded-full" style={{ width: `${Math.min(100, (count / (serviceTypeBreakdown[0]?.[1] || 1)) * 100)}%` }} /></div>
+                      <div className="h-[3px] bg-secondary dark:bg-zinc-800 rounded-full overflow-hidden"><div className="h-full rounded-full" style={{ width: `${Math.min(100, (count / (serviceTypeBreakdown[0]?.[1] || 1)) * 100)}%`, background: 'var(--brand-gradient)' }} /></div>
                     </div>
                   </div>
                 ))}
