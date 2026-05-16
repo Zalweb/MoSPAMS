@@ -59,8 +59,6 @@ export default function DashboardPage() {
   const completedServices = metrics?.totalJobsCompleted ?? 0;
   const inventoryHealth = metrics?.inventoryHealth ?? 100;
   const lowStockCount = metrics?.lowStockCount ?? 0;
-  const revenueSparkline = metrics?.revenueSparkline7d ?? [];
-  const partsUsageSparkline = metrics?.partsUsageSparkline7d ?? [];
   const avgJobTime = metrics?.avgJobTime != null ? `${metrics.avgJobTime} days` : '—';
   const repeatRate = metrics?.repeatRate ?? 0;
   const totalJobs = pendingServices + ongoingServices + completedServices;
@@ -163,7 +161,6 @@ export default function DashboardPage() {
             icon={kpi.icon}
             loading={loading}
             delay={index * 0.1}
-            sparklineData={'sparklineData' in kpi ? kpi.sparklineData : undefined}
           />
         ))}
       </div>

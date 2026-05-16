@@ -13,7 +13,6 @@ interface KPICardProps {
   icon: React.ComponentType<LucideProps>;
   loading?: boolean;
   delay?: number;
-  sparklineData?: number[];
   accentColor?: AccentColor;
 }
 
@@ -71,7 +70,7 @@ const ACCENT: Record<AccentColor, { icon: string; badge: string; bg: string; bar
 
 export function KPICard({
   title, value, change, comparison, trend,
-  icon: Icon, loading, delay = 0, sparklineData,
+  icon: Icon, loading, delay = 0,
   accentColor = 'primary',
 }: KPICardProps) {
   const isPositive = change !== undefined && change >= 0;
