@@ -20,43 +20,62 @@ interface ShopBranding {
   invitationCode: string;
 }
 
-function removeWhiteBackground(file: File, tolerance = 30): Promise<Blob> {
+function removeWhiteBackground(file: File, tolerance = 40): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      const ctx = canvas.getContext('2d')!;
-      ctx.drawImage(img, 0, 0);
-      URL.revokeObjectURL(url);
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject(new Error('Canvas 2D context unavailable'));
+        ctx.drawImage(img, 0, 0);
+        URL.revokeObjectURL(url);
 
-      const { data, width, height } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const { data, width, height } = imageData;
 
-      // Sample the four corners to determine the background color
-      const corners = [
-        [data[0], data[1], data[2]],
-        [data[(width - 1) * 4], data[(width - 1) * 4 + 1], data[(width - 1) * 4 + 2]],
-        [data[(height - 1) * width * 4], data[(height - 1) * width * 4 + 1], data[(height - 1) * width * 4 + 2]],
-        [data[((height - 1) * width + width - 1) * 4], data[((height - 1) * width + width - 1) * 4 + 1], data[((height - 1) * width + width - 1) * 4 + 2]],
-      ];
-      const bgR = Math.round(corners.reduce((s, c) => s + c[0], 0) / 4);
-      const bgG = Math.round(corners.reduce((s, c) => s + c[1], 0) / 4);
-      const bgB = Math.round(corners.reduce((s, c) => s + c[2], 0) / 4);
+        // Use top-left corner pixel as background color seed
+        const bgR = data[0], bgG = data[1], bgB = data[2];
 
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const d = imageData.data;
-      for (let i = 0; i < d.length; i += 4) {
-        const dr = Math.abs(d[i] - bgR);
-        const dg = Math.abs(d[i + 1] - bgG);
-        const db = Math.abs(d[i + 2] - bgB);
-        if (dr <= tolerance && dg <= tolerance && db <= tolerance) {
-          d[i + 3] = 0;
+        const colorMatch = (pixelIdx: number) =>
+          Math.abs(data[pixelIdx] - bgR) <= tolerance &&
+          Math.abs(data[pixelIdx + 1] - bgG) <= tolerance &&
+          Math.abs(data[pixelIdx + 2] - bgB) <= tolerance;
+
+        // BFS flood-fill from all border pixels — only removes background
+        // connected to the edges, preserving any same-color areas inside the logo
+        const visited = new Uint8Array(width * height);
+        const queue: number[] = [];
+
+        const seed = (x: number, y: number) => {
+          const i = y * width + x;
+          if (!visited[i] && colorMatch(i * 4)) { visited[i] = 1; queue.push(i); }
+        };
+
+        for (let x = 0; x < width; x++) { seed(x, 0); seed(x, height - 1); }
+        for (let y = 1; y < height - 1; y++) { seed(0, y); seed(width - 1, y); }
+
+        while (queue.length > 0) {
+          const idx = queue.pop()!;
+          data[idx * 4 + 3] = 0;
+          const x = idx % width, y = Math.floor(idx / width);
+          if (x > 0)         { const n = idx - 1;     if (!visited[n] && colorMatch(n * 4)) { visited[n] = 1; queue.push(n); } }
+          if (x < width - 1) { const n = idx + 1;     if (!visited[n] && colorMatch(n * 4)) { visited[n] = 1; queue.push(n); } }
+          if (y > 0)         { const n = idx - width;  if (!visited[n] && colorMatch(n * 4)) { visited[n] = 1; queue.push(n); } }
+          if (y < height - 1){ const n = idx + width;  if (!visited[n] && colorMatch(n * 4)) { visited[n] = 1; queue.push(n); } }
         }
+
+        ctx.putImageData(imageData, 0, 0);
+        canvas.toBlob(
+          (blob) => blob ? resolve(blob) : reject(new Error('Canvas export failed')),
+          'image/png'
+        );
+      } catch (err) {
+        reject(err);
       }
-      ctx.putImageData(imageData, 0, 0);
-      canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Canvas export failed')), 'image/png');
     };
     img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Image load failed')); };
     img.src = url;
@@ -126,7 +145,11 @@ export default function ShopBrandingSettings() {
     try {
       let processedFile: Blob = file;
       if (file.type !== 'image/svg+xml') {
-        processedFile = await removeWhiteBackground(file);
+        try {
+          processedFile = await removeWhiteBackground(file);
+        } catch (bgErr) {
+          console.warn('Background removal failed, uploading original:', bgErr);
+        }
       }
 
       const formData = new FormData();
