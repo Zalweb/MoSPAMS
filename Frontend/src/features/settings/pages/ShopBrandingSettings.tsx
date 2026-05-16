@@ -20,6 +20,49 @@ interface ShopBranding {
   invitationCode: string;
 }
 
+function removeWhiteBackground(file: File, tolerance = 30): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+
+      const { data, width, height } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+      // Sample the four corners to determine the background color
+      const corners = [
+        [data[0], data[1], data[2]],
+        [data[(width - 1) * 4], data[(width - 1) * 4 + 1], data[(width - 1) * 4 + 2]],
+        [data[(height - 1) * width * 4], data[(height - 1) * width * 4 + 1], data[(height - 1) * width * 4 + 2]],
+        [data[((height - 1) * width + width - 1) * 4], data[((height - 1) * width + width - 1) * 4 + 1], data[((height - 1) * width + width - 1) * 4 + 2]],
+      ];
+      const bgR = Math.round(corners.reduce((s, c) => s + c[0], 0) / 4);
+      const bgG = Math.round(corners.reduce((s, c) => s + c[1], 0) / 4);
+      const bgB = Math.round(corners.reduce((s, c) => s + c[2], 0) / 4);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const d = imageData.data;
+      for (let i = 0; i < d.length; i += 4) {
+        const dr = Math.abs(d[i] - bgR);
+        const dg = Math.abs(d[i + 1] - bgG);
+        const db = Math.abs(d[i + 2] - bgB);
+        if (dr <= tolerance && dg <= tolerance && db <= tolerance) {
+          d[i + 3] = 0;
+        }
+      }
+      ctx.putImageData(imageData, 0, 0);
+      canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Canvas export failed')), 'image/png');
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Image load failed')); };
+    img.src = url;
+  });
+}
+
 export default function ShopBrandingSettings() {
   const { refetch } = useShop();
   const { refreshBranding } = useTenantBranding();
@@ -81,8 +124,13 @@ export default function ShopBrandingSettings() {
     }
 
     try {
+      let processedFile: Blob = file;
+      if (file.type !== 'image/svg+xml') {
+        processedFile = await removeWhiteBackground(file);
+      }
+
       const formData = new FormData();
-      formData.append('logo', file);
+      formData.append('logo', processedFile, 'logo.png');
 
       const response = await fetch('/api/shop/logo', {
         method: 'POST',
