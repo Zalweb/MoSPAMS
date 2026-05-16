@@ -92,7 +92,12 @@ export default function Users() {
           <h2 className="text-[22px] font-bold text-foreground tracking-tight">User Management</h2>
           <p className="text-[13px] text-muted-foreground mt-0.5">Manage access and monitor activity</p>
         </div>
-        <Button onClick={openAdd} size="sm" className="h-9 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-[12px] font-medium px-4 transition-opacity">
+        <Button
+          onClick={openAdd}
+          size="sm"
+          className="h-9 rounded-xl text-[12px] font-semibold px-4 transition-all active:scale-95 shadow-lg"
+          style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}
+        >
           <Plus className="w-3.5 h-3.5 mr-1.5" /> Add User
         </Button>
       </div>
@@ -148,38 +153,89 @@ export default function Users() {
         ))}
       </div>
 
-      <div className="bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/40 backdrop-blur-sm border border-border rounded-2xl p-5 mb-6">
-        <h3 className="text-[13px] font-semibold text-foreground mb-4">Users ({users.length})</h3>
+      <div className="bg-card dark:bg-zinc-900/40 backdrop-blur-2xl border border-border/50 rounded-3xl overflow-hidden shadow-xl mb-6">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead><tr className="border-b border-border">
-              <th className="text-left px-3 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Name</th>
-              <th className="text-left px-3 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Email</th>
-              <th className="text-left px-3 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Role</th>
-              <th className="text-left px-3 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Status</th>
-              <th className="text-left px-3 py-3 text-[10px] font-semibold text-muted-foreground uppercase">Last Active</th>
-              <th className="text-right px-3 py-3 text-[10px] font-semibold text-muted-foreground uppercase"></th>
-            </tr></thead>
-            <tbody className="divide-y divide-border dark:divide-zinc-800">
+            <thead>
+              <tr className="border-b border-border/50 bg-muted/30">
+                <th className="text-left px-6 py-5 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Name</th>
+                <th className="text-left px-6 py-5 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Email</th>
+                <th className="text-left px-6 py-5 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Role</th>
+                <th className="text-left px-6 py-5 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Status</th>
+                <th className="text-left px-6 py-5 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Last Active</th>
+                <th className="text-right px-6 py-5 text-[11px] font-bold text-muted-foreground uppercase tracking-wider"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/50">
               {users.map(u => (
-                <tr key={u.id} className="hover:bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 transition-colors">
-                  <td className="px-3 py-3 text-[12px] font-medium text-foreground dark:text-zinc-200">{u.name}{me?.id === u.id && <span className="ml-1.5 text-[10px] text-blue-400">(you)</span>}</td>
-                  <td className="px-3 py-3 text-[12px] text-muted-foreground">{u.email}</td>
-                  <td className="px-3 py-3"><span className={`text-[10px] font-bold uppercase px-2 py-[3px] rounded-full ${u.role === 'Owner' ? 'bg-[rgb(var(--color-primary-rgb))]/10 text-[rgb(var(--color-primary-rgb))] border border-[rgb(var(--color-primary-rgb))]/20' : 'bg-blue-500/20 text-blue-400'}`}>{u.role}</span></td>
-                  <td className="px-3 py-3"><span className={`text-[10px] font-medium px-2 py-[3px] rounded-full ${u.status === 'Active' ? 'bg-green-500/20 text-green-400' : 'bg-secondary dark:bg-zinc-800 text-muted-foreground'}`}>{u.status}</span></td>
-                  <td className="px-3 py-3 text-[11px] text-muted-foreground tabular-nums">{u.lastActive ? new Date(u.lastActive).toLocaleString() : '—'}</td>
-                  <td className="px-3 py-3 text-right">
-                    <div className="inline-flex items-center gap-0.5">
-                      <button title={u.status === 'Active' ? 'Disable' : 'Enable'} onClick={() => setUserStatus(u.id, u.status === 'Active' ? 'Inactive' : 'Active')} disabled={me?.id === u.id} className="p-1.5 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-muted-foreground dark:text-zinc-300 transition-colors disabled:opacity-30">
+                <tr key={u.id} className="hover:bg-muted/50 transition-colors group">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-4">
+                      <div
+                        className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 border border-border/50"
+                        style={{ background: u.role === 'Owner' ? 'var(--brand-gradient)' : 'var(--brand-surface-gradient)' }}
+                      >
+                        <span className="text-xs font-bold" style={{ color: u.role === 'Owner' ? 'var(--brand-text-on-primary)' : 'var(--brand-safe-text)' }}>
+                          {u.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-[13px] font-bold text-foreground">
+                          {u.name}
+                          {me?.id === u.id && <span className="ml-1.5 text-[10px] font-semibold" style={{ color: 'var(--brand-safe-text)' }}>(you)</span>}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-[12px] text-muted-foreground">{u.email}</td>
+                  <td className="px-6 py-4">
+                    <span className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-full ${
+                      u.role === 'Owner'
+                        ? 'text-white'
+                        : u.role === 'Mechanic'
+                          ? 'bg-blue-500/15 text-blue-500'
+                          : u.role === 'Staff'
+                            ? 'bg-emerald-500/15 text-emerald-500'
+                            : 'bg-violet-500/15 text-violet-500'
+                    }`}
+                    style={u.role === 'Owner' ? { background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)' } : undefined}
+                    >
+                      {u.role}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${u.status === 'Active' ? 'bg-green-500/15 text-green-500' : 'bg-secondary text-muted-foreground'}`}>
+                      {u.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-[11px] text-muted-foreground tabular-nums">{u.lastActive ? new Date(u.lastActive).toLocaleString() : '—'}</td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                      <button title={u.status === 'Active' ? 'Disable' : 'Enable'} onClick={() => setUserStatus(u.id, u.status === 'Active' ? 'Inactive' : 'Active')} disabled={me?.id === u.id} className="p-2 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all active:scale-90 disabled:opacity-30">
                         <Power className="w-3.5 h-3.5" />
                       </button>
-                      <button title="Edit" onClick={() => openEdit(u)} disabled={u.role === 'Owner'} className="p-1.5 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-muted-foreground dark:text-zinc-300 transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-muted-foreground"><Pencil className="w-3.5 h-3.5" /></button>
-                      <button title="Delete" onClick={() => setConfirmDelete(u)} disabled={me?.id === u.id} className="p-1.5 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-400 transition-colors disabled:opacity-30"><Trash2 className="w-3.5 h-3.5" /></button>
+                      <button title="Edit" onClick={() => openEdit(u)} disabled={u.role === 'Owner'} className="p-2 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all active:scale-90 disabled:opacity-30">
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button title="Delete" onClick={() => setConfirmDelete(u)} disabled={me?.id === u.id} className="p-2 rounded-xl bg-red-500/5 hover:bg-red-500/10 text-red-400 transition-all active:scale-90 disabled:opacity-30">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </td>
                 </tr>
               ))}
-              {users.length === 0 && <tr><td colSpan={6} className="px-3 py-12 text-center text-[12px] text-muted-foreground">No users yet</td></tr>}
+              {users.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-6 py-24 text-center">
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="w-20 h-20 rounded-3xl bg-muted/50 flex items-center justify-center">
+                        <UsersIcon className="w-10 h-10 text-muted-foreground/30" />
+                      </div>
+                      <p className="text-sm text-muted-foreground">No users yet</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -297,7 +353,7 @@ export default function Users() {
                 <Input type="password" {...editForm.register('password')} className="mt-1.5 h-9 rounded-xl border-border dark:border-zinc-700 bg-secondary dark:bg-zinc-800 text-[13px] text-foreground dark:text-zinc-200 placeholder:text-muted-foreground dark:text-zinc-600" />
               </div>
               <div className="flex gap-2 pt-2">
-                <Button type="submit" className="flex-1 h-9 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-[12px] transition-opacity">Save</Button>
+                <Button type="submit" className="flex-1 h-9 rounded-xl text-[12px] font-semibold transition-all active:scale-95" style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}>Save</Button>
                 <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-9 rounded-xl text-[12px] border-border dark:border-zinc-700 bg-secondary dark:bg-zinc-800 text-muted-foreground dark:text-zinc-300 hover:bg-muted dark:bg-zinc-700">Cancel</Button>
               </div>
             </form>
@@ -327,7 +383,7 @@ export default function Users() {
                 {addForm.formState.errors.password && <p className="text-[10px] text-red-400 mt-1">{addForm.formState.errors.password.message}</p>}
               </div>
               <div className="flex gap-2 pt-2">
-                <Button type="submit" className="flex-1 h-9 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-[12px] transition-opacity">Create</Button>
+                <Button type="submit" className="flex-1 h-9 rounded-xl text-[12px] font-semibold transition-all active:scale-95" style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}>Create</Button>
                 <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-9 rounded-xl text-[12px] border-border dark:border-zinc-700 bg-secondary dark:bg-zinc-800 text-muted-foreground dark:text-zinc-300 hover:bg-muted dark:bg-zinc-700">Cancel</Button>
               </div>
             </form>

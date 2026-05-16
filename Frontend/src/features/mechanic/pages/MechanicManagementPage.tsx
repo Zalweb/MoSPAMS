@@ -159,7 +159,12 @@ export default function MechanicManagementPage() {
           <h2 className="text-2xl font-bold text-foreground tracking-tight">Mechanics</h2>
           <p className="text-sm text-muted-foreground mt-1">{meta?.total ?? mechanics.length} mechanics</p>
         </div>
-        <Button onClick={openAdd} size="sm" className="h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold px-5 transition-opacity">
+        <Button
+          onClick={openAdd}
+          size="sm"
+          className="h-10 rounded-xl text-sm font-semibold px-5 transition-all active:scale-95 shadow-lg"
+          style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}
+        >
           <Plus className="w-4 h-4 mr-2" /> Add Mechanic
         </Button>
       </div>
@@ -175,54 +180,82 @@ export default function MechanicManagementPage() {
         />
       </div>
 
-      <div className="bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/40 backdrop-blur-sm border border-border rounded-2xl overflow-hidden">
+      <div className="bg-card dark:bg-zinc-900/40 backdrop-blur-2xl border border-border/50 rounded-3xl overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-border">
-                <th className="text-left px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Mechanic</th>
-                <th className="text-left px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Contact</th>
-                <th className="text-left px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
-                <th className="text-left px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Joined</th>
-                <th className="text-left px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Jobs (Mo.)</th>
-                <th className="text-left px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Avg Rating</th>
-                <th className="text-right px-5 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider"></th>
+              <tr className="border-b border-border/50 bg-muted/30">
+                <th className="text-left px-6 py-5 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Mechanic</th>
+                <th className="text-left px-6 py-5 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Contact</th>
+                <th className="text-left px-6 py-5 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Status</th>
+                <th className="text-left px-6 py-5 text-[11px] font-bold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Joined</th>
+                <th className="text-left px-6 py-5 text-[11px] font-bold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Jobs (Mo.)</th>
+                <th className="text-left px-6 py-5 text-[11px] font-bold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Avg Rating</th>
+                <th className="text-right px-6 py-5 text-[11px] font-bold text-muted-foreground uppercase tracking-wider"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border dark:divide-zinc-800/50">
+            <tbody className="divide-y divide-border/50">
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i}><td colSpan={5} className="px-5 py-4"><div className="h-4 bg-secondary dark:bg-zinc-800/60 rounded animate-pulse w-full" /></td></tr>
+                  <tr key={i}><td colSpan={7} className="px-6 py-8"><div className="h-6 bg-muted rounded-xl animate-pulse w-full" /></td></tr>
                 ))
               ) : mechanics.map(m => (
-                <tr key={m.id} className="hover:bg-secondary dark:bg-zinc-800/30 transition-colors group">
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 flex items-center justify-center shrink-0 group-hover:bg-secondary dark:bg-zinc-800 transition-colors">
-                        <Wrench className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
+                <tr key={m.id} className="hover:bg-muted/50 transition-colors group">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-4">
+                      <div
+                        className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 border border-border/50"
+                        style={{ background: 'var(--brand-surface-gradient)' }}
+                      >
+                        <span className="text-sm font-bold" style={{ color: 'var(--brand-safe-text)' }}>
+                          {m.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                        </span>
                       </div>
-                      <p className="text-sm font-medium text-foreground">{m.name}</p>
+                      <div>
+                        <p className="text-sm font-bold text-foreground group-hover:text-[rgb(var(--color-primary-rgb))] transition-colors">{m.name}</p>
+                        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-tighter">Mechanic</p>
+                      </div>
                     </div>
                   </td>
-                  <td className="px-5 py-4">
-                    <div className="space-y-1">
-                      {m.phone && <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Phone className="w-3 h-3" />{m.phone}</p>}
-                      {m.email && <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Mail className="w-3 h-3" />{m.email}</p>}
-                      {!m.phone && !m.email && <span className="text-xs text-muted-foreground dark:text-zinc-600">—</span>}
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col gap-1.5">
+                      {m.phone && (
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <div className="w-5 h-5 rounded-md bg-secondary/50 flex items-center justify-center">
+                            <Phone className="w-3 h-3" />
+                          </div>
+                          <span className="font-medium tabular-nums">{m.phone}</span>
+                        </div>
+                      )}
+                      {m.email && (
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <div className="w-5 h-5 rounded-md bg-secondary/50 flex items-center justify-center">
+                            <Mail className="w-3 h-3" />
+                          </div>
+                          <span className="font-medium truncate max-w-[160px]">{m.email}</span>
+                        </div>
+                      )}
+                      {!m.phone && !m.email && <span className="text-xs text-muted-foreground/40 italic">No contact info</span>}
                     </div>
                   </td>
-                  <td className="px-5 py-4">
-                    <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full ${m.statusCode === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-secondary dark:bg-zinc-800 text-muted-foreground'}`}>
+                  <td className="px-6 py-4">
+                    <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${
+                      m.status?.toLowerCase() === 'available' || m.statusCode === 'active'
+                        ? 'bg-green-500/15 text-green-500'
+                        : m.status?.toLowerCase() === 'busy'
+                          ? 'bg-amber-500/15 text-amber-500'
+                          : 'bg-secondary text-muted-foreground'
+                    }`}>
                       {m.status}
                     </span>
                   </td>
-                  <td className="px-5 py-4 hidden sm:table-cell text-xs text-muted-foreground tabular-nums">
-                    {new Date(m.createdAt).toLocaleDateString()}
+                  <td className="px-6 py-4 hidden sm:table-cell text-xs font-medium text-muted-foreground tabular-nums">
+                    {new Date(m.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                   </td>
-                  <td className="px-5 py-4 hidden md:table-cell text-sm font-semibold text-foreground">
-                    {perfMap[m.id]?.jobs_this_month ?? '—'}
+                  <td className="px-6 py-4 hidden md:table-cell text-sm font-semibold text-foreground">
+                    {perfMap[m.id]?.jobs_this_month ?? <span className="text-muted-foreground font-normal">—</span>}
                   </td>
-                  <td className="px-5 py-4 hidden md:table-cell text-sm">
+                  <td className="px-6 py-4 hidden md:table-cell text-sm">
                     {perfMap[m.id]?.avg_rating != null ? (
                       <span className="flex items-center gap-1">
                         <span className="font-semibold text-foreground">{perfMap[m.id].avg_rating}</span>
@@ -230,18 +263,18 @@ export default function MechanicManagementPage() {
                       </span>
                     ) : <span className="text-muted-foreground">—</span>}
                   </td>
-                  <td className="px-5 py-4 text-right">
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => openPerfDetail(m.id)} className="p-2 rounded-lg hover:bg-blue-500/10 text-muted-foreground hover:text-blue-400 transition-colors" title="View Performance">
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                      <button onClick={() => openPerfDetail(m.id)} className="p-2.5 rounded-xl hover:bg-blue-500/10 text-muted-foreground hover:text-blue-500 transition-all active:scale-90" title="View Performance">
                         <BarChart3 className="w-4 h-4" />
                       </button>
-                      <button onClick={() => toggleStatus(m)} className="p-2 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-muted-foreground dark:text-zinc-300 transition-colors" title={m.statusCode === 'active' ? 'Deactivate' : 'Activate'}>
+                      <button onClick={() => toggleStatus(m)} className="p-2.5 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all active:scale-90" title={m.statusCode === 'active' ? 'Deactivate' : 'Activate'}>
                         <Power className="w-4 h-4" />
                       </button>
-                      <button onClick={() => openEdit(m)} className="p-2 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors">
+                      <button onClick={() => openEdit(m)} className="p-2.5 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all active:scale-90">
                         <Pencil className="w-4 h-4" />
                       </button>
-                      <button onClick={() => setConfirmDelete(m)} className="p-2 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-400 transition-colors">
+                      <button onClick={() => setConfirmDelete(m)} className="p-2.5 rounded-xl bg-red-500/5 hover:bg-red-500/10 text-red-400 transition-all active:scale-90">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -249,11 +282,16 @@ export default function MechanicManagementPage() {
                 </tr>
               ))}
               {!loading && mechanics.length === 0 && (
-                <tr><td colSpan={5} className="px-5 py-16 text-center text-sm text-muted-foreground">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 flex items-center justify-center">
-                    <Wrench className="w-8 h-8 text-muted-foreground dark:text-zinc-600" />
+                <tr><td colSpan={7} className="px-6 py-24 text-center">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="w-20 h-20 rounded-3xl bg-muted/50 flex items-center justify-center">
+                      <Wrench className="w-10 h-10 text-muted-foreground/30" />
+                    </div>
+                    <div>
+                      <h4 className="text-base font-semibold text-foreground">No mechanics found</h4>
+                      <p className="text-sm text-muted-foreground mt-1">{search ? "No mechanics match your search." : "Start building your team today."}</p>
+                    </div>
                   </div>
-                  {search ? 'No mechanics match your search' : 'No mechanics yet'}
                 </td></tr>
               )}
             </tbody>
@@ -261,13 +299,15 @@ export default function MechanicManagementPage() {
         </div>
 
         {meta && meta.lastPage > 1 && (
-          <div className="flex items-center justify-between px-5 py-3 border-t border-border">
-            <p className="text-xs text-muted-foreground">Page {meta.currentPage} of {meta.lastPage} — {meta.total} total</p>
-            <div className="flex items-center gap-1">
-              <button onClick={() => fetchMechanics(page - 1)} disabled={page <= 1} className="p-1.5 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+          <div className="flex items-center justify-between px-6 py-5 bg-muted/30 border-t border-border/50">
+            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+              Showing Page {meta.currentPage} of {meta.lastPage}
+            </p>
+            <div className="flex items-center gap-2">
+              <button onClick={() => fetchMechanics(page - 1)} disabled={page <= 1} className="w-9 h-9 rounded-xl flex items-center justify-center bg-card border border-border/50 text-muted-foreground hover:text-foreground disabled:opacity-20 transition-all">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <button onClick={() => fetchMechanics(page + 1)} disabled={page >= meta.lastPage} className="p-1.5 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+              <button onClick={() => fetchMechanics(page + 1)} disabled={page >= meta.lastPage} className="w-9 h-9 rounded-xl flex items-center justify-center bg-card border border-border/50 text-muted-foreground hover:text-foreground disabled:opacity-20 transition-all">
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -302,7 +342,7 @@ export default function MechanicManagementPage() {
               <Input {...form.register('address')} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="Full address" />
             </div>
             <div className="flex gap-3 pt-2">
-              <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold transition-opacity">{editing ? 'Save Changes' : 'Add Mechanic'}</Button>
+              <Button type="submit" className="flex-1 h-10 rounded-xl text-sm font-semibold transition-all active:scale-95" style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}>{editing ? 'Save Changes' : 'Add Mechanic'}</Button>
               <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-10 rounded-xl text-sm border-border dark:border-zinc-700 text-muted-foreground hover:bg-secondary dark:bg-zinc-800">Cancel</Button>
             </div>
           </form>
