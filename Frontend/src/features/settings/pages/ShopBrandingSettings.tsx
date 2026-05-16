@@ -88,7 +88,9 @@ export default function ShopBrandingSettings() {
   const [branding, setBranding] = useState<ShopBranding | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  
+  const [pendingLogo, setPendingLogo] = useState<{ blob: Blob; previewUrl: string } | null>(null);
+  const [pendingDeleteLogo, setPendingDeleteLogo] = useState(false);
+
   const [formData, setFormData] = useState({
     shopName: '',
     primaryColor: '#ef4444',
@@ -120,10 +122,29 @@ export default function ShopBrandingSettings() {
   const handleSave = async () => {
     try {
       setSaving(true);
+
+      if (pendingDeleteLogo) {
+        await apiMutation('/api/shop/logo', 'DELETE');
+        setPendingDeleteLogo(false);
+      }
+
+      if (pendingLogo) {
+        const fd = new FormData();
+        fd.append('logo', pendingLogo.blob, 'logo.png');
+        const response = await fetch('/api/shop/logo', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+          body: fd,
+        });
+        if (!response.ok) throw new Error('Logo upload failed');
+        URL.revokeObjectURL(pendingLogo.previewUrl);
+        setPendingLogo(null);
+      }
+
       await apiMutation('/api/shop/branding', 'PATCH', formData);
       toast.success('Shop branding updated successfully');
-      await refreshBranding(); // Update global branding state
-      await refetch(); // Refresh global shop context
+      await refreshBranding();
+      await refetch();
       await fetchBranding();
     } catch (error) {
       console.error('Failed to update branding:', error);
@@ -136,6 +157,7 @@ export default function ShopBrandingSettings() {
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    e.target.value = '';
 
     if (file.size > 2 * 1024 * 1024) {
       toast.error('Logo must be less than 2MB');
@@ -143,47 +165,30 @@ export default function ShopBrandingSettings() {
     }
 
     try {
-      let processedFile: Blob = file;
+      let blob: Blob = file;
       if (file.type !== 'image/svg+xml') {
         try {
-          processedFile = await removeWhiteBackground(file);
+          blob = await removeWhiteBackground(file);
         } catch (bgErr) {
-          console.warn('Background removal failed, uploading original:', bgErr);
+          console.warn('Background removal failed, using original:', bgErr);
         }
       }
 
-      const formData = new FormData();
-      formData.append('logo', processedFile, 'logo.png');
-
-      const response = await fetch('/api/shop/logo', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: formData,
-      });
-
-      if (!response.ok) throw new Error('Upload failed');
-      toast.success('Logo uploaded successfully');
-      await refreshBranding();
-      await refetch();
-      await fetchBranding();
+      if (pendingLogo) URL.revokeObjectURL(pendingLogo.previewUrl);
+      setPendingLogo({ blob, previewUrl: URL.createObjectURL(blob) });
+      setPendingDeleteLogo(false);
     } catch (error) {
-      console.error('Failed to upload logo:', error);
-      toast.error('Failed to upload logo');
+      console.error('Failed to process logo:', error);
+      toast.error('Failed to process logo');
     }
   };
 
-  const handleDeleteLogo = async () => {
-    try {
-      await apiMutation('/api/shop/logo', 'DELETE');
-      toast.success('Logo deleted successfully');
-      await refreshBranding();
-      await refetch();
-      await fetchBranding();
-    } catch (error) {
-      console.error('Failed to delete logo:', error);
-      toast.error('Failed to delete logo');
+  const handleDeleteLogo = () => {
+    if (pendingLogo) {
+      URL.revokeObjectURL(pendingLogo.previewUrl);
+      setPendingLogo(null);
+    } else {
+      setPendingDeleteLogo(true);
     }
   };
 
@@ -235,34 +240,41 @@ export default function ShopBrandingSettings() {
         </div>
 
         <div className="flex items-center gap-4">
-          {branding?.logoUrl ? (
-            <div className="relative">
-              <img
-                src={branding.logoUrl}
-                alt="Shop logo"
-                className="w-24 h-24 rounded-xl object-contain border border-border dark:border-zinc-700"
-                loading="lazy"
-                decoding="async"
-              />
-              <button
-                onClick={handleDeleteLogo}
-                className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center hover:bg-red-600 transition-colors"
-              >
-                <X className="w-4 h-4 text-foreground" />
-              </button>
-            </div>
-          ) : (
-            <div className="relative w-24 h-24 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border border-border dark:border-zinc-700 flex items-center justify-center overflow-hidden">
-              <img
-                src="/images/logo.svg"
-                alt="Default MoSPAMS logo"
-                className="w-20 h-20 object-contain opacity-60"
-                loading="lazy"
-                decoding="async"
-              />
-              <span className="absolute bottom-1 left-0 right-0 text-center text-[9px] text-muted-foreground font-medium">Default</span>
-            </div>
-          )}
+          {(() => {
+            const previewUrl = pendingLogo?.previewUrl;
+            const savedUrl = !pendingDeleteLogo ? branding?.logoUrl : null;
+            const displayUrl = previewUrl ?? savedUrl;
+
+            return displayUrl ? (
+              <div className="relative">
+                <img
+                  src={displayUrl}
+                  alt="Shop logo"
+                  className="w-24 h-24 rounded-xl object-contain border border-border dark:border-zinc-700"
+                />
+                {pendingLogo && (
+                  <span className="absolute -bottom-5 left-0 right-0 text-center text-[9px] text-amber-400 font-medium">Unsaved</span>
+                )}
+                <button
+                  onClick={handleDeleteLogo}
+                  className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center hover:bg-red-600 transition-colors"
+                >
+                  <X className="w-4 h-4 text-foreground" />
+                </button>
+              </div>
+            ) : (
+              <div className="relative w-24 h-24 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border border-border dark:border-zinc-700 flex items-center justify-center overflow-hidden">
+                <img
+                  src="/images/logo.svg"
+                  alt="Default MoSPAMS logo"
+                  className="w-20 h-20 object-contain opacity-60"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span className="absolute bottom-1 left-0 right-0 text-center text-[9px] text-muted-foreground font-medium">Default</span>
+              </div>
+            );
+          })()}
 
           <label className="cursor-pointer">
             <input
@@ -272,7 +284,7 @@ export default function ShopBrandingSettings() {
               className="hidden"
             />
             <div className="px-4 py-2 rounded-xl bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 text-sm font-medium text-foreground hover:bg-muted dark:bg-zinc-700 transition-colors">
-              {branding?.logoUrl ? 'Change Logo' : 'Upload Logo'}
+              {(branding?.logoUrl || pendingLogo) ? 'Change Logo' : 'Upload Logo'}
             </div>
           </label>
         </div>
