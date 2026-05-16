@@ -550,7 +550,7 @@ export default function SettingsPage() {
                     <img
                       src={branding.logoUrl}
                       alt="Shop logo"
-                      className="w-24 h-24 rounded-xl object-cover border border-border dark:border-zinc-700"
+                      className="w-24 h-24 rounded-xl object-contain border border-border dark:border-zinc-700"
                     />
                     <button
                       onClick={handleDeleteLogo}

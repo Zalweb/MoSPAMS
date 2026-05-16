@@ -169,7 +169,7 @@ export default function DashboardLayout() {
               <img
                 src={branding?.logoUrl || '/images/logo.svg'}
                 alt={branding?.shopName || 'MoSPAMS'}
-                className="w-6 h-6 object-contain"
+                className="w-full h-full object-contain"
               />
             </div>
             {!isCollapsed && (
