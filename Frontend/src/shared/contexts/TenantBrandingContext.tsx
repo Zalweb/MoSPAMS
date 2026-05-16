@@ -96,12 +96,6 @@ function blendHex(a: string, b: string, ratio: number): string {
   return toHex(ar + (br - ar) * ratio, ag + (bg - ag) * ratio, ab + (bb - ab) * ratio);
 }
 
-// Legacy exports kept for backward compat
-function hexToRgb(hex: string): string {
-  const [r, g, b] = parseHex(hex);
-  return `${r} ${g} ${b}`;
-}
-
 export function hexToHsl(hex: string): string {
   const [r, g, b] = parseHex(hex).map(v => v / 255);
   const max = Math.max(r, g, b), min = Math.min(r, g, b);
@@ -131,7 +125,6 @@ function applyBranding(branding: TenantBranding) {
   const isVeryDark = lum < 0.04;
   const isDark     = lum < 0.18;
   const isLight    = lum > 0.65;
-  const isVeryLight = lum > 0.85;
 
   // ── Derived colors ──
   const mixed       = blendHex(primary, secondary, 0.5);
