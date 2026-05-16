@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Shield, UserCheck, Clock, Activity, Plus, Pencil, Trash2, Power, CheckCircle, XCircle, Users as UsersIcon } from 'lucide-react';
+import { Shield, UserCheck, Clock, Activity, Plus, Pencil, Trash2, Power, CheckCircle, XCircle, Users as UsersIcon, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +11,8 @@ import { useData } from '@/shared/contexts/DataContext';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { apiGet, apiMutation } from '@/shared/lib/api';
 import type { RoleRequest, User } from '@/shared/types';
+import CustomerManagementPage from '@/features/customers/pages/CustomerManagementPage';
+import MechanicManagementPage from '@/features/mechanic/pages/MechanicManagementPage';
 
 const newUserSchema = z.object({
   name: z.string().min(2, 'Required'),
@@ -37,7 +39,7 @@ export default function Users() {
   const [confirmDelete, setConfirmDelete] = useState<User | null>(null);
 
   const [pendingRequests, setPendingRequests] = useState<RoleRequest[]>([]);
-  const [tab, setTab] = useState<'users' | 'requests'>('users');
+  const [tab, setTab] = useState<'users' | 'customers' | 'mechanics' | 'requests'>('users');
 
   const addForm = useForm<NewUserForm>({ resolver: zodResolver(newUserSchema), defaultValues: { name: '', email: '', role: 'Staff', password: '' } });
   const editForm = useForm<EditUserForm>({ resolver: zodResolver(editUserSchema) });
@@ -102,32 +104,32 @@ export default function Users() {
         </Button>
       </div>
 
-      <div className="flex gap-1 mb-6 border-b border-border">
-        <button
-          onClick={() => setTab('users')}
-          className={`px-4 py-2 text-[13px] font-medium border-b-2 transition-colors ${
-            tab === 'users'
-              ? 'border-white text-foreground'
-              : 'border-transparent text-muted-foreground hover:text-muted-foreground dark:text-zinc-300'
-          }`}
-        >
-          All Users
-        </button>
-        <button
-          onClick={() => setTab('requests')}
-          className={`px-4 py-2 text-[13px] font-medium border-b-2 transition-colors flex items-center gap-1.5 ${
-            tab === 'requests'
-              ? 'border-white text-foreground'
-              : 'border-transparent text-muted-foreground hover:text-muted-foreground dark:text-zinc-300'
-          }`}
-        >
-          Pending Requests
-          {pendingRequests.length > 0 && (
-            <span className="inline-flex items-center rounded-full bg-yellow-400 px-1.5 py-0.5 text-[10px] font-bold text-neutral-800">
-              {pendingRequests.length}
-            </span>
-          )}
-        </button>
+      <div className="flex gap-1 mb-6 border-b border-border overflow-x-auto">
+        {([
+          { key: 'users', label: 'All Users', icon: UsersIcon },
+          { key: 'customers', label: 'Customers', icon: UserCheck },
+          { key: 'mechanics', label: 'Mechanics', icon: Wrench },
+          { key: 'requests', label: 'Pending Requests', icon: Clock, badge: pendingRequests.length },
+        ] as const).map(t => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-medium border-b-2 whitespace-nowrap transition-colors ${
+              tab === t.key
+                ? 'border-current text-foreground'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+            style={tab === t.key ? { borderColor: 'var(--brand-mixed)', color: 'var(--brand-safe-text)' } : undefined}
+          >
+            <t.icon className="w-3.5 h-3.5" />
+            {t.label}
+            {t.badge ? (
+              <span className="inline-flex items-center rounded-full bg-yellow-400 px-1.5 py-0.5 text-[10px] font-bold text-neutral-800">
+                {t.badge}
+              </span>
+            ) : null}
+          </button>
+        ))}
       </div>
       {tab === 'users' && (
         <>
@@ -273,6 +275,10 @@ export default function Users() {
 
         </>
       )}
+
+      {tab === 'customers' && <CustomerManagementPage />}
+
+      {tab === 'mechanics' && <MechanicManagementPage />}
 
       {tab === 'requests' && (
         <div className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] rounded-2xl overflow-hidden">

@@ -3,7 +3,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Package, Wrench, ShoppingCart,
-  BarChart3, Shield, LogOut, Menu, X, ClipboardCheck,
+  BarChart3, Shield, LogOut, Menu, X,
   Home, Calendar, CreditCard, ScrollText, Settings, Bike, Bell, Users, Sun, Moon,
   ChevronLeft, CheckCircle2
 } from 'lucide-react';
@@ -34,9 +34,6 @@ const navGroups = [
     items: [
       { label: 'Reports', to: '/dashboard/reports', icon: BarChart3 },
       { label: 'Users', to: '/dashboard/users', icon: Shield },
-      { label: 'Customers', to: '/dashboard/customers', icon: Users },
-      { label: 'Mechanics', to: '/dashboard/mechanics', icon: Wrench },
-      { label: 'Approvals', to: '/dashboard/approvals', icon: ClipboardCheck },
     ]
   },
   {
