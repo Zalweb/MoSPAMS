@@ -131,12 +131,7 @@ export default function ShopBrandingSettings() {
       if (pendingLogo) {
         const fd = new FormData();
         fd.append('logo', pendingLogo.blob, 'logo.png');
-        const response = await fetch('/api/shop/logo', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-          body: fd,
-        });
-        if (!response.ok) throw new Error('Logo upload failed');
+        await apiMutation('/api/shop/logo', 'POST', fd);
         URL.revokeObjectURL(pendingLogo.previewUrl);
         setPendingLogo(null);
       }
