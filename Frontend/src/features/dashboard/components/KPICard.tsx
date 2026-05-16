@@ -74,7 +74,21 @@ export function KPICard({
   accentColor = 'primary',
 }: KPICardProps) {
   const isPositive = change !== undefined && change >= 0;
+  const isBrand = accentColor === 'primary';
   const accent = ACCENT[accentColor];
+
+  // Brand-aware inline styles (only applied when accentColor === 'primary')
+  const brandIconStyle: React.CSSProperties = isBrand ? {
+    background: 'var(--brand-surface)',
+    borderColor: 'var(--brand-border)',
+    color: 'var(--brand-primary)',
+  } : {};
+  const brandOverlayStyle: React.CSSProperties = isBrand ? {
+    background: 'var(--brand-surface-gradient)',
+  } : {};
+  const brandGlowStyle: React.CSSProperties = isBrand ? {
+    background: 'var(--brand-primary)',
+  } : {};
 
   return (
     <motion.div
@@ -85,14 +99,23 @@ export function KPICard({
     >
       <div className="relative flex flex-col h-full bg-card dark:bg-card/80 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 overflow-hidden dark:hover:border-border dark:border-zinc-800/50 hover:border-zinc-300/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
         {/* Gradient overlay */}
-        <div className={`absolute inset-0 bg-gradient-to-br ${accent.bg} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+        <div
+          className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isBrand ? '' : `bg-gradient-to-br ${accent.bg} to-transparent`}`}
+          style={isBrand ? brandOverlayStyle : undefined}
+        />
 
         {/* Glow top-right */}
-        <div className={`absolute top-0 right-0 w-20 h-20 ${accent.glow}/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 opacity-60`} />
+        <div
+          className={`absolute top-0 right-0 w-20 h-20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 opacity-60 ${isBrand ? '' : `${accent.glow}/10`}`}
+          style={isBrand ? { ...brandGlowStyle, opacity: 0.1 } : undefined}
+        />
 
         <div className="relative z-10 flex flex-col h-full">
           <div className="flex items-start justify-between mb-3">
-            <div className={`w-11 h-11 rounded-xl flex items-center justify-center border ${accent.icon}`}>
+            <div
+              className={`w-11 h-11 rounded-xl flex items-center justify-center border ${isBrand ? '' : accent.icon}`}
+              style={isBrand ? brandIconStyle : undefined}
+            >
               <Icon className="w-5 h-5" strokeWidth={2} />
             </div>
 

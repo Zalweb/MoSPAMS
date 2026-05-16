@@ -139,8 +139,7 @@ export default function DashboardLayout() {
   const brandingVars = branding?.primaryColor
     ? ({
         '--primary': hexToHsl(branding.primaryColor),
-        '--ring': hexToHsl(branding.primaryColor),
-        '--primary-foreground': '0 0% 100%',
+        '--ring':    hexToHsl(branding.primaryColor),
       } as React.CSSProperties)
     : undefined;
 
@@ -167,9 +166,7 @@ export default function DashboardLayout() {
           <div className="flex items-center gap-3 overflow-hidden">
             <div
               className="w-8 h-8 rounded-xl flex items-center justify-center overflow-hidden shrink-0"
-              style={branding?.primaryColor && branding?.secondaryColor ? {
-                background: `linear-gradient(135deg, ${branding.primaryColor}, ${branding.secondaryColor})`,
-              } : { background: 'rgb(var(--color-primary-rgb))' }}
+              style={{ background: 'var(--brand-gradient)' }}
             >
               <img
                 src={branding?.logoUrl || '/images/logo.svg'}
@@ -230,24 +227,10 @@ export default function DashboardLayout() {
                 {group.items.map((item) => {
                   const isActive = item.end ? location.pathname === item.to : location.pathname === item.to || location.pathname.startsWith(item.to + '/');
                   
-                  const mixedColor = branding?.primaryColor && branding?.secondaryColor
-                    ? (() => {
-                        const hex = (h: string) => { h = h.replace('#',''); return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)]; };
-                        const [pr,pg,pb] = hex(branding.primaryColor);
-                        const [sr,sg,sb] = hex(branding.secondaryColor);
-                        const r = Math.round((pr+sr)/2).toString(16).padStart(2,'0');
-                        const g = Math.round((pg+sg)/2).toString(16).padStart(2,'0');
-                        const b = Math.round((pb+sb)/2).toString(16).padStart(2,'0');
-                        return `#${r}${g}${b}`;
-                      })()
-                    : branding?.primaryColor;
-
-                  const activeStyle = isActive && branding?.primaryColor ? {
-                    background: theme === 'dark'
-                      ? `linear-gradient(135deg, ${branding.primaryColor}25, ${branding.secondaryColor || branding.primaryColor}25)`
-                      : `linear-gradient(135deg, ${branding.primaryColor}18, ${branding.secondaryColor || branding.primaryColor}18)`,
-                    color: mixedColor,
-                    borderLeftColor: mixedColor,
+                  const activeStyle = isActive ? {
+                    background: 'var(--brand-surface-gradient)',
+                    color: 'var(--brand-mixed)',
+                    borderLeftColor: 'var(--brand-mixed)',
                   } : undefined;
 
                   return (
@@ -268,7 +251,7 @@ export default function DashboardLayout() {
                         <item.icon 
                           className={`w-[18px] h-[18px] shrink-0 transition-colors ${isActive ? (branding?.primaryColor ? '' : 'text-accent-foreground dark:text-foreground') : 'text-muted-foreground group-hover:text-foreground'}`} 
                           strokeWidth={1.75} 
-                          style={isActive && mixedColor ? { color: mixedColor } : undefined}
+                          style={isActive ? { color: 'var(--brand-mixed)' } : undefined}
                         />
                         {!isCollapsed && (
                           <motion.span

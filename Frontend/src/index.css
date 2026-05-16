@@ -32,14 +32,36 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
-    --tenant-primary: #3B82F6;
-    --tenant-secondary: #10B981;
-    
-    /* Dashboard theme colors (overridden by ShopContext) */
+    --tenant-primary: #ef4444;
+    --tenant-secondary: #f97316;
+
+    /* Dashboard theme colors (overridden by TenantBrandingContext) */
     --color-primary: 0 84% 60%;
     --color-secondary: 25 95% 53%;
     --color-primary-rgb: 239 68 68;
     --color-secondary-rgb: 249 115 22;
+    --color-mixed-rgb: 244 91 45;
+
+    /* ── Brand system (WCAG-aware, set dynamically by applyBranding) ── */
+    --brand-primary:           #ef4444;
+    --brand-secondary:         #f97316;
+    --brand-mixed:             #f47a20;
+    --brand-primary-hover:     #dc2626;
+    --brand-primary-active:    #b91c1c;
+    --brand-primary-light:     #fca5a5;
+    --brand-text-on-primary:   #ffffff;
+    --brand-text-on-secondary: #ffffff;
+    --brand-text-on-mixed:     #ffffff;
+    --brand-surface:           rgba(239,68,68,0.08);
+    --brand-surface-muted:     rgba(239,68,68,0.14);
+    --brand-surface-gradient:  linear-gradient(135deg,rgba(239,68,68,0.08),rgba(249,115,22,0.08));
+    --brand-surface-gradient-muted: linear-gradient(135deg,rgba(239,68,68,0.14),rgba(249,115,22,0.14));
+    --brand-border:            rgba(239,68,68,0.22);
+    --brand-glow:              0 4px 24px rgba(239,68,68,0.28),0 1px 6px rgba(239,68,68,0.18);
+    --brand-gradient:          linear-gradient(135deg,#ef4444,#f97316);
+    --brand-primary-rgb:       239 68 68;
+    --brand-secondary-rgb:     249 115 22;
+    --brand-mixed-rgb:         244 91 45;
   }
 
   .dark {
@@ -118,14 +140,65 @@
     @apply hover:border-zinc-300/50 dark:hover:border-zinc-700/50 transition-all duration-300;
   }
 
+  /* ── Brand utility classes (all use CSS vars — no hardcoded colors) ── */
+
+  /* Text */
+  .brand-text        { color: var(--brand-primary); }
+  .brand-text-mixed  { color: var(--brand-mixed); }
+  .brand-text-on     { color: var(--brand-text-on-primary); }
+
+  /* Backgrounds */
+  .brand-bg          { background: var(--brand-primary); }
+  .brand-bg-gradient { background: var(--brand-gradient); }
+  .brand-surface     { background: var(--brand-surface); }
+  .brand-surface-muted { background: var(--brand-surface-muted); }
+  .brand-surface-gradient { background: var(--brand-surface-gradient); }
+
+  /* Borders */
+  .brand-border      { border-color: var(--brand-border); }
+
+  /* Icon containers */
+  .brand-icon-box {
+    background: var(--brand-surface);
+    border: 1px solid var(--brand-border);
+    color: var(--brand-primary);
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+  .brand-icon-box:hover {
+    background: var(--brand-surface-muted);
+    box-shadow: var(--brand-glow);
+  }
+
+  /* Buttons */
+  .brand-btn {
+    background: var(--brand-gradient);
+    color: var(--brand-text-on-primary);
+    border: none;
+    transition: opacity 0.2s, box-shadow 0.2s, transform 0.15s;
+    box-shadow: var(--brand-glow);
+  }
+  .brand-btn:hover  { opacity: 0.9; transform: translateY(-1px); }
+  .brand-btn:active { opacity: 1; transform: translateY(0); }
+
+  /* Active nav item */
+  .brand-nav-active {
+    background: var(--brand-surface-gradient);
+    color: var(--brand-mixed);
+    border-left-color: var(--brand-mixed);
+  }
+
+  /* Adaptive shadow */
+  .brand-shadow { box-shadow: var(--brand-glow); }
+
   /* Gradient text */
   .gradient-text {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))];
+    @apply text-transparent bg-clip-text;
+    background-image: var(--brand-gradient);
   }
 
   /* Gradient background */
   .gradient-bg {
-    @apply bg-gradient-to-br from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))];
+    background: var(--brand-gradient);
   }
 
   /* Animated gradient */
