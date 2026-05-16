@@ -106,11 +106,11 @@ export default function Users() {
 
       <div className="flex gap-1 mb-6 border-b border-border overflow-x-auto">
         {([
-          { key: 'users', label: 'All Users', icon: UsersIcon },
-          { key: 'customers', label: 'Customers', icon: UserCheck },
-          { key: 'mechanics', label: 'Mechanics', icon: Wrench },
-          { key: 'requests', label: 'Pending Requests', icon: Clock, badge: pendingRequests.length },
-        ] as const).map(t => (
+          { key: 'users' as const, label: 'All Users', icon: UsersIcon, badge: 0 },
+          { key: 'customers' as const, label: 'Customers', icon: UserCheck, badge: 0 },
+          { key: 'mechanics' as const, label: 'Mechanics', icon: Wrench, badge: 0 },
+          { key: 'requests' as const, label: 'Pending Requests', icon: Clock, badge: pendingRequests.length },
+        ]).map(t => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}

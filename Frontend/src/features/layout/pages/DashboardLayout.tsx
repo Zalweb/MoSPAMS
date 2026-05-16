@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Package, Wrench, ShoppingCart,
   BarChart3, Shield, LogOut, Menu, X,
-  Home, Calendar, CreditCard, ScrollText, Settings, Bike, Bell, Users, Sun, Moon,
+  Home, Calendar, CreditCard, ScrollText, Settings, Bike, Bell, Sun, Moon,
   ChevronLeft, CheckCircle2
 } from 'lucide-react';
 import { useAuth } from '@/features/auth/context/AuthContext';
