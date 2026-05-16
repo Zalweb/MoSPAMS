@@ -141,6 +141,29 @@ function applyBranding(branding: TenantBranding) {
   // Slightly lightened surface of mixed gradient end for subtle accents
   const primaryLight = shiftLightness(primary, isVeryDark ? 55 : isDark ? 40 : isLight ? -30 : 30);
 
+  // ── Safe text colors: brand-tinted text guaranteed readable on page backgrounds ──
+  // safeTextLight = readable against white (#fff) — WCAG AA needs contrast ≥ 4.5
+  const safeTextLight = (() => {
+    let color = mixed;
+    for (let i = 0; i < 15; i++) {
+      const lum = luminance(color);
+      if ((1.05) / (lum + 0.05) >= 4.5) break;
+      color = shiftLightness(color, -5);
+    }
+    return color;
+  })();
+  // safeTextDark = readable against typical dark bg (L ≈ 0.005)
+  const safeTextDark = (() => {
+    const darkBgLum = 0.005;
+    let color = mixed;
+    for (let i = 0; i < 15; i++) {
+      const lum = luminance(color);
+      if ((lum + 0.05) / (darkBgLum + 0.05) >= 4.5) break;
+      color = shiftLightness(color, 5);
+    }
+    return color;
+  })();
+
   // ── RGB values for rgba() usage ──
   const [pr, pg, pb] = parseHex(primary);
   const [sr, sg, sb] = parseHex(secondary);
@@ -172,10 +195,14 @@ function applyBranding(branding: TenantBranding) {
   set('--brand-primary-active',    primaryActive);
   set('--brand-primary-light',     primaryLight);
 
-  // Text-on-brand (WCAG contrast safe)
+  // Text-on-brand (WCAG contrast safe — for text ON brand-colored backgrounds)
   set('--brand-text-on-primary',   textOn);
   set('--brand-text-on-secondary', textOnSec);
   set('--brand-text-on-mixed',     textOnMixed);
+
+  // Brand-tinted text safe for neutral backgrounds (WCAG AA ≥ 4.5:1)
+  set('--brand-safe-text',         safeTextLight);   // readable on light bg
+  set('--brand-safe-text-dark',    safeTextDark);    // readable on dark bg
 
   // Surfaces (rgba for opacity control)
   set('--brand-surface',           rgba(pr, pg, pb, surfaceAlpha));

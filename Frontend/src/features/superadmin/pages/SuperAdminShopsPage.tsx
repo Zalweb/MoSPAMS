@@ -106,7 +106,7 @@ export default function SuperAdminShopsPage() {
           <p className="text-[13px] text-muted-foreground mt-0.5">Provision, suspend, and monitor tenant shops</p>
         </div>
 
-        <Button onClick={() => navigate('/superadmin/shops/new')} className="h-9 rounded-xl bg-[rgb(var(--color-primary-rgb))] hover:bg-[rgb(var(--color-primary-rgb))]/90 text-white text-[12px] font-medium px-4">
+        <Button onClick={() => navigate('/superadmin/shops/new')} className="h-9 rounded-xl text-[12px] font-medium px-4" style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}>
           <Plus className="w-3.5 h-3.5 mr-1.5" /> Add New Shop
         </Button>
       </div>

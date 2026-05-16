@@ -111,9 +111,10 @@ export default function CustomerManagementPage() {
           <p className="text-sm text-muted-foreground mt-1">Manage and track your client database</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button 
-            onClick={openAdd} 
-            className="h-11 rounded-xl bg-[rgb(var(--color-primary-rgb))] hover:bg-[rgb(var(--color-primary-rgb))]/90 text-white font-semibold px-6 shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20 transition-all active:scale-[0.98]"
+          <Button
+            onClick={openAdd}
+            className="h-11 rounded-xl font-semibold px-6 shadow-lg transition-all active:scale-[0.98]"
+            style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}
           >
             <Plus className="w-5 h-5 mr-2" strokeWidth={2.5} /> 
             New Customer
@@ -373,9 +374,10 @@ export default function CustomerManagementPage() {
             </div>
 
             <div className="flex gap-3 pt-2">
-              <Button 
-                type="submit" 
-                className="flex-1 h-12 rounded-2xl bg-[rgb(var(--color-primary-rgb))] hover:bg-[rgb(var(--color-primary-rgb))]/90 text-white font-bold transition-all active:scale-95 shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20"
+              <Button
+                type="submit"
+                className="flex-1 h-12 rounded-2xl font-bold transition-all active:scale-95 shadow-lg"
+                style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}
               >
                 {editing ? 'Update Client' : 'Register Client'}
               </Button>

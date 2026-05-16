@@ -53,7 +53,8 @@ export default function SystemPerformancePage() {
         <button
           onClick={loadSystemHealth}
           disabled={loading}
-          className="px-4 py-2 rounded-lg bg-[rgb(var(--color-primary-rgb))] text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 w-fit"
+          className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 w-fit"
+          style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} strokeWidth={2} />
           Refresh
@@ -185,7 +186,8 @@ export default function SystemPerformancePage() {
           <p className="text-muted-foreground mb-4">Failed to retrieve system performance data</p>
           <button
             onClick={loadSystemHealth}
-            className="px-6 py-2 rounded-lg bg-[rgb(var(--color-primary-rgb))] text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+            className="px-6 py-2 rounded-lg text-sm font-semibold transition-opacity"
+            style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}
           >
             Try Again
           </button>

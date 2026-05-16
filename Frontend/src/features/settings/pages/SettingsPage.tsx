@@ -379,7 +379,8 @@ export default function SettingsPage() {
             <button
               onClick={handleSaveUserProfile}
               disabled={saving}
-              className="px-6 py-2.5 bg-[rgb(var(--color-primary-rgb))] text-white rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20"
+              className="px-6 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}
             >
               {saving ? 'Saving...' : 'Save Changes'}
             </button>
@@ -431,7 +432,8 @@ export default function SettingsPage() {
             <button
               onClick={handleChangePassword}
               disabled={saving || !currentPassword || !newPassword || !confirmPassword}
-              className="px-6 py-2.5 bg-[rgb(var(--color-primary-rgb))] text-white rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20"
+              className="px-6 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}
             >
               {saving ? 'Changing...' : 'Change Password'}
             </button>
@@ -506,7 +508,8 @@ export default function SettingsPage() {
             <button
               onClick={handleSaveShopProfile}
               disabled={saving}
-              className="px-6 py-2.5 bg-[rgb(var(--color-primary-rgb))] text-white rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20"
+              className="px-6 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}
             >
               {saving ? 'Saving...' : 'Save Changes'}
             </button>
@@ -610,7 +613,8 @@ export default function SettingsPage() {
             <button
               onClick={handleSaveBranding}
               disabled={saving}
-              className="px-6 py-2.5 bg-[rgb(var(--color-primary-rgb))] text-white rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20"
+              className="px-6 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}
             >
               {saving ? 'Saving...' : 'Save Changes'}
             </button>
@@ -728,7 +732,8 @@ export default function SettingsPage() {
                     <button
                       onClick={handleRequestDomain}
                       disabled={domainRequesting || !domainInput}
-                      className="px-4 py-2.5 bg-[rgb(var(--color-primary-rgb))] text-white rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20"
+                      className="px-4 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}
                     >
                       {domainRequesting ? 'Requesting...' : 'Request Domain'}
                     </button>

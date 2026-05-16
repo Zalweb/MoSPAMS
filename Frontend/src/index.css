@@ -52,6 +52,8 @@
     --brand-text-on-primary:   #ffffff;
     --brand-text-on-secondary: #ffffff;
     --brand-text-on-mixed:     #ffffff;
+    --brand-safe-text:         #b91c1c;
+    --brand-safe-text-dark:    #fca5a5;
     --brand-surface:           rgba(239,68,68,0.08);
     --brand-surface-muted:     rgba(239,68,68,0.14);
     --brand-surface-gradient:  linear-gradient(135deg,rgba(239,68,68,0.08),rgba(249,115,22,0.08));
@@ -142,14 +144,18 @@
 
   /* ── Brand utility classes (all use CSS vars — no hardcoded colors) ── */
 
-  /* Text */
-  .brand-text        { color: var(--brand-primary); }
-  .brand-text-mixed  { color: var(--brand-mixed); }
+  /* Text — WCAG-safe brand color on light backgrounds */
+  .brand-text        { color: var(--brand-safe-text); }
+  .brand-text-mixed  { color: var(--brand-safe-text); }
   .brand-text-on     { color: var(--brand-text-on-primary); }
 
+  /* Dark mode: use the dark-optimised safe text */
+  .dark .brand-text       { color: var(--brand-safe-text-dark); }
+  .dark .brand-text-mixed { color: var(--brand-safe-text-dark); }
+
   /* Backgrounds */
-  .brand-bg          { background: var(--brand-primary); }
-  .brand-bg-gradient { background: var(--brand-gradient); }
+  .brand-bg          { background: var(--brand-primary); color: var(--brand-text-on-primary); }
+  .brand-bg-gradient { background: var(--brand-gradient); color: var(--brand-text-on-primary); }
   .brand-surface     { background: var(--brand-surface); }
   .brand-surface-muted { background: var(--brand-surface-muted); }
   .brand-surface-gradient { background: var(--brand-surface-gradient); }
@@ -161,15 +167,16 @@
   .brand-icon-box {
     background: var(--brand-surface);
     border: 1px solid var(--brand-border);
-    color: var(--brand-primary);
+    color: var(--brand-safe-text);
     transition: background 0.2s, box-shadow 0.2s;
   }
+  .dark .brand-icon-box { color: var(--brand-safe-text-dark); }
   .brand-icon-box:hover {
     background: var(--brand-surface-muted);
     box-shadow: var(--brand-glow);
   }
 
-  /* Buttons */
+  /* Buttons — gradient bg, WCAG-safe text, glow shadow */
   .brand-btn {
     background: var(--brand-gradient);
     color: var(--brand-text-on-primary);
@@ -183,12 +190,18 @@
   /* Active nav item */
   .brand-nav-active {
     background: var(--brand-surface-gradient);
-    color: var(--brand-mixed);
+    color: var(--brand-safe-text);
     border-left-color: var(--brand-mixed);
   }
+  .dark .brand-nav-active { color: var(--brand-safe-text-dark); }
 
   /* Adaptive shadow */
   .brand-shadow { box-shadow: var(--brand-glow); }
+
+  /* ── Global: any element using brand-gradient/primary bg gets safe text ── */
+  /* Covers inline-style buttons set by components */
+  [style*="var(--brand-gradient)"]  { color: var(--brand-text-on-primary); }
+  [style*="var(--brand-primary)"]   { color: var(--brand-text-on-primary); }
 
   /* Gradient text */
   .gradient-text {

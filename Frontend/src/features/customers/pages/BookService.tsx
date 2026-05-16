@@ -354,7 +354,8 @@ export default function BookService() {
           <Button
             type="submit"
             disabled={submitting}
-            className="w-full h-12 rounded-2xl bg-[rgb(var(--color-primary-rgb))] hover:bg-[rgb(var(--color-primary-rgb))]/90 text-white font-bold transition-all active:scale-95 shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20 disabled:opacity-50"
+            className="w-full h-12 rounded-2xl font-bold transition-all active:scale-95 shadow-lg disabled:opacity-50"
+            style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}
           >
             {submitting ? 'Booking...' : 'Confirm Booking'}
           </Button>

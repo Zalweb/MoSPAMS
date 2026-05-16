@@ -95,7 +95,8 @@ export default function CustomerVehicles() {
         </div>
         <Button
           onClick={openAdd}
-          className="flex items-center gap-2 h-10 rounded-xl bg-[rgb(var(--color-primary-rgb))] hover:bg-[rgb(var(--color-primary-rgb))]/90 text-white font-semibold px-5 shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20 transition-all"
+          className="flex items-center gap-2 h-10 rounded-xl font-semibold px-5 shadow-lg transition-all"
+          style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}
         >
           <Plus className="w-4 h-4" /> Add Vehicle
         </Button>
@@ -276,10 +277,11 @@ export default function CustomerVehicles() {
                   </div>
                 </div>
                 <div className="pt-4 flex gap-3">
-                  <Button 
+                  <Button
                     type="submit"
                     disabled={submitting}
-                    className="flex-1 h-12 rounded-2xl bg-[rgb(var(--color-primary-rgb))] hover:bg-[rgb(var(--color-primary-rgb))]/90 text-white font-bold transition-all active:scale-95 shadow-lg shadow-[rgb(var(--color-primary-rgb))]/20 disabled:opacity-50"
+                    className="flex-1 h-12 rounded-2xl font-bold transition-all active:scale-95 shadow-lg disabled:opacity-50"
+                    style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}
                   >
                     {submitting
                       ? <Loader2 className="w-5 h-5 animate-spin" />
