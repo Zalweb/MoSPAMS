@@ -166,7 +166,7 @@ export default function Reports() {
         ))}
       </div>
 
-      <div className="flex gap-1 mb-6 flex-wrap items-center">
+      <div className="flex gap-1 flex-wrap items-center mb-3">
         {(['daily', 'weekly', 'monthly', 'yearly', 'custom'] as const).map(p => (
           <button
             key={p}
@@ -175,15 +175,16 @@ export default function Reports() {
             style={period === p ? { background: 'var(--brand-surface-gradient)', color: 'var(--brand-mixed)', border: '1px solid var(--brand-border)' } : undefined}
           >{p}</button>
         ))}
+      </div>
 
       {period === 'custom' && (
-        <div className="flex gap-2 mb-4 items-center">
-          <input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)} className="px-3 py-1.5 bg-muted border border-border rounded-lg text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-zinc-700" />
+        <div className="flex items-center gap-2 mb-6">
+          <input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)} className="h-8 px-3 bg-muted border border-border rounded-lg text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-zinc-700" />
           <span className="text-muted-foreground text-xs">to</span>
-          <input type="date" value={customTo} onChange={e => setCustomTo(e.target.value)} className="px-3 py-1.5 bg-muted border border-border rounded-lg text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-zinc-700" />
+          <input type="date" value={customTo} onChange={e => setCustomTo(e.target.value)} className="h-8 px-3 bg-muted border border-border rounded-lg text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-zinc-700" />
         </div>
       )}
-      </div>
+      {period !== 'custom' && <div className="mb-3" />}
 
       {reportType === 'sales' && (
         <div className="space-y-4">
