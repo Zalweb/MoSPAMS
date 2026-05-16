@@ -82,16 +82,16 @@ export function KPICard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="relative group"
+      className="relative group h-full"
     >
-      <div className="relative bg-card dark:bg-card/80 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 overflow-hidden dark:hover:border-border dark:border-zinc-800/50 hover:border-zinc-300/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+      <div className="relative flex flex-col h-full bg-card dark:bg-card/80 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 overflow-hidden dark:hover:border-border dark:border-zinc-800/50 hover:border-zinc-300/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
         {/* Gradient overlay */}
         <div className={`absolute inset-0 bg-gradient-to-br ${accent.bg} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
 
         {/* Glow top-right */}
         <div className={`absolute top-0 right-0 w-20 h-20 ${accent.glow}/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 opacity-60`} />
 
-        <div className="relative z-10">
+        <div className="relative z-10 flex flex-col h-full">
           <div className="flex items-start justify-between mb-3">
             <div className={`w-11 h-11 rounded-xl flex items-center justify-center border ${accent.icon}`}>
               <Icon className="w-5 h-5" strokeWidth={2} />
@@ -124,6 +124,7 @@ export function KPICard({
             )}
           </div>
 
+          <div className="flex-1" />
           {sparklineData && sparklineData.length > 0 && !loading && (
             <div className="mt-3 h-8 flex items-end gap-0.5">
               {sparklineData.map((val, idx) => {
