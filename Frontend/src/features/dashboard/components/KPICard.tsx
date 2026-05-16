@@ -125,21 +125,6 @@ export function KPICard({
           </div>
 
           <div className="flex-1" />
-          {sparklineData && sparklineData.length > 0 && !loading && (
-            <div className="mt-3 h-8 flex items-end gap-0.5">
-              {sparklineData.map((val, idx) => {
-                const max = Math.max(...sparklineData);
-                const height = max > 0 ? (val / max) * 100 : 0;
-                return (
-                  <div
-                    key={idx}
-                    className={`flex-1 ${accent.bar} opacity-40 rounded-sm transition-all duration-300 hover:opacity-70`}
-                    style={{ height: `${height}%` }}
-                  />
-                );
-              })}
-            </div>
-          )}
         </div>
 
         {/* Shine sweep */}

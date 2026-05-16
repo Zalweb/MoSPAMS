@@ -103,7 +103,6 @@ export default function DashboardPage() {
           comparison: `vs last week: ₱${(metrics?.lastWeekRevenue ?? 0).toLocaleString()}`,
           trend: `₱${(metrics?.todayRevenue ?? 0).toLocaleString()} today`,
           icon: ShoppingCart,
-          sparklineData: revenueSparkline,
         },
         {
           title: 'Service Completion Rate',
@@ -128,7 +127,6 @@ export default function DashboardPage() {
           comparison: `${lowStockCount} items need restocking`,
           trend: `${metrics?.totalParts ?? 0} total parts`,
           icon: AlertTriangle,
-          sparklineData: partsUsageSparkline,
         },
       ];
     } else if (user?.role === 'Customer') {
