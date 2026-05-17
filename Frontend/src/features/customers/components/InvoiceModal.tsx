@@ -134,7 +134,7 @@ export default function InvoiceModal({ paymentId, onClose, apiEndpoint }: Invoic
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.94, y: 24 }}
           transition={{ type: 'spring', stiffness: 320, damping: 32 }}
-          className="relative w-full max-w-sm"
+          className="relative w-[calc(100vw-32px)] sm:w-full max-w-sm max-h-[calc(100vh-120px)] flex flex-col"
         >
           {/* Close button */}
           <button
@@ -145,10 +145,10 @@ export default function InvoiceModal({ paymentId, onClose, apiEndpoint }: Invoic
           </button>
 
           {/* Receipt card — always light themed */}
-          <div className="invoice-receipt-card bg-white rounded-3xl shadow-2xl overflow-hidden">
+          <div className="invoice-receipt-card bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col w-full h-full">
 
             {/* ── Header ── */}
-            <div className="px-6 pt-8 pb-6 text-center">
+            <div className="px-6 pt-8 pb-6 text-center shrink-0">
               <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center mx-auto mb-3 shadow-sm shadow-green-200">
                 <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={2.5} />
               </div>
@@ -160,7 +160,7 @@ export default function InvoiceModal({ paymentId, onClose, apiEndpoint }: Invoic
                   <img
                     src={logoUrl}
                     alt={shopName}
-                    className="h-14 w-auto max-w-[180px] object-contain"
+                    className="h-10 w-auto max-w-[150px] object-contain"
                   />
                 </div>
               )}
@@ -174,10 +174,10 @@ export default function InvoiceModal({ paymentId, onClose, apiEndpoint }: Invoic
             </div>
 
             {/* ── Dashed divider ── */}
-            <div className="mx-6 border-t-[1.5px] border-dashed border-gray-200" />
+            <div className="mx-6 border-t-[1.5px] border-dashed border-gray-200 shrink-0" />
 
             {/* ── Scrollable details ── */}
-            <div className="invoice-details-scroll px-6 max-h-[42vh] overflow-y-auto">
+            <div className="invoice-details-scroll px-6 flex-1 overflow-y-auto">
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-12 gap-3">
                   <Loader2 className="w-7 h-7 animate-spin text-green-500" />
@@ -268,10 +268,10 @@ export default function InvoiceModal({ paymentId, onClose, apiEndpoint }: Invoic
             </div>
 
             {/* ── Dashed divider before total ── */}
-            <div className="mx-6 border-t-[1.5px] border-dashed border-gray-200" />
+            <div className="mx-6 border-t-[1.5px] border-dashed border-gray-200 shrink-0" />
 
             {/* ── Total ── */}
-            <div className="px-6 py-5 flex items-center justify-between">
+            <div className="px-6 py-5 flex items-center justify-between shrink-0">
               <div>
                 <p className="text-sm text-gray-400">Total transaction</p>
                 {details && Number(details.sale.discount) > 0 && (
@@ -290,7 +290,7 @@ export default function InvoiceModal({ paymentId, onClose, apiEndpoint }: Invoic
             </div>
 
             {/* ── Scallop + Footer — single gradient wrapper so holes reveal the gradient ── */}
-            <div style={{ background: 'var(--brand-gradient)' }}>
+            <div className="shrink-0" style={{ background: 'var(--brand-gradient)' }}>
 
               {/* Scalloped edge: white mask creates holes in the gradient below */}
               <div className="invoice-scallop" style={{ height: 12, position: 'relative' }}>

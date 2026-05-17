@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { can } from '@/shared/lib/permissions';
 import { PartFormWithScanning } from '@/features/inventory/components/PartFormWithScanning';
+import { useIsMobile } from '@/shared/hooks/use-mobile';
 import type { Part, StockMovement } from '@/shared/types';
 
 const partSchema = z.object({
