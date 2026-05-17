@@ -132,11 +132,11 @@ export default function PartsCatalog() {
       </div>
       {/* Part Detail Modal */}
       <Dialog open={!!selected} onOpenChange={(open) => { if (!open) setSelected(null); }}>
-        <DialogContent className="p-0 overflow-hidden rounded-[2rem] border-border max-w-sm w-full" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
+        <DialogContent className="p-0 overflow-hidden rounded-[2rem] border-border w-[calc(100vw-32px)] sm:w-full max-w-sm max-h-[calc(100vh-120px)] overflow-y-auto bg-background dark:bg-zinc-950 shadow-2xl z-[60]">
           {selected && (
             <>
               {/* Full Image */}
-              <div className="relative w-full aspect-square bg-secondary/50 dark:bg-zinc-800/50 flex items-center justify-center overflow-hidden">
+              <div className="relative w-full aspect-[4/3] sm:aspect-video bg-secondary/50 dark:bg-zinc-800/50 flex items-center justify-center overflow-hidden shrink-0">
                 {selected.imageUrl ? (
                   <img src={selected.imageUrl} alt={selected.name} className="w-full h-full object-cover" />
                 ) : (
