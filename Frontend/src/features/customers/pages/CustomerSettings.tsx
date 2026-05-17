@@ -56,7 +56,11 @@ export default function CustomerSettings() {
     setSuccess(false);
 
     try {
-      await apiMutation('/api/customer/profile', 'PATCH', formData);
+      await apiMutation('/api/customer/profile', 'PATCH', {
+        full_name: formData.full_name,
+        phone: formData.phone,
+        address: formData.address,
+      });
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
@@ -135,12 +139,17 @@ export default function CustomerSettings() {
             <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1 flex items-center gap-2">
               <Mail className="w-3.5 h-3.5" /> Email Address
             </Label>
-            <Input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="h-12 rounded-2xl bg-muted/50 border-border/50 focus:ring-2 focus:ring-[rgb(var(--color-primary-rgb))]/20 transition-all"
-            />
+            <div className="relative">
+              <Input
+                type="email"
+                value={formData.email}
+                readOnly
+                className="h-12 rounded-2xl bg-muted/30 border-border/30 text-muted-foreground cursor-not-allowed select-none pr-24"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest bg-muted px-2 py-1 rounded-full border border-border/40">
+                Cannot edit
+              </span>
+            </div>
           </div>
 
           <div className="space-y-2">
