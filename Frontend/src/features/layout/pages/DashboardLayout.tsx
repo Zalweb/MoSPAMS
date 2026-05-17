@@ -137,7 +137,6 @@ export default function DashboardLayout() {
 
 
   /* ── Sidebar colour tokens ─────────────────────────────────────────── */
-  const tooltipBg     = 'rgba(11, 70, 50, 0.9)';
 
   return (
     <div className="min-h-screen bg-background flex font-sans" style={brandingVars}>
