@@ -78,18 +78,25 @@ export default function SuperAdminAnalyticsPage() {
             Overview of revenue, shop health, and growth across all tenants.
           </p>
         </div>
-        <div className="flex items-center gap-1.5 bg-card border border-border rounded-xl p-1 self-start sm:self-auto">
+        <div className="flex items-center bg-card border border-border rounded-full p-1 self-start sm:self-auto relative">
           {(['day', 'week', 'month'] as const).map(p => (
             <button
               key={p}
               onClick={() => setPeriod(p)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all capitalize ${
+              className={`relative px-4 py-1.5 rounded-full text-xs font-semibold transition-colors capitalize z-10 ${
                 period === p
-                  ? 'bg-foreground text-background shadow-sm'
+                  ? 'text-background'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              {p}
+              {period === p && (
+                <motion.div
+                  layoutId="analytics-period-toggle"
+                  className="absolute inset-0 bg-foreground rounded-full z-0"
+                  transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+                />
+              )}
+              <span className="relative z-10">{p}</span>
             </button>
           ))}
         </div>
@@ -137,7 +144,7 @@ export default function SuperAdminAnalyticsPage() {
         <div className="grid grid-cols-1 xl:grid-cols-[2fr,1fr] gap-6">
 
           {/* Area chart */}
-          <motion.div variants={item} className="bg-card rounded-2xl border border-border p-5 sm:p-6 shadow-sm overflow-hidden relative">
+          <motion.div variants={item} className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-5 sm:p-6 shadow-sm overflow-hidden relative">
             <div className="absolute top-0 right-0 w-72 h-72 bg-foreground/5 rounded-full blur-[80px] pointer-events-none" />
             <div className="flex items-center justify-between mb-5">
               <div>
@@ -218,7 +225,7 @@ export default function SuperAdminAnalyticsPage() {
           </motion.div>
 
           {/* Shop Growth bar chart */}
-          <motion.div variants={item} className="bg-card rounded-2xl border border-border p-5 sm:p-6 shadow-sm overflow-hidden relative">
+          <motion.div variants={item} className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-5 sm:p-6 shadow-sm overflow-hidden relative">
             <div className="absolute top-0 right-0 w-40 h-40 bg-foreground/5 rounded-full blur-[60px] pointer-events-none" />
             <div className="mb-5">
               <h2 className="text-[15px] font-bold text-foreground">Shop Growth</h2>
@@ -282,7 +289,7 @@ export default function SuperAdminAnalyticsPage() {
         <div className="grid grid-cols-1 xl:grid-cols-[1fr,2fr] gap-6">
 
           {/* Subscription Distribution — "Session by Plan" style */}
-          <motion.div variants={item} className="bg-card rounded-2xl border border-border p-5 sm:p-6 flex flex-col shadow-sm">
+          <motion.div variants={item} className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-5 sm:p-6 flex flex-col shadow-sm">
             <h2 className="text-[15px] font-bold text-foreground mb-1">Plan Distribution</h2>
             <p className="text-[12px] text-muted-foreground mb-5">Active subscriptions by plan</p>
 
@@ -342,7 +349,7 @@ export default function SuperAdminAnalyticsPage() {
           </motion.div>
 
           {/* Recently Registered Shops — "Transaction History" style */}
-          <motion.div variants={item} className="bg-card rounded-2xl border border-border p-5 sm:p-6 shadow-sm overflow-hidden flex flex-col">
+          <motion.div variants={item} className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-5 sm:p-6 shadow-sm overflow-hidden flex flex-col">
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h2 className="text-[15px] font-bold text-foreground">Recently Registered Shops</h2>
@@ -430,7 +437,7 @@ export default function SuperAdminAnalyticsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
           {/* Shop Health */}
-          <motion.div variants={item} className="bg-card rounded-2xl border border-border p-5 sm:p-6 shadow-sm">
+          <motion.div variants={item} className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-5 sm:p-6 shadow-sm">
             <h2 className="text-[15px] font-bold text-foreground mb-1">Shop Health Overview</h2>
             <p className="text-[12px] text-muted-foreground mb-5">Status breakdown across all {totalShops} shops</p>
             <div className="space-y-4">
@@ -442,7 +449,7 @@ export default function SuperAdminAnalyticsPage() {
           </motion.div>
 
           {/* Activity Feed */}
-          <motion.div variants={item} className="bg-card rounded-2xl border border-border p-5 sm:p-6 shadow-sm">
+          <motion.div variants={item} className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-5 sm:p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-5">
               <div className="w-9 h-9 rounded-xl bg-foreground/5 border border-foreground/10 flex items-center justify-center shrink-0">
                 <Activity className="w-4 h-4 text-foreground" />
@@ -511,7 +518,7 @@ function StatCard({
 }) {
   return (
     <motion.div variants={item}>
-      <div className="bg-card rounded-2xl border border-border p-5 relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-lg transition-all duration-300">
+      <div className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-5 relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-lg transition-all duration-300">
         <div className="absolute top-0 right-0 w-32 h-32 bg-foreground/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-50" />
         <div className="relative z-10">
           <div className="flex items-start justify-between mb-4">
