@@ -119,7 +119,7 @@ export default function SuperAdminLayout() {
 
   return (
     <div 
-      className="min-h-screen bg-background text-foreground font-sans selection:bg-muted flex overflow-hidden"
+      className="min-h-screen bg-background text-foreground font-sans selection:bg-muted flex"
       style={{
         '--primary': 'var(--foreground)',
         '--primary-foreground': 'var(--background)',
