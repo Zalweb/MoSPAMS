@@ -135,12 +135,6 @@ export default function DashboardLayout() {
     ? ({ '--primary': hexToHsl(branding.primaryColor), '--ring': hexToHsl(branding.primaryColor) } as React.CSSProperties)
     : undefined;
 
-  const settingsPath = () => {
-    if (role === 'Owner')    return '/dashboard/settings';
-    if (role === 'Staff')    return '/dashboard/staff/settings';
-    if (role === 'Mechanic') return '/dashboard/mechanic/settings';
-    return '/dashboard/customer/settings';
-  };
 
   /* ── Sidebar colour tokens ─────────────────────────────────────────── */
   const tooltipBg     = 'rgba(11, 70, 50, 0.9)';
