@@ -305,14 +305,12 @@ export default function DashboardLayout() {
                       {/* Tooltip — collapsed state */}
                       {isCollapsed && (
                         <div
-                          className="absolute left-[calc(100%+10px)] top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg text-white text-xs font-semibold opacity-0 group-hover/tip:opacity-100 pointer-events-none transition-opacity duration-150 whitespace-nowrap z-[100] shadow-xl"
-                          style={{ background: tooltipBg }}
+                          className="absolute left-[calc(100%+10px)] top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-xl bg-foreground text-background text-xs font-semibold opacity-0 group-hover/tip:opacity-100 pointer-events-none transition-opacity duration-150 whitespace-nowrap z-[100] shadow-xl"
                         >
                           {item.label}
                           {/* Arrow */}
                           <span
-                            className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent"
-                            style={{ borderRightColor: tooltipBg }}
+                            className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-foreground"
                           />
                         </div>
                       )}

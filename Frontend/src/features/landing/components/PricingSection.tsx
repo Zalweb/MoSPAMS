@@ -20,33 +20,32 @@ const FALLBACK_PLANS: PlanData[] = [
 
 const PLAN_FEATURES: Record<string, string[]> = {
   basic: [
-    'Up to 500 parts inventory',
-    'Up to 50 service jobs/month',
-    'Basic reports & dashboard',
-    '2 staff accounts',
-    'Google Sign-In',
-    'Shop subdomain',
+    'Always know what parts you have in stock',
+    'Handle up to 50 service jobs per month',
+    'See your daily sales and earnings at a glance',
+    'Invite up to 2 staff to help run the shop',
+    'Get your own shop page on mospams.shop',
+    'Simple customer records and service tracking',
   ],
   premium: [
-    'Unlimited parts inventory',
-    'Unlimited service jobs',
-    'Advanced reports & analytics',
-    '10 staff accounts',
-    'Google Sign-In',
-    'Shop branding & logo',
-    'Mechanic dashboard',
-    'Customer portal',
-    'Activity logs',
+    'No limits on parts, jobs, or customers — ever',
+    'Assign mechanics and track every job in real time',
+    'Customers can book services and view their history online',
+    'Know exactly what is selling and what is earning you money',
+    'Get alerts before you run out of critical parts',
+    'Your brand, your colors, your logo on everything',
+    'Up to 10 staff accounts for your whole team',
+    'Full history of every action taken in your shop',
   ],
 };
 
 const ENTERPRISE_FEATURES = [
-  'Everything in Premium',
-  'Unlimited staff accounts',
-  'Custom domain support',
-  'Priority support & SLA',
-  'Dedicated onboarding',
-  'Custom integrations',
+  'All Premium features, no exceptions',
+  'Unlimited staff with role-based access',
+  'Dedicated support with guaranteed response time',
+  'Custom setup and onboarding assistance',
+  'Tailored integrations for your workflow',
+  'Pricing and terms built around your scale',
 ];
 
 const POPULAR_PLAN = 'premium';
