@@ -125,7 +125,9 @@ export default function SuperAdminLayout() {
         '--primary-foreground': 'var(--background)',
         '--brand-gradient': 'linear-gradient(135deg, hsl(var(--foreground)), hsl(var(--foreground)))',
         '--brand-surface-gradient': 'linear-gradient(135deg, hsl(var(--foreground) / 0.05), transparent)',
-        '--brand-border': 'hsl(var(--foreground) / 0.1)'
+        '--brand-border': 'hsl(var(--foreground) / 0.1)',
+        '--brand-glow': '0 4px 14px 0 hsl(var(--foreground) / 0.1)',
+        '--brand-text-on-primary': 'hsl(var(--background))'
       } as React.CSSProperties}
     >
       
