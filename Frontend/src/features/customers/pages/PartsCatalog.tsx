@@ -58,6 +58,11 @@ export default function PartsCatalog() {
     }
   }, [debouncedSearch, category, setPage]);
 
+  // Scroll to top on page change
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [page]);
+
   return (
     <div className="space-y-6">
       {/* Header & Search */}

@@ -481,7 +481,7 @@ class CustomerController extends Controller
         ]);
 
         $user = auth()->user();
-        $customer = $this->tenantTable('customers')->where('user_id_fk', $user->user_id)->firstOrFail();
+        $customer = $this->resolveCustomer($user);
 
         $vehicleId = DB::table('customer_vehicles')->insertGetId([
             'customer_id_fk' => $customer->customer_id,
@@ -523,7 +523,7 @@ class CustomerController extends Controller
         ]);
 
         $user = auth()->user();
-        $customer = $this->tenantTable('customers')->where('user_id_fk', $user->user_id)->firstOrFail();
+        $customer = $this->resolveCustomer($user);
 
         $vehicle = DB::table('customer_vehicles')
             ->where('vehicle_id', $vehicleId)
@@ -552,7 +552,7 @@ class CustomerController extends Controller
     public function deleteVehicle(Request $request, $vehicleId): JsonResponse
     {
         $user = auth()->user();
-        $customer = $this->tenantTable('customers')->where('user_id_fk', $user->user_id)->firstOrFail();
+        $customer = $this->resolveCustomer($user);
 
         $deleted = DB::table('customer_vehicles')
             ->where('vehicle_id', $vehicleId)
@@ -735,5 +735,25 @@ class CustomerController extends Controller
                 'countForShop'        => $types->count(),
             ],
         ]);
+    }
+
+    private function resolveCustomer($user): object
+    {
+        $customer = $this->tenantTable('customers')->where('user_id_fk', $user->user_id)->first();
+
+        if ($customer) {
+            return $customer;
+        }
+
+        $customerId = DB::table('customers')->insertGetId([
+            'shop_id_fk' => $user->shop_id_fk,
+            'user_id_fk' => $user->user_id,
+            'full_name'  => $user->full_name,
+            'email'      => $user->email,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return DB::table('customers')->where('customer_id', $customerId)->first();
     }
 }
