@@ -106,14 +106,14 @@ export default function CustomerDashboard() {
           <motion.div
             key={s.label}
             {...fadeUp(i * 0.05 + 0.1)}
-            className={`brand-card backdrop-blur-xl rounded-3xl p-6 border ${i === 0 ? '' : 'bg-card border-border/50 shadow-soft'}`}
-            style={i === 0 ? { background: 'var(--brand-gradient)', borderColor: 'transparent' } : undefined}
+            className="brand-card backdrop-blur-xl rounded-3xl p-6 border"
+            style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}
           >
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${i === 0 ? 'bg-white/20 border border-white/20' : 'brand-icon-box'}`}>
-              <s.icon className={`w-6 h-6 ${i === 0 ? 'text-white' : ''}`} strokeWidth={2} />
+            <div className="brand-icon-box w-12 h-12 rounded-2xl flex items-center justify-center mb-4">
+              <s.icon className="w-6 h-6" strokeWidth={2} />
             </div>
-            <p className={`text-3xl font-bold tracking-tight leading-none ${i === 0 ? 'text-white' : 'text-foreground'}`}>{s.count}</p>
-            <p className={`text-[11px] font-bold uppercase tracking-widest mt-2 ${i === 0 ? 'text-white/75' : 'text-muted-foreground'}`}>{s.label}</p>
+            <p className="text-3xl font-bold text-foreground tracking-tight leading-none">{s.count}</p>
+            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mt-2">{s.label}</p>
           </motion.div>
         ))}
       </div>

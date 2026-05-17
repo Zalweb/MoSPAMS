@@ -68,48 +68,35 @@ export default function PerformanceDashboardPage() {
         {[
           {
             label: 'Jobs Completed (This Month)',
-            rawValue: data.current_period.jobs_completed_this_month,
-            display: <p className="text-3xl font-bold mt-2">{data.current_period.jobs_completed_this_month}</p>,
-            icon: TrendingUp,
+            value: <p className="text-3xl font-bold text-foreground mt-2">{data.current_period.jobs_completed_this_month}</p>,
+            icon: <TrendingUp className="w-6 h-6" style={{ color: 'rgb(var(--color-primary-rgb))' }} />,
           },
           {
             label: 'Avg Time per Job',
-            rawValue: data.current_period.avg_time_per_job_hours,
-            display: <><p className="text-3xl font-bold mt-2">{data.current_period.avg_time_per_job_hours.toFixed(1)}</p><p className="text-xs mt-1 opacity-70">hours</p></>,
-            icon: Clock,
+            value: <><p className="text-3xl font-bold text-foreground mt-2">{data.current_period.avg_time_per_job_hours.toFixed(1)}</p><p className="text-xs text-muted-foreground mt-1">hours</p></>,
+            icon: <Clock className="w-6 h-6" style={{ color: 'rgb(var(--color-primary-rgb))' }} />,
           },
           {
             label: 'Customer Rating',
-            rawValue: data.current_period.customer_rating,
-            display: <div className="flex items-center gap-2 mt-2"><p className="text-3xl font-bold">{data.current_period.customer_rating?.toFixed(1) ?? 'N/A'}</p>{data.current_period.customer_rating && <span className="text-amber-400 text-2xl">★</span>}</div>,
-            icon: Star,
+            value: <div className="flex items-center gap-2 mt-2"><p className="text-3xl font-bold text-foreground">{data.current_period.customer_rating?.toFixed(1) ?? 'N/A'}</p>{data.current_period.customer_rating && <span className="text-amber-400 text-2xl">★</span>}</div>,
+            icon: <Star className="w-6 h-6" style={{ color: 'rgb(var(--color-primary-rgb))' }} />,
           },
-        ].map((card, i) => (
-          i === 0 ? (
-            <div key={card.label} className="rounded-xl p-6 brand-card" style={{ background: 'var(--brand-gradient)' }}>
-              <div className="flex items-center justify-between">
-                <div className="text-white">
-                  <p className="text-sm font-medium text-white/75">{card.label}</p>
-                  {card.display}
-                </div>
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-white/20 border border-white/20 shrink-0">
-                  <card.icon className="w-6 h-6 text-white" />
-                </div>
+        ].map(card => (
+          <div
+            key={card.label}
+            className="border rounded-xl p-6 brand-card"
+            style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">{card.label}</p>
+                {card.value}
+              </div>
+              <div className="p-3 rounded-lg shrink-0" style={{ background: 'var(--brand-surface)' }}>
+                {card.icon}
               </div>
             </div>
-          ) : (
-            <div key={card.label} className="bg-card border border-border/50 rounded-xl p-6 brand-card shadow-soft">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">{card.label}</p>
-                  <div className="text-foreground">{card.display}</div>
-                </div>
-                <div className="brand-icon-box w-12 h-12 rounded-xl flex items-center justify-center shrink-0">
-                  <card.icon className="w-6 h-6" />
-                </div>
-              </div>
-            </div>
-          )
+          </div>
         ))}
       </div>
 

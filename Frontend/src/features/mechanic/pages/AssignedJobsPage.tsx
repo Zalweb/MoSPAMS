@@ -156,24 +156,18 @@ export default function AssignedJobsPage() {
           { label: 'Confirmed',   value: stats.confirmed,  icon: Users        },
           { label: 'In Progress', value: stats.inProgress, icon: Wrench       },
           { label: 'Work Done',   value: stats.workDone,   icon: CheckCircle2 },
-        ].map((stat, i) => (
-          i === 0 ? (
-            <div key={stat.label} className="p-5 rounded-xl brand-card" style={{ background: 'var(--brand-gradient)' }}>
-              <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-white/20 border border-white/20 mb-3">
-                <stat.icon className="w-4 h-4 text-white" strokeWidth={2} />
-              </div>
-              <p className="text-2xl font-bold text-white">{stat.value}</p>
-              <p className="text-xs font-medium text-white/75 mt-1">{stat.label}</p>
+        ].map((stat) => (
+          <div
+            key={stat.label}
+            className="p-4 rounded-xl border brand-card"
+            style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <stat.icon className="w-5 h-5" strokeWidth={2} style={{ color: 'rgb(var(--color-primary-rgb))' }} />
+              <span className="text-2xl font-bold text-foreground">{stat.value}</span>
             </div>
-          ) : (
-            <div key={stat.label} className="bg-card border border-border/50 p-5 rounded-xl brand-card shadow-soft">
-              <div className="brand-icon-box w-9 h-9 rounded-lg flex items-center justify-center mb-3">
-                <stat.icon className="w-4 h-4" strokeWidth={2} />
-              </div>
-              <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-              <p className="text-xs font-medium text-muted-foreground mt-1">{stat.label}</p>
-            </div>
-          )
+            <p className="text-xs font-medium text-muted-foreground">{stat.label}</p>
+          </div>
         ))}
       </div>
 

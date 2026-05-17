@@ -185,6 +185,9 @@ export default function MechanicDashboardPage() {
     { label: 'Customer Rating', value: stats.avg_rating !== null ? `${stats.avg_rating.toFixed(1)} ★` : 'N/A', icon: Star        },
   ];
 
+  const brandCard = { background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' };
+  const brandIcon = { color: 'rgb(var(--color-primary-rgb))' };
+
   return (
     <div className="space-y-8">
       {/* Welcome */}
@@ -197,24 +200,14 @@ export default function MechanicDashboardPage() {
 
       {/* Stat Cards */}
       <motion.div {...fadeUp(0.05)} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((card, i) => (
-          i === 0 ? (
-            <div key={card.label} className="rounded-2xl p-5 brand-card" style={{ background: 'var(--brand-gradient)' }}>
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/20 border border-white/20 mb-3">
-                <card.icon className="w-5 h-5 text-white" strokeWidth={2} />
-              </div>
-              <p className="text-3xl font-bold text-white">{card.value}</p>
-              <p className="text-xs font-medium text-white/75 mt-1">{card.label}</p>
+        {statCards.map(card => (
+          <div key={card.label} className="border rounded-2xl p-5 brand-card" style={brandCard}>
+            <div className="mb-3">
+              <card.icon className="w-5 h-5" strokeWidth={2} style={brandIcon} />
             </div>
-          ) : (
-            <div key={card.label} className="bg-card border border-border/50 rounded-2xl p-5 brand-card shadow-soft">
-              <div className="brand-icon-box w-10 h-10 rounded-xl flex items-center justify-center mb-3">
-                <card.icon className="w-5 h-5" strokeWidth={2} />
-              </div>
-              <p className="text-3xl font-bold text-foreground">{card.value}</p>
-              <p className="text-xs font-medium text-muted-foreground mt-1">{card.label}</p>
-            </div>
-          )
+            <p className="text-3xl font-bold text-foreground">{card.value}</p>
+            <p className="text-xs font-medium text-muted-foreground mt-1">{card.label}</p>
+          </div>
         ))}
       </motion.div>
 
