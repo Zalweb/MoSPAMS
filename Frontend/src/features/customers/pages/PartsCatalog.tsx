@@ -65,54 +65,50 @@ export default function PartsCatalog() {
       </motion.div>
 
       {/* Parts Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {loading ? (
           Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="aspect-[4/5] bg-secondary/20 rounded-3xl animate-pulse" />
+            <div key={i} className="aspect-square bg-secondary/20 rounded-3xl animate-pulse" />
           ))
         ) : filteredParts.length > 0 ? (
           filteredParts.map((part, index) => (
             <motion.div
               key={part.id}
               {...fadeUp(index * 0.05)}
-              className="group relative bg-secondary/30 rounded-[2.5rem] p-4 border border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5"
+              className="group relative aspect-square brand-card backdrop-blur-xl rounded-3xl border overflow-hidden hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300"
+              style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}
             >
-              {/* Image Container */}
-              <div className="relative aspect-square rounded-[2rem] bg-secondary/50 dark:bg-zinc-800/50 overflow-hidden flex items-center justify-center group-hover:scale-[1.02] transition-transform duration-500">
+              {/* Image — top 58% */}
+              <div className="relative h-[58%] bg-secondary/50 dark:bg-zinc-800/50 overflow-hidden flex items-center justify-center group-hover:scale-[1.02] transition-transform duration-500">
                 {part.imageUrl ? (
                   <img src={part.imageUrl} alt={part.name} className="w-full h-full object-cover" />
                 ) : (
-                  <Package className="w-16 h-16 text-muted-foreground/30 group-hover:text-primary/30 transition-colors duration-500" strokeWidth={1} />
+                  <Package className="w-10 h-10 text-muted-foreground/30 group-hover:text-primary/30 transition-colors duration-500" strokeWidth={1} />
                 )}
-                {/* Available Badge */}
-                <div className="absolute top-4 left-4 px-3 py-1 bg-background/80 backdrop-blur-md rounded-full border border-border/50">
-                  <p className="text-[10px] font-bold tracking-wider uppercase">
-                    {part.stock > 0 ? `${part.stock} IN STOCK` : 'OUT OF STOCK'}
+                <div className="absolute top-2 left-2 px-2 py-0.5 bg-background/80 backdrop-blur-md rounded-full border border-border/50">
+                  <p className="text-[8px] font-bold tracking-wider uppercase">
+                    {part.stock > 0 ? `${part.stock} in stock` : 'Out of stock'}
                   </p>
                 </div>
               </div>
 
-              {/* Info Area */}
-              <div className="mt-6 px-2 pb-2">
-                <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-primary tracking-widest uppercase opacity-60">
+              {/* Info — bottom 42% */}
+              <div className="h-[42%] px-3 py-2 flex flex-col justify-between">
+                <div>
+                  <span className="text-[8px] font-bold text-primary tracking-widest uppercase opacity-60 block">
                     {part.category}
                   </span>
-                  <h3 className="text-lg font-bold text-foreground leading-tight line-clamp-1">
+                  <h3 className="text-xs font-bold text-foreground leading-tight line-clamp-2 mt-0.5">
                     {part.name}
                   </h3>
                 </div>
 
-                <div className="mt-4 flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-sm text-muted-foreground font-medium">Price</span>
-                    <span className="text-xl font-black text-foreground tabular-nums">
-                      ₱{part.price.toLocaleString()}
-                    </span>
-                  </div>
-
-                  <div className={`px-3 py-1 rounded-full text-[10px] font-bold tracking-tight ${part.stock > 0 ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
-                    {part.stock > 0 ? 'AVAILABLE' : 'UNAVAILABLE'}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-black text-foreground tabular-nums leading-none">
+                    ₱{part.price.toLocaleString()}
+                  </span>
+                  <div className={`px-2 py-0.5 rounded-full text-[8px] font-bold tracking-tight ${part.stock > 0 ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                    {part.stock > 0 ? 'AVAIL' : 'N/A'}
                   </div>
                 </div>
               </div>
