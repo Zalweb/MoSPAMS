@@ -221,7 +221,7 @@ export default function DashboardLayout() {
         </div>
 
         {/* Nav items */}
-        <nav className="flex-1 py-3 overflow-y-auto overflow-x-hidden custom-scrollbar">
+        <nav className="flex-1 py-3 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
           {visibleGroups.map((group, idx) => (
             <div key={idx} className={idx > 0 ? 'mt-1' : ''}>
               {/* Group separator */}
