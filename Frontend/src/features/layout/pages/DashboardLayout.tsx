@@ -149,25 +149,14 @@ export default function DashboardLayout() {
   return (
     <div className="min-h-screen bg-background flex font-sans" style={brandingVars}>
 
-      {/* Mobile overlay */}
-      <AnimatePresence>
-        {sidebarOpen && (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/70 z-40 lg:hidden backdrop-blur-sm"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-      </AnimatePresence>
+      {/* Mobile sidebar overlay removed in favor of bottom nav */}
 
       {/* ── SIDEBAR ────────────────────────────────────────────────────── */}
       <motion.aside
         initial={false}
         animate={{ width: isCollapsed ? COLLAPSED_W : EXPANDED_W }}
         transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
-        className={`sticky top-4 h-[calc(100vh-32px)] ml-4 my-4 flex flex-col shrink-0 transition-transform duration-300 z-50 rounded-[32px] ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
+        className={`hidden lg:flex sticky top-4 h-[calc(100vh-32px)] ml-4 my-4 flex-col shrink-0 transition-transform duration-300 z-50 rounded-[32px]`}
         style={{
           background: 'linear-gradient(160deg, color-mix(in srgb, rgb(var(--color-primary-rgb)) 50%, rgb(var(--color-secondary-rgb))) 0%, hsl(var(--foreground)) 100%)',
           boxShadow: '0 4px 20px -5px rgba(0,0,0,0.05)'
@@ -398,15 +387,14 @@ export default function DashboardLayout() {
         <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border/50">
           <div className="flex items-center gap-4 px-6 h-[64px]">
 
-            {/* Mobile hamburger */}
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 -ml-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
+            {/* Mobile Logo */}
+            <div className="lg:hidden flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full overflow-hidden bg-white shadow-sm border border-border/50 flex shrink-0">
+                <img src={branding?.logoUrl || '/images/logo.svg'} alt="Logo" className="w-full h-full object-contain" />
+              </div>
+            </div>
 
-            <h1 className="text-base font-semibold text-foreground tracking-tight">{currentLabel}</h1>
+            <h1 className="text-base font-semibold text-foreground tracking-tight ml-2 lg:ml-0">{currentLabel}</h1>
 
             <div className="ml-auto flex items-center gap-2">
 
@@ -553,8 +541,39 @@ export default function DashboardLayout() {
         </div>
 
         {/* Page content */}
-        <div className="min-h-[calc(100vh-64px)] bg-background p-6 lg:p-8">
+        <div className="min-h-[calc(100vh-64px)] bg-background p-6 lg:p-8 pb-32 lg:pb-8">
           <Outlet />
+        </div>
+
+        {/* ── MOBILE BOTTOM NAV ────────────────────────────────────────────── */}
+        <div className="lg:hidden fixed bottom-6 left-0 right-0 px-4 z-50 pointer-events-none flex justify-center">
+          <nav className="pointer-events-auto flex items-center p-1.5 rounded-[28px] bg-background/80 backdrop-blur-xl border border-border/50 shadow-[0_8px_32px_rgba(0,0,0,0.12)] overflow-x-auto no-scrollbar max-w-full">
+            {visibleGroups.flatMap(g => g.items).map((item) => {
+              const isActive = item.end
+                ? location.pathname === item.to
+                : location.pathname === item.to || location.pathname.startsWith(item.to + '/');
+
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className="relative flex items-center justify-center min-w-[48px] h-12 rounded-[22px] transition-colors z-10 shrink-0"
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="mobile-active-tab"
+                      className="absolute inset-0 bg-foreground/10 rounded-[22px] z-0"
+                      transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                    />
+                  )}
+                  <item.icon 
+                    className={`w-[22px] h-[22px] relative z-10 transition-colors ${isActive ? 'text-foreground' : 'text-foreground/40'}`} 
+                    strokeWidth={isActive ? 2.5 : 2}
+                  />
+                </NavLink>
+              );
+            })}
+          </nav>
         </div>
       </main>
     </div>
