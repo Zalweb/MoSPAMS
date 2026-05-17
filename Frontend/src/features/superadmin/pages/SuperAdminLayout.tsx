@@ -118,7 +118,16 @@ export default function SuperAdminLayout() {
   const currentLabel = currentItem ? currentItem.label : 'Admin Portal';
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-muted flex overflow-hidden">
+    <div 
+      className="min-h-screen bg-background text-foreground font-sans selection:bg-muted flex overflow-hidden"
+      style={{
+        '--primary': 'var(--foreground)',
+        '--primary-foreground': 'var(--background)',
+        '--brand-gradient': 'linear-gradient(135deg, hsl(var(--foreground)), hsl(var(--foreground)))',
+        '--brand-surface-gradient': 'linear-gradient(135deg, hsl(var(--foreground) / 0.05), transparent)',
+        '--brand-border': 'hsl(var(--foreground) / 0.1)'
+      } as React.CSSProperties}
+    >
       
       {/* ── DESKTOP SIDEBAR ──────────────────────────────────────────────── */}
       <motion.aside
