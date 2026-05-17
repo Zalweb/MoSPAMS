@@ -411,10 +411,11 @@ export default function SuperAdminLayout() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 20, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
-                className="pointer-events-auto mb-4 bg-background border border-border shadow-2xl rounded-[32px] p-2 w-[calc(100vw-32px)] max-w-sm flex flex-col gap-1 overflow-hidden"
+                className="pointer-events-auto mb-4 shadow-2xl rounded-[32px] p-2 w-[calc(100vw-32px)] max-w-sm flex flex-col gap-1 overflow-hidden"
+                style={{ background: 'hsl(var(--foreground))' }}
               >
                 <div className="px-4 py-3 mb-1">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{activeMobileGroup}</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-background/40">{activeMobileGroup}</p>
                 </div>
                 {NAV_SECTIONS.find(g => g.title === activeMobileGroup)?.items.map(item => {
                   const isActive = item.end
@@ -425,14 +426,22 @@ export default function SuperAdminLayout() {
                     <NavLink
                       key={item.to}
                       to={item.to}
-                      className={`flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-colors ${
+                      onClick={() => setActiveMobileGroup(null)}
+                      className={`relative flex items-center gap-4 px-5 py-3.5 rounded-[24px] transition-colors z-10 ${
                         isActive 
-                          ? 'bg-foreground text-background' 
-                          : 'text-foreground hover:bg-secondary'
+                          ? 'text-foreground' 
+                          : 'text-background/70 hover:bg-background/10 hover:text-background'
                       }`}
                     >
-                      <item.icon className="w-5 h-5 shrink-0" strokeWidth={isActive ? 2.5 : 2} />
-                      <span className="text-[15px] font-bold tracking-wide">{item.label}</span>
+                      {isActive && (
+                        <motion.div
+                          layoutId="superadmin-mobile-dropup-active"
+                          className="absolute inset-0 bg-background rounded-[24px] z-0"
+                          transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                        />
+                      )}
+                      <item.icon className="w-5 h-5 shrink-0 relative z-10" strokeWidth={isActive ? 2.5 : 2} />
+                      <span className="text-[15px] font-bold tracking-wide relative z-10">{item.label}</span>
                     </NavLink>
                   );
                 })}
