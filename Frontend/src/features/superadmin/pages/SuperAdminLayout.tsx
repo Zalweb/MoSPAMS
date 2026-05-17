@@ -21,79 +21,71 @@ import {
   User,
   Sun,
   Moon,
+  ChevronLeft,
 } from 'lucide-react';
 import { apiGet } from '@/shared/lib/api';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { useTheme } from '@/shared/contexts/ThemeContext';
 
 const NAV_SECTIONS = [
   {
     title: 'MAIN',
-    items: [{ to: '/superadmin/analytics', label: 'Dashboard (Home)', icon: LayoutDashboard }],
+    items: [{ to: '/superadmin/analytics', label: 'Dashboard', icon: LayoutDashboard }],
   },
   {
-    title: 'SHOPS MANAGEMENT',
+    title: 'SHOPS',
     items: [
       { to: '/superadmin/shops', label: 'All Shops', icon: Building2, end: true },
-      { to: '/superadmin/shops/pending', label: 'Pending Approvals', icon: HeartHandshake },
-      { to: '/superadmin/shops/new', label: 'Create New Shop', icon: Store },
-      { to: '/superadmin/shops/suspended', label: 'Suspended Shops', icon: Shield },
+      { to: '/superadmin/shops/pending', label: 'Pending', icon: HeartHandshake },
+      { to: '/superadmin/shops/new', label: 'New Shop', icon: Store },
+      { to: '/superadmin/shops/suspended', label: 'Suspended', icon: Shield },
     ],
   },
   {
-    title: 'BILLING & REVENUE',
+    title: 'BILLING',
     items: [
-      { to: '/superadmin/subscriptions', label: 'Subscription Plans', icon: CreditCard },
-      { to: '/superadmin/billing/payments', label: 'Payments History', icon: FileText },
-      { to: '/superadmin/billing/reports', label: 'Revenue Reports', icon: TrendingUp },
-      { to: '/superadmin/billing/overdue', label: 'Overdue Accounts', icon: Bell },
+      { to: '/superadmin/subscriptions', label: 'Plans', icon: CreditCard },
+      { to: '/superadmin/billing/payments', label: 'Payments', icon: FileText },
+      { to: '/superadmin/billing/reports', label: 'Revenue', icon: TrendingUp },
+      { to: '/superadmin/billing/overdue', label: 'Overdue', icon: Bell },
     ],
   },
   {
-    title: 'PLATFORM ADMINS',
+    title: 'ADMINS',
     items: [
       { to: '/superadmin/access-control', label: 'Admin Users', icon: Users },
-      { to: '/superadmin/admins/new', label: 'Add Platform Admin', icon: Shield },
+      { to: '/superadmin/admins/new', label: 'Add Admin', icon: Shield },
     ],
   },
   {
-    title: 'ANALYTICS & REPORTS',
+    title: 'REPORTS',
     items: [
-      { to: '/superadmin/reports/revenue', label: 'Revenue Analytics', icon: BarChart3 },
-      { to: '/superadmin/reports/growth', label: 'Shop Growth Trends', icon: TrendingUp },
-      { to: '/superadmin/reports/users', label: 'User Statistics', icon: Users },
-      { to: '/superadmin/reports/performance', label: 'System Performance', icon: Activity },
+      { to: '/superadmin/reports/revenue', label: 'Analytics', icon: BarChart3 },
+      { to: '/superadmin/reports/growth', label: 'Growth', icon: TrendingUp },
+      { to: '/superadmin/reports/users', label: 'Users', icon: Users },
+      { to: '/superadmin/reports/performance', label: 'Performance', icon: Activity },
     ],
   },
   {
-    title: 'SETTINGS',
+    title: 'SYSTEM',
     items: [
       { to: '/superadmin/audit-logs', label: 'Audit Logs', icon: Activity },
-    ],
-  },
-  {
-    title: 'SUPPORT',
-    items: [
-      { to: '/superadmin/support/tickets', label: 'Support Tickets', icon: LifeBuoy },
-      { to: '/superadmin/support/feedback', label: 'Shop Feedback', icon: MessageSquare },
-    ],
-  },
-  {
-    title: 'ACCOUNT',
-    items: [
-      { to: '/superadmin/profile', label: 'User Profile', icon: User },
-      { to: '/superadmin/settings', label: 'Platform Settings', icon: Settings },
+      { to: '/superadmin/support/tickets', label: 'Tickets', icon: LifeBuoy },
+      { to: '/superadmin/support/feedback', label: 'Feedback', icon: MessageSquare },
     ],
   },
 ];
+
+const COLLAPSED_W = 84;
+const EXPANDED_W = 260;
 
 export default function SuperAdminLayout() {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifData, setNotifData] = useState<{ pendingShops: number; expiringSubscriptions: any[] }>({ pendingShops: 0, expiringSubscriptions: [] });
@@ -111,188 +103,318 @@ export default function SuperAdminLayout() {
     navigate('/', { replace: true });
   };
 
-  return (
-    <div className="min-h-screen bg-background text-muted-foreground dark:text-zinc-300 font-sans selection:bg-muted flex">
-      {sidebarOpen && (
-        <button
-          className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-          aria-label="Close menu"
-        />
-      )}
+  const allItems = NAV_SECTIONS.flatMap(s => s.items);
+  const currentItem = allItems.find(item => item.end ? location.pathname === item.to : location.pathname === item.to || location.pathname.startsWith(item.to + '/'));
+  const currentLabel = currentItem ? currentItem.label : 'Admin Portal';
 
-      <aside
-        className={`fixed lg:sticky top-0 left-0 z-50 h-screen bg-sidebar border-r border-border flex flex-col w-[260px] shrink-0 transition-transform duration-300 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
+  return (
+    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-muted flex overflow-hidden">
+      
+      {/* ── DESKTOP SIDEBAR ──────────────────────────────────────────────── */}
+      <motion.aside
+        initial={false}
+        animate={{ width: isCollapsed ? COLLAPSED_W : EXPANDED_W }}
+        transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
+        className={`hidden lg:flex sticky top-4 h-[calc(100vh-32px)] ml-4 my-4 flex-col shrink-0 transition-transform duration-300 z-50 rounded-[32px] overflow-hidden`}
+        style={{
+          background: 'hsl(var(--foreground))',
+          boxShadow: '0 4px 30px -5px rgba(0,0,0,0.2)'
+        }}
       >
-        <div className="flex items-center gap-3 px-6 h-[70px] border-b border-border shrink-0">
-          <div className="w-8 h-8 rounded-xl bg-muted border border-border dark:border-zinc-700 flex items-center justify-center overflow-hidden shrink-0">
-            <img src="/images/logo.svg" alt="MoSPAMS" className="w-6 h-6 object-contain" />
-          </div>
-          <div>
-            <span className="text-[15px] font-bold text-foreground tracking-tight leading-none block">MoSPAMS</span>
-            <span className="block text-[10px] text-muted-foreground font-semibold tracking-wider leading-none mt-1">PLATFORM</span>
+        {/* Logo area */}
+        <div className={`flex items-center h-[90px] w-full shrink-0 relative ${isCollapsed ? 'justify-center' : 'px-5 justify-between'}`}>
+          <button
+            onClick={() => setIsCollapsed(false)}
+            className="w-[42px] h-[42px] shrink-0 rounded-full flex items-center justify-center overflow-hidden bg-background/10 transition-transform hover:scale-105"
+          >
+            <Shield className="w-5 h-5 text-background" strokeWidth={2} />
+          </button>
+
+          <AnimatePresence>
+            {!isCollapsed && (
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.18 }}
+                className="ml-3 min-w-0 flex-1"
+              >
+                <span className="text-[15px] font-black text-background tracking-tight leading-tight block uppercase">
+                  Platform
+                </span>
+                <span className="text-[10px] font-bold text-background/60 tracking-widest uppercase block">
+                  MoSPAMS
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div className={`hidden lg:block transition-opacity duration-300 ${isCollapsed ? 'opacity-0 pointer-events-none absolute' : 'opacity-100'}`}>
+              <button
+                onClick={() => setIsCollapsed(true)}
+                className="w-7 h-7 rounded-full bg-background/10 hover:bg-background/20 flex items-center justify-center text-background/70 hover:text-background transition-colors"
+              >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
-        <nav className="flex-1 px-4 py-6 space-y-6 overflow-y-auto custom-scrollbar">
-          {NAV_SECTIONS.map((section, idx) => (
-            <div key={idx}>
-              <h3 className="px-3 text-[10px] font-bold text-muted-foreground tracking-wider mb-2 uppercase">{section.title}</h3>
-              <div className="space-y-1">
-                {section.items.map((item) => {
-                  const isActive = item.end ? location.pathname === item.to : location.pathname === item.to || location.pathname.startsWith(item.to + '/');
+        {/* Nav items */}
+        <nav className="flex-1 py-3 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] -mr-5 pr-5">
+          {NAV_SECTIONS.map((group, idx) => (
+            <div key={idx} className={idx > 0 ? 'mt-1' : ''}>
+              {idx > 0 && (
+                <div className="mx-4 my-2 border-t border-background/10" />
+              )}
+
+              <AnimatePresence>
+                {!isCollapsed && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                    className="px-5 mb-1 text-[9px] font-bold uppercase tracking-[0.12em] whitespace-nowrap text-background/40"
+                  >
+                    {group.title}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+
+              <div className={`space-y-0.5 ${isCollapsed ? 'px-2' : 'pl-3 pr-0'}`}>
+                {group.items.map(item => {
+                  const isActive = item.end
+                    ? location.pathname === item.to
+                    : location.pathname === item.to || location.pathname.startsWith(item.to + '/');
+
                   return (
-                    <NavLink
-                      key={item.to}
-                      to={item.to}
-                      onClick={() => setSidebarOpen(false)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 group ${
-                        isActive
-                          ? 'bg-accent dark:bg-secondary dark:bg-zinc-800 text-accent-foreground dark:text-foreground border-l-2 border-primary dark:border-white'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-secondary dark:hover:bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50'
-                      }`}
-                    >
-                      <item.icon className={`w-[16px] h-[16px] transition-colors ${isActive ? 'text-accent-foreground dark:text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`} strokeWidth={1.75} />
-                      <span>{item.label}</span>
-                    </NavLink>
+                    <div key={item.to} className="relative group/tip">
+                      <NavLink to={item.to} end={item.end} className="block relative">
+                        {isActive && (
+                          <motion.div
+                            layoutId="superadmin-active-tab"
+                            transition={{ type: 'spring', stiffness: 350, damping: 35 }}
+                            className={`absolute z-0 bg-background ${
+                              isCollapsed 
+                                ? 'inset-0 m-auto w-12 h-12 rounded-full' 
+                                : 'inset-y-0 left-0 w-full rounded-l-[24px] rounded-r-none shadow-[2px_0_0_0_hsl(var(--background))]'
+                            }`}
+                          >
+                            {!isCollapsed && (
+                              <>
+                                <div className="absolute -top-[24px] -right-[2px] w-[26px] h-[24px] text-background pointer-events-none z-20">
+                                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" preserveAspectRatio="none">
+                                    <path d="M24 0V24H0C13.2548 24 24 13.2548 24 0Z" fill="currentColor" />
+                                  </svg>
+                                </div>
+                                <div className="absolute -bottom-[24px] -right-[2px] w-[26px] h-[24px] text-background pointer-events-none z-20">
+                                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" preserveAspectRatio="none">
+                                    <path d="M24 24V0H0C13.2548 0 24 10.7452 24 24Z" fill="currentColor" />
+                                  </svg>
+                                </div>
+                              </>
+                            )}
+                          </motion.div>
+                        )}
+
+                        <div
+                          className={`flex items-center transition-colors duration-300 relative z-10 ${
+                            isCollapsed 
+                              ? 'justify-center w-12 h-12 mx-auto rounded-full' 
+                              : \`h-[52px] \${isActive ? 'pl-5' : 'w-[calc(100%-12px)] rounded-full mr-3 px-4'}\`
+                          } ${
+                            isActive 
+                              ? 'text-foreground' 
+                              : 'text-background/70 hover:bg-background/10 hover:text-background'
+                          }`}
+                        >
+                          <item.icon
+                            className={`shrink-0 transition-all duration-300 ${
+                              isCollapsed ? 'w-5 h-5' : 'w-[20px] h-[20px]'
+                            } ${isActive && isCollapsed ? 'scale-110' : ''}`}
+                            strokeWidth={isActive ? 2.5 : 2}
+                          />
+                          <AnimatePresence>
+                            {!isCollapsed && (
+                              <motion.span
+                                initial={{ opacity: 0, x: -8 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -8 }}
+                                transition={{ duration: 0.15 }}
+                                className="text-[14px] font-bold tracking-wide whitespace-nowrap ml-4"
+                              >
+                                {item.label}
+                              </motion.span>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      </NavLink>
+
+                      {isCollapsed && (
+                        <div
+                          className="absolute left-[calc(100%+10px)] top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg bg-foreground text-background text-xs font-bold opacity-0 group-hover/tip:opacity-100 pointer-events-none transition-opacity duration-150 whitespace-nowrap z-[100] shadow-xl"
+                        >
+                          {item.label}
+                          <span className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-foreground" />
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
               </div>
             </div>
           ))}
         </nav>
-      </aside>
+      </motion.aside>
 
-      <main className="flex-1 min-w-0 min-h-screen flex flex-col">
-        <header className="flex items-center gap-4 px-6 h-[70px] bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-30 shrink-0">
-          <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-1.5 -ml-2 rounded-lg hover:bg-muted text-muted-foreground">
-            <Menu className="w-5 h-5" />
-          </button>
+      {/* ── MAIN CONTENT ────────────────────────────────────────────────── */}
+      <main className="flex-1 min-w-0 min-h-screen bg-background">
+        <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border/50">
+          <div className="flex items-center gap-4 px-6 h-[64px]">
 
-          <div className="flex-1" />
+            <div className="lg:hidden flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full overflow-hidden bg-foreground flex items-center justify-center shrink-0">
+                <Shield className="w-4 h-4 text-background" strokeWidth={2.5} />
+              </div>
+            </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-xl hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors mr-1"
-              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-            >
-              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
+            <h1 className="text-base font-bold text-foreground tracking-tight ml-2 lg:ml-0 uppercase">{currentLabel}</h1>
 
-            <div className="relative">
+            <div className="ml-auto flex items-center gap-2">
               <button
-                onClick={() => { setNotifOpen(o => !o); setProfileOpen(false); }}
-                className="relative p-2 rounded-xl hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors"
+                onClick={toggleTheme}
+                className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
               >
-                <Bell className="w-5 h-5" />
-                {(notifData.pendingShops > 0 || notifData.expiringSubscriptions.length > 0) && (
-                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-foreground text-[9px] font-bold rounded-full flex items-center justify-center">
-                    {notifData.pendingShops + notifData.expiringSubscriptions.length}
-                  </span>
-                )}
+                {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
 
-              {notifOpen && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} />
-                  <motion.div
-                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    className="absolute right-0 top-full mt-2 w-[320px] bg-muted/95 backdrop-blur-xl rounded-2xl border border-border shadow-2xl shadow-black/50 z-50 overflow-hidden"
-                  >
-                    <div className="px-4 py-3 border-b border-border">
-                      <p className="text-sm font-semibold text-foreground">Notifications</p>
-                    </div>
-                    <div className="max-h-[320px] overflow-y-auto">
-                      {notifData.pendingShops === 0 && notifData.expiringSubscriptions.length === 0 ? (
-                        <p className="text-center text-muted-foreground text-xs py-8">No new notifications</p>
-                      ) : (
-                        <>
-                          {notifData.pendingShops > 0 && (
-                            <button onClick={() => { setNotifOpen(false); navigate('/superadmin/shops/pending'); }} className="w-full text-left px-4 py-3 border-b border-border/50 hover:bg-secondary dark:bg-zinc-800/30 transition-colors">
-                              <p className="text-xs font-semibold text-amber-400">{notifData.pendingShops} shop{notifData.pendingShops > 1 ? 's' : ''} pending approval</p>
-                              <p className="text-[11px] text-muted-foreground mt-0.5">Review and approve new shop registrations</p>
-                            </button>
-                          )}
-                          {notifData.expiringSubscriptions.map((s: any, i: number) => (
-                            <button key={i} onClick={() => { setNotifOpen(false); navigate('/superadmin/billing/overdue'); }} className="w-full text-left px-4 py-3 border-b border-border/50 hover:bg-secondary dark:bg-zinc-800/30 transition-colors">
-                              <p className="text-xs font-semibold text-red-400">{s.shopName}</p>
-                              <p className="text-[11px] text-muted-foreground mt-0.5">Subscription expiring in {s.daysLeft} day{s.daysLeft !== 1 ? 's' : ''}</p>
-                            </button>
-                          ))}
-                        </>
-                      )}
-                    </div>
-                  </motion.div>
-                </>
-              )}
-            </div>
+              <div className="relative">
+                <button
+                  onClick={() => { setNotifOpen(o => !o); setProfileOpen(false); }}
+                  className="relative w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                >
+                  <Bell className="w-5 h-5" />
+                  {(notifData.pendingShops > 0 || notifData.expiringSubscriptions.length > 0) && (
+                    <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-background" />
+                  )}
+                </button>
 
-            <div className="w-px h-6 bg-secondary dark:bg-zinc-800" />
-            <div className="relative">
-              <motion.button
-                onClick={() => setProfileOpen(o => !o)}
-                className="flex items-center gap-3 pl-1 pr-3 py-1.5 rounded-xl hover:bg-secondary dark:bg-zinc-800 transition-all"
-                whileHover={{ scale: 1.02 }}
-              >
-                <div className="w-8 h-8 rounded-xl bg-primary/10 backdrop-blur-sm border border-primary/20 flex items-center justify-center text-sm font-bold text-primary">
+                {notifOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} />
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      className="absolute right-0 top-full mt-2 w-[320px] bg-card backdrop-blur-xl rounded-3xl border border-border shadow-2xl z-50 overflow-hidden"
+                    >
+                      <div className="px-5 py-4 border-b border-border/50">
+                        <p className="text-sm font-bold text-foreground">Notifications</p>
+                      </div>
+                      <div className="max-h-[320px] overflow-y-auto">
+                        {notifData.pendingShops === 0 && notifData.expiringSubscriptions.length === 0 ? (
+                          <p className="text-center text-muted-foreground text-xs py-8 font-medium">No new notifications</p>
+                        ) : (
+                          <>
+                            {notifData.pendingShops > 0 && (
+                              <button onClick={() => { setNotifOpen(false); navigate('/superadmin/shops/pending'); }} className="w-full text-left px-5 py-4 border-b border-border/50 hover:bg-secondary/50 transition-colors">
+                                <p className="text-xs font-bold text-amber-500">{notifData.pendingShops} pending shop approvals</p>
+                              </button>
+                            )}
+                            {notifData.expiringSubscriptions.map((s: any, i: number) => (
+                              <button key={i} onClick={() => { setNotifOpen(false); navigate('/superadmin/billing/overdue'); }} className="w-full text-left px-5 py-4 border-b border-border/50 hover:bg-secondary/50 transition-colors">
+                                <p className="text-xs font-bold text-red-500">{s.shopName}</p>
+                                <p className="text-[11px] text-muted-foreground mt-1">Expiring in {s.daysLeft} days</p>
+                              </button>
+                            ))}
+                          </>
+                        )}
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+              </div>
+
+              <div className="w-px h-5 bg-border mx-1" />
+
+              <div className="relative">
+                <button
+                  onClick={() => setProfileOpen(o => !o)}
+                  className="w-10 h-10 rounded-full bg-foreground flex items-center justify-center text-background font-black text-sm transition-transform hover:scale-105"
+                >
                   {user?.name?.charAt(0)?.toUpperCase() || 'S'}
-                </div>
-                <div className="hidden sm:block text-left">
-                  <p className="text-sm font-medium text-foreground leading-none">{user?.name}</p>
-                  <p className="text-xs text-muted-foreground leading-none mt-1">SuperAdmin</p>
-                </div>
-              </motion.button>
+                </button>
 
-              {profileOpen && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
-                  <motion.div
-                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    className="absolute right-0 top-full mt-2 w-[220px] bg-muted/95 backdrop-blur-xl rounded-2xl border border-border shadow-2xl shadow-black/50 z-50 overflow-hidden"
-                  >
-                    <div className="px-4 py-3 border-b border-border">
-                      <p className="text-sm font-semibold text-foreground truncate">{user?.name}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{user?.email}</p>
-                    </div>
-                    <div className="py-1">
+                {profileOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      className="absolute right-0 top-full mt-2 w-[240px] bg-card backdrop-blur-xl rounded-3xl border border-border shadow-2xl z-50 p-2"
+                    >
+                      <div className="px-3 py-3 mb-1 bg-secondary/50 rounded-2xl">
+                        <p className="text-sm font-bold text-foreground truncate leading-tight">{user?.name}</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{user?.email}</p>
+                      </div>
                       <button
                         onClick={() => { setProfileOpen(false); navigate('/superadmin/profile'); }}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 transition-colors"
+                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                       >
-                        <User className="w-[18px] h-[18px]" strokeWidth={1.5} />
-                        User Profile
+                        <User className="w-4 h-4" strokeWidth={2.5} /> Profile
                       </button>
-                    </div>
-                    <button
-                      onClick={() => { setProfileOpen(false); handleLogout(); }}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                    >
-                      <LogOut className="w-[18px] h-[18px]" strokeWidth={1.5} />
-                      Sign Out
-                    </button>
-                  </motion.div>
-                </>
-              )}
+                      <button
+                        onClick={() => { setProfileOpen(false); handleLogout(); }}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 mt-1 rounded-xl text-xs font-bold text-red-500 hover:bg-red-500/10 transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" strokeWidth={2.5} /> Sign Out
+                      </button>
+                    </motion.div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
-        </header>
+        </div>
 
-        <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto flex-1">
+        <div className="min-h-[calc(100vh-64px)] bg-background p-6 lg:p-8 pb-32 lg:pb-8">
           <Outlet />
         </div>
-      </main>
 
-      <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
-      `}</style>
+        {/* ── MOBILE BOTTOM NAV ────────────────────────────────────────────── */}
+        <div className="lg:hidden fixed bottom-6 left-0 right-0 px-4 z-50 pointer-events-none flex justify-center">
+          <nav 
+            className="pointer-events-auto flex items-center p-1.5 rounded-[28px] shadow-2xl overflow-x-auto no-scrollbar max-w-full"
+            style={{ background: 'hsl(var(--foreground))' }}
+          >
+            {allItems.map((item) => {
+              const isActive = item.end
+                ? location.pathname === item.to
+                : location.pathname === item.to || location.pathname.startsWith(item.to + '/');
+
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className="relative flex items-center justify-center min-w-[48px] h-12 rounded-[22px] transition-colors z-10 shrink-0"
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="superadmin-mobile-active-tab"
+                      className="absolute inset-0 bg-background rounded-[22px] z-0"
+                      transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                    />
+                  )}
+                  <item.icon 
+                    className={`w-[22px] h-[22px] relative z-10 transition-colors ${isActive ? 'text-foreground' : 'text-background/50'}`} 
+                    strokeWidth={isActive ? 2.5 : 2}
+                  />
+                </NavLink>
+              );
+            })}
+          </nav>
+        </div>
+      </main>
     </div>
   );
 }
