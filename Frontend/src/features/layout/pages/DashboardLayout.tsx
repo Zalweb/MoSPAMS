@@ -169,7 +169,7 @@ export default function DashboardLayout() {
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
         style={{
-          background: 'linear-gradient(160deg, color-mix(in srgb, rgb(var(--color-primary-rgb)) 12%, color-mix(in srgb, rgb(var(--color-secondary-rgb)) 12%, hsl(var(--card)))) 0%, hsl(var(--card)) 100%)',
+          background: 'linear-gradient(160deg, color-mix(in srgb, rgb(var(--color-primary-rgb)) 50%, rgb(var(--color-secondary-rgb))) 0%, hsl(var(--foreground)) 100%)',
           boxShadow: '0 4px 20px -5px rgba(0,0,0,0.05)'
         }}
       >
@@ -199,8 +199,8 @@ export default function DashboardLayout() {
                 transition={{ duration: 0.18 }}
                 className="ml-3 overflow-hidden min-w-0 flex-1"
               >
-                <span className="text-[15px] font-bold text-foreground tracking-tight leading-none block whitespace-nowrap">
-                  Mo<span className="text-foreground/40">SPAMS</span>
+                <span className="text-[15px] font-bold text-background tracking-tight leading-none block whitespace-nowrap">
+                  Mo<span className="text-background/60">SPAMS</span>
                 </span>
               </motion.div>
             )}
@@ -210,7 +210,7 @@ export default function DashboardLayout() {
           <div className={`hidden lg:block transition-opacity duration-300 ${isCollapsed ? 'opacity-0 pointer-events-none absolute' : 'opacity-100'}`}>
               <button
                 onClick={() => { setIsCollapsed(true); setSidebarOpen(false); }}
-                className="w-7 h-7 rounded-full bg-foreground/5 hover:bg-foreground/10 flex items-center justify-center text-foreground/50 hover:text-foreground transition-colors"
+                className="w-7 h-7 rounded-full bg-background/10 hover:bg-background/20 flex items-center justify-center text-background/70 hover:text-background transition-colors"
               >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -237,7 +237,7 @@ export default function DashboardLayout() {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.15 }}
-                    className="px-5 mb-1 text-[9px] font-bold uppercase tracking-[0.12em] whitespace-nowrap text-foreground/40"
+                    className="px-5 mb-1 text-[9px] font-bold uppercase tracking-[0.12em] whitespace-nowrap text-background/50"
                   >
                     {group.title}
                   </motion.p>
@@ -296,7 +296,7 @@ export default function DashboardLayout() {
                           } ${
                             isActive 
                               ? 'text-foreground' 
-                              : 'text-emerald-50/80 hover:bg-white/10 hover:text-white'
+                              : 'text-background/70 hover:bg-background/10 hover:text-background'
                           }`}
                         >
                           <item.icon
@@ -347,7 +347,7 @@ export default function DashboardLayout() {
         <div className="shrink-0 p-3 mb-2">
           <button
             onClick={() => navigate(settingsPath())}
-            className={`w-full flex items-center rounded-xl transition-colors hover:bg-foreground/5 ${
+            className={`w-full flex items-center rounded-xl transition-colors hover:bg-background/10 ${
               isCollapsed ? 'justify-center p-2' : 'gap-3 px-3 py-2.5'
             }`}
           >
@@ -366,8 +366,8 @@ export default function DashboardLayout() {
                   transition={{ duration: 0.15 }}
                   className="min-w-0 text-left"
                 >
-                  <p className="text-sm font-semibold text-foreground/90 truncate leading-none">{user?.name}</p>
-                  <p className="text-[11px] text-foreground/50 mt-0.5 leading-none">{user?.role}</p>
+                  <p className="text-sm font-semibold text-background/90 truncate leading-none">{user?.name}</p>
+                  <p className="text-[11px] text-background/60 mt-0.5 leading-none">{user?.role}</p>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -381,7 +381,7 @@ export default function DashboardLayout() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={handleLogout}
-                className="mt-1 w-full flex items-center gap-3 px-3 py-2 rounded-xl text-foreground/50 hover:text-red-400 hover:bg-red-500/10 transition-colors text-xs font-semibold"
+                className="mt-1 w-full flex items-center gap-3 px-3 py-2 rounded-xl text-background/60 hover:text-red-400 hover:bg-red-500/10 transition-colors text-xs font-semibold"
               >
                 <LogOut className="w-4 h-4" strokeWidth={1.75} />
                 Sign Out
