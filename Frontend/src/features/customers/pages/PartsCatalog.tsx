@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Package, Filter } from 'lucide-react';
+import { Search, Package, Filter, Tag, Layers, CheckCircle2, XCircle } from 'lucide-react';
 import { usePaginatedFetch } from '@/shared/hooks/usePaginatedFetch';
 import type { Part } from '@/shared/types';
 import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 20 },
@@ -14,6 +15,7 @@ const fadeUp = (delay = 0) => ({
 export default function PartsCatalog() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
+  const [selected, setSelected] = useState<Part | null>(null);
 
   const { data: parts, loading } = usePaginatedFetch<Part>('/api/parts');
 
@@ -75,7 +77,8 @@ export default function PartsCatalog() {
             <motion.div
               key={part.id}
               {...fadeUp(index * 0.05)}
-              className="group relative aspect-square brand-card backdrop-blur-xl rounded-3xl border overflow-hidden hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300"
+              onClick={() => setSelected(part)}
+              className="group relative aspect-square brand-card backdrop-blur-xl rounded-3xl border overflow-hidden hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300 cursor-pointer"
               style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}
             >
               {/* Image — top 58% */}
@@ -124,6 +127,63 @@ export default function PartsCatalog() {
           </div>
         )}
       </div>
+      {/* Part Detail Modal */}
+      <Dialog open={!!selected} onOpenChange={(open) => { if (!open) setSelected(null); }}>
+        <DialogContent className="p-0 overflow-hidden rounded-[2rem] border-border max-w-sm w-full" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
+          {selected && (
+            <>
+              {/* Full Image */}
+              <div className="relative w-full aspect-square bg-secondary/50 dark:bg-zinc-800/50 flex items-center justify-center overflow-hidden">
+                {selected.imageUrl ? (
+                  <img src={selected.imageUrl} alt={selected.name} className="w-full h-full object-cover" />
+                ) : (
+                  <Package className="w-20 h-20 text-muted-foreground/20" strokeWidth={1} />
+                )}
+                {/* Stock pill over image */}
+                <div className={`absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md border ${selected.stock > 0 ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
+                  {selected.stock > 0
+                    ? <><CheckCircle2 className="w-3 h-3" /> In Stock</>
+                    : <><XCircle className="w-3 h-3" /> Out of Stock</>}
+                </div>
+              </div>
+
+              {/* Details */}
+              <div className="px-6 py-5 space-y-4">
+                {/* Name + category */}
+                <div>
+                  <span className="text-[9px] font-bold text-primary tracking-widest uppercase opacity-60">{selected.category}</span>
+                  <h2 className="text-xl font-bold text-foreground leading-tight mt-0.5">{selected.name}</h2>
+                  {selected.brand && (
+                    <p className="text-sm text-muted-foreground mt-0.5">{selected.brand}</p>
+                  )}
+                </div>
+
+                {/* Info rows */}
+                <div className="space-y-2">
+                  {selected.partCode && (
+                    <div className="flex items-center gap-2.5">
+                      <Tag className="w-3.5 h-3.5 text-muted-foreground shrink-0" strokeWidth={2} />
+                      <span className="text-xs text-muted-foreground">Part No.</span>
+                      <span className="ml-auto text-xs font-semibold text-foreground font-mono">{selected.partCode}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2.5">
+                    <Layers className="w-3.5 h-3.5 text-muted-foreground shrink-0" strokeWidth={2} />
+                    <span className="text-xs text-muted-foreground">Category</span>
+                    <span className="ml-auto text-xs font-semibold text-foreground">{selected.category}</span>
+                  </div>
+                </div>
+
+                {/* Price */}
+                <div className="flex items-end justify-between pt-2 border-t border-border/50">
+                  <span className="text-xs text-muted-foreground font-medium">Price</span>
+                  <span className="text-2xl font-black text-foreground tabular-nums">₱{selected.price.toLocaleString()}</span>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
