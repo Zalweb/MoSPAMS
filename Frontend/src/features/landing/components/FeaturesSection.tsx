@@ -39,7 +39,7 @@ const FEATURES = [
     icon: Users,
     title: 'Role-Based Access',
     description:
-      'Five distinct roles \u2014 Owner, Staff, Mechanic, Customer, and SuperAdmin \u2014 each with tailored permissions and views.',
+      'Five distinct roles \u2014 Owner, Staff, Mechanic, and Customer \u2014 each with tailored permissions and views.',
     color: 'pink',
     tags: ['5 Roles', 'Permissions', 'Google Sign-In'],
   },
@@ -47,7 +47,7 @@ const FEATURES = [
     icon: ClipboardList,
     title: 'Multi-Tenant & Branding',
     description:
-      'Each shop gets its own subdomain, logo, color scheme, business hours, and invitation codes. Fully isolated data per shop.',
+      'Each shop gets its own subdomain, logo, color scheme, and business hours. Fully isolated data per shop.',
     color: 'indigo',
     tags: ['Subdomains', 'Shop Branding', 'Data Isolation'],
   },

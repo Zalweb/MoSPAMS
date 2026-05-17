@@ -14,7 +14,7 @@ interface OCRPreviewModalProps {
   barcode: string;
 }
 
-export function OCRPreviewModal({ onExtracted, onCancel }: OCRPreviewModalProps) {
+export function OCRPreviewModal({ onExtracted, onCancel, barcode }: OCRPreviewModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [extractedText, setExtractedText] = useState<string>('');
@@ -22,7 +22,7 @@ export function OCRPreviewModal({ onExtracted, onCancel }: OCRPreviewModalProps)
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     brand: '',
-    partCode: '',
+    partCode: barcode || '',
     description: '',
   });
 
@@ -43,11 +43,11 @@ export function OCRPreviewModal({ onExtracted, onCancel }: OCRPreviewModalProps)
             setConfidence(result.confidence);
 
             const suggestions = suggestPartsFromOCR(result.text);
-            setFormData({
-              brand: suggestions.brand || '',
-              partCode: suggestions.partCode || '',
-              description: suggestions.description || '',
-            });
+            setFormData(prev => ({
+              brand: suggestions.brand || prev.brand,
+              partCode: suggestions.partCode || prev.partCode,
+              description: suggestions.description || prev.description,
+            }));
           } else {
             setExtractedText('No text detected. Please enter details manually.');
           }

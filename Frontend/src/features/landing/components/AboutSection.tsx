@@ -25,7 +25,7 @@ const BENEFITS = [
 
 const STATS = [
   { value: '100%', label: 'Cloud-Based' },
-  { value: '5', label: 'User Roles' },
+  { value: '4', label: 'User Roles' },
   { value: '5+', label: 'Report Types' },
   { value: '∞', label: 'Transactions' },
 ];

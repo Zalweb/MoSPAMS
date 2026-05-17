@@ -7,7 +7,7 @@ import { OCRPreviewModal } from './OCRPreviewModal';
 
 interface PartFormWithScanningProps {
   onClose: () => void;
-  onManualEntry: (ocrData?: { brand: string; partCode: string; description: string; rawText: string }) => void;
+  onManualEntry: (ocrData?: { brand: string; partCode: string; description: string; rawText: string; barcode?: string }) => void;
   onPartAdded?: () => void;
 }
 
@@ -135,7 +135,11 @@ export function PartFormWithScanning({
           }}
           onManualEntry={() => {
             onClose();
-            onManualEntry();
+            onManualEntry(
+              scannedBarcode
+                ? { brand: '', partCode: '', description: '', rawText: '', barcode: scannedBarcode.value }
+                : undefined
+            );
           }}
           onBack={() => {
             resetForm();
