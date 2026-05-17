@@ -131,12 +131,12 @@ export default function Sales() {
 
       <motion.div {...fadeUp(0.2)} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: `${PERIOD_LABEL[period]} Revenue`, value: `₱${totalRevenue.toLocaleString()}`, dark: true },
-          { label: 'Transactions', value: filteredTx.length.toString(), color: 'blue' },
-          { label: 'Cash', value: `₱${cashTotal.toLocaleString()}`, color: 'green' },
-          { label: 'GCash', value: `₱${gcashTotal.toLocaleString()}`, color: 'purple' },
+          { label: `${PERIOD_LABEL[period]} Revenue`, value: `₱${totalRevenue.toLocaleString()}` },
+          { label: 'Transactions', value: filteredTx.length.toString() },
+          { label: 'Cash', value: `₱${cashTotal.toLocaleString()}` },
+          { label: 'GCash', value: `₱${gcashTotal.toLocaleString()}` },
         ].map((s) => (
-          <div key={s.label} className={`rounded-2xl p-5 ${s.dark ? 'bg-muted/50 border border-border' : s.color === 'blue' ? 'bg-blue-500/10 border border-blue-500/20' : s.color === 'green' ? 'bg-green-500/10 border border-green-500/20' : 'bg-violet-500/10 border border-violet-500/20'}`}>
+          <div key={s.label} className="rounded-2xl p-5 border brand-card" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
             <p className="text-xs font-medium text-muted-foreground">{s.label}</p>
             <p className="text-2xl font-bold text-foreground mt-1 tracking-tight">{s.value}</p>
           </div>

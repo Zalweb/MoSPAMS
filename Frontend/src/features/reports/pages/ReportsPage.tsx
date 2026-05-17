@@ -190,18 +190,18 @@ export default function Reports() {
         <div className="space-y-4">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {[
-              { label: 'Total Revenue', value: `₱${totalRevenue.toLocaleString()}`, accent: 'bg-blue-500/20 text-blue-400', primary: true },
-              { label: 'Transactions', value: filteredTx.length.toString(), accent: 'bg-blue-500/20 text-blue-400' },
-              { label: 'Cash', value: `₱${cashTotal.toLocaleString()}`, accent: 'bg-green-500/20 text-green-400' },
-              { label: 'GCash', value: `₱${gcashTotal.toLocaleString()}`, accent: 'bg-purple-500/20 text-purple-400' },
+              { label: 'Total Revenue', value: `₱${totalRevenue.toLocaleString()}` },
+              { label: 'Transactions', value: filteredTx.length.toString() },
+              { label: 'Cash', value: `₱${cashTotal.toLocaleString()}` },
+              { label: 'GCash', value: `₱${gcashTotal.toLocaleString()}` },
             ].map((s) => (
               <div
                 key={s.label}
-                className={`rounded-2xl p-4 shadow-sm border backdrop-blur-md ${s.primary ? 'border-transparent' : 'border-border/50 bg-card dark:bg-zinc-900/40 ' + s.accent.split(' ')[0]}`}
-                style={s.primary ? { background: 'var(--brand-gradient)', boxShadow: 'var(--brand-glow)', borderColor: 'transparent' } : undefined}
+                className="rounded-2xl p-4 border brand-card"
+                style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}
               >
-                <p className={`text-[11px] font-medium ${s.primary ? '' : 'text-muted-foreground'}`} style={s.primary ? { color: 'var(--brand-text-on-primary)', opacity: 0.8 } : undefined}>{s.label}</p>
-                <p className={`text-xl font-bold mt-1 tracking-tight ${s.primary ? '' : 'text-foreground'}`} style={s.primary ? { color: 'var(--brand-text-on-primary)' } : undefined}>{s.value}</p>
+                <p className="text-[11px] font-medium text-muted-foreground">{s.label}</p>
+                <p className="text-xl font-bold mt-1 tracking-tight text-foreground">{s.value}</p>
               </div>
             ))}
           </div>
@@ -242,11 +242,11 @@ export default function Reports() {
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-3">
             {[
-              { label: 'Total Parts', value: parts.length.toString(), accent: 'bg-blue-500/20 text-blue-400' },
-              { label: 'Low Stock', value: lowStockItems.length.toString(), accent: 'bg-yellow-500/20 text-yellow-400' },
-              { label: 'Out of Stock', value: parts.filter(p => p.stock === 0).length.toString(), accent: 'bg-red-500/20 text-red-400' },
+              { label: 'Total Parts', value: parts.length.toString() },
+              { label: 'Low Stock', value: lowStockItems.length.toString() },
+              { label: 'Out of Stock', value: parts.filter(p => p.stock === 0).length.toString() },
             ].map(s => (
-              <div key={s.label} className={`rounded-2xl p-4 ${s.accent.split(' ')[0]}`}>
+              <div key={s.label} className="rounded-2xl p-4 border brand-card" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
                 <p className="text-[11px] font-medium text-muted-foreground">{s.label}</p>
                 <p className="text-xl font-bold text-foreground mt-1 tracking-tight">{s.value}</p>
               </div>
