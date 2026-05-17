@@ -71,7 +71,7 @@ export default function SuperAdminAccessControlPage() {
         <p className="text-[13px] text-muted-foreground mt-0.5">Manage SuperAdmin accounts and platform-wide access</p>
       </div>
 
-      <section className="bg-card rounded-2xl border border-border p-4 mb-4">
+      <section className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-4 mb-4">
         <h3 className="text-[13px] font-semibold text-foreground mb-3">Create Platform Admin</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           <Input placeholder="Full name" value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} className="bg-muted border-border dark:border-zinc-700 text-foreground dark:text-zinc-200 placeholder:text-muted-foreground" />
@@ -81,7 +81,7 @@ export default function SuperAdminAccessControlPage() {
         <Button className="mt-3 h-9 text-[12px]" style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }} onClick={() => void onCreate()}>Create Admin</Button>
       </section>
 
-      <section className="bg-card rounded-2xl border border-border overflow-x-auto">
+      <section className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border overflow-x-auto">
         <table className="w-full min-w-[620px]">
           <thead>
             <tr className="border-b border-border">
@@ -107,7 +107,7 @@ export default function SuperAdminAccessControlPage() {
                   <td className="px-4 py-3 text-[12px] font-medium text-foreground">{admin.name}</td>
                   <td className="px-4 py-3 text-[12px] text-muted-foreground dark:text-zinc-300">{admin.email}</td>
                   <td className="px-4 py-3">
-                    <span className={`text-[10px] font-semibold px-2 py-[3px] rounded-full border ${admin.statusCode === 'active' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-zinc-500/10 text-muted-foreground border-zinc-500/20'}`}>
+                    <span className={`text-[10px] font-semibold px-2 py-[3px] rounded-full border ${admin.statusCode === 'active' ? 'bg-foreground/10 text-foreground border-foreground/20' : 'bg-zinc-500/10 text-muted-foreground border-zinc-500/20'}`}>
                       {admin.status}
                     </span>
                   </td>

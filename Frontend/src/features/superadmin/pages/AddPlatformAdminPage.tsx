@@ -49,10 +49,10 @@ export default function AddPlatformAdminPage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-card rounded-2xl border border-border p-8 text-center"
+          className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-8 text-center"
         >
-          <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4">
-            <CheckCircle className="w-8 h-8 text-emerald-400" strokeWidth={2} />
+          <div className="w-16 h-16 rounded-full bg-foreground/10 border border-foreground/20 flex items-center justify-center mx-auto mb-4">
+            <CheckCircle className="w-8 h-8 text-foreground" strokeWidth={2} />
           </div>
 
           <h2 className="text-2xl font-bold text-foreground mb-2">Admin Created Successfully!</h2>
@@ -100,8 +100,8 @@ export default function AddPlatformAdminPage() {
                 </div>
               </div>
 
-              <div className="mt-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-                <p className="text-xs text-amber-400">
+              <div className="mt-4 p-3 bg-foreground/10 border border-foreground/20 rounded-lg">
+                <p className="text-xs text-foreground">
                   ⚠️ Make sure to save these credentials. The temporary password will not be shown again.
                 </p>
               </div>
@@ -109,8 +109,8 @@ export default function AddPlatformAdminPage() {
           )}
 
           {!credentials.temporaryPassword && (
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 mb-6">
-              <p className="text-sm text-blue-400">
+            <div className="bg-foreground/10 border border-foreground/20 rounded-xl p-4 mb-6">
+              <p className="text-sm text-foreground">
                 Admin created with custom password. They can login immediately with the credentials provided.
               </p>
             </div>
@@ -154,7 +154,7 @@ export default function AddPlatformAdminPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-card rounded-2xl border border-border p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-6 space-y-6">
         <div>
           <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
             <Shield className="w-5 h-5" strokeWidth={2} />
@@ -163,7 +163,7 @@ export default function AddPlatformAdminPage() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">
-                Full Name <span className="text-red-400">*</span>
+                Full Name <span className="text-foreground">*</span>
               </label>
               <div className="relative">
                 <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" strokeWidth={2} />
@@ -180,7 +180,7 @@ export default function AddPlatformAdminPage() {
 
             <div>
               <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">
-                Email Address <span className="text-red-400">*</span>
+                Email Address <span className="text-foreground">*</span>
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" strokeWidth={2} />
@@ -217,12 +217,12 @@ export default function AddPlatformAdminPage() {
           </div>
         </div>
 
-        <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+        <div className="bg-foreground/10 border border-foreground/20 rounded-xl p-4">
           <div className="flex gap-3">
-            <Shield className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" strokeWidth={2} />
+            <Shield className="w-5 h-5 text-foreground shrink-0 mt-0.5" strokeWidth={2} />
             <div>
-              <h3 className="text-sm font-semibold text-blue-400 mb-1">Platform Admin Permissions</h3>
-              <p className="text-xs text-blue-300/80">
+              <h3 className="text-sm font-semibold text-foreground mb-1">Platform Admin Permissions</h3>
+              <p className="text-xs text-foreground/80">
                 Platform admins have full access to all SuperAdmin features including shop management, 
                 billing, analytics, and system settings. Only create admin accounts for trusted personnel.
               </p>

@@ -88,8 +88,8 @@ export default function PaymentsHistoryPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-card rounded-xl border border-border p-5">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-              <DollarSign className="w-5 h-5 text-emerald-400" strokeWidth={2} />
+            <div className="w-10 h-10 rounded-lg bg-foreground/10 border border-foreground/20 flex items-center justify-center">
+              <DollarSign className="w-5 h-5 text-foreground" strokeWidth={2} />
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Total Paid</p>
@@ -100,8 +100,8 @@ export default function PaymentsHistoryPage() {
 
         <div className="bg-card rounded-xl border border-border p-5">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-              <Calendar className="w-5 h-5 text-amber-400" strokeWidth={2} />
+            <div className="w-10 h-10 rounded-lg bg-foreground/10 border border-foreground/20 flex items-center justify-center">
+              <Calendar className="w-5 h-5 text-foreground" strokeWidth={2} />
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Pending</p>
@@ -142,7 +142,7 @@ export default function PaymentsHistoryPage() {
       </div>
 
       {/* Payments Table */}
-      <div className="bg-card rounded-2xl border border-border overflow-hidden">
+      <div className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
@@ -225,10 +225,10 @@ export default function PaymentsHistoryPage() {
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    PAID: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    PENDING: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-    FAILED: 'bg-red-500/10 text-red-400 border-red-500/20',
-    REFUNDED: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    PAID: 'bg-foreground/10 text-foreground border-foreground/20',
+    PENDING: 'bg-foreground/10 text-foreground border-foreground/20',
+    FAILED: 'bg-foreground/10 text-foreground border-foreground/20',
+    REFUNDED: 'bg-foreground/10 text-foreground border-foreground/20',
   };
 
   const style = styles[status] || 'bg-zinc-500/10 text-muted-foreground border-zinc-500/20';

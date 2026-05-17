@@ -106,7 +106,7 @@ export default function SuperAdminSubscriptionsPage() {
       <div className="mb-7"><h2 className="text-[22px] font-bold text-foreground tracking-tight">Subscription & Billing</h2><p className="text-[13px] text-muted-foreground mt-0.5">Manage plan tiers, shop subscriptions, and payment records</p></div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-6">
-        <section className="bg-card rounded-2xl border border-border p-4">
+        <section className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-4">
           <h3 className="text-[13px] font-semibold text-foreground mb-3">{editingPlanId ? 'Edit Plan' : 'Create Plan'}</h3>
           <div className="space-y-2.5">
             <Input placeholder="Plan code" value={planForm.planCode} onChange={(e) => setPlanForm(p => ({ ...p, planCode: e.target.value }))} className="bg-muted border-border dark:border-zinc-700 text-foreground dark:text-zinc-200 placeholder:text-muted-foreground" />
@@ -119,7 +119,7 @@ export default function SuperAdminSubscriptionsPage() {
           </div>
         </section>
 
-        <section className="bg-card rounded-2xl border border-border p-4">
+        <section className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-4">
           <h3 className="text-[13px] font-semibold text-foreground mb-3">Assign Subscription</h3>
           <div className="space-y-2.5">
             <select className="w-full h-9 rounded-xl border border-border dark:border-zinc-700 bg-muted text-foreground dark:text-zinc-200 px-3 text-[12px]" value={subscriptionForm.shopId} onChange={(e) => setSubscriptionForm(p => ({ ...p, shopId: e.target.value }))}><option value="">Select shop</option>{shops.map(s => <option key={s.shopId} value={s.shopId}>{s.shopName}</option>)}</select>
@@ -130,7 +130,7 @@ export default function SuperAdminSubscriptionsPage() {
           </div>
         </section>
 
-        <section className="bg-card rounded-2xl border border-border p-4">
+        <section className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-4">
           <h3 className="text-[13px] font-semibold text-foreground mb-3">Record Payment</h3>
           <div className="space-y-2.5">
             <select className="w-full h-9 rounded-xl border border-border dark:border-zinc-700 bg-muted text-foreground dark:text-zinc-200 px-3 text-[12px]" value={paymentForm.shopSubscriptionId} onChange={(e) => setPaymentForm(p => ({ ...p, shopSubscriptionId: e.target.value }))}><option value="">Select subscription</option>{subscriptions.map(s => <option key={s.shopSubscriptionId} value={s.shopSubscriptionId}>{s.shopName} | {s.planName}</option>)}</select>
@@ -144,7 +144,7 @@ export default function SuperAdminSubscriptionsPage() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <section className="bg-card rounded-2xl border border-border p-4 overflow-x-auto">
+        <section className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-4 overflow-x-auto">
           <h3 className="text-[13px] font-semibold text-foreground mb-3">Plans</h3>
           <table className="w-full text-[12px] text-muted-foreground dark:text-zinc-300 min-w-[360px]"><thead><tr className="border-b border-border"><th className="text-left py-2 text-muted-foreground">Code</th><th className="text-left py-2 text-muted-foreground">Name</th><th className="text-left py-2 text-muted-foreground">Monthly</th><th className="text-right py-2 text-muted-foreground"></th></tr></thead>
           <tbody className="divide-y divide-border dark:divide-zinc-800">
@@ -156,7 +156,7 @@ export default function SuperAdminSubscriptionsPage() {
           </tbody></table>
         </section>
 
-        <section className="bg-card rounded-2xl border border-border p-4 overflow-x-auto">
+        <section className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-4 overflow-x-auto">
           <h3 className="text-[13px] font-semibold text-foreground mb-3">Expiring in 7 Days</h3>
           <table className="w-full text-[12px] text-muted-foreground dark:text-zinc-300 min-w-[360px]"><thead><tr className="border-b border-border"><th className="text-left py-2 text-muted-foreground">Shop</th><th className="text-left py-2 text-muted-foreground">Plan</th><th className="text-left py-2 text-muted-foreground">Days Left</th></tr></thead>
           <tbody className="divide-y divide-border dark:divide-zinc-800">
@@ -168,7 +168,7 @@ export default function SuperAdminSubscriptionsPage() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4">
-        <section className="bg-card rounded-2xl border border-border p-4 overflow-x-auto">
+        <section className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-4 overflow-x-auto">
           <h3 className="text-[13px] font-semibold text-foreground mb-3">Subscriptions</h3>
           <table className="w-full text-[12px] text-muted-foreground dark:text-zinc-300 min-w-[540px]"><thead><tr className="border-b border-border"><th className="text-left py-2 text-muted-foreground">Shop</th><th className="text-left py-2 text-muted-foreground">Plan</th><th className="text-left py-2 text-muted-foreground">Status</th><th className="text-left py-2 text-muted-foreground">Ends At</th><th className="text-right py-2 text-muted-foreground"></th></tr></thead>
           <tbody className="divide-y divide-border dark:divide-zinc-800">
@@ -178,7 +178,7 @@ export default function SuperAdminSubscriptionsPage() {
                   <td className="py-2 text-foreground">{sub.shopName}</td><td className="py-2">{sub.planName}</td>
                   <td className="py-2"><select className="bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 text-foreground dark:text-zinc-200 rounded px-2 py-1 text-[11px]" value={editingSubStatus} onChange={e => setEditingSubStatus(e.target.value)}><option value="PENDING">PENDING</option><option value="ACTIVE">ACTIVE</option><option value="EXPIRED">EXPIRED</option><option value="CANCELLED">CANCELLED</option></select></td>
                   <td className="py-2"><input type="date" className="bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 text-foreground dark:text-zinc-200 rounded px-2 py-1 text-[11px] w-[130px]" value={editingSubEndsAt} onChange={e => setEditingSubEndsAt(e.target.value)} /></td>
-                  <td className="py-2 text-right"><button onClick={() => void saveEditSub()} className="text-emerald-400 hover:text-emerald-300 text-[11px] font-semibold mr-2">Save</button><button onClick={cancelEditSub} className="text-muted-foreground hover:text-muted-foreground dark:text-zinc-300 text-[11px]">Cancel</button></td>
+                  <td className="py-2 text-right"><button onClick={() => void saveEditSub()} className="text-foreground hover:text-foreground text-[11px] font-semibold mr-2">Save</button><button onClick={cancelEditSub} className="text-muted-foreground hover:text-muted-foreground dark:text-zinc-300 text-[11px]">Cancel</button></td>
                 </tr>
               ) : (
                 <tr key={sub.shopSubscriptionId} className="hover:bg-muted/50"><td className="py-2">{sub.shopName}</td><td className="py-2">{sub.planName}</td><td className="py-2"><StatusBadge status={sub.status} /></td><td className="py-2">{sub.endsAt ? new Date(sub.endsAt).toLocaleDateString() : 'N/A'}</td>
@@ -189,7 +189,7 @@ export default function SuperAdminSubscriptionsPage() {
           </tbody></table>
         </section>
 
-        <section className="bg-card rounded-2xl border border-border p-4 overflow-x-auto">
+        <section className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-4 overflow-x-auto">
           <h3 className="text-[13px] font-semibold text-foreground mb-3">Payment History</h3>
           <table className="w-full text-[12px] text-muted-foreground dark:text-zinc-300 min-w-[480px]"><thead><tr className="border-b border-border"><th className="text-left py-2 text-muted-foreground">Shop</th><th className="text-left py-2 text-muted-foreground">Amount</th><th className="text-left py-2 text-muted-foreground">Status</th><th className="text-left py-2 text-muted-foreground">Date</th></tr></thead>
           <tbody className="divide-y divide-border dark:divide-zinc-800">
@@ -202,6 +202,6 @@ export default function SuperAdminSubscriptionsPage() {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = { PAID: 'bg-emerald-500/10 text-emerald-400', ACTIVE: 'bg-emerald-500/10 text-emerald-400', PENDING: 'bg-amber-500/10 text-amber-400', FAILED: 'bg-red-500/10 text-red-400', REFUNDED: 'bg-blue-500/10 text-blue-400', EXPIRED: 'bg-zinc-500/10 text-muted-foreground', CANCELLED: 'bg-red-500/10 text-red-400', };
+  const styles: Record<string, string> = { PAID: 'bg-foreground/10 text-foreground', ACTIVE: 'bg-foreground/10 text-foreground', PENDING: 'bg-foreground/10 text-foreground', FAILED: 'bg-foreground/10 text-foreground', REFUNDED: 'bg-foreground/10 text-foreground', EXPIRED: 'bg-zinc-500/10 text-muted-foreground', CANCELLED: 'bg-foreground/10 text-foreground', };
   return <span className={`px-2 py-0.5 rounded text-[11px] font-semibold ${styles[status] || 'bg-zinc-500/10 text-muted-foreground'}`}>{status}</span>;
 }

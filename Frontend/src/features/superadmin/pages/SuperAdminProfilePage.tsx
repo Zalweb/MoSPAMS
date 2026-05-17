@@ -37,7 +37,7 @@ export default function SuperAdminProfilePage() {
       </div>
 
       <div className="space-y-6">
-        <div className="bg-card rounded-2xl border border-border p-6">
+        <div className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-6">
           <h3 className="text-[15px] font-semibold text-foreground mb-6 flex items-center gap-2">
             <User className="w-5 h-5" strokeWidth={1.75} />
             Account Information

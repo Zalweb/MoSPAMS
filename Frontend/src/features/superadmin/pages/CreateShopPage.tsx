@@ -48,15 +48,15 @@ export default function CreateShopPage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-card rounded-2xl border border-border p-8 text-center"
+          className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-8 text-center"
         >
-          <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4">
-            <CheckCircle className="w-8 h-8 text-emerald-400" strokeWidth={2} />
+          <div className="w-16 h-16 rounded-full bg-foreground/10 border border-foreground/20 flex items-center justify-center mx-auto mb-4">
+            <CheckCircle className="w-8 h-8 text-foreground" strokeWidth={2} />
           </div>
 
           <h2 className="text-2xl font-bold text-foreground mb-2">Shop Created Successfully!</h2>
           <p className="text-muted-foreground mb-2">The shop has been created and owner credentials have been generated.</p>
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-foreground/10 border border-foreground/20 text-foreground text-sm font-medium mb-6">
             <span>Shop Domain:</span>
             <span className="font-mono font-bold">{formData.shopName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}.mospams.shop</span>
           </div>
@@ -138,8 +138,8 @@ export default function CreateShopPage() {
               </div>
             </div>
 
-            <div className="mt-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-              <p className="text-xs text-amber-400">
+            <div className="mt-4 p-3 bg-foreground/10 border border-foreground/20 rounded-lg">
+              <p className="text-xs text-foreground">
                 ⚠️ Make sure to save these credentials. The temporary password will not be shown again.
               </p>
             </div>
@@ -190,7 +190,7 @@ export default function CreateShopPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-card rounded-2xl border border-border p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-6 space-y-6">
         {/* Shop Information */}
         <div>
           <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
@@ -200,7 +200,7 @@ export default function CreateShopPage() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">
-                Shop Name <span className="text-red-400">*</span>
+                Shop Name <span className="text-foreground">*</span>
               </label>
               <input
                 type="text"
@@ -213,7 +213,7 @@ export default function CreateShopPage() {
               {formData.shopName && (
                 <p className="text-xs text-muted-foreground mt-2 flex items-center gap-2">
                   <span>Domain will be:</span>
-                  <span className="font-mono text-blue-400">
+                  <span className="font-mono text-foreground">
                     {formData.shopName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'shop-name'}.mospams.shop
                   </span>
                 </p>
@@ -266,7 +266,7 @@ export default function CreateShopPage() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">
-                Owner Name <span className="text-red-400">*</span>
+                Owner Name <span className="text-foreground">*</span>
               </label>
               <input
                 type="text"
@@ -280,7 +280,7 @@ export default function CreateShopPage() {
 
             <div>
               <label className="block text-sm font-medium text-muted-foreground dark:text-zinc-300 mb-2">
-                Owner Email <span className="text-red-400">*</span>
+                Owner Email <span className="text-foreground">*</span>
               </label>
               <input
                 type="email"

@@ -24,14 +24,14 @@ export default function UserStatisticsPage() {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {d?.byRole?.length > 0 && (
-          <div className="bg-card rounded-2xl border border-border p-6"><h2 className="text-[16px] font-bold text-foreground mb-4">Users by Role</h2><div className="space-y-3">{d.byRole.map((r: any) => { const maxVal = Math.max(...d.byRole.map((x: any) => x.count), 1); const pct = Math.round((r.count / maxVal) * 100); return <div key={r.role}><div className="flex justify-between text-sm mb-1"><span className="text-muted-foreground dark:text-zinc-300">{r.role}</span><span className="text-foreground font-semibold">{r.count}</span></div><div className="h-2 w-full bg-muted rounded-full overflow-hidden"><div className="h-full bg-violet-500 rounded-full" style={{ width: `${pct}%` }} /></div></div>; })}</div></div>
+          <div className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-6"><h2 className="text-[16px] font-bold text-foreground mb-4">Users by Role</h2><div className="space-y-3">{d.byRole.map((r: any) => { const maxVal = Math.max(...d.byRole.map((x: any) => x.count), 1); const pct = Math.round((r.count / maxVal) * 100); return <div key={r.role}><div className="flex justify-between text-sm mb-1"><span className="text-muted-foreground dark:text-zinc-300">{r.role}</span><span className="text-foreground font-semibold">{r.count}</span></div><div className="h-2 w-full bg-muted rounded-full overflow-hidden"><div className="h-full bg-foreground rounded-full" style={{ width: `${pct}%` }} /></div></div>; })}</div></div>
         )}
         {d?.byShop?.length > 0 && (
-          <div className="bg-card rounded-2xl border border-border p-6"><h2 className="text-[16px] font-bold text-foreground mb-4">Top Shops by Users</h2><div className="space-y-3">{d.byShop.map((s: any) => { const maxVal = Math.max(...d.byShop.map((x: any) => x.count), 1); const pct = Math.round((s.count / maxVal) * 100); return <div key={s.shopName}><div className="flex justify-between text-sm mb-1"><span className="text-muted-foreground dark:text-zinc-300">{s.shopName}</span><span className="text-foreground font-semibold">{s.count}</span></div><div className="h-2 w-full bg-muted rounded-full overflow-hidden"><div className="h-full bg-violet-500 rounded-full" style={{ width: `${pct}%` }} /></div></div>; })}</div></div>
+          <div className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-6"><h2 className="text-[16px] font-bold text-foreground mb-4">Top Shops by Users</h2><div className="space-y-3">{d.byShop.map((s: any) => { const maxVal = Math.max(...d.byShop.map((x: any) => x.count), 1); const pct = Math.round((s.count / maxVal) * 100); return <div key={s.shopName}><div className="flex justify-between text-sm mb-1"><span className="text-muted-foreground dark:text-zinc-300">{s.shopName}</span><span className="text-foreground font-semibold">{s.count}</span></div><div className="h-2 w-full bg-muted rounded-full overflow-hidden"><div className="h-full bg-foreground rounded-full" style={{ width: `${pct}%` }} /></div></div>; })}</div></div>
         )}
       </div>
       {d?.monthlySignups?.length > 0 && (
-        <div className="bg-card rounded-2xl border border-border p-6">
+        <div className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-6">
           <h2 className="text-[16px] font-bold text-foreground mb-4">Monthly Signups</h2>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={d.monthlySignups} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
@@ -60,6 +60,6 @@ export default function UserStatisticsPage() {
 }
 
 function StatCard({ icon: Icon, label, value, color = 'zinc' }: any) {
-  const colors: any = { emerald: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400', blue: 'bg-blue-500/10 border-blue-500/20 text-blue-400', amber: 'bg-amber-500/10 border-amber-500/20 text-amber-400', zinc: 'bg-secondary dark:bg-zinc-800 border-border dark:border-zinc-700 text-foreground' };
+  const colors: any = { emerald: 'bg-foreground/10 border-foreground/20 text-foreground', blue: 'bg-foreground/10 border-foreground/20 text-foreground', amber: 'bg-foreground/10 border-foreground/20 text-foreground', zinc: 'bg-secondary dark:bg-zinc-800 border-border dark:border-zinc-700 text-foreground' };
   return <div className="bg-card rounded-xl border border-border p-5"><div className="flex items-center gap-3"><div className={`w-10 h-10 rounded-lg flex items-center justify-center border ${colors[color]}`}><Icon className="w-5 h-5" /></div><div><p className="text-xs text-muted-foreground">{label}</p><p className="text-xl font-bold text-foreground">{value}</p></div></div></div>;
 }

@@ -89,7 +89,7 @@ export default function PendingShopsPage() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
         </div>
       ) : shops.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
+        <div className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-12 text-center">
           <CheckCircle className="w-16 h-16 mx-auto mb-4 text-muted-foreground dark:text-zinc-600" />
           <h3 className="text-lg font-semibold text-foreground mb-2">All Caught Up!</h3>
           <p className="text-muted-foreground">No pending shop approvals at the moment</p>
@@ -101,13 +101,13 @@ export default function PendingShopsPage() {
               key={shop.shopId}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-card rounded-2xl border border-border p-6 hover:border-border dark:border-zinc-700 transition-all"
+              className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-6 hover:border-border dark:border-zinc-700 transition-all"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="w-12 h-12 rounded-xl bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 flex items-center justify-center">
                   <Store className="w-6 h-6 text-foreground" strokeWidth={2} />
                 </div>
-                <span className="px-2 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold">
+                <span className="px-2 py-1 rounded-full bg-foreground/10 text-foreground border border-foreground/20 text-xs font-semibold">
                   Pending
                 </span>
               </div>
@@ -150,7 +150,7 @@ export default function PendingShopsPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-card rounded-2xl border border-border p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
           >
             <div className="flex items-start justify-between mb-6">
               <div>
@@ -213,7 +213,7 @@ export default function PendingShopsPage() {
               <button
                 onClick={() => handleApprove(selectedShop.shopId)}
                 disabled={actionLoading}
-                className="flex-1 px-6 py-3 rounded-lg bg-emerald-500 text-foreground font-semibold hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 px-6 py-3 rounded-lg bg-foreground text-foreground font-semibold hover:bg-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 <CheckCircle className="w-5 h-5" strokeWidth={2} />
                 {actionLoading ? 'Approving...' : 'Approve Shop'}
@@ -221,7 +221,7 @@ export default function PendingShopsPage() {
               <button
                 onClick={() => setShowRejectModal(true)}
                 disabled={actionLoading}
-                className="flex-1 px-6 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 font-semibold hover:bg-red-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 px-6 py-3 rounded-lg bg-foreground/10 border border-foreground/20 text-foreground font-semibold hover:bg-foreground/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 <XCircle className="w-5 h-5" strokeWidth={2} />
                 Reject
@@ -237,11 +237,11 @@ export default function PendingShopsPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-card rounded-2xl border border-border p-6 max-w-md w-full"
+            className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-6 max-w-md w-full"
           >
             <div className="flex items-start gap-3 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0">
-                <AlertCircle className="w-5 h-5 text-red-400" strokeWidth={2} />
+              <div className="w-10 h-10 rounded-lg bg-foreground/10 border border-foreground/20 flex items-center justify-center shrink-0">
+                <AlertCircle className="w-5 h-5 text-foreground" strokeWidth={2} />
               </div>
               <div>
                 <h3 className="text-lg font-bold text-foreground mb-1">Reject Shop Registration</h3>
@@ -269,7 +269,7 @@ export default function PendingShopsPage() {
               <button
                 onClick={() => handleReject(selectedShop.shopId)}
                 disabled={actionLoading}
-                className="flex-1 px-4 py-2 rounded-lg bg-red-500 text-foreground text-sm font-semibold hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-2 rounded-lg bg-foreground text-foreground text-sm font-semibold hover:bg-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {actionLoading ? 'Rejecting...' : 'Confirm Reject'}
               </button>

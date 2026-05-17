@@ -64,7 +64,7 @@ export default function SuperAdminSettingsPage() {
         <p className="text-[13px] text-muted-foreground">Loading platform settings...</p>
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-[1.4fr,1fr] gap-4">
-          <section className="bg-card rounded-2xl border border-border p-5">
+          <section className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-5">
             <h3 className="text-[13px] font-semibold text-foreground mb-4">Configuration</h3>
 
             <label className="flex items-center justify-between mb-4">
@@ -103,18 +103,18 @@ export default function SuperAdminSettingsPage() {
           </section>
 
           <section className="space-y-4">
-            <div className="bg-card rounded-2xl border border-border p-5">
+            <div className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-5">
               <h3 className="text-[13px] font-semibold text-foreground mb-3">Database Health</h3>
               <p className="text-[12px] text-muted-foreground dark:text-zinc-300">
                 Status:{' '}
-                <span className={health.database.ok ? 'text-green-400 font-semibold' : 'text-red-400 font-semibold'}>
+                <span className={health.database.ok ? 'text-foreground font-semibold' : 'text-foreground font-semibold'}>
                   {health.database.ok ? 'Healthy' : 'Issue Detected'}
                 </span>
               </p>
               <p className="text-[11px] text-muted-foreground mt-1">{health.database.message}</p>
             </div>
 
-            <div className="bg-card rounded-2xl border border-border p-5">
+            <div className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-5">
               <h3 className="text-[13px] font-semibold text-foreground mb-3">System Metrics</h3>
               <Metric label="Shops" value={health.counts.shops} />
               <Metric label="Users" value={health.counts.users} />
@@ -122,7 +122,7 @@ export default function SuperAdminSettingsPage() {
               <Metric label="Active Subscriptions" value={health.counts.activeSubscriptions} />
             </div>
 
-            <div className="bg-card rounded-2xl border border-border p-5">
+            <div className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-5">
               <h3 className="text-[13px] font-semibold text-foreground mb-3">Version</h3>
               <p className="text-[18px] font-bold text-foreground">{health.version}</p>
               <p className="text-[11px] text-muted-foreground mt-1">Generated {new Date(health.generatedAt).toLocaleString()}</p>

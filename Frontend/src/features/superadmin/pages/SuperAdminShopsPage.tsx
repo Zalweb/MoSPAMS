@@ -129,7 +129,7 @@ export default function SuperAdminShopsPage() {
         />
       </div>
 
-      <div className="bg-card rounded-2xl border border-border overflow-x-auto">
+      <div className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border overflow-x-auto">
         <table className="w-full min-w-[860px]">
           <thead>
             <tr className="border-b border-border">
@@ -165,7 +165,7 @@ export default function SuperAdminShopsPage() {
                       <p className="text-[11px] text-muted-foreground">Applicant: {shop.applicant.name} ({shop.applicant.email ?? 'No email'})</p>
                     ) : null}
                     {shop.registration.status === 'REJECTED' && shop.registration.rejectionReason ? (
-                      <p className="text-[11px] text-red-400">Rejected: {shop.registration.rejectionReason}</p>
+                      <p className="text-[11px] text-foreground">Rejected: {shop.registration.rejectionReason}</p>
                     ) : null}
                   </td>
                   <td className="px-4 py-3 text-[12px] text-muted-foreground dark:text-zinc-300">
@@ -270,21 +270,21 @@ export default function SuperAdminShopsPage() {
 function statusTone(code: string) {
   switch (code) {
     case 'ACTIVE':
-      return 'bg-green-500/10 text-green-400 border border-green-500/20';
+      return 'bg-foreground/10 text-foreground border border-foreground/20';
     case 'SUSPENDED':
-      return 'bg-red-500/10 text-red-400 border border-red-500/20';
+      return 'bg-foreground/10 text-foreground border border-foreground/20';
     case 'PENDING':
-      return 'bg-orange-500/10 text-orange-400 border border-orange-500/20';
+      return 'bg-foreground/10 text-foreground border border-foreground/20';
     default:
       return 'bg-zinc-500/10 text-muted-foreground border border-zinc-500/20';
   }
 }
 
 function Stat({ label, value, icon: Icon, tone }: { label: string; value: number; icon: typeof Wrench; tone: 'slate' | 'amber' | 'green' }) {
-  const bg = tone === 'amber' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' : tone === 'green' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-muted text-muted-foreground dark:text-zinc-300 border-border dark:border-zinc-700';
+  const bg = tone === 'amber' ? 'bg-foreground/10 text-foreground border-foreground/20' : tone === 'green' ? 'bg-foreground/10 text-foreground border-foreground/20' : 'bg-muted text-muted-foreground dark:text-zinc-300 border-border dark:border-zinc-700';
 
   return (
-    <div className="bg-card rounded-2xl border border-border p-4">
+    <div className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-4">
       <div className={`w-8 h-8 rounded-[10px] border ${bg} flex items-center justify-center mb-3`}>
         <Icon className="w-[14px] h-[14px]" strokeWidth={2} />
       </div>

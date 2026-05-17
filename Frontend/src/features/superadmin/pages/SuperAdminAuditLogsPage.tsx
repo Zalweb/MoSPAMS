@@ -71,7 +71,7 @@ export default function SuperAdminAuditLogsPage() {
         </div>
       </div>
 
-      <div className="bg-card rounded-2xl border border-border overflow-x-auto">
+      <div className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border overflow-x-auto">
         <table className="w-full min-w-[900px]">
           <thead>
             <tr className="border-b border-border">

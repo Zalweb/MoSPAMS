@@ -17,7 +17,7 @@ export function SupportTicketsPage() {
   return (
     <div className="space-y-6">
       <div><h1 className="text-2xl sm:text-[28px] font-bold text-foreground tracking-tight">Support Tickets</h1><p className="text-[13px] sm:text-[14px] text-muted-foreground mt-1">Active shop directory — ticketing system coming in a future update.</p></div>
-      <div className="bg-card rounded-2xl border border-border overflow-hidden">
+      <div className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm"><thead><tr className="border-b border-border bg-muted/50 text-[11px] font-semibold text-muted-foreground uppercase"><th className="px-6 py-4">Shop</th><th className="px-6 py-4">Subdomain</th><th className="px-6 py-4">Phone</th><th className="px-6 py-4">Created</th></tr></thead>
           <tbody>{shops.map((s: any) => (
@@ -51,7 +51,7 @@ export function ShopFeedbackPage() {
   return (
     <div className="space-y-6">
       <div><h1 className="text-2xl sm:text-[28px] font-bold text-foreground tracking-tight">Shop Feedback</h1><p className="text-[13px] sm:text-[14px] text-muted-foreground mt-1">Review feedback from shops</p></div>
-      <div className="bg-card rounded-2xl border border-border p-12 text-center">
+      <div className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-12 text-center">
         <div className="w-16 h-16 rounded-full bg-muted border border-border flex items-center justify-center mx-auto mb-4"><MessageSquare className="w-8 h-8 text-muted-foreground dark:text-zinc-600" /></div>
         <h3 className="text-lg font-semibold text-foreground mb-2">Not Yet Available</h3>
         <p className="text-muted-foreground max-w-md mx-auto">{message || 'Shops will be able to submit feedback through their dashboards. This feature is planned for a future release.'}</p>

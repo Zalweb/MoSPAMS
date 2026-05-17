@@ -68,7 +68,7 @@ export default function SystemPerformancePage() {
       ) : data ? (
         <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-6">
           {/* System Status */}
-          <motion.div variants={itemVariants} className="bg-card rounded-2xl border border-border p-6">
+          <motion.div variants={itemVariants} className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
                 <Activity className="w-5 h-5" strokeWidth={2} />
@@ -77,13 +77,13 @@ export default function SystemPerformancePage() {
               <div className="flex items-center gap-2">
                 {data.database.ok ? (
                   <>
-                    <CheckCircle className="w-5 h-5 text-emerald-400" strokeWidth={2} />
-                    <span className="text-sm font-semibold text-emerald-400">All Systems Operational</span>
+                    <CheckCircle className="w-5 h-5 text-foreground" strokeWidth={2} />
+                    <span className="text-sm font-semibold text-foreground">All Systems Operational</span>
                   </>
                 ) : (
                   <>
-                    <AlertTriangle className="w-5 h-5 text-red-400" strokeWidth={2} />
-                    <span className="text-sm font-semibold text-red-400">System Issues Detected</span>
+                    <AlertTriangle className="w-5 h-5 text-foreground" strokeWidth={2} />
+                    <span className="text-sm font-semibold text-foreground">System Issues Detected</span>
                   </>
                 )}
               </div>
@@ -94,14 +94,14 @@ export default function SystemPerformancePage() {
                 <div className="flex items-center gap-3 mb-2">
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                     data.database.ok 
-                      ? 'bg-emerald-500/10 border border-emerald-500/20' 
-                      : 'bg-red-500/10 border border-red-500/20'
+                      ? 'bg-foreground/10 border border-foreground/20' 
+                      : 'bg-foreground/10 border border-foreground/20'
                   }`}>
-                    <Database className={`w-5 h-5 ${data.database.ok ? 'text-emerald-400' : 'text-red-400'}`} strokeWidth={2} />
+                    <Database className={`w-5 h-5 ${data.database.ok ? 'text-foreground' : 'text-foreground'}`} strokeWidth={2} />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-foreground">Database</p>
-                    <p className={`text-xs ${data.database.ok ? 'text-emerald-400' : 'text-red-400'}`}>
+                    <p className={`text-xs ${data.database.ok ? 'text-foreground' : 'text-foreground'}`}>
                       {data.database.ok ? 'Connected' : 'Disconnected'}
                     </p>
                   </div>
@@ -111,12 +111,12 @@ export default function SystemPerformancePage() {
 
               <div className="bg-muted rounded-xl border border-border p-4">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-                    <Server className="w-5 h-5 text-blue-400" strokeWidth={2} />
+                  <div className="w-10 h-10 rounded-lg bg-foreground/10 border border-foreground/20 flex items-center justify-center">
+                    <Server className="w-5 h-5 text-foreground" strokeWidth={2} />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-foreground">Platform Version</p>
-                    <p className="text-xs text-blue-400">{data.version}</p>
+                    <p className="text-xs text-foreground">{data.version}</p>
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
@@ -127,7 +127,7 @@ export default function SystemPerformancePage() {
           </motion.div>
 
           {/* Platform Metrics */}
-          <motion.div variants={itemVariants} className="bg-card rounded-2xl border border-border p-6">
+          <motion.div variants={itemVariants} className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-6">
             <h2 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
               <Activity className="w-5 h-5" strokeWidth={2} />
               Platform Metrics
@@ -162,7 +162,7 @@ export default function SystemPerformancePage() {
           </motion.div>
 
           {/* System Information */}
-          <motion.div variants={itemVariants} className="bg-card rounded-2xl border border-border p-6">
+          <motion.div variants={itemVariants} className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-6">
             <h2 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
               <Server className="w-5 h-5" strokeWidth={2} />
               System Information
@@ -180,7 +180,7 @@ export default function SystemPerformancePage() {
           </motion.div>
         </motion.div>
       ) : (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
+        <div className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-12 text-center">
           <AlertTriangle className="w-16 h-16 mx-auto mb-4 text-muted-foreground dark:text-zinc-600" />
           <h3 className="text-lg font-semibold text-foreground mb-2">Unable to Load System Health</h3>
           <p className="text-muted-foreground mb-4">Failed to retrieve system performance data</p>
@@ -204,10 +204,10 @@ function MetricCard({ icon: Icon, label, value, color }: {
   color: 'blue' | 'emerald' | 'amber' | 'green';
 }) {
   const colorClasses = {
-    blue: 'bg-blue-500/10 border-blue-500/20 text-blue-400',
-    emerald: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
-    amber: 'bg-amber-500/10 border-amber-500/20 text-amber-400',
-    green: 'bg-green-500/10 border-green-500/20 text-green-400',
+    blue: 'bg-foreground/10 border-foreground/20 text-foreground',
+    emerald: 'bg-foreground/10 border-foreground/20 text-foreground',
+    amber: 'bg-foreground/10 border-foreground/20 text-foreground',
+    green: 'bg-foreground/10 border-foreground/20 text-foreground',
   };
 
   return (

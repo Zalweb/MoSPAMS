@@ -23,7 +23,7 @@ export default function ShopGrowthPage() {
         <StatCard icon={TrendingUp} label="Activation Rate" value={`${d?.summary?.activationRate ?? 0}%`} color="blue" />
       </div>
       {d?.monthlyGrowth?.length > 0 && (
-        <div className="bg-card rounded-2xl border border-border p-6">
+        <div className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-6">
           <h2 className="text-[16px] font-bold text-foreground mb-4">Monthly Shop Registrations</h2>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={d.monthlyGrowth} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
@@ -52,6 +52,6 @@ export default function ShopGrowthPage() {
 }
 
 function StatCard({ icon: Icon, label, value, color = 'zinc' }: any) {
-  const colors: any = { emerald: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400', blue: 'bg-blue-500/10 border-blue-500/20 text-blue-400', amber: 'bg-amber-500/10 border-amber-500/20 text-amber-400', zinc: 'bg-secondary dark:bg-zinc-800 border-border dark:border-zinc-700 text-foreground' };
+  const colors: any = { emerald: 'bg-foreground/10 border-foreground/20 text-foreground', blue: 'bg-foreground/10 border-foreground/20 text-foreground', amber: 'bg-foreground/10 border-foreground/20 text-foreground', zinc: 'bg-secondary dark:bg-zinc-800 border-border dark:border-zinc-700 text-foreground' };
   return <div className="bg-card rounded-xl border border-border p-5"><div className="flex items-center gap-3"><div className={`w-10 h-10 rounded-lg flex items-center justify-center border ${colors[color]}`}><Icon className="w-5 h-5" /></div><div><p className="text-xs text-muted-foreground">{label}</p><p className="text-xl font-bold text-foreground">{value}</p></div></div></div>;
 }

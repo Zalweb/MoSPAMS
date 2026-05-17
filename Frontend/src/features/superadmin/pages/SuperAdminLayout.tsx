@@ -315,7 +315,7 @@ export default function SuperAdminLayout() {
                 >
                   <Bell className="w-5 h-5" />
                   {(notifData.pendingShops > 0 || notifData.expiringSubscriptions.length > 0) && (
-                    <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-background" />
+                    <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-foreground rounded-full border-2 border-background" />
                   )}
                 </button>
 
@@ -337,12 +337,12 @@ export default function SuperAdminLayout() {
                           <>
                             {notifData.pendingShops > 0 && (
                               <button onClick={() => { setNotifOpen(false); navigate('/superadmin/shops/pending'); }} className="w-full text-left px-5 py-4 border-b border-border/50 hover:bg-secondary/50 transition-colors">
-                                <p className="text-xs font-bold text-amber-500">{notifData.pendingShops} pending shop approvals</p>
+                                <p className="text-xs font-bold text-foreground">{notifData.pendingShops} pending shop approvals</p>
                               </button>
                             )}
                             {notifData.expiringSubscriptions.map((s: any, i: number) => (
                               <button key={i} onClick={() => { setNotifOpen(false); navigate('/superadmin/billing/overdue'); }} className="w-full text-left px-5 py-4 border-b border-border/50 hover:bg-secondary/50 transition-colors">
-                                <p className="text-xs font-bold text-red-500">{s.shopName}</p>
+                                <p className="text-xs font-bold text-foreground">{s.shopName}</p>
                                 <p className="text-[11px] text-muted-foreground mt-1">Expiring in {s.daysLeft} days</p>
                               </button>
                             ))}
@@ -384,7 +384,7 @@ export default function SuperAdminLayout() {
                       </button>
                       <button
                         onClick={() => { setProfileOpen(false); handleLogout(); }}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 mt-1 rounded-xl text-xs font-bold text-red-500 hover:bg-red-500/10 transition-colors"
+                        className="w-full flex items-center gap-3 px-3 py-2.5 mt-1 rounded-xl text-xs font-bold text-foreground hover:bg-foreground/10 transition-colors"
                       >
                         <LogOut className="w-4 h-4" strokeWidth={2.5} /> Sign Out
                       </button>
