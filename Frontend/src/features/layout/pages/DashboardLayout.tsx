@@ -248,7 +248,7 @@ export default function DashboardLayout() {
                 )}
               </AnimatePresence>
 
-              <div className={`space-y-0.5 ${isCollapsed ? 'px-2' : 'px-3'}`}>
+              <div className={`space-y-0.5 ${isCollapsed ? 'px-2' : 'pl-3 pr-0'}`}>
                 {group.items.map(item => {
                   const isActive = item.end
                     ? location.pathname === item.to
@@ -266,10 +266,10 @@ export default function DashboardLayout() {
                           className={`flex items-center transition-all duration-300 z-10 ${
                             isCollapsed 
                               ? 'justify-center w-12 h-12 mx-auto rounded-full' 
-                              : `h-[52px] ${isActive ? 'rounded-l-full rounded-r-none pl-5 ml-3 w-[calc(100%-12px)]' : 'rounded-full mx-3 px-4 w-[calc(100%-24px)]'}`
+                              : `h-[52px] ${isActive ? 'w-full rounded-l-[24px] rounded-r-none pl-5 relative' : 'w-[calc(100%-12px)] rounded-full mr-3 px-4'}`
                           } ${
                             isActive 
-                              ? 'bg-background text-foreground shadow-[-4px_0_15px_rgba(0,0,0,0.1)]' 
+                              ? 'bg-background text-foreground' 
                               : 'text-emerald-50/80 hover:bg-white/10 hover:text-white'
                           }`}
                         >
@@ -292,6 +292,24 @@ export default function DashboardLayout() {
                               </motion.span>
                             )}
                           </AnimatePresence>
+
+                          {/* Seamless Curve / Gooey Effect for Active Tab */}
+                          {isActive && !isCollapsed && (
+                            <>
+                              {/* Top curve */}
+                              <div className="absolute -top-[16px] right-0 w-[16px] h-[16px] text-background">
+                                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M16 0V16H0C8.83656 16 16 8.83656 16 0Z" fill="currentColor" />
+                                </svg>
+                              </div>
+                              {/* Bottom curve */}
+                              <div className="absolute -bottom-[16px] right-0 w-[16px] h-[16px] text-background">
+                                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M16 16V0H0C8.83656 0 16 7.16344 16 16Z" fill="currentColor" />
+                                </svg>
+                              </div>
+                            </>
+                          )}
                         </div>
                       </NavLink>
 
