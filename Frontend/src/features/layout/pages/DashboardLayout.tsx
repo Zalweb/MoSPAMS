@@ -173,7 +173,7 @@ export default function DashboardLayout() {
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           border: 'none',
-          boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 0 20px rgba(255,255,255,0.05), 0 20px 40px rgba(0,0,0,0.4)'
+          boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 0 20px rgba(255,255,255,0.05), -15px 15px 30px -5px rgba(0,0,0,0.4)'
         }}
       >
         {/* Logo area */}
