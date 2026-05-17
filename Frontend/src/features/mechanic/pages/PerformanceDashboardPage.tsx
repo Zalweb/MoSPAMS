@@ -37,7 +37,7 @@ export default function PerformanceDashboardPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+          <div className="w-8 h-8 border-2 border-[rgb(var(--color-primary-rgb))] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
           <p className="text-muted-foreground text-sm">Loading performance data...</p>
         </div>
       </div>
@@ -65,31 +65,40 @@ export default function PerformanceDashboardPage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="border border-border rounded-xl p-6 bg-gradient-to-br from-blue-50 to-transparent dark:from-blue-950/20">
+        {/* Jobs Completed — primary */}
+        <div
+          className="border border-border rounded-xl p-6"
+          style={{ background: 'linear-gradient(135deg, rgb(var(--color-primary-rgb) / 0.08), transparent)' }}
+        >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Jobs Completed (This Month)</p>
               <p className="text-3xl font-bold text-foreground mt-2">{data.current_period.jobs_completed_this_month}</p>
             </div>
-            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg shrink-0">
-              <TrendingUp className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <div className="p-3 rounded-lg shrink-0" style={{ backgroundColor: 'rgb(var(--color-primary-rgb) / 0.1)' }}>
+              <TrendingUp className="w-6 h-6" style={{ color: 'rgb(var(--color-primary-rgb))' }} />
             </div>
           </div>
         </div>
 
-        <div className="border border-border rounded-xl p-6 bg-gradient-to-br from-green-50 to-transparent dark:from-green-950/20">
+        {/* Avg Time — secondary */}
+        <div
+          className="border border-border rounded-xl p-6"
+          style={{ background: 'linear-gradient(135deg, rgb(var(--color-secondary-rgb) / 0.08), transparent)' }}
+        >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Avg Time per Job</p>
               <p className="text-3xl font-bold text-foreground mt-2">{data.current_period.avg_time_per_job_hours.toFixed(1)}</p>
               <p className="text-xs text-muted-foreground mt-1">hours</p>
             </div>
-            <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg shrink-0">
-              <Clock className="w-6 h-6 text-green-600 dark:text-green-400" />
+            <div className="p-3 rounded-lg shrink-0" style={{ backgroundColor: 'rgb(var(--color-secondary-rgb) / 0.1)' }}>
+              <Clock className="w-6 h-6" style={{ color: 'rgb(var(--color-secondary-rgb))' }} />
             </div>
           </div>
         </div>
 
+        {/* Customer Rating — amber (semantic) */}
         <div className="border border-border rounded-xl p-6 bg-gradient-to-br from-yellow-50 to-transparent dark:from-yellow-950/20">
           <div className="flex items-center justify-between">
             <div>
@@ -171,8 +180,12 @@ export default function PerformanceDashboardPage() {
             <div key={idx} className="flex-1 flex flex-col items-center justify-end gap-2">
               <span className="text-sm font-bold text-foreground">{month.jobs_completed}</span>
               <div
-                className="w-full bg-gradient-to-t from-primary to-primary/60 rounded-t-lg transition-all duration-500"
-                style={{ height: `${(month.jobs_completed / maxJobs) * 160}px`, minHeight: '4px' }}
+                className="w-full rounded-t-lg transition-all duration-500"
+                style={{
+                  height: `${(month.jobs_completed / maxJobs) * 160}px`,
+                  minHeight: '4px',
+                  background: 'linear-gradient(to top, rgb(var(--color-primary-rgb)), rgb(var(--color-primary-rgb) / 0.6))',
+                }}
                 title={`${month.jobs_completed} jobs`}
               />
               <span className="text-xs text-muted-foreground">{month.month}</span>

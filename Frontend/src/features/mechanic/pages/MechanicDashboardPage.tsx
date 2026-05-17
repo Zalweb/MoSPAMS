@@ -167,7 +167,7 @@ export default function MechanicDashboardPage() {
   if (loadingStats) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[rgb(var(--color-primary-rgb))] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -177,38 +177,10 @@ export default function MechanicDashboardPage() {
   const stats = data.stats;
 
   const statCards = [
-    {
-      label: "Today's Jobs",
-      value: stats.today_jobs,
-      icon: Wrench,
-      gradient: 'from-violet-500/10',
-      border: 'border-violet-500/20',
-      text: 'text-violet-400',
-    },
-    {
-      label: 'Done This Month',
-      value: stats.completed_this_month,
-      icon: CheckCircle2,
-      gradient: 'from-green-500/10',
-      border: 'border-green-500/20',
-      text: 'text-green-400',
-    },
-    {
-      label: "Today's Revenue",
-      value: `₱${stats.today_labor_revenue.toLocaleString()}`,
-      icon: DollarSign,
-      gradient: 'from-emerald-500/10',
-      border: 'border-emerald-500/20',
-      text: 'text-emerald-400',
-    },
-    {
-      label: 'Customer Rating',
-      value: stats.avg_rating !== null ? `${stats.avg_rating.toFixed(1)} ★` : 'N/A',
-      icon: Star,
-      gradient: 'from-amber-500/10',
-      border: 'border-amber-500/20',
-      text: 'text-amber-400',
-    },
+    { label: "Today's Jobs",     value: stats.today_jobs,                                           icon: Wrench,       variant: 'primary'   },
+    { label: 'Done This Month',  value: stats.completed_this_month,                                 icon: CheckCircle2, variant: 'secondary' },
+    { label: "Today's Revenue",  value: `₱${stats.today_labor_revenue.toLocaleString()}`,           icon: DollarSign,   variant: 'primary'   },
+    { label: 'Customer Rating',  value: stats.avg_rating !== null ? `${stats.avg_rating.toFixed(1)} ★` : 'N/A', icon: Star, variant: 'amber' },
   ];
 
   return (
@@ -223,18 +195,29 @@ export default function MechanicDashboardPage() {
 
       {/* Stat Cards */}
       <motion.div {...fadeUp(0.05)} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map(card => (
-          <div
-            key={card.label}
-            className={`bg-gradient-to-br ${card.gradient} to-transparent border ${card.border} rounded-2xl p-5`}
-          >
-            <div className="mb-3">
-              <card.icon className={`w-5 h-5 ${card.text}`} strokeWidth={2} />
+        {statCards.map(card => {
+          const cardStyle = card.variant === 'primary'
+            ? { background: 'linear-gradient(135deg, rgb(var(--color-primary-rgb) / 0.1), transparent)', borderColor: 'rgb(var(--color-primary-rgb) / 0.2)' }
+            : card.variant === 'secondary'
+            ? { background: 'linear-gradient(135deg, rgb(var(--color-secondary-rgb) / 0.1), transparent)', borderColor: 'rgb(var(--color-secondary-rgb) / 0.2)' }
+            : { background: 'linear-gradient(135deg, rgba(251,191,36,0.1), transparent)', borderColor: 'rgba(251,191,36,0.2)' };
+
+          const iconStyle = card.variant === 'primary'
+            ? { color: 'rgb(var(--color-primary-rgb))' }
+            : card.variant === 'secondary'
+            ? { color: 'rgb(var(--color-secondary-rgb))' }
+            : { color: '#FBBF24' };
+
+          return (
+            <div key={card.label} className="border rounded-2xl p-5" style={cardStyle}>
+              <div className="mb-3">
+                <card.icon className="w-5 h-5" strokeWidth={2} style={iconStyle} />
+              </div>
+              <p className="text-3xl font-bold text-foreground">{card.value}</p>
+              <p className="text-xs font-medium text-muted-foreground mt-1">{card.label}</p>
             </div>
-            <p className="text-3xl font-bold text-foreground">{card.value}</p>
-            <p className="text-xs font-medium text-muted-foreground mt-1">{card.label}</p>
-          </div>
-        ))}
+          );
+        })}
       </motion.div>
 
       {/* Rating Breakdown */}
@@ -242,7 +225,7 @@ export default function MechanicDashboardPage() {
         <RatingBreakdown breakdown={stats.rating_breakdown} avg={stats.avg_rating} />
       </motion.div>
 
-      {/* Charts — 2 columns, separate period selectors */}
+      {/* Charts */}
       <motion.div {...fadeUp(0.15)}>
         <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">Analytics</p>
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -255,15 +238,15 @@ export default function MechanicDashboardPage() {
             <div className="mt-4">
               {loadingLabor ? (
                 <div className="h-44 flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-[rgb(var(--color-primary-rgb))] border-t-transparent rounded-full animate-spin" />
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height={176}>
                   <AreaChart data={laborPoints} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="laborGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%"  stopColor="#10b981" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                        <stop offset="5%"  stopColor="rgb(var(--color-primary-rgb))" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="rgb(var(--color-primary-rgb))" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
@@ -274,7 +257,7 @@ export default function MechanicDashboardPage() {
                       formatter={(v: number) => [`₱${v.toLocaleString()}`, 'Labor']}
                       labelStyle={{ color: '#a1a1aa' }}
                     />
-                    <Area type="monotone" dataKey="labor" stroke="#10b981" strokeWidth={2} fill="url(#laborGrad)" dot={false} activeDot={{ r: 4, fill: '#10b981' }} />
+                    <Area type="monotone" dataKey="labor" stroke="rgb(var(--color-primary-rgb))" strokeWidth={2} fill="url(#laborGrad)" dot={false} activeDot={{ r: 4, fill: 'rgb(var(--color-primary-rgb))' }} />
                   </AreaChart>
                 </ResponsiveContainer>
               )}
@@ -289,15 +272,15 @@ export default function MechanicDashboardPage() {
             <div className="mt-4">
               {loadingJobs ? (
                 <div className="h-44 flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-[rgb(var(--color-secondary-rgb))] border-t-transparent rounded-full animate-spin" />
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height={176}>
                   <BarChart data={jobsPoints} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="jobsGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%"  stopColor="#6366f1" stopOpacity={0.9} />
-                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0.5} />
+                        <stop offset="5%"  stopColor="rgb(var(--color-secondary-rgb))" stopOpacity={0.9} />
+                        <stop offset="95%" stopColor="rgb(var(--color-secondary-rgb))" stopOpacity={0.5} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
