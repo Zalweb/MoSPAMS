@@ -1417,6 +1417,97 @@ class MospamsController extends Controller
         return response()->json(['data' => $payments]);
     }
 
+    public function paymentDetail(Request $request, $saleId): JsonResponse
+    {
+        $sale = DB::table('sales')
+            ->where('sale_id', $saleId)
+            ->where('shop_id_fk', $this->shopId())
+            ->first();
+
+        if (!$sale) {
+            return response()->json(['error' => 'Transaction not found'], 404);
+        }
+
+        $items = DB::table('sale_items')
+            ->join('parts', 'parts.part_id', '=', 'sale_items.part_id_fk')
+            ->where('sale_items.sale_id_fk', $saleId)
+            ->get()
+            ->map(fn ($i) => [
+                'part_name'  => $i->part_name,
+                'quantity'   => (int) $i->quantity,
+                'unit_price' => (float) $i->unit_price,
+                'subtotal'   => (float) $i->subtotal,
+            ])->values();
+
+        $labor = [];
+        if ($sale->job_id_fk) {
+            $labor = DB::table('service_job_items')
+                ->join('service_types', 'service_types.service_type_id', '=', 'service_job_items.service_type_id_fk')
+                ->where('service_job_items.job_id_fk', $sale->job_id_fk)
+                ->get()
+                ->map(fn ($l) => [
+                    'service_name' => $l->service_name,
+                    'labor_cost'   => (float) $l->labor_cost,
+                ])->values();
+        }
+
+        $payment = DB::table('payments')
+            ->join('payment_statuses', 'payment_statuses.payment_status_id', '=', 'payments.payment_status_id_fk')
+            ->where('payments.sale_id_fk', $saleId)
+            ->select('payments.payment_method', 'payment_statuses.status_name as payment_status', 'payments.payment_date', 'payments.reference_number')
+            ->first();
+
+        $mechanics = [];
+        if ($sale->job_id_fk) {
+            $mechanics = DB::table('service_job_mechanics')
+                ->join('mechanics', 'mechanics.mechanic_id', '=', 'service_job_mechanics.mechanic_id_fk')
+                ->where('service_job_mechanics.job_id_fk', $sale->job_id_fk)
+                ->pluck('mechanics.full_name')
+                ->toArray();
+        }
+
+        $processedBy = null;
+        if ($sale->processed_by_fk) {
+            $processedBy = DB::table('users')
+                ->where('user_id', $sale->processed_by_fk)
+                ->value('full_name');
+        }
+
+        $customerName = null;
+        if ($sale->customer_id_fk) {
+            $customerName = DB::table('customers')
+                ->where('customer_id', $sale->customer_id_fk)
+                ->value('full_name');
+        }
+
+        $shopName = DB::table('shops')
+            ->where('shop_id', $this->shopId())
+            ->value('shop_name');
+
+        return response()->json([
+            'shopName'    => $shopName,
+            'sale'        => [
+                'sale_id'      => (string) $sale->sale_id,
+                'sale_type'    => $sale->sale_type,
+                'total_amount' => (float) $sale->total_amount,
+                'discount'     => (float) ($sale->discount ?? 0),
+                'net_amount'   => (float) $sale->net_amount,
+                'sale_date'    => $sale->sale_date,
+            ],
+            'payment'     => [
+                'payment_method'   => $payment?->payment_method,
+                'payment_status'   => $payment?->payment_status,
+                'payment_date'     => $payment?->payment_date,
+                'reference_number' => $payment?->reference_number,
+            ],
+            'customer'    => $customerName ? ['name' => $customerName] : null,
+            'processedBy' => $processedBy,
+            'mechanics'   => $mechanics,
+            'items'       => $items,
+            'labor'       => $labor,
+        ]);
+    }
+
     public function users(): JsonResponse
     {
         $memberships = ShopMembership::query()

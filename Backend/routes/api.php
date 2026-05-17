@@ -126,6 +126,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/transactions', [MospamsController::class, 'transactions'])->middleware('role:Owner,Staff');
         Route::post('/transactions', [MospamsController::class, 'storeTransaction'])->middleware('role:Owner,Staff');
         Route::get('/payments', [MospamsController::class, 'payments'])->middleware('role:Owner,Staff');
+        Route::get('/payments/{saleId}', [MospamsController::class, 'paymentDetail'])->middleware('role:Owner,Staff');
 
         Route::get('/users', [MospamsController::class, 'users'])->middleware('role:Owner');
         Route::post('/users', [MospamsController::class, 'storeUser'])->middleware('role:Owner');

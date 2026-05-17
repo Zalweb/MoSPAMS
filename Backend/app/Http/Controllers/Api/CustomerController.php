@@ -320,14 +320,58 @@ class CustomerController extends Controller
         $payment = $this->tenantTable('payments')
             ->join('payment_statuses', 'payment_statuses.payment_status_id', '=', 'payments.payment_status_id_fk')
             ->where('sale_id_fk', $paymentId)
-            ->select('payments.payment_method', 'payment_statuses.status_name as payment_status', 'payments.payment_date')
+            ->select('payments.payment_method', 'payment_statuses.status_name as payment_status', 'payments.payment_date', 'payments.reference_number')
             ->first();
 
+        $mechanics = [];
+        if ($sale->job_id_fk) {
+            $mechanics = $this->tenantTable('service_job_mechanics')
+                ->join('mechanics', 'mechanics.mechanic_id', '=', 'service_job_mechanics.mechanic_id_fk')
+                ->where('service_job_mechanics.job_id_fk', $sale->job_id_fk)
+                ->pluck('mechanics.full_name')
+                ->toArray();
+        }
+
+        $processedBy = null;
+        if ($sale->processed_by_fk) {
+            $processedBy = DB::table('users')
+                ->where('user_id', $sale->processed_by_fk)
+                ->value('full_name');
+        }
+
+        $shopName = DB::table('shops')
+            ->where('shop_id', $user->shop_id_fk)
+            ->value('shop_name');
+
         return response()->json([
-            'sale' => $sale,
-            'payment' => $payment,
-            'items' => $items,
-            'labor' => $labor
+            'shopName'    => $shopName,
+            'sale'        => [
+                'sale_id'      => (string) $sale->sale_id,
+                'sale_type'    => $sale->sale_type,
+                'total_amount' => (float) $sale->total_amount,
+                'discount'     => (float) ($sale->discount ?? 0),
+                'net_amount'   => (float) $sale->net_amount,
+                'sale_date'    => $sale->sale_date,
+            ],
+            'payment'     => [
+                'payment_method'   => $payment?->payment_method,
+                'payment_status'   => $payment?->payment_status,
+                'payment_date'     => $payment?->payment_date,
+                'reference_number' => $payment?->reference_number,
+            ],
+            'customer'    => ['name' => $customer->full_name],
+            'processedBy' => $processedBy,
+            'mechanics'   => $mechanics,
+            'items'       => $items->map(fn ($i) => [
+                'part_name'  => $i->part_name,
+                'quantity'   => (int) $i->quantity,
+                'unit_price' => (float) $i->unit_price,
+                'subtotal'   => (float) $i->subtotal,
+            ])->values(),
+            'labor'       => collect($labor)->map(fn ($l) => [
+                'service_name' => $l->service_name,
+                'labor_cost'   => (float) $l->labor_cost,
+            ])->values(),
         ]);
     }
 

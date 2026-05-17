@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Plus, Trash2, Banknote, Smartphone, Receipt, Search, Printer, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Trash2, Banknote, Smartphone, Receipt, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import InvoiceModal from '@/features/customers/components/InvoiceModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -292,33 +293,11 @@ export default function Sales() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!receiptTx} onOpenChange={() => setReceiptTx(null)}>
-        <DialogContent className="sm:max-w-sm rounded-2xl border-border bg-muted p-6">
-          <DialogHeader>
-            <DialogTitle className="text-base font-semibold text-center flex items-center justify-center gap-2 text-foreground">
-              Receipt
-              <button onClick={() => window.print()} className="p-1.5 rounded hover:bg-secondary dark:bg-zinc-800 text-muted-foreground" title="Print"><Printer className="w-4 h-4" /></button>
-            </DialogTitle>
-          </DialogHeader>
-          {receiptTx && (
-            <div className="space-y-3 mt-2">
-              <div className="text-center border-b border-dashed border-border dark:border-zinc-700 pb-4">
-                <p className="text-sm text-muted-foreground">MoSPAMS Motorcycle Shop</p>
-                <p className="text-xs text-muted-foreground mt-1">{new Date(receiptTx.createdAt).toLocaleString()}</p>
-                <p className="text-xs font-mono text-muted-foreground mt-0.5">TXN-{receiptTx.id.slice(-8).toUpperCase()}</p>
-              </div>
-              {receiptTx.items.map((item, i) => (
-                <div key={i} className="flex justify-between text-sm"><span className="text-muted-foreground">{item.name} x{item.quantity}</span><span className="font-medium text-foreground tabular-nums">₱{(item.price * item.quantity).toLocaleString()}</span></div>
-              ))}
-              {receiptTx.serviceLaborCost && <div className="flex justify-between text-sm font-medium text-violet-400"><span>Service Labor</span><span className="tabular-nums">₱{receiptTx.serviceLaborCost.toLocaleString()}</span></div>}
-              <div className="border-t border-dashed border-border dark:border-zinc-700 pt-4">
-                <div className="flex justify-between text-base font-bold text-foreground"><span>Total</span><span className="tabular-nums">₱{receiptTx.total.toLocaleString()}</span></div>
-                <div className="flex justify-between text-xs text-muted-foreground mt-2"><span>Payment</span><span className="flex items-center gap-1">{receiptTx.paymentMethod === 'GCash' ? <Smartphone className="w-3.5 h-3.5" /> : <Banknote className="w-3.5 h-3.5" />}{receiptTx.paymentMethod}</span></div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <InvoiceModal
+        paymentId={receiptTx?.id ?? null}
+        onClose={() => setReceiptTx(null)}
+        apiEndpoint={receiptTx ? `/api/payments/${receiptTx.id}` : undefined}
+      />
     </div>
   );
 }
