@@ -428,12 +428,12 @@ export default function DashboardPage() {
       {isOwnerOrStaff && (
         <motion.div
           {...fadeUp(0.45)}
-          className="relative group bg-card dark:bg-card/80 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-border dark:border-zinc-800/50 hover:border-zinc-300/50 transition-all duration-300"
+          className="backdrop-blur-xl bg-white/[0.03] dark:bg-white/[0.02] border border-white/[0.08] rounded-2xl overflow-hidden"
         >
-          <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
+          <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[rgb(var(--color-primary-rgb))]/10 flex items-center justify-center border border-[rgb(var(--color-primary-rgb))]/20">
-                <Wrench className="w-5 h-5 text-[rgb(var(--color-primary-rgb))]" strokeWidth={2} />
+              <div className="brand-icon-box w-10 h-10 rounded-xl flex items-center justify-center">
+                <Wrench className="w-5 h-5" strokeWidth={2} />
               </div>
               <div>
                 <h3 className="text-base font-semibold text-card-foreground">Service Pipeline</h3>
@@ -452,42 +452,47 @@ export default function DashboardPage() {
                   label: 'Pending',
                   count: pendingServices,
                   icon: Clock,
-                  color: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
+                  bg: 'bg-amber-950/70 dark:bg-amber-950/80',
+                  border: 'border-amber-700/30',
+                  iconColor: 'text-amber-400',
                   percentage: totalJobs > 0 ? ((pendingServices / totalJobs) * 100).toFixed(0) : 0,
                 },
                 {
                   label: 'Ongoing',
                   count: ongoingServices,
                   icon: Wrench,
-                  color: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
+                  bg: 'bg-blue-950/70 dark:bg-blue-950/80',
+                  border: 'border-blue-700/30',
+                  iconColor: 'text-blue-400',
                   percentage: totalJobs > 0 ? ((ongoingServices / totalJobs) * 100).toFixed(0) : 0,
                 },
                 {
                   label: 'Completed',
                   count: completedServices,
                   icon: CheckCircle2,
-                  color: 'bg-green-500/10 text-green-400 border border-green-500/20',
+                  bg: 'bg-green-950/70 dark:bg-green-950/80',
+                  border: 'border-green-700/30',
+                  iconColor: 'text-green-400',
                   percentage: totalJobs > 0 ? ((completedServices / totalJobs) * 100).toFixed(0) : 0,
                 },
               ].map((item) => (
                 <motion.div
                   key={item.label}
-                  className={`flex flex-col gap-3 p-4 rounded-xl ${item.color}`}
+                  className={`flex flex-col gap-3 p-4 rounded-xl backdrop-blur-sm border ${item.bg} ${item.border}`}
                   whileHover={{ y: -2, transition: { duration: 0.2 } }}
                 >
                   <div className="flex items-center justify-between">
-                    <item.icon className="w-5 h-5" strokeWidth={2} />
-                    <span className="text-xs font-bold text-muted-foreground">{item.percentage}%</span>
+                    <item.icon className={`w-5 h-5 ${item.iconColor}`} strokeWidth={2} />
+                    <span className="text-xs font-bold text-white/50">{item.percentage}%</span>
                   </div>
                   <div>
-                    <p className="text-3xl font-bold text-card-foreground leading-none mb-1">{item.count}</p>
-                    <p className="text-xs font-medium text-muted-foreground">{item.label}</p>
+                    <p className="text-3xl font-bold text-white leading-none mb-1">{item.count}</p>
+                    <p className="text-xs font-medium text-white/60">{item.label}</p>
                   </div>
                 </motion.div>
               ))}
             </div>
           </div>
-          <div className="absolute inset-0 bg-gradient-to-br from-[rgb(var(--color-primary-rgb))]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
         </motion.div>
       )}
 
