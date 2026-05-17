@@ -260,16 +260,46 @@ export default function DashboardLayout() {
                         to={item.to}
                         end={item.end}
                         onClick={() => setSidebarOpen(false)}
-                        className="block"
+                        className="block relative"
                       >
+                        {/* The gliding background highlight */}
+                        {isActive && (
+                          <motion.div
+                            layoutId="dashboard-active-tab"
+                            transition={{ type: 'spring', stiffness: 350, damping: 35 }}
+                            className={`absolute z-0 bg-background ${
+                              isCollapsed 
+                                ? 'inset-0 m-auto w-12 h-12 rounded-full' 
+                                : 'inset-y-0 left-0 w-full rounded-l-[24px] rounded-r-none shadow-[2px_0_0_0_hsl(var(--background))]'
+                            }`}
+                          >
+                            {!isCollapsed && (
+                              <>
+                                {/* Top curve */}
+                                <div className="absolute -top-[24px] -right-[2px] w-[26px] h-[24px] text-background pointer-events-none z-20">
+                                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" preserveAspectRatio="none">
+                                    <path d="M24 0V24H0C13.2548 24 24 13.2548 24 0Z" fill="currentColor" />
+                                  </svg>
+                                </div>
+                                {/* Bottom curve */}
+                                <div className="absolute -bottom-[24px] -right-[2px] w-[26px] h-[24px] text-background pointer-events-none z-20">
+                                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" preserveAspectRatio="none">
+                                    <path d="M24 24V0H0C13.2548 0 24 10.7452 24 24Z" fill="currentColor" />
+                                  </svg>
+                                </div>
+                              </>
+                            )}
+                          </motion.div>
+                        )}
+
                         <div
-                          className={`flex items-center transition-all duration-300 z-10 ${
+                          className={`flex items-center transition-colors duration-300 relative z-10 ${
                             isCollapsed 
                               ? 'justify-center w-12 h-12 mx-auto rounded-full' 
-                              : `h-[52px] ${isActive ? 'w-full rounded-l-[24px] rounded-r-none pl-5 relative shadow-[2px_0_0_0_hsl(var(--background))]' : 'w-[calc(100%-12px)] rounded-full mr-3 px-4'}`
+                              : `h-[52px] ${isActive ? 'pl-5' : 'w-[calc(100%-12px)] rounded-full mr-3 px-4'}`
                           } ${
                             isActive 
-                              ? 'bg-background text-foreground' 
+                              ? 'text-foreground' 
                               : 'text-emerald-50/80 hover:bg-white/10 hover:text-white'
                           }`}
                         >
@@ -292,24 +322,6 @@ export default function DashboardLayout() {
                               </motion.span>
                             )}
                           </AnimatePresence>
-
-                          {/* Seamless Curve / Gooey Effect for Active Tab */}
-                          {isActive && !isCollapsed && (
-                            <>
-                              {/* Top curve */}
-                              <div className="absolute -top-[24px] -right-[2px] w-[26px] h-[24px] text-background pointer-events-none z-20">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" preserveAspectRatio="none">
-                                  <path d="M24 0V24H0C13.2548 24 24 13.2548 24 0Z" fill="currentColor" />
-                                </svg>
-                              </div>
-                              {/* Bottom curve */}
-                              <div className="absolute -bottom-[24px] -right-[2px] w-[26px] h-[24px] text-background pointer-events-none z-20">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" preserveAspectRatio="none">
-                                  <path d="M24 24V0H0C13.2548 0 24 10.7452 24 24Z" fill="currentColor" />
-                                </svg>
-                              </div>
-                            </>
-                          )}
                         </div>
                       </NavLink>
 
