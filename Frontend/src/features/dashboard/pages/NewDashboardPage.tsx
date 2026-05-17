@@ -448,9 +448,9 @@ export default function DashboardPage() {
           <div className="p-5">
             <div className="grid grid-cols-3 gap-4">
               {[
-                { label: 'Pending',   count: pendingServices,  icon: Clock,        iconColor: 'text-amber-400', percentage: totalJobs > 0 ? ((pendingServices  / totalJobs) * 100).toFixed(0) : 0 },
-                { label: 'Ongoing',   count: ongoingServices,  icon: Wrench,       iconColor: 'text-blue-400',  percentage: totalJobs > 0 ? ((ongoingServices  / totalJobs) * 100).toFixed(0) : 0 },
-                { label: 'Completed', count: completedServices, icon: CheckCircle2, iconColor: 'text-green-400', percentage: totalJobs > 0 ? ((completedServices / totalJobs) * 100).toFixed(0) : 0 },
+                { label: 'Pending',   count: pendingServices,  icon: Clock,        percentage: totalJobs > 0 ? ((pendingServices  / totalJobs) * 100).toFixed(0) : 0 },
+                { label: 'Ongoing',   count: ongoingServices,  icon: Wrench,       percentage: totalJobs > 0 ? ((ongoingServices  / totalJobs) * 100).toFixed(0) : 0 },
+                { label: 'Completed', count: completedServices, icon: CheckCircle2, percentage: totalJobs > 0 ? ((completedServices / totalJobs) * 100).toFixed(0) : 0 },
               ].map((item) => (
                 <motion.div
                   key={item.label}
@@ -459,7 +459,9 @@ export default function DashboardPage() {
                   whileHover={{ y: -2, transition: { duration: 0.2 } }}
                 >
                   <div className="flex items-center justify-between">
-                    <item.icon className={`w-5 h-5 ${item.iconColor}`} strokeWidth={2} />
+                    <div className="brand-icon-box w-8 h-8 rounded-lg flex items-center justify-center">
+                      <item.icon className="w-4 h-4" strokeWidth={2} />
+                    </div>
                     <span className="text-xs font-bold text-muted-foreground">{item.percentage}%</span>
                   </div>
                   <div>
