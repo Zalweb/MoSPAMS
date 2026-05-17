@@ -169,11 +169,8 @@ export default function DashboardLayout() {
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
         style={{
-          background: 'linear-gradient(160deg, color-mix(in srgb, rgb(var(--color-primary-rgb)) 8%, rgba(30, 30, 30, 0.65)) 0%, rgba(10, 10, 10, 0.85) 100%)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          border: 'none',
-          boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 0 20px rgba(255,255,255,0.05), -15px 15px 30px -5px rgba(0,0,0,0.4)'
+          background: 'linear-gradient(160deg, color-mix(in srgb, rgb(var(--color-primary-rgb)) 12%, color-mix(in srgb, rgb(var(--color-secondary-rgb)) 12%, hsl(var(--card)))) 0%, hsl(var(--card)) 100%)',
+          boxShadow: '0 4px 20px -5px rgba(0,0,0,0.05)'
         }}
       >
         {/* Logo area */}
@@ -202,8 +199,8 @@ export default function DashboardLayout() {
                 transition={{ duration: 0.18 }}
                 className="ml-3 overflow-hidden min-w-0 flex-1"
               >
-                <span className="text-[15px] font-bold text-white tracking-tight leading-none block whitespace-nowrap">
-                  Mo<span className="text-white/40">SPAMS</span>
+                <span className="text-[15px] font-bold text-foreground tracking-tight leading-none block whitespace-nowrap">
+                  Mo<span className="text-foreground/40">SPAMS</span>
                 </span>
               </motion.div>
             )}
@@ -211,10 +208,10 @@ export default function DashboardLayout() {
 
           {/* Collapse / expand button — desktop only */}
           <div className={`hidden lg:block transition-opacity duration-300 ${isCollapsed ? 'opacity-0 pointer-events-none absolute' : 'opacity-100'}`}>
-            <button
-              onClick={() => { setIsCollapsed(true); setSidebarOpen(false); }}
-              className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/70 hover:text-white transition-colors"
-            >
+              <button
+                onClick={() => { setIsCollapsed(true); setSidebarOpen(false); }}
+                className="w-7 h-7 rounded-full bg-foreground/5 hover:bg-foreground/10 flex items-center justify-center text-foreground/50 hover:text-foreground transition-colors"
+              >
               <ChevronLeft className="w-4 h-4" />
             </button>
           </div>
@@ -240,8 +237,7 @@ export default function DashboardLayout() {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.15 }}
-                    className="px-5 mb-1 text-[9px] font-bold uppercase tracking-[0.12em] whitespace-nowrap"
-                    style={{ color: 'rgba(255,255,255,0.28)' }}
+                    className="px-5 mb-1 text-[9px] font-bold uppercase tracking-[0.12em] whitespace-nowrap text-foreground/40"
                   >
                     {group.title}
                   </motion.p>
@@ -351,13 +347,13 @@ export default function DashboardLayout() {
         <div className="shrink-0 p-3 mb-2">
           <button
             onClick={() => navigate(settingsPath())}
-            className={`w-full flex items-center rounded-xl transition-colors hover:bg-white/10 ${
+            className={`w-full flex items-center rounded-xl transition-colors hover:bg-foreground/5 ${
               isCollapsed ? 'justify-center p-2' : 'gap-3 px-3 py-2.5'
             }`}
           >
             <div
               className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
-              style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%)' }}
+              style={{ background: 'linear-gradient(135deg, rgb(var(--color-primary-rgb)) 0%, rgb(var(--color-secondary-rgb)) 100%)' }}
             >
               {user?.name?.charAt(0)?.toUpperCase() ?? 'U'}
             </div>
@@ -370,8 +366,8 @@ export default function DashboardLayout() {
                   transition={{ duration: 0.15 }}
                   className="min-w-0 text-left"
                 >
-                  <p className="text-sm font-semibold text-white/90 truncate leading-none">{user?.name}</p>
-                  <p className="text-[11px] text-white/40 mt-0.5 leading-none">{user?.role}</p>
+                  <p className="text-sm font-semibold text-foreground/90 truncate leading-none">{user?.name}</p>
+                  <p className="text-[11px] text-foreground/50 mt-0.5 leading-none">{user?.role}</p>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -385,7 +381,7 @@ export default function DashboardLayout() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={handleLogout}
-                className="mt-1 w-full flex items-center gap-3 px-3 py-2 rounded-xl text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-colors text-xs font-semibold"
+                className="mt-1 w-full flex items-center gap-3 px-3 py-2 rounded-xl text-foreground/50 hover:text-red-400 hover:bg-red-500/10 transition-colors text-xs font-semibold"
               >
                 <LogOut className="w-4 h-4" strokeWidth={1.75} />
                 Sign Out
