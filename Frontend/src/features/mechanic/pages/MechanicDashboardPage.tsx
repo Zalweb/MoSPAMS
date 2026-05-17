@@ -177,11 +177,14 @@ export default function MechanicDashboardPage() {
   const stats = data.stats;
 
   const statCards = [
-    { label: "Today's Jobs",     value: stats.today_jobs,                                           icon: Wrench,       variant: 'primary'   },
-    { label: 'Done This Month',  value: stats.completed_this_month,                                 icon: CheckCircle2, variant: 'secondary' },
-    { label: "Today's Revenue",  value: `₱${stats.today_labor_revenue.toLocaleString()}`,           icon: DollarSign,   variant: 'primary'   },
-    { label: 'Customer Rating',  value: stats.avg_rating !== null ? `${stats.avg_rating.toFixed(1)} ★` : 'N/A', icon: Star, variant: 'amber' },
+    { label: "Today's Jobs",    value: stats.today_jobs,                                                      icon: Wrench       },
+    { label: 'Done This Month', value: stats.completed_this_month,                                            icon: CheckCircle2 },
+    { label: "Today's Revenue", value: `₱${stats.today_labor_revenue.toLocaleString()}`,                      icon: DollarSign   },
+    { label: 'Customer Rating', value: stats.avg_rating !== null ? `${stats.avg_rating.toFixed(1)} ★` : 'N/A', icon: Star        },
   ];
+
+  const brandCard = { background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' };
+  const brandIcon = { color: 'rgb(var(--color-primary-rgb))' };
 
   return (
     <div className="space-y-8">
@@ -195,29 +198,15 @@ export default function MechanicDashboardPage() {
 
       {/* Stat Cards */}
       <motion.div {...fadeUp(0.05)} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map(card => {
-          const cardStyle = card.variant === 'primary'
-            ? { background: 'linear-gradient(135deg, rgb(var(--color-primary-rgb) / 0.1), transparent)', borderColor: 'rgb(var(--color-primary-rgb) / 0.2)' }
-            : card.variant === 'secondary'
-            ? { background: 'linear-gradient(135deg, rgb(var(--color-secondary-rgb) / 0.1), transparent)', borderColor: 'rgb(var(--color-secondary-rgb) / 0.2)' }
-            : { background: 'linear-gradient(135deg, rgba(251,191,36,0.1), transparent)', borderColor: 'rgba(251,191,36,0.2)' };
-
-          const iconStyle = card.variant === 'primary'
-            ? { color: 'rgb(var(--color-primary-rgb))' }
-            : card.variant === 'secondary'
-            ? { color: 'rgb(var(--color-secondary-rgb))' }
-            : { color: '#FBBF24' };
-
-          return (
-            <div key={card.label} className="border rounded-2xl p-5" style={cardStyle}>
-              <div className="mb-3">
-                <card.icon className="w-5 h-5" strokeWidth={2} style={iconStyle} />
-              </div>
-              <p className="text-3xl font-bold text-foreground">{card.value}</p>
-              <p className="text-xs font-medium text-muted-foreground mt-1">{card.label}</p>
+        {statCards.map(card => (
+          <div key={card.label} className="border rounded-2xl p-5" style={brandCard}>
+            <div className="mb-3">
+              <card.icon className="w-5 h-5" strokeWidth={2} style={brandIcon} />
             </div>
-          );
-        })}
+            <p className="text-3xl font-bold text-foreground">{card.value}</p>
+            <p className="text-xs font-medium text-muted-foreground mt-1">{card.label}</p>
+          </div>
+        ))}
       </motion.div>
 
       {/* Rating Breakdown */}

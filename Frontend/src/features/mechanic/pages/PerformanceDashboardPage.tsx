@@ -65,59 +65,39 @@ export default function PerformanceDashboardPage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Jobs Completed — primary */}
-        <div
-          className="border border-border rounded-xl p-6"
-          style={{ background: 'linear-gradient(135deg, rgb(var(--color-primary-rgb) / 0.08), transparent)' }}
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Jobs Completed (This Month)</p>
-              <p className="text-3xl font-bold text-foreground mt-2">{data.current_period.jobs_completed_this_month}</p>
-            </div>
-            <div className="p-3 rounded-lg shrink-0" style={{ backgroundColor: 'rgb(var(--color-primary-rgb) / 0.1)' }}>
-              <TrendingUp className="w-6 h-6" style={{ color: 'rgb(var(--color-primary-rgb))' }} />
-            </div>
-          </div>
-        </div>
-
-        {/* Avg Time — secondary */}
-        <div
-          className="border border-border rounded-xl p-6"
-          style={{ background: 'linear-gradient(135deg, rgb(var(--color-secondary-rgb) / 0.08), transparent)' }}
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Avg Time per Job</p>
-              <p className="text-3xl font-bold text-foreground mt-2">{data.current_period.avg_time_per_job_hours.toFixed(1)}</p>
-              <p className="text-xs text-muted-foreground mt-1">hours</p>
-            </div>
-            <div className="p-3 rounded-lg shrink-0" style={{ backgroundColor: 'rgb(var(--color-secondary-rgb) / 0.1)' }}>
-              <Clock className="w-6 h-6" style={{ color: 'rgb(var(--color-secondary-rgb))' }} />
-            </div>
-          </div>
-        </div>
-
-        {/* Customer Rating — amber (semantic) */}
-        <div className="border border-border rounded-xl p-6 bg-gradient-to-br from-yellow-50 to-transparent dark:from-yellow-950/20">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Customer Rating</p>
-              <div className="flex items-center gap-2 mt-2">
-                <p className="text-3xl font-bold text-foreground">
-                  {data.current_period.customer_rating?.toFixed(1) ?? 'N/A'}
-                </p>
-                {data.current_period.customer_rating && (
-                  <span className="text-yellow-400 text-2xl">★</span>
-                )}
+        {[
+          {
+            label: 'Jobs Completed (This Month)',
+            value: <p className="text-3xl font-bold text-foreground mt-2">{data.current_period.jobs_completed_this_month}</p>,
+            icon: <TrendingUp className="w-6 h-6" style={{ color: 'rgb(var(--color-primary-rgb))' }} />,
+          },
+          {
+            label: 'Avg Time per Job',
+            value: <><p className="text-3xl font-bold text-foreground mt-2">{data.current_period.avg_time_per_job_hours.toFixed(1)}</p><p className="text-xs text-muted-foreground mt-1">hours</p></>,
+            icon: <Clock className="w-6 h-6" style={{ color: 'rgb(var(--color-primary-rgb))' }} />,
+          },
+          {
+            label: 'Customer Rating',
+            value: <div className="flex items-center gap-2 mt-2"><p className="text-3xl font-bold text-foreground">{data.current_period.customer_rating?.toFixed(1) ?? 'N/A'}</p>{data.current_period.customer_rating && <span className="text-amber-400 text-2xl">★</span>}</div>,
+            icon: <Star className="w-6 h-6" style={{ color: 'rgb(var(--color-primary-rgb))' }} />,
+          },
+        ].map(card => (
+          <div
+            key={card.label}
+            className="border rounded-xl p-6"
+            style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">{card.label}</p>
+                {card.value}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">this month</p>
-            </div>
-            <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg shrink-0">
-              <Star className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+              <div className="p-3 rounded-lg shrink-0" style={{ background: 'var(--brand-surface)' }}>
+                {card.icon}
+              </div>
             </div>
           </div>
-        </div>
+        ))}
       </div>
 
       {/* Rating Breakdown */}

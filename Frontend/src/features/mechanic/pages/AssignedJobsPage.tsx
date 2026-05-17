@@ -152,32 +152,23 @@ export default function AssignedJobsPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total Jobs',  value: stats.total,      icon: Wrench,       variant: 'neutral'    },
-          { label: 'Confirmed',   value: stats.confirmed,  icon: Users,        variant: 'primary'    },
-          { label: 'In Progress', value: stats.inProgress, icon: Wrench,       variant: 'secondary'  },
-          { label: 'Work Done',   value: stats.workDone,   icon: CheckCircle2, variant: 'amber'      },
-        ].map((stat) => {
-          const cardStyle = stat.variant === 'primary'
-            ? { background: 'rgb(var(--color-primary-rgb) / 0.1)', borderColor: 'rgb(var(--color-primary-rgb) / 0.2)', color: 'rgb(var(--color-primary-rgb))' }
-            : stat.variant === 'secondary'
-            ? { background: 'rgb(var(--color-secondary-rgb) / 0.1)', borderColor: 'rgb(var(--color-secondary-rgb) / 0.2)', color: 'rgb(var(--color-secondary-rgb))' }
-            : stat.variant === 'amber'
-            ? {}
-            : {};
-          return (
-            <div
-              key={stat.label}
-              className={`p-4 rounded-xl border ${stat.variant === 'neutral' ? 'bg-zinc-500/10 text-muted-foreground border-zinc-500/20' : stat.variant === 'amber' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : ''}`}
-              style={stat.variant === 'primary' || stat.variant === 'secondary' ? { background: cardStyle.background, borderColor: cardStyle.borderColor, color: cardStyle.color } : {}}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <stat.icon className="w-5 h-5" strokeWidth={2} />
-                <span className="text-2xl font-bold text-foreground">{stat.value}</span>
-              </div>
-              <p className="text-xs font-medium">{stat.label}</p>
+          { label: 'Total Jobs',  value: stats.total,      icon: Wrench       },
+          { label: 'Confirmed',   value: stats.confirmed,  icon: Users        },
+          { label: 'In Progress', value: stats.inProgress, icon: Wrench       },
+          { label: 'Work Done',   value: stats.workDone,   icon: CheckCircle2 },
+        ].map((stat) => (
+          <div
+            key={stat.label}
+            className="p-4 rounded-xl border"
+            style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <stat.icon className="w-5 h-5" strokeWidth={2} style={{ color: 'rgb(var(--color-primary-rgb))' }} />
+              <span className="text-2xl font-bold text-foreground">{stat.value}</span>
             </div>
-          );
-        })}
+            <p className="text-xs font-medium text-muted-foreground">{stat.label}</p>
+          </div>
+        ))}
       </div>
 
       {/* Filters */}
