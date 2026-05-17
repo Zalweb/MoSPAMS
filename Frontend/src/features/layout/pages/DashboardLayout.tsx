@@ -122,7 +122,7 @@ export default function DashboardLayout() {
   };
 
   const visibleGroups = navGroups
-    .map(g => ({ ...g, items: g.items.filter(i => (NAV_ACCESS[i.to] ?? []).includes(role ?? '')) }))
+    .map(g => ({ ...g, items: g.items.filter(i => role ? (NAV_ACCESS[i.to] ?? []).includes(role) : false) }))
     .filter(g => g.items.length > 0);
 
   const allItems    = navGroups.flatMap(g => g.items);
