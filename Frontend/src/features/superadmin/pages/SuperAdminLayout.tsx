@@ -411,7 +411,7 @@ export default function SuperAdminLayout() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 20, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
-                className="pointer-events-auto mb-4 shadow-2xl rounded-[32px] p-2 w-[calc(100vw-32px)] max-w-sm flex flex-col gap-1 overflow-hidden"
+                className="pointer-events-auto mb-4 shadow-2xl rounded-[32px] pl-2 py-2 pr-0 w-[calc(100vw-32px)] max-w-sm flex flex-col gap-1"
                 style={{ background: 'hsl(var(--foreground))' }}
               >
                 <div className="px-4 py-3 mb-1">
@@ -427,18 +427,29 @@ export default function SuperAdminLayout() {
                       key={item.to}
                       to={item.to}
                       onClick={() => setActiveMobileGroup(null)}
-                      className={`relative flex items-center gap-4 px-5 py-3.5 rounded-[24px] transition-colors z-10 ${
+                      className={`relative flex items-center gap-4 px-5 py-3.5 transition-colors z-10 ${
                         isActive 
                           ? 'text-foreground' 
-                          : 'text-background/70 hover:bg-background/10 hover:text-background'
+                          : 'rounded-[24px] mr-2 text-background/70 hover:bg-background/10 hover:text-background'
                       }`}
                     >
                       {isActive && (
                         <motion.div
                           layoutId="superadmin-mobile-dropup-active"
-                          className="absolute inset-0 bg-background rounded-[24px] z-0"
+                          className="absolute inset-y-0 left-0 w-full bg-background rounded-l-[24px] rounded-r-none z-0 shadow-[2px_0_0_0_hsl(var(--background))]"
                           transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                        />
+                        >
+                          <div className="absolute -top-[24px] -right-[2px] w-[26px] h-[24px] text-background pointer-events-none z-20">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" preserveAspectRatio="none">
+                              <path d="M24 0V24H0C13.2548 24 24 13.2548 24 0Z" fill="currentColor" />
+                            </svg>
+                          </div>
+                          <div className="absolute -bottom-[24px] -right-[2px] w-[26px] h-[24px] text-background pointer-events-none z-20">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" preserveAspectRatio="none">
+                              <path d="M24 24V0H0C13.2548 0 24 10.7452 24 24Z" fill="currentColor" />
+                            </svg>
+                          </div>
+                        </motion.div>
                       )}
                       <item.icon className="w-5 h-5 shrink-0 relative z-10" strokeWidth={isActive ? 2.5 : 2} />
                       <span className="text-[15px] font-bold tracking-wide relative z-10">{item.label}</span>
