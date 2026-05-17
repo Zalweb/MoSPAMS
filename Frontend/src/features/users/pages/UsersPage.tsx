@@ -276,9 +276,9 @@ export default function Users() {
         </>
       )}
 
-      {tab === 'customers' && <CustomerManagementPage />}
+      {tab === 'customers' && <CustomerManagementPage hideAddButton />}
 
-      {tab === 'mechanics' && <MechanicManagementPage />}
+      {tab === 'mechanics' && <MechanicManagementPage hideAddButton />}
 
       {tab === 'requests' && (
         <div className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] rounded-2xl overflow-hidden">

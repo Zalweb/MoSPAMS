@@ -45,7 +45,7 @@ const mechanicSchema = z.object({
 });
 type MechanicForm = z.infer<typeof mechanicSchema>;
 
-export default function MechanicManagementPage() {
+export default function MechanicManagementPage({ hideAddButton = false }: { hideAddButton?: boolean }) {
   const [mechanics, setMechanics] = useState<Mechanic[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -159,14 +159,16 @@ export default function MechanicManagementPage() {
           <h2 className="text-2xl font-bold text-foreground tracking-tight">Mechanics</h2>
           <p className="text-sm text-muted-foreground mt-1">{meta?.total ?? mechanics.length} mechanics</p>
         </div>
-        <Button
-          onClick={openAdd}
-          size="sm"
-          className="h-10 rounded-xl text-sm font-semibold px-5 transition-all active:scale-95 shadow-lg"
-          style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}
-        >
-          <Plus className="w-4 h-4 mr-2" /> Add Mechanic
-        </Button>
+        {!hideAddButton && (
+          <Button
+            onClick={openAdd}
+            size="sm"
+            className="h-10 rounded-xl text-sm font-semibold px-5 transition-all active:scale-95 shadow-lg"
+            style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}
+          >
+            <Plus className="w-4 h-4 mr-2" /> Add Mechanic
+          </Button>
+        )}
       </div>
 
       <div className="relative">

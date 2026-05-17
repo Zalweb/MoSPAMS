@@ -34,7 +34,7 @@ const customerSchema = z.object({
 });
 type CustomerForm = z.infer<typeof customerSchema>;
 
-export default function CustomerManagementPage() {
+export default function CustomerManagementPage({ hideAddButton = false }: { hideAddButton?: boolean }) {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -110,16 +110,18 @@ export default function CustomerManagementPage() {
           <h1 className="text-3xl font-bold text-foreground tracking-tight">Customer Relations</h1>
           <p className="text-sm text-muted-foreground mt-1">Manage and track your client database</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button
-            onClick={openAdd}
-            className="h-11 rounded-xl font-semibold px-6 shadow-lg transition-all active:scale-[0.98]"
-            style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}
-          >
-            <Plus className="w-5 h-5 mr-2" strokeWidth={2.5} /> 
-            New Customer
-          </Button>
-        </div>
+        {!hideAddButton && (
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={openAdd}
+              className="h-11 rounded-xl font-semibold px-6 shadow-lg transition-all active:scale-[0.98]"
+              style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}
+            >
+              <Plus className="w-5 h-5 mr-2" strokeWidth={2.5} />
+              New Customer
+            </Button>
+          </div>
+        )}
       </motion.div>
 
       {/* Stats Grid */}
@@ -268,7 +270,7 @@ export default function CustomerManagementPage() {
                           {search ? "We couldn't find anyone matching your search criteria." : "Start building your customer base today."}
                         </p>
                       </div>
-                      {!search && (
+                      {!search && !hideAddButton && (
                         <Button onClick={openAdd} variant="outline" className="mt-2 rounded-xl border-border">
                           Add your first client
                         </Button>
