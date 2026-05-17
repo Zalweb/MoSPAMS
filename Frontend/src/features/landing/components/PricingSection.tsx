@@ -48,7 +48,6 @@ const ENTERPRISE_FEATURES = [
   'Pricing and terms built around your scale',
 ];
 
-const POPULAR_PLAN = 'premium';
 
 export default function PricingSection() {
   const navigate = useNavigate();

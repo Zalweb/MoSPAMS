@@ -433,7 +433,7 @@ export default function Services() {
               {service.partsUsed.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-border flex flex-wrap gap-2">
                   {service.partsUsed.map(pu => (
-                    <span key={pu.jobPartId} className="text-xs font-medium text-muted-foreground bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 px-2.5 py-1 rounded-lg border border-border dark:border-zinc-700">
+                    <span key={pu.jobPartId} className="text-xs font-semibold text-foreground bg-secondary/80 dark:bg-zinc-800/80 px-2.5 py-1 rounded-lg border border-border/60">
                       {pu.name ?? `Part #${pu.partId}`} x{pu.quantity}
                     </span>
                   ))}

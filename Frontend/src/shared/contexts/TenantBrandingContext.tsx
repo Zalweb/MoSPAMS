@@ -128,7 +128,20 @@ function applyBranding(branding: TenantBranding) {
 
   // ── Derived colors ──
   const mixed       = blendHex(primary, secondary, 0.5);
-  const textOn      = textOnColor(primary);
+  
+  // Determine text color for buttons (which usually have the gradient)
+  let textOn = textOnColor(primary);
+  const lumP = luminance(primary);
+  const lumS = luminance(secondary);
+  
+  if (lumP < 0.1 || lumS < 0.1) {
+    textOn = '#ffffff'; // If either is very dark/black, use white text
+  } else if (lumP > 0.8 && lumS > 0.8) {
+    textOn = '#111111'; // If both are very light/white, use black text
+  } else {
+    textOn = luminance(mixed) < 0.45 ? '#ffffff' : '#111111'; // Bias towards white for normal colors
+  }
+
   const textOnSec   = textOnColor(secondary);
   const textOnMixed = textOnColor(mixed);
 

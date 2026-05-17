@@ -155,7 +155,7 @@
 
   /* Backgrounds */
   .brand-bg          { background: var(--brand-primary); color: var(--brand-text-on-primary); }
-  .brand-bg-gradient { background: var(--brand-gradient); color: var(--brand-text-on-primary); }
+  .brand-bg-gradient { background: var(--brand-gradient); color: var(--brand-text-on-mixed); }
   .brand-surface     { background: var(--brand-surface); }
   .brand-surface-muted { background: var(--brand-surface-muted); }
   .brand-surface-gradient { background: var(--brand-surface-gradient); }
