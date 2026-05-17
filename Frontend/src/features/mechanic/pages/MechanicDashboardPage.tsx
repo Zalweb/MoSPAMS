@@ -7,6 +7,7 @@ import {
 } from 'recharts';
 import { apiGet } from '@/shared/lib/api';
 import { toast } from 'sonner';
+import { useSvgBrandColors } from '@/shared/hooks/useSvgBrandColors';
 
 interface DashboardData {
   mechanic_name: string;
@@ -123,6 +124,7 @@ export default function MechanicDashboardPage() {
   const [jobsPoints, setJobsPoints]   = useState<ChartPoint[]>([]);
   const [loadingLabor, setLoadingLabor] = useState(true);
   const [loadingJobs, setLoadingJobs]   = useState(true);
+  const svgColors = useSvgBrandColors();
 
   useEffect(() => {
     void (async () => {
@@ -199,7 +201,7 @@ export default function MechanicDashboardPage() {
       {/* Stat Cards */}
       <motion.div {...fadeUp(0.05)} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map(card => (
-          <div key={card.label} className="border rounded-2xl p-5" style={brandCard}>
+          <div key={card.label} className="border rounded-2xl p-5 brand-card" style={brandCard}>
             <div className="mb-3">
               <card.icon className="w-5 h-5" strokeWidth={2} style={brandIcon} />
             </div>
@@ -234,8 +236,8 @@ export default function MechanicDashboardPage() {
                   <AreaChart data={laborPoints} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="laborGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%"  stopColor="rgb(var(--color-primary-rgb))" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="rgb(var(--color-primary-rgb))" stopOpacity={0} />
+                        <stop offset="5%"  stopColor={svgColors.primary}   stopOpacity={0.35} />
+                        <stop offset="95%" stopColor={svgColors.secondary} stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
@@ -246,7 +248,7 @@ export default function MechanicDashboardPage() {
                       formatter={(v: number) => [`₱${v.toLocaleString()}`, 'Labor']}
                       labelStyle={{ color: '#a1a1aa' }}
                     />
-                    <Area type="monotone" dataKey="labor" stroke="rgb(var(--color-primary-rgb))" strokeWidth={2} fill="url(#laborGrad)" dot={false} activeDot={{ r: 4, fill: 'rgb(var(--color-primary-rgb))' }} />
+                    <Area type="monotone" dataKey="labor" stroke={svgColors.primary} strokeWidth={2} fill="url(#laborGrad)" dot={false} activeDot={{ r: 4, fill: svgColors.primary }} />
                   </AreaChart>
                 </ResponsiveContainer>
               )}
@@ -268,8 +270,8 @@ export default function MechanicDashboardPage() {
                   <BarChart data={jobsPoints} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="jobsGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%"  stopColor="rgb(var(--color-secondary-rgb))" stopOpacity={0.9} />
-                        <stop offset="95%" stopColor="rgb(var(--color-secondary-rgb))" stopOpacity={0.5} />
+                        <stop offset="0%"   stopColor={svgColors.primary}   stopOpacity={0.95} />
+                        <stop offset="100%" stopColor={svgColors.secondary} stopOpacity={0.75} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />

@@ -99,17 +99,18 @@ export default function CustomerDashboard() {
       {/* Stats Row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { label: 'Pending Bookings', count: pending, icon: Clock, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
-          { label: 'Ongoing Services', count: ongoing, icon: Wrench, color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
-          { label: 'Completed Jobs', count: completed, icon: CheckCircle2, color: 'text-green-500', bg: 'bg-green-500/10', border: 'border-green-500/20' },
+          { label: 'Pending Bookings', count: pending, icon: Clock },
+          { label: 'Ongoing Services', count: ongoing, icon: Wrench },
+          { label: 'Completed Jobs', count: completed, icon: CheckCircle2 },
         ].map((s, i) => (
           <motion.div
             key={s.label}
             {...fadeUp(i * 0.05 + 0.1)}
-            className="bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-3xl p-6 border border-border/50 shadow-sm group hover:border-[rgb(var(--color-primary-rgb))]/30 transition-all duration-300"
+            className="brand-card backdrop-blur-xl rounded-3xl p-6 border"
+            style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}
           >
-            <div className={`w-12 h-12 rounded-2xl ${s.bg} ${s.border} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-              <s.icon className={`w-6 h-6 ${s.color}`} strokeWidth={2} />
+            <div className="brand-icon-box w-12 h-12 rounded-2xl flex items-center justify-center mb-4">
+              <s.icon className="w-6 h-6" strokeWidth={2} />
             </div>
             <p className="text-3xl font-bold text-foreground tracking-tight leading-none">{s.count}</p>
             <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mt-2">{s.label}</p>

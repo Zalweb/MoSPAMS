@@ -276,6 +276,20 @@
                 0 0 60px rgba(var(--color-primary-rgb), 0.1);
   }
 
+  /* Brand card — subtle lift + brand glow on hover */
+  .brand-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease,
+                background 0.2s ease, filter 0.2s ease;
+    cursor: default;
+  }
+  .brand-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--brand-glow, 0 4px 24px rgba(0,0,0,0.15));
+    background: var(--brand-surface-gradient-muted) !important;
+    border-color: var(--brand-primary) !important;
+    filter: brightness(1.15) saturate(1.1);
+  }
+
   /* Smooth transitions */
   .transition-smooth {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

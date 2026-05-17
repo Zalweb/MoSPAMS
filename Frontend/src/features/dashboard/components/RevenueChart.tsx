@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useSvgBrandColors } from '@/shared/hooks/useSvgBrandColors';
 
 interface RevenueChartProps {
   data: Array<{ date: string; amount: number }>;
@@ -11,6 +12,7 @@ type ChartPeriod = 'daily' | 'weekly' | 'monthly';
 
 export function RevenueChart({ data, loading }: RevenueChartProps) {
   const [period, setPeriod] = useState<ChartPeriod>('daily');
+  const svgColors = useSvgBrandColors();
 
   const filteredData = useMemo(() => {
     const now = new Date();
@@ -90,8 +92,8 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                 <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="rgb(var(--color-primary-rgb))" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="rgb(var(--color-primary-rgb))" stopOpacity={0} />
+                      <stop offset="5%"  stopColor={svgColors.primary}   stopOpacity={0.35} />
+                      <stop offset="95%" stopColor={svgColors.secondary} stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
@@ -123,7 +125,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                   <Area
                     type="monotone"
                     dataKey="amount"
-                    stroke="rgb(var(--color-primary-rgb))"
+                    stroke={svgColors.primary}
                     strokeWidth={2}
                     fill="url(#colorRevenue)"
                     animationDuration={1000}

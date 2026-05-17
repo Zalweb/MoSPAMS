@@ -84,7 +84,7 @@ export default function PerformanceDashboardPage() {
         ].map(card => (
           <div
             key={card.label}
-            className="border rounded-xl p-6"
+            className="border rounded-xl p-6 brand-card"
             style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}
           >
             <div className="flex items-center justify-between">
@@ -164,7 +164,7 @@ export default function PerformanceDashboardPage() {
                 style={{
                   height: `${(month.jobs_completed / maxJobs) * 160}px`,
                   minHeight: '4px',
-                  background: 'linear-gradient(to top, rgb(var(--color-primary-rgb)), rgb(var(--color-primary-rgb) / 0.6))',
+                  background: 'linear-gradient(to top, var(--brand-primary), var(--brand-primary-light))',
                 }}
                 title={`${month.jobs_completed} jobs`}
               />

@@ -97,12 +97,14 @@ export function KPICard({
       transition={{ delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className="relative group h-full"
     >
-      <div className="relative flex flex-col h-full bg-card dark:bg-card/80 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl p-6 overflow-hidden dark:hover:border-border dark:border-zinc-800/50 hover:border-zinc-300/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-        {/* Gradient overlay */}
-        <div
-          className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isBrand ? '' : `bg-gradient-to-br ${accent.bg} to-transparent`}`}
-          style={isBrand ? brandOverlayStyle : undefined}
-        />
+      <div
+        className={`relative flex flex-col h-full dark:backdrop-blur-xl border rounded-2xl p-6 overflow-hidden ${isBrand ? 'brand-card' : 'bg-card dark:bg-card/80 shadow-soft dark:shadow-none border-border/50 dark:hover:border-border dark:border-zinc-800/50 hover:border-zinc-300/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg'}`}
+        style={isBrand ? { background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' } : undefined}
+      >
+        {/* Gradient overlay — non-brand only */}
+        {!isBrand && (
+          <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br ${accent.bg} to-transparent`} />
+        )}
 
         {/* Glow top-right */}
         <div

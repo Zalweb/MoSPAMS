@@ -159,7 +159,7 @@ export default function AssignedJobsPage() {
         ].map((stat) => (
           <div
             key={stat.label}
-            className="p-4 rounded-xl border"
+            className="p-4 rounded-xl border brand-card"
             style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}
           >
             <div className="flex items-center justify-between mb-2">
