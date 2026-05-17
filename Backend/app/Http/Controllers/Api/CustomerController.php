@@ -302,30 +302,30 @@ class CustomerController extends Controller
             return response()->json(['error' => 'Payment not found'], 404);
         }
 
-        $items = $this->tenantTable('sale_items')
+        $items = DB::table('sale_items')
             ->join('parts', 'parts.part_id', '=', 'sale_items.part_id_fk')
             ->where('sale_items.sale_id_fk', $paymentId)
             ->select('sale_items.*', 'parts.part_name')
             ->get();
-            
+
         $labor = [];
         if ($sale->job_id_fk) {
-            $labor = $this->tenantTable('service_job_items')
+            $labor = DB::table('service_job_items')
                 ->join('service_types', 'service_types.service_type_id', '=', 'service_job_items.service_type_id_fk')
                 ->where('service_job_items.job_id_fk', $sale->job_id_fk)
                 ->select('service_job_items.*', 'service_types.service_name')
                 ->get();
         }
 
-        $payment = $this->tenantTable('payments')
+        $payment = DB::table('payments')
             ->join('payment_statuses', 'payment_statuses.payment_status_id', '=', 'payments.payment_status_id_fk')
-            ->where('sale_id_fk', $paymentId)
+            ->where('payments.sale_id_fk', $paymentId)
             ->select('payments.payment_method', 'payment_statuses.status_name as payment_status', 'payments.payment_date', 'payments.reference_number')
             ->first();
 
         $mechanics = [];
         if ($sale->job_id_fk) {
-            $mechanics = $this->tenantTable('service_job_mechanics')
+            $mechanics = DB::table('service_job_mechanics')
                 ->join('mechanics', 'mechanics.mechanic_id', '=', 'service_job_mechanics.mechanic_id_fk')
                 ->where('service_job_mechanics.job_id_fk', $sale->job_id_fk)
                 ->pluck('mechanics.full_name')
