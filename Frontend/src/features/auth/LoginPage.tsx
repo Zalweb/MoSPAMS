@@ -101,7 +101,7 @@ export default function LoginPage() {
       setJoining(false);
     }
   };
-
+  return (
     <div className="dark text-foreground min-h-screen bg-zinc-950 flex items-center justify-center relative overflow-hidden">
       {/* Background glow / light ray */}
       <div className="absolute inset-0 pointer-events-none flex justify-center">
