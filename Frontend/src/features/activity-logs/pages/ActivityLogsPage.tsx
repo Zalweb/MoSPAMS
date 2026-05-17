@@ -154,14 +154,14 @@ export default function ActivityLogsPage() {
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <div className="bg-card rounded-2xl border border-border p-4">
+        <div className="brand-card rounded-2xl border p-4" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
           <div className="flex items-center gap-2 mb-2">
             <Activity className="w-4 h-4 text-muted-foreground" />
             <span className="text-xs text-muted-foreground font-medium">Total Events</span>
           </div>
           <p className="text-xl font-bold text-foreground">{meta?.total ?? logs.length}</p>
         </div>
-        <div className="bg-card rounded-2xl border border-border p-4">
+        <div className="brand-card rounded-2xl border p-4" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
           <div className="flex items-center gap-2 mb-2">
             <User className="w-4 h-4 text-muted-foreground" />
             <span className="text-xs text-muted-foreground font-medium">Active Users</span>
@@ -221,7 +221,7 @@ export default function ActivityLogsPage() {
       </div>
 
       {/* Logs Table */}
-      <div className="bg-card rounded-2xl border border-border overflow-hidden">
+      <div className="brand-card rounded-2xl border overflow-hidden" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="w-6 h-6 border-2 border-border dark:border-zinc-700 border-t-white rounded-full animate-spin" />

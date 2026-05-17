@@ -143,7 +143,7 @@ export default function Sales() {
         ))}
       </motion.div>
 
-      <motion.div {...fadeUp(0.25)} className="bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/40 backdrop-blur-sm border border-border rounded-2xl overflow-hidden">
+      <motion.div {...fadeUp(0.25)} className="brand-card backdrop-blur-sm border rounded-2xl overflow-hidden" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
         <div className="px-5 py-4 border-b border-border flex items-center justify-between">
           <h3 className="text-sm font-semibold text-foreground">Transactions ({filteredTx.length})</h3>
           <span className="text-xs text-muted-foreground">{PERIOD_LABEL[period]}{paymentFilter !== 'All' && ` · ${paymentFilter}`}</span>

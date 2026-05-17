@@ -325,7 +325,7 @@ export default function SettingsPage() {
         </button>
       </div>
 
-      <div className="bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-border p-6 shadow-sm">
+      <div className="brand-card backdrop-blur-xl rounded-2xl border p-6 shadow-sm" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
         {activeTab === 'user' && (
           <div className="space-y-6">
             <div>

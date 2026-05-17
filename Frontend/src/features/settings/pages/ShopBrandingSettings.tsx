@@ -222,7 +222,7 @@ export default function ShopBrandingSettings() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.5 }}
-        className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-6"
+        className="brand-card backdrop-blur-sm border rounded-2xl p-6" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}
       >
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-xl bg-secondary dark:bg-zinc-800 flex items-center justify-center">
@@ -290,7 +290,7 @@ export default function ShopBrandingSettings() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.5 }}
-        className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-6"
+        className="brand-card backdrop-blur-sm border rounded-2xl p-6" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}
       >
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-xl bg-secondary dark:bg-zinc-800 flex items-center justify-center">
@@ -363,7 +363,7 @@ export default function ShopBrandingSettings() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.5 }}
-        className="bg-card shadow-soft dark:shadow-none dark:bg-muted/50 backdrop-blur-sm border border-border rounded-2xl p-6"
+        className="brand-card backdrop-blur-sm border rounded-2xl p-6" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}
       >
         <h3 className="text-base font-semibold text-foreground mb-4">Shop Information</h3>
         

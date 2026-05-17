@@ -51,7 +51,7 @@ export function AIAssistant({ metrics }: AIAssistantProps) {
       transition={{ delay: 0.4, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className="relative group"
     >
-      <div className="relative bg-card dark:bg-zinc-900/40 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-border dark:border-zinc-800/50 hover:border-zinc-300/50 transition-all duration-300">
+      <div className="relative brand-card backdrop-blur-xl border rounded-2xl overflow-hidden transition-all duration-300" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
         <div className="flex items-center justify-between p-6 border-b border-border/50">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[rgb(var(--color-primary-rgb))]/20 flex items-center justify-center border border-[rgb(var(--color-primary-rgb))]/30">
@@ -82,7 +82,7 @@ export function AIAssistant({ metrics }: AIAssistantProps) {
             insights.map((insight, index) => (
               <div
                 key={index}
-                className="p-3.5 bg-secondary dark:bg-zinc-800/40 rounded-xl border border-border dark:border-zinc-700/50"
+                className="p-3.5 brand-card rounded-xl border" style={{ borderColor: 'var(--brand-border)' }}
               >
                 <p className="text-sm text-muted-foreground dark:text-zinc-300">{insight}</p>
               </div>

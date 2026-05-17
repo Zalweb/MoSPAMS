@@ -48,7 +48,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
       transition={{ delay: 0.2, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className="relative group"
     >
-      <div className="relative backdrop-blur-xl bg-white/[0.03] dark:bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6 overflow-hidden transition-all duration-300">
+      <div className="relative brand-card backdrop-blur-xl border rounded-2xl p-6 overflow-hidden transition-all duration-300" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-lg font-semibold text-card-foreground mb-1">Revenue Analytics</h3>

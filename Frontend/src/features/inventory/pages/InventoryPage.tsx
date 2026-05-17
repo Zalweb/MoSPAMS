@@ -278,7 +278,7 @@ export default function Inventory() {
         </div>
       </motion.div>
 
-      <motion.div {...fadeUp(0.2)} className="bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/40 backdrop-blur-sm border border-border rounded-2xl overflow-hidden">
+      <motion.div {...fadeUp(0.2)} className="brand-card backdrop-blur-sm border rounded-2xl overflow-hidden" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>

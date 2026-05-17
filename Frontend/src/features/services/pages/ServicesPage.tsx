@@ -344,7 +344,7 @@ export default function Services() {
           const StatusIcon = style.icon;
           const pendingRequests = (service.partRequests ?? []).length;
           return (
-            <div key={service.id} className="bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/40 backdrop-blur-sm border border-border rounded-2xl p-5 hover:border-border dark:border-zinc-700 transition-all duration-300 group">
+            <div key={service.id} className="brand-card backdrop-blur-sm border rounded-2xl p-5 transition-all duration-300 group" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-start gap-4">
                   <div className={`w-11 h-11 rounded-xl ${style.bg} border ${style.border} flex items-center justify-center shrink-0`}>
@@ -478,7 +478,7 @@ export default function Services() {
           );
         })}
         {!loading && filtered.length === 0 && (
-          <div className="text-center py-16 text-sm text-muted-foreground bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/40 backdrop-blur-sm border border-border rounded-2xl">
+          <div className="text-center py-16 text-sm text-muted-foreground brand-card backdrop-blur-sm border rounded-2xl" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
             <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 flex items-center justify-center">
               <Wrench className="w-8 h-8 text-muted-foreground dark:text-zinc-600" />
             </div>

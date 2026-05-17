@@ -28,7 +28,7 @@ export function TransactionTable({ transactions, loading }: TransactionTableProp
       transition={{ delay: 0.3, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className="relative group"
     >
-      <div className="relative bg-card dark:bg-zinc-900/40 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-border dark:border-zinc-800/50 hover:border-zinc-300/50 transition-all duration-300">
+      <div className="relative brand-card backdrop-blur-xl border rounded-2xl overflow-hidden transition-all duration-300" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border/50">
           <div>

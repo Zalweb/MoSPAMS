@@ -155,7 +155,7 @@ export default function Users() {
         ))}
       </div>
 
-      <div className="bg-card dark:bg-zinc-900/40 backdrop-blur-2xl border border-border/50 rounded-3xl overflow-hidden shadow-xl mb-6">
+      <div className="brand-card backdrop-blur-2xl border rounded-3xl overflow-hidden shadow-xl mb-6" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -243,7 +243,7 @@ export default function Users() {
         </div>
       </div>
 
-      <div className="bg-card shadow-soft dark:shadow-none dark:bg-zinc-900/40 backdrop-blur-sm border border-border rounded-2xl p-5 mb-6">
+      <div className="brand-card backdrop-blur-sm border rounded-2xl p-5 mb-6" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
         <h3 className="text-[13px] font-semibold text-foreground mb-4">Access Privileges</h3>
         <div className="overflow-x-auto">
           <table className="w-full">
