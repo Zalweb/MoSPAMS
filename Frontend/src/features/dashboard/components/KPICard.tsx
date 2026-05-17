@@ -83,9 +83,6 @@ export function KPICard({
     borderColor: 'var(--brand-border)',
     color: 'var(--brand-primary)',
   } : {};
-  const brandOverlayStyle: React.CSSProperties = isBrand ? {
-    background: 'var(--brand-surface-gradient)',
-  } : {};
   const brandGlowStyle: React.CSSProperties = isBrand ? {
     background: 'var(--brand-primary)',
   } : {};
