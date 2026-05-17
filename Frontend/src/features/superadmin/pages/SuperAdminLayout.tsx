@@ -12,6 +12,7 @@ import {
   LifeBuoy,
   LogOut,
   MessageSquare,
+  Settings,
   Shield,
   Store,
   TrendingUp,
@@ -29,10 +30,12 @@ import { useTheme } from '@/shared/contexts/ThemeContext';
 const NAV_SECTIONS = [
   {
     title: 'MAIN',
+    mobileIcon: LayoutDashboard,
     items: [{ to: '/superadmin/analytics', label: 'Dashboard', icon: LayoutDashboard }],
   },
   {
     title: 'SHOPS',
+    mobileIcon: Store,
     items: [
       { to: '/superadmin/shops', label: 'All Shops', icon: Building2, end: true },
       { to: '/superadmin/shops/pending', label: 'Pending', icon: HeartHandshake },
@@ -42,6 +45,7 @@ const NAV_SECTIONS = [
   },
   {
     title: 'BILLING',
+    mobileIcon: CreditCard,
     items: [
       { to: '/superadmin/subscriptions', label: 'Plans', icon: CreditCard },
       { to: '/superadmin/billing/payments', label: 'Payments', icon: FileText },
@@ -51,6 +55,7 @@ const NAV_SECTIONS = [
   },
   {
     title: 'ADMINS',
+    mobileIcon: Users,
     items: [
       { to: '/superadmin/access-control', label: 'Admin Users', icon: Users },
       { to: '/superadmin/admins/new', label: 'Add Admin', icon: Shield },
@@ -58,6 +63,7 @@ const NAV_SECTIONS = [
   },
   {
     title: 'REPORTS',
+    mobileIcon: BarChart3,
     items: [
       { to: '/superadmin/reports/revenue', label: 'Analytics', icon: BarChart3 },
       { to: '/superadmin/reports/growth', label: 'Growth', icon: TrendingUp },
@@ -67,6 +73,7 @@ const NAV_SECTIONS = [
   },
   {
     title: 'SYSTEM',
+    mobileIcon: Settings,
     items: [
       { to: '/superadmin/audit-logs', label: 'Audit Logs', icon: Activity },
       { to: '/superadmin/support/tickets', label: 'Tickets', icon: LifeBuoy },
@@ -86,6 +93,7 @@ export default function SuperAdminLayout() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [activeMobileGroup, setActiveMobileGroup] = useState<string | null>(null);
   const [notifData, setNotifData] = useState<{ pendingShops: number; expiringSubscriptions: any[] }>({ pendingShops: 0, expiringSubscriptions: [] });
 
   const fetchNotifications = () => {
@@ -95,6 +103,10 @@ export default function SuperAdminLayout() {
   };
 
   useEffect(() => { fetchNotifications(); const t = setInterval(fetchNotifications, 60000); return () => clearInterval(t); }, []);
+
+  useEffect(() => {
+    setActiveMobileGroup(null);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -380,34 +392,101 @@ export default function SuperAdminLayout() {
         </div>
 
         {/* ── MOBILE BOTTOM NAV ────────────────────────────────────────────── */}
-        <div className="lg:hidden fixed bottom-6 left-0 right-0 px-4 z-50 pointer-events-none flex justify-center">
+        <AnimatePresence>
+          {activeMobileGroup && (
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="lg:hidden fixed inset-0 z-40 bg-background/20 backdrop-blur-sm" 
+              onClick={() => setActiveMobileGroup(null)} 
+            />
+          )}
+        </AnimatePresence>
+
+        <div className="lg:hidden fixed bottom-6 left-0 right-0 px-4 z-50 pointer-events-none flex flex-col items-center justify-end">
+          
+          <AnimatePresence>
+            {activeMobileGroup && (
+              <motion.div
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                className="pointer-events-auto mb-4 bg-background border border-border shadow-2xl rounded-[32px] p-2 w-[calc(100vw-32px)] max-w-sm flex flex-col gap-1 overflow-hidden"
+              >
+                <div className="px-4 py-3 mb-1">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{activeMobileGroup}</p>
+                </div>
+                {NAV_SECTIONS.find(g => g.title === activeMobileGroup)?.items.map(item => {
+                  const isActive = item.end
+                    ? location.pathname === item.to
+                    : location.pathname === item.to || location.pathname.startsWith(item.to + '/');
+                    
+                  return (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      className={`flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-colors ${
+                        isActive 
+                          ? 'bg-foreground text-background' 
+                          : 'text-foreground hover:bg-secondary'
+                      }`}
+                    >
+                      <item.icon className="w-5 h-5 shrink-0" strokeWidth={isActive ? 2.5 : 2} />
+                      <span className="text-[15px] font-bold tracking-wide">{item.label}</span>
+                    </NavLink>
+                  );
+                })}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <nav 
             className="pointer-events-auto flex items-center p-1.5 rounded-[28px] shadow-2xl overflow-x-auto no-scrollbar max-w-full"
             style={{ background: 'hsl(var(--foreground))' }}
           >
-            {allItems.map((item) => {
-              const isActive = item.end
-                ? location.pathname === item.to
-                : location.pathname === item.to || location.pathname.startsWith(item.to + '/');
+            {NAV_SECTIONS.map((group) => {
+              const isActiveGroup = group.items.some(item => 
+                item.end ? location.pathname === item.to : location.pathname === item.to || location.pathname.startsWith(item.to + '/')
+              );
+              const isExpanded = activeMobileGroup === group.title;
+              const Icon = group.mobileIcon;
 
-              return (
+              return group.items.length === 1 ? (
                 <NavLink
-                  key={item.to}
-                  to={item.to}
-                  className="relative flex items-center justify-center min-w-[48px] h-12 rounded-[22px] transition-colors z-10 shrink-0"
+                  key={group.title}
+                  to={group.items[0].to}
+                  className="relative flex items-center justify-center min-w-[52px] h-12 rounded-[22px] transition-colors z-10 shrink-0 mx-0.5"
                 >
-                  {isActive && (
+                  {isActiveGroup && !activeMobileGroup && (
                     <motion.div
                       layoutId="superadmin-mobile-active-tab"
                       className="absolute inset-0 bg-background rounded-[22px] z-0"
                       transition={{ type: 'spring', stiffness: 350, damping: 30 }}
                     />
                   )}
-                  <item.icon 
-                    className={`w-[22px] h-[22px] relative z-10 transition-colors ${isActive ? 'text-foreground' : 'text-background/50'}`} 
-                    strokeWidth={isActive ? 2.5 : 2}
+                  <Icon 
+                    className={`w-[22px] h-[22px] relative z-10 transition-colors ${isActiveGroup && !activeMobileGroup ? 'text-foreground' : 'text-background/50'}`} 
+                    strokeWidth={isActiveGroup && !activeMobileGroup ? 2.5 : 2}
                   />
                 </NavLink>
+              ) : (
+                <button
+                  key={group.title}
+                  onClick={() => setActiveMobileGroup(isExpanded ? null : group.title)}
+                  className="relative flex items-center justify-center min-w-[52px] h-12 rounded-[22px] transition-colors z-10 shrink-0 mx-0.5"
+                >
+                  {(isActiveGroup && !activeMobileGroup || isExpanded) && (
+                    <motion.div
+                      layoutId="superadmin-mobile-active-tab"
+                      className="absolute inset-0 bg-background rounded-[22px] z-0"
+                      transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                    />
+                  )}
+                  <Icon 
+                    className={`w-[22px] h-[22px] relative z-10 transition-colors ${(isActiveGroup && !activeMobileGroup) || isExpanded ? 'text-foreground' : 'text-background/50'}`} 
+                    strokeWidth={(isActiveGroup && !activeMobileGroup) || isExpanded ? 2.5 : 2}
+                  />
+                </button>
               );
             })}
           </nav>
