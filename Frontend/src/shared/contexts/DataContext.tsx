@@ -16,6 +16,7 @@ interface DataContextType {
   addPart: (part: Omit<Part, 'id' | 'createdAt'>) => Promise<Part>;
   updatePart: (id: string, part: Partial<Part>) => Promise<Part>;
   uploadPartImage: (id: string, file: File) => Promise<Part>;
+  removePartImage: (id: string) => Promise<Part>;
   deletePart: (id: string) => Promise<void>;
   recordStockMovement: (partId: string, type: 'in' | 'out' | 'adjust', qty: number, reason: string) => Promise<StockMovement | void>;
   addService: (service: Omit<ServiceRecord, 'id' | 'createdAt'>) => Promise<ServiceRecord>;
@@ -109,6 +110,14 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       toast.success('Part image saved');
       return response.data;
     } catch (error) { showApiFailure('Upload image', error); throw error; }
+  }, []);
+
+  const removePartImage = useCallback(async (id: string): Promise<Part> => {
+    try {
+      const response = await apiMutation<ApiItem<Part>>(`/api/parts/${id}/image`, 'DELETE');
+      toast.success('Part image removed');
+      return response.data;
+    } catch (error) { showApiFailure('Remove image', error); throw error; }
   }, []);
 
   const deletePart = useCallback(async (id: string): Promise<void> => {
@@ -236,7 +245,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   return (
     <DataContext.Provider value={{
       serviceTypes, categories, users, logs, loading,
-      addPart, updatePart, uploadPartImage, deletePart, recordStockMovement,
+      addPart, updatePart, uploadPartImage, removePartImage, deletePart, recordStockMovement,
       addService, updateService, deleteService,
       addTransaction,
       addServiceType, updateServiceType, deleteServiceType,

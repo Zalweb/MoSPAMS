@@ -50,7 +50,7 @@ const fadeUp = (delay = 0) => ({
 });
 
 export default function Inventory() {
-  const { addPart, updatePart, uploadPartImage, deletePart, recordStockMovement, categories, addCategory } = useData();
+  const { addPart, updatePart, uploadPartImage, removePartImage, deletePart, recordStockMovement, categories, addCategory } = useData();
   const { user } = useAuth();
   const role = user?.role;
   const canCreate = can(role, 'inventory', 'create');
@@ -71,6 +71,7 @@ export default function Inventory() {
   const [pendingImage, setPendingImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageUploading, setImageUploading] = useState(false);
+  const [removingImage, setRemovingImage] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const csvInputRef = useRef<HTMLInputElement>(null);
   const [importing, setImporting] = useState(false);
@@ -118,6 +119,7 @@ export default function Inventory() {
   const openEdit = (part: Part) => {
     setEditing(part);
     setPendingImage(null);
+    setRemovingImage(false);
     setImagePreview(part.imageUrl ?? null);
     form.reset({ brand: part.brand || '', name: part.name, partCode: part.partCode || '', category: part.category, stock: part.stock, minStock: part.minStock, price: part.price, barcode: part.barcode });
     setModalOpen(true);
@@ -171,6 +173,7 @@ export default function Inventory() {
   };
 
   const clearImage = () => {
+    if (editing?.imageUrl && !pendingImage) setRemovingImage(true);
     setPendingImage(null);
     setImagePreview(null);
     if (imageInputRef.current) imageInputRef.current.value = '';
@@ -195,6 +198,15 @@ export default function Inventory() {
         setImageUploading(false);
         setPendingImage(null);
         setImagePreview(null);
+      }
+    } else if (removingImage) {
+      setImageUploading(true);
+      try {
+        const withoutImage = await removePartImage(savedPart.id);
+        updateItem(savedPart.id, 'id', withoutImage);
+      } finally {
+        setImageUploading(false);
+        setRemovingImage(false);
       }
     }
 
