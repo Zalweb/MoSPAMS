@@ -330,52 +330,7 @@ export default function DashboardLayout() {
           ))}
         </nav>
 
-        {/* Bottom — user profile shortcut */}
-        <div className="shrink-0 p-3 mb-2">
-          <button
-            onClick={() => navigate(settingsPath())}
-            className={`w-full flex items-center rounded-xl transition-colors hover:bg-background/10 ${
-              isCollapsed ? 'justify-center p-2' : 'gap-3 px-3 py-2.5'
-            }`}
-          >
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
-              style={{ background: 'linear-gradient(135deg, rgb(var(--color-primary-rgb)) 0%, rgb(var(--color-secondary-rgb)) 100%)' }}
-            >
-              {user?.name?.charAt(0)?.toUpperCase() ?? 'U'}
-            </div>
-            <AnimatePresence>
-              {!isCollapsed && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.15 }}
-                  className="min-w-0 text-left"
-                >
-                  <p className="text-sm font-semibold text-background/90 truncate leading-none">{user?.name}</p>
-                  <p className="text-[11px] text-background/60 mt-0.5 leading-none">{user?.role}</p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </button>
 
-          {/* Logout — visible only expanded */}
-          <AnimatePresence>
-            {!isCollapsed && (
-              <motion.button
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={handleLogout}
-                className="mt-1 w-full flex items-center gap-3 px-3 py-2 rounded-xl text-background/60 hover:text-red-400 hover:bg-red-500/10 transition-colors text-xs font-semibold"
-              >
-                <LogOut className="w-4 h-4" strokeWidth={1.75} />
-                Sign Out
-              </motion.button>
-            )}
-          </AnimatePresence>
-        </div>
       </motion.aside>
 
       {/* ── MAIN CONTENT ────────────────────────────────────────────────── */}
