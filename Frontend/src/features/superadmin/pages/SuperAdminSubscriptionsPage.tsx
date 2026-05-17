@@ -108,6 +108,9 @@ export default function SuperAdminSubscriptionsPage() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-6">
         <section className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-4">
           <h3 className="text-[13px] font-semibold text-foreground mb-3">{editingPlanId ? 'Edit Plan' : 'Create Plan'}</h3>
+          {!editingPlanId && plans.length >= 2 ? (
+            <p className="text-[12px] text-muted-foreground py-2">Maximum of 2 editable plans reached. Edit an existing plan above.</p>
+          ) : (
           <div className="space-y-2.5">
             <Input placeholder="Plan code" value={planForm.planCode} onChange={(e) => setPlanForm(p => ({ ...p, planCode: e.target.value }))} className="bg-muted border-border dark:border-zinc-700 text-foreground dark:text-zinc-200 placeholder:text-muted-foreground" />
             <Input placeholder="Plan name" value={planForm.planName} onChange={(e) => setPlanForm(p => ({ ...p, planName: e.target.value }))} className="bg-muted border-border dark:border-zinc-700 text-foreground dark:text-zinc-200 placeholder:text-muted-foreground" />
@@ -117,6 +120,7 @@ export default function SuperAdminSubscriptionsPage() {
               {editingPlanId && <Button className="h-9 text-[12px] bg-secondary dark:bg-zinc-800 hover:bg-muted dark:bg-zinc-700 text-muted-foreground dark:text-zinc-300" onClick={cancelEditPlan}>Cancel</Button>}
             </div>
           </div>
+          )}
         </section>
 
         <section className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-4">
@@ -145,14 +149,15 @@ export default function SuperAdminSubscriptionsPage() {
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <section className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-4 overflow-x-auto">
-          <h3 className="text-[13px] font-semibold text-foreground mb-3">Plans</h3>
+          <h3 className="text-[13px] font-semibold text-foreground mb-3">Plans <span className="text-muted-foreground font-normal">(max 2 editable + Enterprise)</span></h3>
           <table className="w-full text-[12px] text-muted-foreground dark:text-zinc-300 min-w-[360px]"><thead><tr className="border-b border-border"><th className="text-left py-2 text-muted-foreground">Code</th><th className="text-left py-2 text-muted-foreground">Name</th><th className="text-left py-2 text-muted-foreground">Monthly</th><th className="text-right py-2 text-muted-foreground"></th></tr></thead>
           <tbody className="divide-y divide-border dark:divide-zinc-800">
-            {plans.map(plan => (
+            {plans.slice(0, 2).map(plan => (
               <tr key={plan.planId} className="hover:bg-muted/50"><td className="py-2">{plan.planCode}</td><td className="py-2">{plan.planName}</td><td className="py-2">{CURRENCY_PREFIX}{plan.monthlyPrice.toLocaleString()}</td>
                 <td className="py-2 text-right"><button onClick={() => startEditPlan(plan)} className="text-muted-foreground hover:text-foreground p-1 rounded" title="Edit plan"><Pencil className="w-3.5 h-3.5" /></button></td>
               </tr>
             ))}
+            <tr className="opacity-50"><td className="py-2 italic">enterprise</td><td className="py-2 italic">Enterprise</td><td className="py-2 italic">Custom</td><td className="py-2 text-right text-[10px] text-muted-foreground">contact only</td></tr>
           </tbody></table>
         </section>
 

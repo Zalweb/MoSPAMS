@@ -293,7 +293,7 @@ export default function DashboardLayout() {
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -8 }}
                                 transition={{ duration: 0.15 }}
-                                className="text-[15px] font-bold tracking-wide whitespace-nowrap ml-4"
+                                className="text-[13px] font-medium tracking-normal whitespace-nowrap ml-4"
                               >
                                 {item.label}
                               </motion.span>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { Check, DollarSign } from 'lucide-react';
+import { Check, DollarSign, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useScrollAnimation } from '@/shared/hooks/useScrollAnimation';
 import { apiGet } from '@/shared/lib/api';
@@ -16,7 +16,6 @@ interface PlanData {
 const FALLBACK_PLANS: PlanData[] = [
   { planId: 1, planCode: 'basic', planName: 'Basic', monthlyPrice: 499, description: 'Perfect for small shops' },
   { planId: 2, planCode: 'premium', planName: 'Premium', monthlyPrice: 999, description: 'Best for growing shops' },
-  { planId: 3, planCode: 'enterprise', planName: 'Enterprise', monthlyPrice: 1999, description: 'Full-featured operations' },
 ];
 
 const PLAN_FEATURES: Record<string, string[]> = {
@@ -39,15 +38,16 @@ const PLAN_FEATURES: Record<string, string[]> = {
     'Customer portal',
     'Activity logs',
   ],
-  enterprise: [
-    'Everything in Premium',
-    'Unlimited staff accounts',
-    'Custom domain support',
-    'Priority support',
-    'Advanced security',
-    'Dedicated onboarding',
-  ],
 };
+
+const ENTERPRISE_FEATURES = [
+  'Everything in Premium',
+  'Unlimited staff accounts',
+  'Custom domain support',
+  'Priority support & SLA',
+  'Dedicated onboarding',
+  'Custom integrations',
+];
 
 const POPULAR_PLAN = 'premium';
 
@@ -61,13 +61,13 @@ export default function PricingSection() {
     apiGet<{ data: PlanData[] }>('/api/plans')
       .then(res => {
         if (res.data && res.data.length > 0) {
-          setPlans(res.data);
+          setPlans(res.data.slice(0, 2));
         }
       })
       .catch(() => { /* use fallback */ });
   }, []);
 
-  const plansWithFeatures = plans.map(plan => {
+  const editablePlans = plans.slice(0, 2).map(plan => {
     const code = plan.planCode.toLowerCase();
     return {
       ...plan,
@@ -129,7 +129,8 @@ export default function PricingSection() {
         </div>
 
         <div ref={cardsRef} className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {plansWithFeatures.map((plan, index) => (
+          {/* Editable plans 1 & 2 */}
+          {editablePlans.map((plan, index) => (
             <motion.div
               key={plan.planCode}
               initial={{ opacity: 0, y: 30 }}
@@ -185,6 +186,51 @@ export default function PricingSection() {
               </div>
             </motion.div>
           ))}
+
+          {/* Enterprise plan — hardcoded, always 3rd */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={cardsVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.2, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="relative group rounded-3xl p-8 transition-all duration-300 bg-muted/40 border border-border/50 hover:border-zinc-700/50 backdrop-blur-xl"
+          >
+            <div className="absolute inset-0 rounded-3xl transition-opacity duration-300 opacity-0 group-hover:opacity-100">
+              <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent rounded-3xl" />
+            </div>
+
+            <div className="relative">
+              <div className="mb-6">
+                <p className="text-sm text-muted-foreground mb-2">Enterprise Plan</p>
+                <div className="flex items-baseline gap-1 mb-2">
+                  <span className="text-3xl font-bold text-foreground">Custom</span>
+                </div>
+                <p className="text-sm text-muted-foreground">Tailored for large-scale operations</p>
+              </div>
+
+              <div className="h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent mb-6" />
+
+              <ul className="space-y-4 mb-8">
+                {ENTERPRISE_FEATURES.map((feature) => (
+                  <li key={feature} className="flex items-start gap-3">
+                    <div className="mt-0.5 flex-shrink-0">
+                      <div className="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center">
+                        <Check className="w-3 h-3 text-muted-foreground" strokeWidth={3} />
+                      </div>
+                    </div>
+                    <span className="text-sm text-muted-foreground leading-relaxed">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <a
+                href="mailto:support@mospams.shop"
+                className="w-full py-3.5 rounded-2xl font-semibold text-sm transition-all duration-200 bg-zinc-800/50 text-foreground hover:bg-zinc-800 border border-zinc-700/50 flex items-center justify-center gap-2"
+              >
+                <Mail className="w-4 h-4" />
+                Contact the Team
+              </a>
+            </div>
+          </motion.div>
         </div>
 
         <div className="text-center mt-12">
