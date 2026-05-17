@@ -43,6 +43,7 @@ const PartsCatalog = lazy(() => import('@/features/customers/pages/PartsCatalog'
 const ActivityLogsPage = lazy(() => import('@/features/activity-logs/pages/ActivityLogsPage'));
 const SettingsPage = lazy(() => import('@/features/settings/pages/SettingsPage'));
 const StaffSettingsPage = lazy(() => import('@/features/settings/pages/StaffSettingsPage'));
+const MechanicSettingsPage = lazy(() => import('@/features/settings/pages/MechanicSettingsPage'));
 const NotFound = lazy(() => import('@/features/common/NotFound'));
 const ShopBlockedScreen = lazy(() => import('@/features/common/ShopBlockedScreen'));
 
@@ -275,6 +276,7 @@ function App() {
                             <Route path="mechanic/jobs/:id" element={<JobDetailsPage />} />
                             <Route path="mechanic/history" element={<JobHistoryPage />} />
                             <Route path="mechanic/performance" element={<PerformanceDashboardPage />} />
+                            <Route path="mechanic/settings" element={<MechanicSettingsPage />} />
                           </Route>
                           <Route path="*" element={<NotFound />} />
                         </Route>
