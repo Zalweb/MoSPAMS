@@ -172,8 +172,8 @@ export default function DashboardLayout() {
           background: 'linear-gradient(160deg, color-mix(in srgb, rgb(var(--color-primary-rgb)) 8%, rgba(30, 30, 30, 0.65)) 0%, rgba(10, 10, 10, 0.85) 100%)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: 'inset 0 0 20px rgba(255,255,255,0.05), 0 20px 40px rgba(0,0,0,0.4)'
+          border: 'none',
+          boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 0 20px rgba(255,255,255,0.05), 0 20px 40px rgba(0,0,0,0.4)'
         }}
       >
         {/* Logo area */}
@@ -297,15 +297,15 @@ export default function DashboardLayout() {
                           {isActive && !isCollapsed && (
                             <>
                               {/* Top curve */}
-                              <div className="absolute -top-[16px] right-0 w-[16px] h-[16px] text-background">
-                                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M16 0V16H0C8.83656 16 16 8.83656 16 0Z" fill="currentColor" />
+                              <div className="absolute -top-[24px] right-0 w-[24px] h-[24px] text-background pointer-events-none z-20">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                                  <path d="M24 0V24H0C13.2548 24 24 13.2548 24 0Z" fill="currentColor" />
                                 </svg>
                               </div>
                               {/* Bottom curve */}
-                              <div className="absolute -bottom-[16px] right-0 w-[16px] h-[16px] text-background">
-                                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M16 16V0H0C8.83656 0 16 7.16344 16 16Z" fill="currentColor" />
+                              <div className="absolute -bottom-[24px] right-0 w-[24px] h-[24px] text-background pointer-events-none z-20">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                                  <path d="M24 24V0H0C13.2548 0 24 10.7452 24 24Z" fill="currentColor" />
                                 </svg>
                               </div>
                             </>
