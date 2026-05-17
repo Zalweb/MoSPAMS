@@ -27,7 +27,7 @@ export default function ShopGrowthPage() {
           <div className="h-[200px] flex items-end gap-[2px]">
             {d.monthlyGrowth.map((m: any, i: number) => {
               const maxVal = Math.max(...d.monthlyGrowth.map((x: any) => x.count), 1);
-              return <div key={i} className="flex-1 min-w-[8px] relative" style={{ height: '100%' }} title={`${m.month}: ${m.count}`}><div className="absolute bottom-0 w-full rounded-t-sm bg-white/20 hover:bg-white/40 transition-colors" style={{ height: `${Math.max((m.count / maxVal) * 100, 2)}%` }} /></div>;
+              return <div key={i} className="flex-1 min-w-[8px] relative" style={{ height: '100%' }} title={`${m.month}: ${m.count}`}><div className="absolute bottom-0 w-full rounded-t-sm bg-blue-500 hover:bg-blue-400 transition-colors" style={{ height: `${Math.max((m.count / maxVal) * 100, 2)}%` }} /></div>;
             })}
           </div>
           <div className="flex justify-between mt-2 text-[10px] text-muted-foreground dark:text-zinc-600"><span>{d.monthlyGrowth[0]?.month}</span><span>{d.monthlyGrowth[d.monthlyGrowth.length - 1]?.month}</span></div>
