@@ -441,7 +441,7 @@ export default function DashboardLayout() {
                             className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 transition-colors"
                           >
                             <Settings className="w-[18px] h-[18px]" strokeWidth={1.5} />
-                            Profile Settings
+                            Settings
                           </button>
               )}
                       </div>
