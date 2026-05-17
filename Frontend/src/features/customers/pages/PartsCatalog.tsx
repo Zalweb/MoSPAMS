@@ -78,11 +78,11 @@ export default function PartsCatalog() {
               key={part.id}
               {...fadeUp(index * 0.05)}
               onClick={() => setSelected(part)}
-              className="group relative aspect-square brand-card backdrop-blur-xl rounded-3xl border overflow-hidden hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300 cursor-pointer"
+              className="group relative flex flex-col brand-card backdrop-blur-xl rounded-3xl border overflow-hidden hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300 cursor-pointer"
               style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}
             >
-              {/* Image — top 58% */}
-              <div className="relative h-[58%] bg-secondary/50 dark:bg-zinc-800/50 overflow-hidden flex items-center justify-center group-hover:scale-[1.02] transition-transform duration-500">
+              {/* Image */}
+              <div className="relative aspect-square w-full bg-secondary/50 dark:bg-zinc-800/50 overflow-hidden flex items-center justify-center group-hover:scale-[1.02] transition-transform duration-500 shrink-0">
                 {part.imageUrl ? (
                   <img src={part.imageUrl} alt={part.name} className="w-full h-full object-cover" />
                 ) : (
@@ -95,25 +95,25 @@ export default function PartsCatalog() {
                 </div>
               </div>
 
-              {/* Info — bottom 42% */}
-              <div className="h-[42%] px-3 py-2 flex flex-col justify-between bg-card/95 dark:bg-zinc-900/80">
+              {/* Info */}
+              <div className="flex-1 px-3 py-3 flex flex-col justify-between bg-card/95 dark:bg-zinc-900/80 gap-2">
                 <div>
-                  <span className="text-[9px] font-bold text-primary tracking-widest uppercase block">
+                  <span className="text-[9px] font-bold text-primary tracking-widest uppercase block leading-none mb-1">
                     {part.category}
                   </span>
-                  <h3 className="text-xs font-bold text-foreground leading-tight line-clamp-1 mt-0.5">
+                  <h3 className="text-xs font-bold text-foreground leading-tight line-clamp-1">
                     {part.name}
                   </h3>
                   {part.brand && (
-                    <p className="text-[9px] text-muted-foreground truncate">{part.brand}</p>
+                    <p className="text-[9px] text-muted-foreground truncate mt-0.5">{part.brand}</p>
                   )}
                 </div>
 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mt-auto pt-1">
                   <span className="text-sm font-black text-foreground tabular-nums leading-none">
                     ₱{part.price.toLocaleString()}
                   </span>
-                  <div className={`px-2 py-0.5 rounded-full text-[8px] font-bold tracking-tight ${part.stock > 0 ? 'bg-green-500/15 text-green-600 dark:text-green-400 border border-green-500/30' : 'bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30'}`}>
+                  <div className={`px-2 py-0.5 rounded-full text-[8px] font-bold tracking-tight shrink-0 ${part.stock > 0 ? 'bg-green-500/15 text-green-600 dark:text-green-400 border border-green-500/30' : 'bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30'}`}>
                     {part.stock > 0 ? 'AVAIL' : 'N/A'}
                   </div>
                 </div>
