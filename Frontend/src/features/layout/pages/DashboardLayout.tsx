@@ -169,7 +169,7 @@ export default function DashboardLayout() {
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
         style={{
-          background: 'rgba(11, 70, 50, 0.45)', // Dark green glass
+          background: 'linear-gradient(160deg, color-mix(in srgb, rgb(var(--color-primary-rgb)) 8%, rgba(30, 30, 30, 0.65)) 0%, rgba(10, 10, 10, 0.85) 100%)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           border: '1px solid rgba(255, 255, 255, 0.1)',
