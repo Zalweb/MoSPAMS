@@ -17,15 +17,21 @@ export default function ShopBlockedScreen({ shopStatus }: { shopStatus?: string 
 
   const Icon = code === 'PENDING' ? Clock3 : AlertTriangle;
 
+  const iconClass = code === 'SUSPENDED'
+    ? 'bg-red-500/10 text-red-500'
+    : code === 'PENDING'
+    ? 'bg-amber-500/10 text-amber-500'
+    : 'bg-muted text-muted-foreground';
+
   return (
-    <div className="min-h-screen bg-[#FAFAF9] flex items-center justify-center px-4">
-      <div className="max-w-md w-full bg-white rounded-2xl border border-[#F5F5F4] p-8 text-center">
-        <div className="mx-auto w-12 h-12 rounded-2xl bg-[#FEF2F2] text-[#DC2626] flex items-center justify-center mb-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <div className="max-w-md w-full bg-card rounded-2xl border border-border p-8 text-center">
+        <div className={`mx-auto w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${iconClass}`}>
           <Icon className="w-6 h-6" />
         </div>
-        <h1 className="text-[22px] font-bold text-[#1C1917] tracking-tight">{title}</h1>
-        <p className="text-[13px] text-[#A8A29E] mt-2">{description}</p>
-        <p className="text-[11px] text-[#D6D3D1] mt-4">Status code: {code}</p>
+        <h1 className="text-[22px] font-bold text-foreground tracking-tight">{title}</h1>
+        <p className="text-[13px] text-muted-foreground mt-2">{description}</p>
+        <p className="text-[11px] text-muted-foreground/50 mt-4">Status code: {code}</p>
       </div>
     </div>
   );

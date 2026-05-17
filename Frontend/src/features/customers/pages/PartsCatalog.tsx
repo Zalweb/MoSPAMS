@@ -67,7 +67,7 @@ export default function PartsCatalog() {
       </motion.div>
 
       {/* Parts Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         {loading ? (
           Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="aspect-square bg-secondary/20 rounded-3xl animate-pulse" />

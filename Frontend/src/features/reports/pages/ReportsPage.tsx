@@ -302,7 +302,7 @@ export default function Reports() {
 
       {reportType === 'inventory' && (
         <div className="space-y-4">
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
               { label: 'Total Parts', value: parts.length.toString() },
               { label: 'Low Stock', value: lowStockItems.length.toString() },
