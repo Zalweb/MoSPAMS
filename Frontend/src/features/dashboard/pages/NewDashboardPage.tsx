@@ -16,7 +16,8 @@ const fadeUp = (delay = 0) => ({
 });
 
 // Consistent card shell — flex-col + h-full so grid rows equalize heights
-const CARD = "relative group flex flex-col h-full backdrop-blur-xl bg-white/[0.03] dark:bg-white/[0.02] border border-white/[0.08] rounded-2xl overflow-hidden transition-all duration-300";
+const CARD = "relative group flex flex-col h-full brand-card backdrop-blur-xl border rounded-2xl overflow-hidden transition-all duration-300";
+const CARD_STYLE = { background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' };
 
 // Consistent card header
 function CardHeader({
@@ -182,7 +183,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
           {/* Top Service Types */}
           <motion.div {...fadeUp(0.25)} className="flex flex-col h-full">
-            <div className={CARD}>
+            <div className={CARD} style={CARD_STYLE}>
               <CardHeader icon={Wrench} title="Top Service Types" subtitle="By revenue this month" />
               <div className="flex-1 p-5 space-y-4">
                 {metrics.topServiceTypes.length === 0 ? (
@@ -224,7 +225,7 @@ export default function DashboardPage() {
 
           {/* Payment Methods */}
           <motion.div {...fadeUp(0.3)} className="flex flex-col h-full">
-            <div className={CARD}>
+            <div className={CARD} style={CARD_STYLE}>
               <CardHeader icon={DollarSign} title="Payment Methods" subtitle="Transaction breakdown" />
               <div className="flex-1 p-5 flex flex-col justify-between">
                 <div className="space-y-6">
@@ -296,7 +297,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
           {/* Low Stock Alert */}
           <motion.div {...fadeUp(0.35)} className="flex flex-col h-full">
-            <div className={CARD} style={{ minHeight: 360 }}>
+            <div className={CARD} style={{ minHeight: 360, ...CARD_STYLE }}>
               <CardHeader
                 icon={AlertTriangle}
                 title="Low Stock Alerts"
@@ -360,7 +361,7 @@ export default function DashboardPage() {
 
           {/* Recent Services */}
           <motion.div {...fadeUp(0.4)} className="flex flex-col h-full">
-            <div className={CARD} style={{ minHeight: 360 }}>
+            <div className={CARD} style={{ minHeight: 360, ...CARD_STYLE }}>
               <CardHeader
                 icon={Wrench}
                 title="Recent Services"
@@ -428,9 +429,10 @@ export default function DashboardPage() {
       {isOwnerOrStaff && (
         <motion.div
           {...fadeUp(0.45)}
-          className="backdrop-blur-xl bg-white/[0.03] dark:bg-white/[0.02] border border-white/[0.08] rounded-2xl overflow-hidden"
+          className="brand-card backdrop-blur-xl border rounded-2xl overflow-hidden"
+          style={CARD_STYLE}
         >
-          <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
+          <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="brand-icon-box w-10 h-10 rounded-xl flex items-center justify-center">
                 <Wrench className="w-5 h-5" strokeWidth={2} />
@@ -483,7 +485,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
           {/* Inventory Value */}
           <motion.div {...fadeUp(0.5)} className="flex flex-col h-full">
-            <div className={CARD}>
+            <div className={CARD} style={CARD_STYLE}>
               <CardHeader icon={Package} title="Inventory Value" subtitle={`${metrics.totalParts} total parts`} />
               <div className="flex-1 p-5 flex flex-col justify-between">
                 <div>
@@ -520,7 +522,7 @@ export default function DashboardPage() {
 
           {/* Customer Base */}
           <motion.div {...fadeUp(0.55)} className="flex flex-col h-full">
-            <div className={CARD}>
+            <div className={CARD} style={CARD_STYLE}>
               <CardHeader icon={Users} title="Customer Base" subtitle={`${metrics.activeServices} active services`} />
               <div className="flex-1 p-5 flex flex-col justify-between">
                 <div>
@@ -557,7 +559,7 @@ export default function DashboardPage() {
 
           {/* Performance */}
           <motion.div {...fadeUp(0.6)} className="flex flex-col h-full">
-            <div className={CARD}>
+            <div className={CARD} style={CARD_STYLE}>
               <CardHeader icon={TrendingUp} title="Performance" subtitle="Jobs & revenue metrics" />
               <div className="flex-1 p-5 flex flex-col justify-between">
                 <div>
