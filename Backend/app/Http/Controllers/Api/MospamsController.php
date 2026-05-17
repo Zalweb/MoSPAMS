@@ -30,6 +30,18 @@ class MospamsController extends Controller
 
         $this->scopeToShop($query, 'parts');
 
+        if ($search = request()->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('parts.part_name', 'like', "%{$search}%")
+                  ->orWhere('parts.brand', 'like', "%{$search}%")
+                  ->orWhere('parts.part_code', 'like', "%{$search}%");
+            });
+        }
+
+        if ($category = request()->query('category')) {
+            $query->where('categories.category_name', $category);
+        }
+
         $result = $this->paginateOrLimit($query);
 
         return response()->json([
