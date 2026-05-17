@@ -144,9 +144,7 @@ export default function DashboardLayout() {
   };
 
   /* ── Sidebar colour tokens ─────────────────────────────────────────── */
-  const sidebarBg     = 'color-mix(in srgb, rgb(var(--color-primary-rgb)) 22%, #07090e 78%)';
-  const sidebarBorder = 'color-mix(in srgb, rgb(var(--color-primary-rgb)) 40%, transparent 60%)';
-  const tooltipBg     = 'color-mix(in srgb, rgb(var(--color-primary-rgb)) 45%, #07090e 55%)';
+  const tooltipBg     = 'rgba(11, 70, 50, 0.9)';
 
   return (
     <div className="min-h-screen bg-background flex font-sans" style={brandingVars}>
@@ -167,19 +165,25 @@ export default function DashboardLayout() {
         initial={false}
         animate={{ width: isCollapsed ? COLLAPSED_W : EXPANDED_W }}
         transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
-        className={`fixed lg:sticky top-0 left-0 z-50 h-screen flex flex-col shrink-0 overflow-hidden transition-transform duration-300 ${
+        className={`sticky top-4 h-[calc(100vh-32px)] ml-4 my-4 flex flex-col shrink-0 overflow-hidden transition-transform duration-300 z-50 rounded-[32px] ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
-        style={{ background: sidebarBg, borderRight: `1px solid ${sidebarBorder}` }}
+        style={{
+          background: 'rgba(11, 70, 50, 0.45)', // Dark green glass
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          boxShadow: 'inset 0 0 20px rgba(255,255,255,0.05), 0 20px 40px rgba(0,0,0,0.4)'
+        }}
       >
         {/* Logo area */}
-        <div
-          className="flex items-center h-[70px] px-4 shrink-0 relative"
-          style={{ borderBottom: `1px solid rgba(255,255,255,0.07)` }}
-        >
+        <div className={`flex items-center h-[90px] w-full shrink-0 relative ${isCollapsed ? 'justify-center' : 'px-5 justify-between'}`}>
           <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden shrink-0 shadow-lg"
-            style={{ background: 'var(--brand-gradient)' }}
+            className="w-[42px] h-[42px] shrink-0 rounded-full flex items-center justify-center overflow-hidden transition-transform hover:scale-105"
+            style={{
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 100%)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+            }}
           >
             <img
               src={branding?.logoUrl || '/images/logo.svg'}
@@ -195,32 +199,24 @@ export default function DashboardLayout() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
                 transition={{ duration: 0.18 }}
-                className="ml-3 overflow-hidden min-w-0"
+                className="ml-3 overflow-hidden min-w-0 flex-1"
               >
                 <span className="text-[15px] font-bold text-white tracking-tight leading-none block whitespace-nowrap">
                   Mo<span className="text-white/40">SPAMS</span>
-                </span>
-                <span className="block text-[10px] text-white/35 font-semibold tracking-wider leading-none mt-1 whitespace-nowrap uppercase">
-                  {branding?.shopName || user?.shopName || 'Management'}
                 </span>
               </motion.div>
             )}
           </AnimatePresence>
 
           {/* Collapse / expand button — desktop only */}
-          <button
-            onClick={() => { setIsCollapsed(c => !c); setSidebarOpen(false); }}
-            className="hidden lg:flex absolute -right-3 top-[26px] w-6 h-6 rounded-full items-center justify-center z-[60] shadow-md transition-colors"
-            style={{
-              background: tooltipBg,
-              border: `1px solid ${sidebarBorder}`,
-              color: 'rgba(255,255,255,0.7)',
-            }}
-          >
-            <motion.div animate={{ rotate: isCollapsed ? 180 : 0 }} transition={{ duration: 0.25 }}>
-              <ChevronLeft className="w-3.5 h-3.5" />
-            </motion.div>
-          </button>
+          <div className={`hidden lg:block transition-opacity duration-300 ${isCollapsed ? 'opacity-0 pointer-events-none absolute' : 'opacity-100'}`}>
+            <button
+              onClick={() => { setIsCollapsed(true); setSidebarOpen(false); }}
+              className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/70 hover:text-white transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Nav items */}
@@ -266,15 +262,21 @@ export default function DashboardLayout() {
                         className="block"
                       >
                         <div
-                          className={`flex items-center rounded-xl transition-colors duration-150 ${
-                            isCollapsed ? 'justify-center w-11 h-11 mx-auto' : 'gap-3 px-4 py-2.5'
-                          } ${isActive ? 'bg-white' : 'hover:bg-white/10'}`}
+                          className={`flex items-center transition-all duration-300 z-10 ${
+                            isCollapsed 
+                              ? 'justify-center w-12 h-12 mx-auto rounded-full' 
+                              : `h-[52px] ${isActive ? 'rounded-l-full rounded-r-none pl-5 ml-3 w-[calc(100%-12px)]' : 'rounded-full mx-3 px-4 w-[calc(100%-24px)]'}`
+                          } ${
+                            isActive 
+                              ? 'bg-background text-foreground shadow-[-4px_0_15px_rgba(0,0,0,0.1)]' 
+                              : 'text-emerald-50/80 hover:bg-white/10 hover:text-white'
+                          }`}
                         >
                           <item.icon
-                            className={`shrink-0 transition-colors ${
-                              isCollapsed ? 'w-5 h-5' : 'w-[18px] h-[18px]'
-                            } ${isActive ? 'text-gray-900' : 'text-white/65 group-hover/tip:text-white'}`}
-                            strokeWidth={isActive ? 2.5 : 1.75}
+                            className={`shrink-0 transition-all duration-300 ${
+                              isCollapsed ? 'w-5 h-5' : 'w-[20px] h-[20px]'
+                            } ${isActive && isCollapsed ? 'scale-110' : ''}`}
+                            strokeWidth={isActive ? 2.5 : 2}
                           />
                           <AnimatePresence>
                             {!isCollapsed && (
@@ -283,9 +285,7 @@ export default function DashboardLayout() {
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -8 }}
                                 transition={{ duration: 0.15 }}
-                                className={`text-sm font-semibold whitespace-nowrap ${
-                                  isActive ? 'text-gray-900' : 'text-white/65'
-                                }`}
+                                className="text-[15px] font-bold tracking-wide whitespace-nowrap ml-4"
                               >
                                 {item.label}
                               </motion.span>
@@ -317,10 +317,7 @@ export default function DashboardLayout() {
         </nav>
 
         {/* Bottom — user profile shortcut */}
-        <div
-          className="shrink-0 p-3"
-          style={{ borderTop: 'rgba(255,255,255,0.07) 1px solid' }}
-        >
+        <div className="shrink-0 p-3 mb-2">
           <button
             onClick={() => navigate(settingsPath())}
             className={`w-full flex items-center rounded-xl transition-colors hover:bg-white/10 ${
@@ -328,8 +325,8 @@ export default function DashboardLayout() {
             }`}
           >
             <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0"
-              style={{ background: 'rgba(255,255,255,0.15)' }}
+              className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
+              style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%)' }}
             >
               {user?.name?.charAt(0)?.toUpperCase() ?? 'U'}
             </div>
