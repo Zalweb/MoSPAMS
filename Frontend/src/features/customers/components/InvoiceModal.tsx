@@ -43,8 +43,6 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-const FOOTER_BG = '#F2E8D8';
-
 const scallopMask = {
   maskImage: 'radial-gradient(circle at 50% 100%, transparent 8px, black 8.5px)',
   WebkitMaskImage: 'radial-gradient(circle at 50% 100%, transparent 8px, black 8.5px)',
@@ -53,6 +51,28 @@ const scallopMask = {
   maskRepeat: 'repeat-x',
   WebkitMaskRepeat: 'repeat-x',
 } as React.CSSProperties;
+
+/* Injected during window.print() to isolate the receipt card */
+const PRINT_CSS = `
+  @media print {
+    body * { visibility: hidden !important; }
+    .invoice-receipt-card, .invoice-receipt-card * { visibility: visible !important; }
+    .invoice-receipt-card {
+      position: fixed !important;
+      top: 0 !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      width: 380px !important;
+      box-shadow: none !important;
+      border-radius: 8px !important;
+    }
+    .invoice-details-scroll {
+      max-height: none !important;
+      overflow: visible !important;
+    }
+    .invoice-footer, .invoice-scallop { display: none !important; }
+  }
+`;
 
 export default function InvoiceModal({ paymentId, onClose, apiEndpoint }: InvoiceModalProps) {
   const [details, setDetails] = useState<InvoiceDetails | null>(null);
@@ -71,6 +91,15 @@ export default function InvoiceModal({ paymentId, onClose, apiEndpoint }: Invoic
 
   if (!paymentId) return null;
 
+  const handlePrint = () => {
+    const style = document.createElement('style');
+    style.id = '__receipt-print';
+    style.textContent = PRINT_CSS;
+    document.head.appendChild(style);
+    window.print();
+    setTimeout(() => document.getElementById('__receipt-print')?.remove(), 1000);
+  };
+
   const formatDateTime = (iso: string | null | undefined) => {
     if (!iso) return '—';
     const d = new Date(iso);
@@ -85,6 +114,7 @@ export default function InvoiceModal({ paymentId, onClose, apiEndpoint }: Invoic
     ? `#${details.sale.sale_id.toString().padStart(10, '0')}`
     : `#${paymentId.toString().padStart(10, '0')}`;
   const shopName = details?.shopName ?? branding?.shopName ?? 'MoSPAMS';
+  const logoUrl = branding?.logoUrl ?? null;
 
   const nets = details?.sale.net_amount ?? 0;
   const intPart = Math.floor(nets).toLocaleString();
@@ -115,15 +145,27 @@ export default function InvoiceModal({ paymentId, onClose, apiEndpoint }: Invoic
           </button>
 
           {/* Receipt card — always light themed */}
-          <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
+          <div className="invoice-receipt-card bg-white rounded-3xl shadow-2xl overflow-hidden">
 
-            {/* Header */}
+            {/* ── Header ── */}
             <div className="px-6 pt-8 pb-6 text-center">
               <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center mx-auto mb-3 shadow-sm shadow-green-200">
                 <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={2.5} />
               </div>
               <p className="text-sm font-bold text-gray-800">Transaction Success</p>
-              <h2 className="text-[22px] font-black text-gray-900 uppercase tracking-tight mt-4 leading-tight">
+
+              {/* Shop logo */}
+              {logoUrl && (
+                <div className="mt-4 mb-1 flex items-center justify-center">
+                  <img
+                    src={logoUrl}
+                    alt={shopName}
+                    className="h-14 w-auto max-w-[180px] object-contain"
+                  />
+                </div>
+              )}
+
+              <h2 className={`text-[22px] font-black text-gray-900 uppercase tracking-tight leading-tight ${logoUrl ? 'mt-2' : 'mt-4'}`}>
                 {shopName}
               </h2>
               <p className="text-xs text-gray-400 mt-1.5">
@@ -131,11 +173,11 @@ export default function InvoiceModal({ paymentId, onClose, apiEndpoint }: Invoic
               </p>
             </div>
 
-            {/* Dashed divider */}
+            {/* ── Dashed divider ── */}
             <div className="mx-6 border-t-[1.5px] border-dashed border-gray-200" />
 
-            {/* Scrollable details */}
-            <div className="px-6 max-h-[42vh] overflow-y-auto">
+            {/* ── Scrollable details ── */}
+            <div className="invoice-details-scroll px-6 max-h-[42vh] overflow-y-auto">
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-12 gap-3">
                   <Loader2 className="w-7 h-7 animate-spin text-green-500" />
@@ -225,10 +267,10 @@ export default function InvoiceModal({ paymentId, onClose, apiEndpoint }: Invoic
               )}
             </div>
 
-            {/* Dashed divider before total */}
+            {/* ── Dashed divider before total ── */}
             <div className="mx-6 border-t-[1.5px] border-dashed border-gray-200" />
 
-            {/* Total */}
+            {/* ── Total ── */}
             <div className="px-6 py-5 flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Total transaction</p>
@@ -247,27 +289,31 @@ export default function InvoiceModal({ paymentId, onClose, apiEndpoint }: Invoic
               </span>
             </div>
 
-            {/* Scalloped edge — white card with beige showing through cutouts */}
-            <div style={{ height: 12, background: FOOTER_BG, position: 'relative' }}>
-              <div style={{ position: 'absolute', inset: 0, background: 'white', ...scallopMask }} />
+            {/* ── Scallop + Footer — single gradient wrapper so holes reveal the gradient ── */}
+            <div style={{ background: 'var(--brand-gradient)' }}>
+
+              {/* Scalloped edge: white mask creates holes in the gradient below */}
+              <div className="invoice-scallop" style={{ height: 12, position: 'relative' }}>
+                <div style={{ position: 'absolute', inset: 0, background: 'white', ...scallopMask }} />
+              </div>
+
+              {/* Footer buttons — both same white/translucent style on gradient */}
+              <div className="invoice-footer px-6 pb-6 pt-3 flex gap-3">
+                <button
+                  onClick={handlePrint}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-white/30 bg-white/15 text-white text-sm font-bold hover:bg-white/25 transition-colors"
+                >
+                  <Printer className="w-4 h-4" /> Print
+                </button>
+                <button
+                  onClick={onClose}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-white/30 bg-white/15 text-white text-sm font-bold hover:bg-white/25 transition-colors"
+                >
+                  Done →
+                </button>
+              </div>
             </div>
 
-            {/* Footer */}
-            <div className="px-6 pb-6 pt-3 flex gap-3" style={{ background: FOOTER_BG }}>
-              <button
-                onClick={() => window.print()}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-gray-300/70 bg-white/70 text-gray-500 text-sm font-bold hover:bg-white transition-colors"
-              >
-                <Printer className="w-4 h-4" /> Print
-              </button>
-              <button
-                onClick={onClose}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-white text-sm font-bold"
-                style={{ background: 'var(--brand-gradient)' }}
-              >
-                Done →
-              </button>
-            </div>
           </div>
         </motion.div>
       </div>
