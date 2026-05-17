@@ -178,7 +178,8 @@ export default function DashboardLayout() {
       >
         {/* Logo area */}
         <div className={`flex items-center h-[90px] w-full shrink-0 relative ${isCollapsed ? 'justify-center' : 'px-5 justify-between'}`}>
-          <div
+          <button
+            onClick={() => setIsCollapsed(false)}
             className="w-[42px] h-[42px] shrink-0 rounded-full flex items-center justify-center overflow-hidden transition-transform hover:scale-105"
             style={{
               background: 'linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 100%)',
@@ -190,7 +191,7 @@ export default function DashboardLayout() {
               alt={branding?.shopName || 'MoSPAMS'}
               className="w-full h-full object-contain"
             />
-          </div>
+          </button>
 
           <AnimatePresence>
             {!isCollapsed && (
