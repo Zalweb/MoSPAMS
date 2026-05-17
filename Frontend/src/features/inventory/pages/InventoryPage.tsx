@@ -332,10 +332,10 @@ export default function Inventory() {
               ) : filtered.map(part => {
                 const isLow = part.stock <= part.minStock;
                 return (
-                  <tr key={part.id} className="hover:bg-secondary dark:bg-zinc-800/30 transition-colors group">
+                  <tr key={part.id} className="hover:bg-foreground/5 transition-colors group">
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-secondary/50 dark:bg-zinc-800/50 shrink-0 overflow-hidden flex items-center justify-center group-hover:bg-secondary dark:group-hover:bg-zinc-800 transition-colors">
+                        <div className="w-10 h-10 rounded-xl bg-muted shrink-0 overflow-hidden flex items-center justify-center transition-colors">
                           {part.imageUrl ? (
                             <img src={part.imageUrl} alt={part.name} className="w-full h-full object-cover" />
                           ) : (
@@ -348,11 +348,11 @@ export default function Inventory() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-4"><span className="text-xs font-medium text-muted-foreground bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 px-3 py-1.5 rounded-full">{part.category}</span></td>
+                    <td className="px-5 py-4"><span className="text-xs font-medium text-foreground/80 bg-foreground/10 px-3 py-1.5 rounded-full">{part.category}</span></td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <span className={`text-sm font-semibold tabular-nums ${isLow ? 'text-amber-400' : 'text-foreground'}`}>{part.stock}</span>
-                        <div className="w-16 h-1.5 bg-secondary dark:bg-zinc-800 rounded-full overflow-hidden">
+                        <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
                           <div className={`h-full rounded-full ${isLow ? 'bg-amber-500' : 'bg-green-500'}`} style={{ width: `${Math.min(100, (part.stock / Math.max(part.minStock * 2, 1)) * 100)}%` }} />
                         </div>
                       </div>
@@ -362,18 +362,18 @@ export default function Inventory() {
                     <td className="px-5 py-4 text-right">
                       <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                         {canMove && (
-                          <button title="Stock movement" onClick={() => openMovement(part)} className="p-2 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-green-400 transition-colors">
+                          <button title="Stock movement" onClick={() => openMovement(part)} className="p-2 rounded-lg hover:bg-foreground/10 text-muted-foreground hover:text-green-500 transition-colors">
                             <ArrowDownToLine className="w-4 h-4" />
                           </button>
                         )}
-                        <button title="History" onClick={() => setHistoryTarget(part)} className="p-2 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-muted-foreground dark:text-zinc-300 transition-colors">
+                        <button title="History" onClick={() => setHistoryTarget(part)} className="p-2 rounded-lg hover:bg-foreground/10 text-muted-foreground hover:text-foreground transition-colors">
                           <History className="w-4 h-4" />
                         </button>
-                        <button title="Edit" onClick={() => openEdit(part)} className="p-2 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-muted-foreground dark:text-zinc-300 transition-colors">
+                        <button title="Edit" onClick={() => openEdit(part)} className="p-2 rounded-lg hover:bg-foreground/10 text-muted-foreground hover:text-foreground transition-colors">
                           <Pencil className="w-4 h-4" />
                         </button>
                         {canDelete && (
-                          <button title="Delete" onClick={() => setConfirmDelete(part.id)} className="p-2 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-400 transition-colors">
+                          <button title="Delete" onClick={() => setConfirmDelete(part.id)} className="p-2 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         )}
@@ -384,7 +384,7 @@ export default function Inventory() {
               })}
               {!loading && filtered.length === 0 && (
                 <tr><td colSpan={6} className="px-5 py-16 text-center text-sm text-muted-foreground">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 flex items-center justify-center">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-muted flex items-center justify-center">
                     <Package className="w-8 h-8 text-muted-foreground dark:text-zinc-600" />
                   </div>
                   No parts found
