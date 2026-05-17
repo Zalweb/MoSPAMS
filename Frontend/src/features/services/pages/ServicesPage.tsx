@@ -520,28 +520,28 @@ export default function Services() {
               </div>
               <div>
                 <Label className="text-xs font-medium text-muted-foreground">Motorcycle Model</Label>
-                <Input {...form.register('motorcycleModel')} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="Honda Click 150i" />
+                <Input {...form.register('motorcycleModel')} className="mt-1.5 h-10 rounded-xl bg-background dark:bg-zinc-900 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="Honda Click 150i" />
                 {form.formState.errors.motorcycleModel && <p className="text-xs text-red-400 mt-1">{form.formState.errors.motorcycleModel.message}</p>}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="text-xs font-medium text-muted-foreground">Service Type</Label>
-                <select onChange={e => handleTypeChange(e.target.value)} defaultValue="" className="w-full mt-1.5 h-10 px-3 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border border-border dark:border-zinc-700 text-sm text-foreground">
+                <select onChange={e => handleTypeChange(e.target.value)} defaultValue="" className="w-full mt-1.5 h-10 px-3 rounded-xl bg-background dark:bg-zinc-900 border border-border dark:border-zinc-700 text-sm text-foreground">
                   <option value="">Pick from catalog…</option>
                   {serviceTypes.map(st => <option key={st.id} value={st.id}>{st.name} (₱{st.defaultLaborCost})</option>)}
                 </select>
-                <Input {...form.register('serviceType')} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="Or type custom service" />
+                <Input {...form.register('serviceType')} className="mt-1.5 h-10 rounded-xl bg-background dark:bg-zinc-900 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="Or type custom service" />
                 {form.formState.errors.serviceType && <p className="text-xs text-red-400 mt-1">{form.formState.errors.serviceType.message}</p>}
               </div>
               <div>
                 <Label className="text-xs font-medium text-muted-foreground">Labor Cost (₱)</Label>
-                <Input type="number" {...form.register('laborCost', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground focus:border-border dark:border-zinc-600" />
+                <Input type="number" {...form.register('laborCost', { valueAsNumber: true })} className="mt-1.5 h-10 rounded-xl bg-background dark:bg-zinc-900 border-border dark:border-zinc-700 text-sm text-foreground focus:border-border dark:border-zinc-600" />
               </div>
             </div>
             <div>
               <Label className="text-xs font-medium text-muted-foreground">Notes</Label>
-              <Input {...form.register('notes')} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="Special instructions…" />
+              <Input {...form.register('notes')} className="mt-1.5 h-10 rounded-xl bg-background dark:bg-zinc-900 border border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="Special instructions…" />
             </div>
 
             {availableMechanics.length > 0 && (
@@ -553,7 +553,7 @@ export default function Services() {
                       type="button"
                       key={m.id}
                       onClick={() => toggleMechanic(m.id)}
-                      className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors ${selectedMechanicIds.includes(m.id) ? 'bg-blue-500/20 border-blue-500/40 text-blue-300' : 'bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-muted-foreground hover:bg-secondary dark:bg-zinc-800'}`}
+                      className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors ${selectedMechanicIds.includes(m.id) ? 'bg-blue-500/20 border-blue-500/40 text-blue-300' : 'bg-background dark:bg-zinc-900 border-border dark:border-zinc-700 text-muted-foreground hover:bg-secondary dark:bg-zinc-800'}`}
                     >
                       {m.name}
                     </button>
@@ -571,7 +571,7 @@ export default function Services() {
                   placeholder="Search parts to add…"
                   value={newPartsSearch}
                   onChange={e => setNewPartsSearch(e.target.value)}
-                  className="w-full h-10 pl-9 pr-3 rounded-xl bg-secondary/50 dark:bg-zinc-800/50 border border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-white/10"
+                  className="w-full h-10 pl-9 pr-3 rounded-xl bg-background dark:bg-zinc-900 border border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-white/10"
                 />
               </div>
               {newPartsSearch && (
@@ -592,7 +592,7 @@ export default function Services() {
                   {partsUsed.map(pu => {
                     const part = availableParts.find(p => p.id === pu.partId);
                     return (
-                      <div key={pu.partId} className="flex items-center justify-between text-sm bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 px-3 py-2 rounded-lg border border-border dark:border-zinc-700">
+                      <div key={pu.partId} className="flex items-center justify-between text-sm bg-background dark:bg-zinc-900 px-3 py-2 rounded-lg border border-border dark:border-zinc-700">
                         <span className="text-foreground">{part ? `${part.name} x${pu.quantity}` : `Part #${pu.partId} x${pu.quantity}`}</span>
                         <button type="button" onClick={() => removePartFromService(pu.partId)} className="text-muted-foreground hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
                       </div>
@@ -625,7 +625,7 @@ export default function Services() {
                   min={0}
                   value={billLaborCost}
                   onChange={e => { const v = parseFloat(e.target.value); setBillLaborCost(isNaN(v) ? 0 : v); }}
-                  className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground"
+                  className="mt-1.5 h-10 rounded-xl bg-background dark:bg-zinc-900 border-border dark:border-zinc-700 text-sm text-foreground"
                 />
               </div>
               {billJob.partsUsed.length > 0 && (
@@ -697,8 +697,8 @@ export default function Services() {
             ))}
           </div>
           <form onSubmit={stForm.handleSubmit(values => { addServiceType(values); stForm.reset({ name: '', defaultLaborCost: 0 }); })} className="flex gap-2 pt-4 mt-4 border-t border-border">
-            <Input {...stForm.register('name')} placeholder="Type name" className="flex-1 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground" />
-            <Input type="number" {...stForm.register('defaultLaborCost', { valueAsNumber: true })} placeholder="₱" className="w-24 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground" />
+            <Input {...stForm.register('name')} placeholder="Type name" className="flex-1 h-10 rounded-xl bg-background dark:bg-zinc-900 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground" />
+            <Input type="number" {...stForm.register('defaultLaborCost', { valueAsNumber: true })} placeholder="₱" className="w-24 h-10 rounded-xl bg-background dark:bg-zinc-900 border-border dark:border-zinc-700 text-sm text-foreground" />
             <Button type="submit" className="h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold px-5 transition-opacity">Add</Button>
           </form>
         </DialogContent>
@@ -787,7 +787,7 @@ export default function Services() {
                     placeholder="Search parts…"
                     value={addPartsSearch}
                     onChange={e => setAddPartsSearch(e.target.value)}
-                    className="w-full h-10 pl-9 pr-3 rounded-xl bg-secondary/50 dark:bg-zinc-800/50 border border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-white/10"
+                    className="w-full h-10 pl-9 pr-3 rounded-xl bg-background dark:bg-zinc-900 border border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-white/10"
                   />
                 </div>
                 <div className="mt-1.5 max-h-40 overflow-y-auto space-y-1 rounded-xl border border-border dark:border-zinc-700 p-1">

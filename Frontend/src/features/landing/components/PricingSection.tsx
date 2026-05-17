@@ -53,24 +53,18 @@ export default function PricingSection() {
   const navigate = useNavigate();
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.2 });
   const { ref: cardsRef, isVisible: cardsVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.1 });
-  const [plans, setPlans] = useState<PlanData[]>(FALLBACK_PLANS);
+  const [plan1, setPlan1] = useState<PlanData>(FALLBACK_PLANS[0]);
+  const [plan2, setPlan2] = useState<PlanData>(FALLBACK_PLANS[1]);
 
   useEffect(() => {
     apiGet<{ data: PlanData[] }>('/api/plans')
       .then(res => {
-        if (res.data && res.data.length > 0) {
-          setPlans(res.data.slice(0, 2));
-        }
+        const data = res.data;
+        if (Array.isArray(data) && data.length >= 1) setPlan1(data[0]);
+        if (Array.isArray(data) && data.length >= 2) setPlan2(data[1]);
       })
-      .catch(() => { /* use fallback */ });
+      .catch(() => { /* keep fallback */ });
   }, []);
-
-  // Map features by position (0 = basic, 1 = premium) so any plan code works
-  const editablePlans = plans.slice(0, 2).map((plan, index) => ({
-    ...plan,
-    features: index === 0 ? PLAN_FEATURES.basic : PLAN_FEATURES.premium,
-    popular: index === 1,
-  }));
 
   return (
     <section id="pricing" className="relative py-32 overflow-hidden">

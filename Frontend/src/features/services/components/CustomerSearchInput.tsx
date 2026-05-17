@@ -96,7 +96,7 @@ export function CustomerSearchInput({ value, customerId, onChange, placeholder =
           onChange={e => handleInput(e.target.value)}
           onFocus={() => value.trim().length > 0 && setOpen(true)}
           placeholder={placeholder}
-          className="w-full h-10 pl-9 pr-9 rounded-xl bg-secondary/50 dark:bg-zinc-800/50 border border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-white/10 transition-all"
+          className="w-full h-10 pl-9 pr-9 rounded-xl bg-background dark:bg-zinc-900 border border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-white/10 transition-all"
         />
         {customerId && (
           <button
