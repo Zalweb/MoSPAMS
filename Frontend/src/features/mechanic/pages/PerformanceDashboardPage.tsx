@@ -101,7 +101,7 @@ export default function PerformanceDashboardPage() {
       </div>
 
       {/* Rating Breakdown */}
-      <div className="border border-border rounded-xl p-6">
+      <div className="backdrop-blur-xl bg-white/[0.03] dark:bg-white/[0.02] border border-white/[0.08] rounded-xl p-6">
         <div className="flex items-center justify-between mb-5">
           <div>
             <h3 className="text-lg font-semibold text-foreground">Customer Ratings</h3>
@@ -153,7 +153,7 @@ export default function PerformanceDashboardPage() {
       </div>
 
       {/* Trend Chart */}
-      <div className="border border-border rounded-xl p-6">
+      <div className="backdrop-blur-xl bg-white/[0.03] dark:bg-white/[0.02] border border-white/[0.08] rounded-xl p-6">
         <h3 className="text-lg font-semibold text-foreground mb-6">Jobs Trend (Last 3 Months)</h3>
         <div className="flex items-end gap-6 h-52 px-4">
           {data.trend_last_three_months.map((month, idx) => (

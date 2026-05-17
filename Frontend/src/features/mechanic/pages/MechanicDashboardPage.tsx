@@ -66,7 +66,7 @@ function PeriodTabs({ value, onChange }: { value: Period; onChange: (p: Period) 
 function RatingBreakdown({ breakdown, avg }: { breakdown: Record<string, number>; avg: number | null }) {
   const total = Object.values(breakdown).reduce((s, c) => s + c, 0);
   return (
-    <div className="bg-card dark:bg-zinc-900/40 border border-border/50 rounded-2xl p-6">
+    <div className="backdrop-blur-xl bg-white/[0.03] dark:bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6">
       <div className="flex items-center justify-between mb-5">
         <div>
           <p className="font-bold text-foreground">Customer Ratings</p>
@@ -222,7 +222,7 @@ export default function MechanicDashboardPage() {
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
 
           {/* Labor Revenue Chart */}
-          <div className="bg-card dark:bg-zinc-900/40 border border-border/50 rounded-2xl p-6">
+          <div className="backdrop-blur-xl bg-white/[0.03] dark:bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6">
             <p className="font-bold text-foreground">Labor Revenue</p>
             <p className="text-xs text-muted-foreground mt-0.5">Total labor income from completed jobs</p>
             <PeriodTabs value={laborPeriod} onChange={setLaborPeriod} />
@@ -256,7 +256,7 @@ export default function MechanicDashboardPage() {
           </div>
 
           {/* Jobs Completed Chart */}
-          <div className="bg-card dark:bg-zinc-900/40 border border-border/50 rounded-2xl p-6">
+          <div className="backdrop-blur-xl bg-white/[0.03] dark:bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6">
             <p className="font-bold text-foreground">Jobs Completed</p>
             <p className="text-xs text-muted-foreground mt-0.5">Number of jobs finished per period</p>
             <PeriodTabs value={jobsPeriod} onChange={setJobsPeriod} />

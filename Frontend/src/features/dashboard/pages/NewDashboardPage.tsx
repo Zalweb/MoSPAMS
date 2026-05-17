@@ -16,7 +16,7 @@ const fadeUp = (delay = 0) => ({
 });
 
 // Consistent card shell — flex-col + h-full so grid rows equalize heights
-const CARD = "relative group flex flex-col h-full bg-card dark:bg-card/80 dark:backdrop-blur-xl shadow-soft dark:shadow-none border border-border/50 rounded-2xl overflow-hidden dark:hover:border-border dark:border-zinc-800/50 hover:border-zinc-300/50 transition-all duration-300";
+const CARD = "relative group flex flex-col h-full backdrop-blur-xl bg-white/[0.03] dark:bg-white/[0.02] border border-white/[0.08] rounded-2xl overflow-hidden transition-all duration-300";
 
 // Consistent card header
 function CardHeader({
