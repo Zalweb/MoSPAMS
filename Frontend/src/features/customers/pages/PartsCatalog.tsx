@@ -96,21 +96,24 @@ export default function PartsCatalog() {
               </div>
 
               {/* Info — bottom 42% */}
-              <div className="h-[42%] px-3 py-2 flex flex-col justify-between">
+              <div className="h-[42%] px-3 py-2 flex flex-col justify-between bg-card/95 dark:bg-zinc-900/80">
                 <div>
-                  <span className="text-[8px] font-bold text-primary tracking-widest uppercase opacity-60 block">
+                  <span className="text-[9px] font-bold text-primary tracking-widest uppercase block">
                     {part.category}
                   </span>
-                  <h3 className="text-xs font-bold text-foreground leading-tight line-clamp-2 mt-0.5">
+                  <h3 className="text-xs font-bold text-foreground leading-tight line-clamp-1 mt-0.5">
                     {part.name}
                   </h3>
+                  {part.brand && (
+                    <p className="text-[9px] text-muted-foreground truncate">{part.brand}</p>
+                  )}
                 </div>
 
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-black text-foreground tabular-nums leading-none">
                     ₱{part.price.toLocaleString()}
                   </span>
-                  <div className={`px-2 py-0.5 rounded-full text-[8px] font-bold tracking-tight ${part.stock > 0 ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                  <div className={`px-2 py-0.5 rounded-full text-[8px] font-bold tracking-tight ${part.stock > 0 ? 'bg-green-500/15 text-green-600 dark:text-green-400 border border-green-500/30' : 'bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30'}`}>
                     {part.stock > 0 ? 'AVAIL' : 'N/A'}
                   </div>
                 </div>
