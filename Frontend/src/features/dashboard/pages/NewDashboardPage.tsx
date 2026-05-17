@@ -33,8 +33,8 @@ function CardHeader({
   return (
     <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between shrink-0">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-[rgb(var(--color-primary-rgb))]/10 flex items-center justify-center border border-[rgb(var(--color-primary-rgb))]/20 shrink-0">
-          <Icon className="w-5 h-5 text-[rgb(var(--color-primary-rgb))]" strokeWidth={2} />
+        <div className="brand-icon-box w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
+          <Icon className="w-5 h-5" strokeWidth={2} />
         </div>
         <div>
           <h3 className="text-base font-semibold text-card-foreground">{title}</h3>
@@ -161,6 +161,7 @@ export default function DashboardPage() {
             icon={kpi.icon}
             loading={loading}
             delay={index * 0.1}
+            isHero={index === 0}
           />
         ))}
       </div>
@@ -303,7 +304,7 @@ export default function DashboardPage() {
                 subtitle="Items need restocking"
                 badge={
                   lowStock.length > 0 ? (
-                    <span className="text-xs font-semibold text-[rgb(var(--color-primary-rgb))] bg-[rgb(var(--color-primary-rgb))]/10 px-3 py-1.5 rounded-full border border-[rgb(var(--color-primary-rgb))]/20">
+                    <span className="text-xs font-semibold brand-text bg-[rgb(var(--color-primary-rgb))]/10 px-3 py-1.5 rounded-full border border-[rgb(var(--color-primary-rgb))]/20">
                       {lowStock.length} items
                     </span>
                   ) : undefined
@@ -312,8 +313,8 @@ export default function DashboardPage() {
               <div className="flex-1 overflow-y-auto divide-y divide-border/50 dark:divide-zinc-800/30">
                 {lowStock.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12">
-                    <div className="w-12 h-12 mb-3 rounded-xl bg-[rgb(var(--color-primary-rgb))]/10 flex items-center justify-center border border-[rgb(var(--color-primary-rgb))]/20">
-                      <Package className="w-6 h-6 text-[rgb(var(--color-primary-rgb))]" />
+                    <div className="w-12 h-12 mb-3 rounded-xl brand-icon-box flex items-center justify-center">
+                      <Package className="w-6 h-6 brand-text" />
                     </div>
                     <p className="text-sm text-muted-foreground">All stock levels are healthy</p>
                   </div>
@@ -432,8 +433,8 @@ export default function DashboardPage() {
         >
           <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[rgb(var(--color-primary-rgb))]/10 flex items-center justify-center border border-[rgb(var(--color-primary-rgb))]/20">
-                <Wrench className="w-5 h-5 text-[rgb(var(--color-primary-rgb))]" strokeWidth={2} />
+              <div className="w-10 h-10 rounded-xl brand-icon-box flex items-center justify-center">
+                <Wrench className="w-5 h-5 brand-text" strokeWidth={2} />
               </div>
               <div>
                 <h3 className="text-base font-semibold text-card-foreground">Service Pipeline</h3>
