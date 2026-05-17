@@ -548,7 +548,7 @@ export default function DashboardLayout() {
           <nav 
             className="pointer-events-auto flex items-center p-1.5 rounded-[28px] backdrop-blur-xl border border-border/50 shadow-[0_8px_32px_rgba(0,0,0,0.12)] overflow-x-auto no-scrollbar max-w-full"
             style={{
-              background: 'linear-gradient(90deg, color-mix(in srgb, rgb(var(--color-primary-rgb)) 15%, hsl(var(--background) / 0.85)) 0%, color-mix(in srgb, rgb(var(--color-secondary-rgb)) 15%, hsl(var(--background) / 0.85)) 100%)'
+              background: 'linear-gradient(90deg, color-mix(in srgb, rgb(var(--color-primary-rgb)) 35%, hsl(var(--foreground) / 0.95)) 0%, color-mix(in srgb, rgb(var(--color-secondary-rgb)) 35%, hsl(var(--foreground) / 0.95)) 100%)'
             }}
           >
             {visibleGroups.flatMap(g => g.items).map((item) => {
@@ -565,12 +565,12 @@ export default function DashboardLayout() {
                   {isActive && (
                     <motion.div
                       layoutId="mobile-active-tab"
-                      className="absolute inset-0 bg-foreground/10 rounded-[22px] z-0"
+                      className="absolute inset-0 bg-background/20 rounded-[22px] z-0"
                       transition={{ type: 'spring', stiffness: 350, damping: 30 }}
                     />
                   )}
                   <item.icon 
-                    className={`w-[22px] h-[22px] relative z-10 transition-colors ${isActive ? 'text-foreground' : 'text-foreground/40'}`} 
+                    className={`w-[22px] h-[22px] relative z-10 transition-colors ${isActive ? 'text-background' : 'text-background/50'}`} 
                     strokeWidth={isActive ? 2.5 : 2}
                   />
                 </NavLink>
