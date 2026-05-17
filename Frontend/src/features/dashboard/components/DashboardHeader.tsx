@@ -26,8 +26,7 @@ export function DashboardHeader() {
       <div className="flex items-center gap-3">
         <button
           onClick={() => navigate('/dashboard/reports')}
-          className="h-10 px-4 rounded-xl text-sm font-semibold flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all duration-200"
-          style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}
+          className="h-10 px-4 rounded-xl text-sm font-semibold flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all duration-200 bg-foreground text-background shadow-lg"
         >
           <FileText className="w-4 h-4" />
           <span className="hidden sm:inline">Create Report</span>

@@ -97,8 +97,7 @@ export default function Users() {
         <Button
           onClick={openAdd}
           size="sm"
-          className="h-9 rounded-xl text-[12px] font-semibold px-4 transition-all active:scale-95 shadow-lg"
-          style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}
+          className="h-9 rounded-xl text-[12px] font-semibold px-4 transition-all active:scale-95 shadow-lg bg-foreground text-background hover:opacity-90 hover:bg-foreground"
         >
           <Plus className="w-3.5 h-3.5 mr-1.5" /> Add User
         </Button>
@@ -359,7 +358,7 @@ export default function Users() {
                 <Input type="password" {...editForm.register('password')} className="mt-1.5 h-9 rounded-xl border-border dark:border-zinc-700 bg-secondary dark:bg-zinc-800 text-[13px] text-foreground dark:text-zinc-200 placeholder:text-muted-foreground dark:text-zinc-600" />
               </div>
               <div className="flex gap-2 pt-2">
-                <Button type="submit" className="flex-1 h-9 rounded-xl text-[12px] font-semibold transition-all active:scale-95" style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}>Save</Button>
+                <Button type="submit" className="flex-1 h-9 rounded-xl text-[12px] font-semibold transition-all active:scale-95 bg-foreground text-background hover:bg-foreground hover:opacity-90 shadow-lg">Save</Button>
                 <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-9 rounded-xl text-[12px] border-border dark:border-zinc-700 bg-secondary dark:bg-zinc-800 text-muted-foreground dark:text-zinc-300 hover:bg-muted dark:bg-zinc-700">Cancel</Button>
               </div>
             </form>
@@ -389,7 +388,7 @@ export default function Users() {
                 {addForm.formState.errors.password && <p className="text-[10px] text-red-400 mt-1">{addForm.formState.errors.password.message}</p>}
               </div>
               <div className="flex gap-2 pt-2">
-                <Button type="submit" className="flex-1 h-9 rounded-xl text-[12px] font-semibold transition-all active:scale-95" style={{ background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' }}>Create</Button>
+                <Button type="submit" className="flex-1 h-9 rounded-xl text-[12px] font-semibold transition-all active:scale-95 bg-foreground text-background hover:bg-foreground hover:opacity-90 shadow-lg">Create</Button>
                 <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-9 rounded-xl text-[12px] border-border dark:border-zinc-700 bg-secondary dark:bg-zinc-800 text-muted-foreground dark:text-zinc-300 hover:bg-muted dark:bg-zinc-700">Cancel</Button>
               </div>
             </form>
