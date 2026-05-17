@@ -162,14 +162,15 @@ export default function CustomerDashboard() {
       </div>
 
       {/* Recent Services */}
-      <motion.div 
-        {...fadeUp(0.45)} 
-        className="bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-[32px] border border-border/50 shadow-xl overflow-hidden"
+      <motion.div
+        {...fadeUp(0.45)}
+        className="brand-card backdrop-blur-xl rounded-[32px] border overflow-hidden shadow-xl"
+        style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}
       >
-        <div className="px-8 py-6 border-b border-border/50 flex items-center justify-between bg-muted/20">
+        <div className="px-8 py-6 border-b flex items-center justify-between" style={{ borderColor: 'var(--brand-border)' }}>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[rgb(var(--color-primary-rgb))]/10 flex items-center justify-center">
-              <Calendar className="w-4 h-4 text-[rgb(var(--color-primary-rgb))]" strokeWidth={2} />
+            <div className="brand-icon-box w-8 h-8 rounded-lg flex items-center justify-center">
+              <Calendar className="w-4 h-4" strokeWidth={2} />
             </div>
             <h3 className="text-base font-bold text-foreground">Recent Activity</h3>
           </div>
@@ -180,8 +181,8 @@ export default function CustomerDashboard() {
             View Full History
           </button>
         </div>
-        
-        <div className="divide-y divide-border/50">
+
+        <div className="divide-y" style={{ borderColor: 'var(--brand-border)' }}>
           {loading ? (
             <div className="py-20 flex flex-col items-center gap-4">
               <div className="w-8 h-8 border-2 border-[rgb(var(--color-primary-rgb))] border-t-transparent rounded-full animate-spin" />
@@ -201,14 +202,14 @@ export default function CustomerDashboard() {
               const statusKey = (service.status as StatusKey) in STATUS_STYLES ? (service.status as StatusKey) : 'Pending';
               const style = STATUS_STYLES[statusKey];
               const Icon = style.icon;
-              
+
               return (
-                <motion.div 
-                  key={service.id} 
+                <motion.div
+                  key={service.id}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.5 + i * 0.05 }}
-                  className="flex items-center justify-between px-8 py-5 hover:bg-muted/30 transition-colors group"
+                  className="flex items-center justify-between px-8 py-5 hover:bg-white/5 dark:hover:bg-white/5 transition-colors group"
                 >
                   <div className="flex items-center gap-5 min-w-0 flex-1">
                     <div className={`w-12 h-12 rounded-2xl ${style.bg} ${style.border} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}>
@@ -219,7 +220,7 @@ export default function CustomerDashboard() {
                         {service.motorcycleModel}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter bg-muted px-2 py-0.5 rounded-md">
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter brand-card border px-2 py-0.5 rounded-md" style={{ borderColor: 'var(--brand-border)' }}>
                           {service.serviceType}
                         </span>
                         {service.mechanics && service.mechanics.length > 0 && (
