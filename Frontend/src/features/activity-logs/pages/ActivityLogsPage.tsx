@@ -3,6 +3,7 @@ import { ScrollText, Search, RefreshCw, Calendar, User, Activity, Download, Chev
 import { apiGet } from '@/shared/lib/api';
 import { downloadCSV, toCSV } from '@/shared/lib/csv';
 import { toast } from 'sonner';
+import { useIsMobile } from '@/shared/hooks/use-mobile';
 
 interface LogEntry {
   id: string;
@@ -12,6 +13,7 @@ interface LogEntry {
 }
 
 export default function ActivityLogsPage() {
+  const isMobile = useIsMobile();
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -223,9 +225,43 @@ export default function ActivityLogsPage() {
       {/* Logs Table */}
       <div className="brand-card rounded-2xl border overflow-hidden" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="w-6 h-6 border-2 border-border dark:border-zinc-700 border-t-white rounded-full animate-spin" />
-          </div>
+          isMobile ? (
+            <div className="divide-y divide-border/50">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3 px-5 py-3.5">
+                  <div className="w-7 h-7 rounded-lg bg-muted/50 animate-pulse shrink-0" />
+                  <div className="flex-1 space-y-1.5">
+                    <div className="h-3.5 bg-muted/50 animate-pulse rounded w-24" />
+                    <div className="h-3 bg-muted/50 animate-pulse rounded w-44" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left px-5 py-3.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">User</th>
+                  <th className="text-left px-5 py-3.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Action</th>
+                  <th className="text-left px-5 py-3.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Date & Time</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/50">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <tr key={i}>
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-muted/50 animate-pulse shrink-0" />
+                        <div className="h-3.5 bg-muted/50 animate-pulse rounded w-24" />
+                      </div>
+                    </td>
+                    <td className="px-5 py-3.5"><div className="h-3.5 bg-muted/50 animate-pulse rounded w-48" /></td>
+                    <td className="px-5 py-3.5 hidden sm:table-cell"><div className="h-3.5 bg-muted/50 animate-pulse rounded w-32" /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-14 h-14 rounded-2xl bg-muted border border-border flex items-center justify-center mb-4">

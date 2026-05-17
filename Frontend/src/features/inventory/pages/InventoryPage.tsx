@@ -56,6 +56,7 @@ export default function Inventory() {
   const canCreate = can(role, 'inventory', 'create');
   const canDelete = can(role, 'inventory', 'delete');
   const canMove = can(role, 'stock-movements', 'create');
+  const isMobile = useIsMobile();
 
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('All');
@@ -279,6 +280,23 @@ export default function Inventory() {
       </motion.div>
 
       <motion.div {...fadeUp(0.2)} className="brand-card backdrop-blur-sm border rounded-2xl overflow-hidden" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
+        {loading && isMobile ? (
+          <div className="divide-y divide-border/50">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 px-5 py-4">
+                <div className="w-10 h-10 rounded-xl bg-muted/50 animate-pulse shrink-0" />
+                <div className="flex-1 space-y-1.5">
+                  <div className="h-4 bg-muted/50 animate-pulse rounded w-32" />
+                  <div className="h-3 bg-muted/50 animate-pulse rounded w-20" />
+                </div>
+                <div className="flex flex-col items-end gap-1.5">
+                  <div className="h-4 bg-muted/50 animate-pulse rounded w-10" />
+                  <div className="h-5 bg-muted/50 animate-pulse rounded-full w-16" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -294,10 +312,21 @@ export default function Inventory() {
             <tbody className="divide-y divide-border dark:divide-zinc-800/50">
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i}>
-                    <td colSpan={6} className="px-5 py-4">
-                      <div className="h-4 bg-secondary dark:bg-zinc-800/60 rounded animate-pulse w-full" />
+                  <tr key={i} className="border-b border-border/50">
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-muted/50 animate-pulse shrink-0" />
+                        <div className="space-y-1.5">
+                          <div className="h-4 bg-muted/50 animate-pulse rounded w-28" />
+                          <div className="h-3 bg-muted/50 animate-pulse rounded w-16" />
+                        </div>
+                      </div>
                     </td>
+                    <td className="px-5 py-4"><div className="h-5 bg-muted/50 animate-pulse rounded-full w-16" /></td>
+                    <td className="px-5 py-4"><div className="h-4 bg-muted/50 animate-pulse rounded w-10" /></td>
+                    <td className="px-5 py-4"><div className="h-4 bg-muted/50 animate-pulse rounded w-14" /></td>
+                    <td className="px-5 py-4"><div className="h-4 bg-muted/50 animate-pulse rounded w-20" /></td>
+                    <td className="px-5 py-4"></td>
                   </tr>
                 ))
               ) : filtered.map(part => {
@@ -364,6 +393,7 @@ export default function Inventory() {
             </tbody>
           </table>
         </div>
+        )}
 
         {meta && meta.lastPage > 1 && (
           <div className="flex items-center justify-between px-5 py-3 border-t border-border">

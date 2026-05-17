@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useData } from '@/shared/contexts/DataContext';
 import { usePaginatedFetch } from '@/shared/hooks/usePaginatedFetch';
 import { apiGet } from '@/shared/lib/api';
+import { useIsMobile } from '@/shared/hooks/use-mobile';
 import { inPeriod, type Period } from '@/shared/lib/period';
 import type { Part, ServiceRecord, Transaction } from '@/shared/types';
 import { CustomerSearchInput } from '@/features/services/components/CustomerSearchInput';
@@ -27,6 +28,7 @@ const fadeUp = (delay = 0) => ({
 
 export default function Sales() {
   const { addTransaction } = useData();
+  const isMobile = useIsMobile();
   const [modalOpen, setModalOpen] = useState(false);
   const [receiptTx, setReceiptTx] = useState<Transaction | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -149,6 +151,22 @@ export default function Sales() {
           <h3 className="text-sm font-semibold text-foreground">Transactions ({filteredTx.length})</h3>
           <span className="text-xs text-muted-foreground">{PERIOD_LABEL[period]}{paymentFilter !== 'All' && ` · ${paymentFilter}`}</span>
         </div>
+        {loading && isMobile ? (
+          <div className="divide-y divide-border/50">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 px-5 py-4">
+                <div className="flex-1 space-y-1.5">
+                  <div className="h-3.5 bg-muted/50 animate-pulse rounded w-24" />
+                  <div className="h-3 bg-muted/50 animate-pulse rounded w-36" />
+                </div>
+                <div className="flex flex-col items-end gap-1.5">
+                  <div className="h-5 bg-muted/50 animate-pulse rounded-full w-20" />
+                  <div className="h-4 bg-muted/50 animate-pulse rounded w-16" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead><tr className="border-b border-border">
@@ -162,7 +180,14 @@ export default function Sales() {
             <tbody className="divide-y divide-border dark:divide-zinc-800/50">
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i}><td colSpan={6} className="px-5 py-4"><div className="h-4 bg-secondary dark:bg-zinc-800/60 rounded animate-pulse" /></td></tr>
+                  <tr key={i} className="border-b border-border/50">
+                    <td className="px-5 py-4"><div className="h-3.5 bg-muted/50 animate-pulse rounded w-24" /></td>
+                    <td className="px-5 py-4"><div className="h-5 bg-muted/50 animate-pulse rounded-full w-20" /></td>
+                    <td className="px-5 py-4"><div className="h-3.5 bg-muted/50 animate-pulse rounded w-36" /></td>
+                    <td className="px-5 py-4"><div className="h-3.5 bg-muted/50 animate-pulse rounded w-16" /></td>
+                    <td className="px-5 py-4 text-right"><div className="h-3.5 bg-muted/50 animate-pulse rounded w-16 ml-auto" /></td>
+                    <td className="px-5 py-4"></td>
+                  </tr>
                 ))
               ) : filteredTx.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(tx => (
                 <tr key={tx.id} className="hover:bg-secondary dark:bg-zinc-800/30 transition-colors">
@@ -192,6 +217,7 @@ export default function Sales() {
             </tbody>
           </table>
         </div>
+        )}
 
         {meta && meta.lastPage > 1 && (
           <div className="flex items-center justify-between px-5 py-3 border-t border-border">

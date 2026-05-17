@@ -4,24 +4,29 @@ import { inPeriod, type Period } from '@/shared/lib/period';
 import { downloadCSV, toCSV } from '@/shared/lib/csv';
 import { apiGet } from '@/shared/lib/api';
 import type { Part, ServiceRecord, Transaction } from '@/shared/types';
+import { useIsMobile } from '@/shared/hooks/use-mobile';
 
 type ReportType = 'sales' | 'inventory' | 'services';
 
 const PERIOD_LABEL: Record<Period | 'custom', string> = { daily: 'Today', weekly: 'This week', monthly: 'This month', yearly: 'This year', custom: 'Custom' };
 
 export default function Reports() {
+  const isMobile = useIsMobile();
   const [parts, setParts] = useState<Part[]>([]);
   const [services, setServices] = useState<ServiceRecord[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
   const [reportType, setReportType] = useState<ReportType>('sales');
   const [period, setPeriod] = useState<Period | 'custom'>('daily');
   const [customFrom, setCustomFrom] = useState('');
   const [customTo, setCustomTo] = useState('');
 
   useEffect(() => {
-    void apiGet<{ data: Part[] }>('/api/parts').then(r => setParts(r.data)).catch(() => {});
-    void apiGet<{ data: ServiceRecord[] }>('/api/services').then(r => setServices(r.data)).catch(() => {});
-    void apiGet<{ data: Transaction[] }>('/api/transactions').then(r => setTransactions(r.data)).catch(() => {});
+    let done = 0;
+    const check = () => { done++; if (done === 3) setLoading(false); };
+    void apiGet<{ data: Part[] }>('/api/parts').then(r => { setParts(r.data); check(); }).catch(check);
+    void apiGet<{ data: ServiceRecord[] }>('/api/services').then(r => { setServices(r.data); check(); }).catch(check);
+    void apiGet<{ data: Transaction[] }>('/api/transactions').then(r => { setTransactions(r.data); check(); }).catch(check);
   }, []);
 
   const filteredTx = transactions.filter(t => {
@@ -139,6 +144,63 @@ export default function Reports() {
     else if (reportType === 'inventory') exportInventoryCSV();
     else exportServicesCSV();
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-5">
+        <div className="flex items-end justify-between gap-3">
+          <div className="space-y-2">
+            <div className="h-6 bg-muted/50 animate-pulse rounded w-48" />
+            <div className="h-3.5 bg-muted/50 animate-pulse rounded w-64" />
+          </div>
+          <div className="h-9 bg-muted/50 animate-pulse rounded-xl w-28" />
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-9 bg-muted/50 animate-pulse rounded-xl w-32" />
+          ))}
+        </div>
+        <div className="flex gap-1 flex-wrap">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-7 bg-muted/50 animate-pulse rounded-full w-16" />
+          ))}
+        </div>
+        {isMobile ? (
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="rounded-2xl border border-border/50 p-4 space-y-2" style={{ background: 'var(--brand-surface-gradient)' }}>
+                <div className="h-3 bg-muted/50 animate-pulse rounded w-24" />
+                <div className="h-6 bg-muted/50 animate-pulse rounded w-32" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="rounded-2xl border border-border/50 p-4 space-y-2" style={{ background: 'var(--brand-surface-gradient)' }}>
+                  <div className="h-3 bg-muted/50 animate-pulse rounded w-24" />
+                  <div className="h-6 bg-muted/50 animate-pulse rounded w-20" />
+                </div>
+              ))}
+            </div>
+            <div className="rounded-2xl border border-border/50 p-5 space-y-3" style={{ background: 'var(--brand-surface-gradient)' }}>
+              <div className="h-4 bg-muted/50 animate-pulse rounded w-32" />
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="h-3 bg-muted/50 animate-pulse rounded w-5" />
+                  <div className="flex-1 space-y-1">
+                    <div className="h-3.5 bg-muted/50 animate-pulse rounded w-full" />
+                    <div className="h-1.5 bg-muted/50 animate-pulse rounded-full w-3/4" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div>
