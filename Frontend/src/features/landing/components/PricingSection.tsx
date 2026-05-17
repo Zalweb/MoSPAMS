@@ -119,63 +119,87 @@ export default function PricingSection() {
         </div>
 
         <div ref={cardsRef} className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto items-stretch">
-          {/* Editable plans 1 & 2 */}
-          {editablePlans.map((plan, index) => (
-            <motion.div
-              key={plan.planCode}
-              initial={{ opacity: 0, y: 30 }}
-              animate={cardsVisible ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: 0.1 * index, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className={`relative group rounded-3xl p-8 flex flex-col transition-all duration-300 ${
-                plan.popular
-                  ? 'bg-gradient-to-b from-zinc-800/80 to-zinc-900/80 border-2 border-zinc-700/50 shadow-2xl scale-105'
-                  : 'bg-muted/40 border border-border/50 hover:border-zinc-700/50'
-              } backdrop-blur-xl`}
-            >
-              <div className={`absolute inset-0 rounded-3xl transition-opacity duration-300 ${
-                plan.popular ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-              }`}>
-                <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent rounded-3xl" />
-              </div>
-
-              <div className="relative flex flex-col flex-1">
-                <div className="mb-6">
-                  <p className="text-sm text-muted-foreground mb-2">{plan.planName} Plan</p>
-                  <div className="flex items-baseline gap-1 mb-2">
-                    <span className="text-5xl font-bold text-foreground">₱{plan.monthlyPrice.toLocaleString()}</span>
-                    <span className="text-muted-foreground text-lg">/month</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{plan.description}</p>
+          {/* Plan 1 (Basic) */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={cardsVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="relative group rounded-3xl p-8 flex flex-col transition-all duration-300 bg-muted/40 border border-border/50 hover:border-zinc-700/50 backdrop-blur-xl"
+          >
+            <div className="absolute inset-0 rounded-3xl transition-opacity duration-300 opacity-0 group-hover:opacity-100">
+              <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent rounded-3xl" />
+            </div>
+            <div className="relative flex flex-col flex-1">
+              <div className="mb-6">
+                <p className="text-sm text-muted-foreground mb-2">{plan1.planName} Plan</p>
+                <div className="flex items-baseline gap-1 mb-2">
+                  <span className="text-5xl font-bold text-foreground">₱{plan1.monthlyPrice.toLocaleString()}</span>
+                  <span className="text-muted-foreground text-lg">/month</span>
                 </div>
-
-                <div className="h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent mb-6" />
-
-                <ul className="space-y-4 mb-8 flex-1">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-3">
-                      <div className="mt-0.5 flex-shrink-0">
-                        <div className="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center">
-                          <Check className="w-3 h-3 text-muted-foreground" strokeWidth={3} />
-                        </div>
-                      </div>
-                      <span className="text-sm text-muted-foreground leading-relaxed">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <button
-                  onClick={() => navigate('/register-shop')}
-                  className={`w-full py-3.5 rounded-2xl font-semibold text-sm transition-all duration-200 ${
-                    plan.popular
-                      ? 'bg-white text-black hover:bg-zinc-100 shadow-lg'
-                      : 'bg-zinc-800/50 text-foreground hover:bg-zinc-800 border border-zinc-700/50'
-                  }`}
-                >
-                  Get Started
-                </button>
+                <p className="text-sm text-muted-foreground">{plan1.description}</p>
               </div>
-            </motion.div>
-          ))}
+              <div className="h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent mb-6" />
+              <ul className="space-y-4 mb-8 flex-1">
+                {PLAN_FEATURES.basic.map((feature) => (
+                  <li key={feature} className="flex items-start gap-3">
+                    <div className="mt-0.5 flex-shrink-0">
+                      <div className="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center">
+                        <Check className="w-3 h-3 text-muted-foreground" strokeWidth={3} />
+                      </div>
+                    </div>
+                    <span className="text-sm text-muted-foreground leading-relaxed">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => navigate('/register-shop')}
+                className="w-full py-3.5 rounded-2xl font-semibold text-sm transition-all duration-200 bg-zinc-800/50 text-foreground hover:bg-zinc-800 border border-zinc-700/50"
+              >
+                Get Started
+              </button>
+            </div>
+          </motion.div>
+
+          {/* Plan 2 (Premium) */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={cardsVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="relative group rounded-3xl p-8 flex flex-col transition-all duration-300 bg-gradient-to-b from-zinc-800/80 to-zinc-900/80 border-2 border-zinc-700/50 shadow-2xl scale-105 backdrop-blur-xl"
+          >
+            <div className="absolute inset-0 rounded-3xl transition-opacity duration-300 opacity-100">
+              <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent rounded-3xl" />
+            </div>
+            <div className="relative flex flex-col flex-1">
+              <div className="mb-6">
+                <p className="text-sm text-muted-foreground mb-2">{plan2.planName} Plan</p>
+                <div className="flex items-baseline gap-1 mb-2">
+                  <span className="text-5xl font-bold text-foreground">₱{plan2.monthlyPrice.toLocaleString()}</span>
+                  <span className="text-muted-foreground text-lg">/month</span>
+                </div>
+                <p className="text-sm text-muted-foreground">{plan2.description}</p>
+              </div>
+              <div className="h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent mb-6" />
+              <ul className="space-y-4 mb-8 flex-1">
+                {PLAN_FEATURES.premium.map((feature) => (
+                  <li key={feature} className="flex items-start gap-3">
+                    <div className="mt-0.5 flex-shrink-0">
+                      <div className="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center">
+                        <Check className="w-3 h-3 text-muted-foreground" strokeWidth={3} />
+                      </div>
+                    </div>
+                    <span className="text-sm text-muted-foreground leading-relaxed">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => navigate('/register-shop')}
+                className="w-full py-3.5 rounded-2xl font-semibold text-sm transition-all duration-200 bg-white text-black hover:bg-zinc-100 shadow-lg"
+              >
+                Get Started
+              </button>
+            </div>
+          </motion.div>
 
           {/* Enterprise plan — hardcoded, always 3rd */}
           <motion.div
