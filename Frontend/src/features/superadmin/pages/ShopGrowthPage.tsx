@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { TrendingUp, Store, Activity, CheckCircle } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { apiGet } from '@/shared/lib/api';
 import { toast } from 'sonner';
 
@@ -24,13 +25,26 @@ export default function ShopGrowthPage() {
       {d?.monthlyGrowth?.length > 0 && (
         <div className="bg-card rounded-2xl border border-border p-6">
           <h2 className="text-[16px] font-bold text-foreground mb-4">Monthly Shop Registrations</h2>
-          <div className="h-[200px] flex items-end gap-[2px]">
-            {d.monthlyGrowth.map((m: any, i: number) => {
-              const maxVal = Math.max(...d.monthlyGrowth.map((x: any) => x.count), 1);
-              return <div key={i} className="flex-1 min-w-[8px] relative" style={{ height: '100%' }} title={`${m.month}: ${m.count}`}><div className="absolute bottom-0 w-full rounded-t-sm bg-blue-500 hover:bg-blue-400 transition-colors" style={{ height: `${Math.max((m.count / maxVal) * 100, 2)}%` }} /></div>;
-            })}
-          </div>
-          <div className="flex justify-between mt-2 text-[10px] text-muted-foreground dark:text-zinc-600"><span>{d.monthlyGrowth[0]?.month}</span><span>{d.monthlyGrowth[d.monthlyGrowth.length - 1]?.month}</span></div>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={d.monthlyGrowth} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="shopGrowthGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.9} />
+                  <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.4} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+              <XAxis dataKey="month" tick={{ fill: '#71717a', fontSize: 11 }} tickLine={false} axisLine={false} />
+              <YAxis tick={{ fill: '#71717a', fontSize: 11 }} tickLine={false} axisLine={false} allowDecimals={false} width={30} />
+              <Tooltip
+                contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', padding: '10px 14px' }}
+                labelStyle={{ color: '#a1a1aa', fontSize: '11px', marginBottom: '4px' }}
+                itemStyle={{ color: '#fff', fontSize: '13px', fontWeight: 700 }}
+                formatter={(v: number) => [v, 'New shops']}
+              />
+              <Bar dataKey="count" fill="url(#shopGrowthGrad)" radius={[4, 4, 0, 0]} maxBarSize={48} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       )}
     </div>
