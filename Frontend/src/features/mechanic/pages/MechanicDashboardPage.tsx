@@ -185,9 +185,6 @@ export default function MechanicDashboardPage() {
     { label: 'Customer Rating', value: stats.avg_rating !== null ? `${stats.avg_rating.toFixed(1)} ★` : 'N/A', icon: Star        },
   ];
 
-  const brandCard = { background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' };
-  const brandIcon = { color: 'rgb(var(--color-primary-rgb))' };
-
   return (
     <div className="space-y-8">
       {/* Welcome */}
