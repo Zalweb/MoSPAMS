@@ -181,7 +181,7 @@ export default function DashboardLayout() {
                 transition={{ duration: 0.18 }}
                 className="ml-3 overflow-hidden min-w-0 flex-1"
               >
-                <span className="text-[15px] font-bold text-background tracking-tight leading-none block whitespace-nowrap truncate">
+                <span className="text-[15px] font-bold text-background tracking-tight leading-tight block line-clamp-2">
                   {branding?.shopName || 'MoSPAMS'}
                 </span>
               </motion.div>
