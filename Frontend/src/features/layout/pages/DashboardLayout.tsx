@@ -545,7 +545,12 @@ export default function DashboardLayout() {
 
         {/* ── MOBILE BOTTOM NAV ────────────────────────────────────────────── */}
         <div className="lg:hidden fixed bottom-6 left-0 right-0 px-4 z-50 pointer-events-none flex justify-center">
-          <nav className="pointer-events-auto flex items-center p-1.5 rounded-[28px] bg-background/80 backdrop-blur-xl border border-border/50 shadow-[0_8px_32px_rgba(0,0,0,0.12)] overflow-x-auto no-scrollbar max-w-full">
+          <nav 
+            className="pointer-events-auto flex items-center p-1.5 rounded-[28px] backdrop-blur-xl border border-border/50 shadow-[0_8px_32px_rgba(0,0,0,0.12)] overflow-x-auto no-scrollbar max-w-full"
+            style={{
+              background: 'linear-gradient(90deg, color-mix(in srgb, rgb(var(--color-primary-rgb)) 15%, hsl(var(--background) / 0.85)) 0%, color-mix(in srgb, rgb(var(--color-secondary-rgb)) 15%, hsl(var(--background) / 0.85)) 100%)'
+            }}
+          >
             {visibleGroups.flatMap(g => g.items).map((item) => {
               const isActive = item.end
                 ? location.pathname === item.to
