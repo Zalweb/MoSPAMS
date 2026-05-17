@@ -165,7 +165,7 @@ export default function DashboardLayout() {
         initial={false}
         animate={{ width: isCollapsed ? COLLAPSED_W : EXPANDED_W }}
         transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
-        className={`sticky top-4 h-[calc(100vh-32px)] ml-4 my-4 flex flex-col shrink-0 overflow-hidden transition-transform duration-300 z-50 rounded-[32px] ${
+        className={`sticky top-4 h-[calc(100vh-32px)] ml-4 my-4 flex flex-col shrink-0 transition-transform duration-300 z-50 rounded-[32px] ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
         style={{
@@ -266,7 +266,7 @@ export default function DashboardLayout() {
                           className={`flex items-center transition-all duration-300 z-10 ${
                             isCollapsed 
                               ? 'justify-center w-12 h-12 mx-auto rounded-full' 
-                              : `h-[52px] ${isActive ? 'w-full rounded-l-[24px] rounded-r-none pl-5 relative' : 'w-[calc(100%-12px)] rounded-full mr-3 px-4'}`
+                              : `h-[52px] ${isActive ? 'w-full rounded-l-[24px] rounded-r-none pl-5 relative shadow-[2px_0_0_0_hsl(var(--background))]' : 'w-[calc(100%-12px)] rounded-full mr-3 px-4'}`
                           } ${
                             isActive 
                               ? 'bg-background text-foreground' 
@@ -297,14 +297,14 @@ export default function DashboardLayout() {
                           {isActive && !isCollapsed && (
                             <>
                               {/* Top curve */}
-                              <div className="absolute -top-[24px] right-0 w-[24px] h-[24px] text-background pointer-events-none z-20">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                              <div className="absolute -top-[24px] -right-[1px] w-[25px] h-[24px] text-background pointer-events-none z-20">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" preserveAspectRatio="none">
                                   <path d="M24 0V24H0C13.2548 24 24 13.2548 24 0Z" fill="currentColor" />
                                 </svg>
                               </div>
                               {/* Bottom curve */}
-                              <div className="absolute -bottom-[24px] right-0 w-[24px] h-[24px] text-background pointer-events-none z-20">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                              <div className="absolute -bottom-[24px] -right-[1px] w-[25px] h-[24px] text-background pointer-events-none z-20">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" preserveAspectRatio="none">
                                   <path d="M24 24V0H0C13.2548 0 24 10.7452 24 24Z" fill="currentColor" />
                                 </svg>
                               </div>
