@@ -52,28 +52,6 @@ const scallopMask = {
   WebkitMaskRepeat: 'repeat-x',
 } as React.CSSProperties;
 
-/* Injected during window.print() to isolate the receipt card */
-const PRINT_CSS = `
-  @media print {
-    body * { visibility: hidden !important; }
-    .invoice-receipt-card, .invoice-receipt-card * { visibility: visible !important; }
-    .invoice-receipt-card {
-      position: fixed !important;
-      top: 0 !important;
-      left: 50% !important;
-      transform: translateX(-50%) !important;
-      width: 380px !important;
-      box-shadow: none !important;
-      border-radius: 8px !important;
-    }
-    .invoice-details-scroll {
-      max-height: none !important;
-      overflow: visible !important;
-    }
-    .invoice-footer, .invoice-scallop { display: none !important; }
-  }
-`;
-
 export default function InvoiceModal({ paymentId, onClose, apiEndpoint }: InvoiceModalProps) {
   const [details, setDetails] = useState<InvoiceDetails | null>(null);
   const [loading, setLoading] = useState(false);
@@ -92,12 +70,60 @@ export default function InvoiceModal({ paymentId, onClose, apiEndpoint }: Invoic
   if (!paymentId) return null;
 
   const handlePrint = () => {
-    const style = document.createElement('style');
-    style.id = '__receipt-print';
-    style.textContent = PRINT_CSS;
-    document.head.appendChild(style);
-    window.print();
-    setTimeout(() => document.getElementById('__receipt-print')?.remove(), 1000);
+    const content = document.querySelector('.invoice-receipt-card');
+    if (!content) return;
+
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    document.body.appendChild(iframe);
+
+    const iframeDoc = iframe.contentWindow?.document;
+    if (!iframeDoc) return;
+
+    let headHtml = '';
+    document.querySelectorAll('style, link[rel="stylesheet"]').forEach((s) => {
+      headHtml += s.outerHTML;
+    });
+
+    iframeDoc.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          ${headHtml}
+          <style>
+            @media print {
+              body { background: white !important; margin: 0; padding: 20px; -webkit-print-color-adjust: exact; color-adjust: exact; }
+              .invoice-receipt-card { box-shadow: none !important; margin: 0 auto; }
+              .invoice-footer, .invoice-scallop, button { display: none !important; }
+              .invoice-details-scroll { max-height: none !important; overflow: visible !important; flex: none !important; }
+              /* Force text colors to be black/dark for printing */
+              .text-gray-400 { color: #6b7280 !important; }
+              .text-gray-800 { color: #1f2937 !important; }
+              .text-gray-900 { color: #111827 !important; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="max-w-sm mx-auto invoice-receipt-card bg-white rounded-3xl overflow-hidden flex flex-col w-full">
+            ${content.innerHTML}
+          </div>
+        </body>
+      </html>
+    `);
+    iframeDoc.close();
+
+    iframe.onload = () => {
+      setTimeout(() => {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+        setTimeout(() => document.body.removeChild(iframe), 1000);
+      }, 500);
+    };
   };
 
   const formatDateTime = (iso: string | null | undefined) => {
