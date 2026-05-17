@@ -66,14 +66,12 @@ export default function PricingSection() {
       .catch(() => { /* use fallback */ });
   }, []);
 
-  const editablePlans = plans.slice(0, 2).map(plan => {
-    const code = plan.planCode.toLowerCase();
-    return {
-      ...plan,
-      features: PLAN_FEATURES[code] ?? PLAN_FEATURES.basic,
-      popular: code === POPULAR_PLAN,
-    };
-  });
+  // Map features by position (0 = basic, 1 = premium) so any plan code works
+  const editablePlans = plans.slice(0, 2).map((plan, index) => ({
+    ...plan,
+    features: index === 0 ? PLAN_FEATURES.basic : PLAN_FEATURES.premium,
+    popular: index === 1,
+  }));
 
   return (
     <section id="pricing" className="relative py-32 overflow-hidden">
@@ -127,7 +125,7 @@ export default function PricingSection() {
           </motion.p>
         </div>
 
-        <div ref={cardsRef} className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div ref={cardsRef} className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto items-stretch">
           {/* Editable plans 1 & 2 */}
           {editablePlans.map((plan, index) => (
             <motion.div
@@ -135,7 +133,7 @@ export default function PricingSection() {
               initial={{ opacity: 0, y: 30 }}
               animate={cardsVisible ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.1 * index, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className={`relative group rounded-3xl p-8 transition-all duration-300 ${
+              className={`relative group rounded-3xl p-8 flex flex-col transition-all duration-300 ${
                 plan.popular
                   ? 'bg-gradient-to-b from-zinc-800/80 to-zinc-900/80 border-2 border-zinc-700/50 shadow-2xl scale-105'
                   : 'bg-muted/40 border border-border/50 hover:border-zinc-700/50'
@@ -147,7 +145,7 @@ export default function PricingSection() {
                 <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent rounded-3xl" />
               </div>
 
-              <div className="relative">
+              <div className="relative flex flex-col flex-1">
                 <div className="mb-6">
                   <p className="text-sm text-muted-foreground mb-2">{plan.planName} Plan</p>
                   <div className="flex items-baseline gap-1 mb-2">
@@ -159,7 +157,7 @@ export default function PricingSection() {
 
                 <div className="h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent mb-6" />
 
-                <ul className="space-y-4 mb-8">
+                <ul className="space-y-4 mb-8 flex-1">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-3">
                       <div className="mt-0.5 flex-shrink-0">
@@ -191,13 +189,13 @@ export default function PricingSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={cardsVisible ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.2, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="relative group rounded-3xl p-8 transition-all duration-300 bg-muted/40 border border-border/50 hover:border-zinc-700/50 backdrop-blur-xl"
+            className="relative group rounded-3xl p-8 flex flex-col transition-all duration-300 bg-muted/40 border border-border/50 hover:border-zinc-700/50 backdrop-blur-xl"
           >
             <div className="absolute inset-0 rounded-3xl transition-opacity duration-300 opacity-0 group-hover:opacity-100">
               <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent rounded-3xl" />
             </div>
 
-            <div className="relative">
+            <div className="relative flex flex-col flex-1">
               <div className="mb-6">
                 <p className="text-sm text-muted-foreground mb-2">Enterprise Plan</p>
                 <div className="flex items-baseline gap-1 mb-2">
@@ -208,7 +206,7 @@ export default function PricingSection() {
 
               <div className="h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent mb-6" />
 
-              <ul className="space-y-4 mb-8">
+              <ul className="space-y-4 mb-8 flex-1">
                 {ENTERPRISE_FEATURES.map((feature) => (
                   <li key={feature} className="flex items-start gap-3">
                     <div className="mt-0.5 flex-shrink-0">
