@@ -348,7 +348,7 @@ export default function Inventory() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-4"><span className="text-xs font-medium text-foreground/80 bg-foreground/10 px-3 py-1.5 rounded-full">{part.category}</span></td>
+                    <td className="px-5 py-4"><span className="whitespace-nowrap text-xs font-medium text-foreground/80 bg-foreground/10 px-3 py-1.5 rounded-full">{part.category}</span></td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <span className={`text-sm font-semibold tabular-nums ${isLow ? 'text-amber-400' : 'text-foreground'}`}>{part.stock}</span>
