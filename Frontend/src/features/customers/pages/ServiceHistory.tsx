@@ -155,11 +155,11 @@ export default function ServiceHistory() {
 
       <div className="space-y-4">
         {loading ? (
-          <div className="flex items-center justify-center py-20 bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-[32px] border border-border/50">
+          <div className="flex items-center justify-center py-20 brand-card backdrop-blur-xl rounded-[32px] border" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
             <div className="w-8 h-8 border-4 border-muted border-t-[rgb(var(--color-primary-rgb))] rounded-full animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-20 bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-[32px] border border-border/50">
+          <div className="text-center py-20 brand-card backdrop-blur-xl rounded-[32px] border" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
             <Wrench className="w-12 h-12 text-muted-foreground/20 mx-auto mb-4" />
             <p className="text-sm font-medium text-muted-foreground">No service records found</p>
           </div>
@@ -173,7 +173,8 @@ export default function ServiceHistory() {
               <motion.div
                 key={service.id}
                 {...fadeUp(0.2 + (i * 0.05))}
-                className="bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-border/50 shadow-sm p-6 hover:border-[rgb(var(--color-primary-rgb))]/30 transition-all duration-300 group"
+                className="brand-card backdrop-blur-xl rounded-2xl border shadow-sm p-6 transition-all duration-300 group"
+                style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}
               >
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
                   <div className="flex items-start gap-4">
@@ -199,7 +200,7 @@ export default function ServiceHistory() {
                         )}
                       </div>
                       {service.notes && (
-                        <div className="mt-4 p-3 rounded-xl bg-muted/50 border border-border/50">
+                        <div className="mt-4 p-3 rounded-xl brand-card border" style={{ borderColor: 'var(--brand-border)' }}>
                           <p className="text-xs italic text-muted-foreground leading-relaxed">"{service.notes}"</p>
                         </div>
                       )}

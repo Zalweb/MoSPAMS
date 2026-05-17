@@ -109,7 +109,7 @@ export default function CustomerVehicles() {
             <Loader2 className="w-8 h-8 text-muted-foreground animate-spin" />
           </div>
         ) : vehicles.length === 0 ? (
-          <motion.div {...fadeUp(0.1)} className="flex flex-col items-center justify-center py-20 bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-[32px] border border-border/50 shadow-xl">
+          <motion.div {...fadeUp(0.1)} className="flex flex-col items-center justify-center py-20 brand-card backdrop-blur-xl rounded-[32px] border shadow-xl" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
             <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center mb-6 border border-primary/20">
               <Bike className="w-10 h-10 text-primary" />
             </div>
@@ -122,10 +122,10 @@ export default function CustomerVehicles() {
         ) : (
           vehicles.map((v, i) => (
             <motion.div key={v.id} {...fadeUp(i * 0.06)}>
-              <div className="bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-border/50 shadow-sm p-5 flex items-center justify-between gap-4 group hover:border-[rgb(var(--color-primary-rgb))]/30 transition-all duration-300">
+              <div className="brand-card backdrop-blur-xl rounded-2xl border shadow-sm p-5 flex items-center justify-between gap-4 group transition-all duration-300" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center shrink-0 border border-border/50 group-hover:scale-105 transition-transform">
-                    <Bike className="w-6 h-6 text-muted-foreground" strokeWidth={1.5} />
+                  <div className="brand-icon-box w-12 h-12 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <Bike className="w-6 h-6" strokeWidth={1.5} />
                   </div>
                   <div>
                     <p className="text-base font-bold text-foreground group-hover:text-[rgb(var(--color-primary-rgb))] transition-colors">

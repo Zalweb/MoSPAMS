@@ -123,7 +123,8 @@ export default function CustomerDashboard() {
         <motion.button
           {...fadeUp(0.3)}
           onClick={() => navigate('book')}
-          className="relative overflow-hidden bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-[28px] border border-border/50 p-6 text-left hover:border-[rgb(var(--color-primary-rgb))]/50 hover:shadow-xl transition-all duration-500 group"
+          className="relative overflow-hidden brand-card backdrop-blur-xl rounded-[28px] border p-6 text-left hover:shadow-xl transition-all duration-500 group"
+          style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}
         >
           <div className="flex items-center justify-between relative z-10">
             <div>
@@ -143,7 +144,8 @@ export default function CustomerDashboard() {
         <motion.button
           {...fadeUp(0.35)}
           onClick={() => navigate('history')}
-          className="relative overflow-hidden bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-[28px] border border-border/50 p-6 text-left hover:border-[rgb(var(--color-secondary-rgb))]/50 hover:shadow-xl transition-all duration-500 group"
+          className="relative overflow-hidden brand-card backdrop-blur-xl rounded-[28px] border p-6 text-left hover:shadow-xl transition-all duration-500 group"
+          style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}
         >
           <div className="flex items-center justify-between relative z-10">
             <div>

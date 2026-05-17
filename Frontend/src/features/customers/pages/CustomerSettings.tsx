@@ -103,7 +103,7 @@ export default function CustomerSettings() {
         <p className="text-sm text-muted-foreground mt-1">Manage your account information</p>
       </motion.div>
 
-      <motion.div {...fadeUp(0.1)} className="bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-[32px] border border-border/50 shadow-xl p-8 mb-6">
+      <motion.div {...fadeUp(0.1)} className="brand-card backdrop-blur-xl rounded-[32px] border shadow-xl p-8 mb-6" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
         {loadingProfile ? (
           <div className="flex items-center justify-center py-10">
             <Loader2 className="w-7 h-7 animate-spin text-muted-foreground" />
@@ -190,7 +190,7 @@ export default function CustomerSettings() {
       </motion.div>
 
       {/* Change Password Card */}
-      <motion.div {...fadeUp(0.2)} className="bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-[32px] border border-border/50 shadow-xl p-8">
+      <motion.div {...fadeUp(0.2)} className="brand-card backdrop-blur-xl rounded-[32px] border shadow-xl p-8" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center">
             <Lock className="w-5 h-5 text-muted-foreground" />

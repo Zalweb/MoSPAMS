@@ -130,9 +130,10 @@ export default function BookService() {
         <p className="text-sm text-muted-foreground mt-1">Schedule your motorcycle service</p>
       </motion.div>
 
-      <motion.div 
-        {...fadeUp(0.1)} 
-        className="bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-[32px] border border-border/50 shadow-xl p-8"
+      <motion.div
+        {...fadeUp(0.1)}
+        className="brand-card backdrop-blur-xl rounded-[32px] border shadow-xl p-8"
+        style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}
       >
         {error && (
           <div className="p-4 rounded-2xl bg-red-500/10 text-red-400 text-xs mb-6 border border-red-500/20">

@@ -58,9 +58,10 @@ export default function Payments() {
       </motion.div>
 
       {/* Total Spent Card */}
-      <motion.div 
-        {...fadeUp(0.1)} 
-        className="bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-[32px] border border-border/50 shadow-xl p-8 mb-8"
+      <motion.div
+        {...fadeUp(0.1)}
+        className="brand-card backdrop-blur-xl rounded-[32px] border shadow-xl p-8 mb-8"
+        style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}
       >
         <div className="flex items-center gap-5">
           <div className="w-16 h-16 rounded-[20px] bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
@@ -87,11 +88,11 @@ export default function Payments() {
 
       <div className="space-y-4">
         {loading ? (
-          <div className="flex items-center justify-center py-20 bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-[32px] border border-border/50">
+          <div className="flex items-center justify-center py-20 brand-card backdrop-blur-xl rounded-[32px] border" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
             <div className="w-8 h-8 border-4 border-muted border-t-[rgb(var(--color-primary-rgb))] rounded-full animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-20 bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-[32px] border border-border/50">
+          <div className="text-center py-20 brand-card backdrop-blur-xl rounded-[32px] border" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
             <CreditCard className="w-12 h-12 text-muted-foreground/20 mx-auto mb-4" />
             <p className="text-sm font-medium text-muted-foreground">No payment records found</p>
           </div>
@@ -101,7 +102,8 @@ export default function Payments() {
               key={payment.id}
               {...fadeUp(0.2 + (i * 0.05))}
               onClick={() => setSelectedPaymentId(payment.id)}
-              className="w-full text-left bg-card dark:bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-border/50 shadow-sm p-5 hover:border-[rgb(var(--color-primary-rgb))]/30 hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 group"
+              className="w-full text-left brand-card backdrop-blur-xl rounded-2xl border shadow-sm p-5 hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 group"
+              style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
