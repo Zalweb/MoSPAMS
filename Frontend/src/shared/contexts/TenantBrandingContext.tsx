@@ -231,6 +231,14 @@ function applyBranding(branding: TenantBranding) {
   set('--color-primary',           hexToHsl(primary));
   set('--color-secondary',         hexToHsl(secondary));
 
+  // ── Shadcn UI Global Overrides ──
+  // Ensures default <Button /> and <Badge /> components use the shop's brand colors 
+  // with the automatically calculated readable text color (white for dark brand, black for light brand)
+  set('--primary',                 hexToHsl(primary));
+  set('--primary-foreground',      hexToHsl(textOn));
+  set('--secondary',               hexToHsl(secondary));
+  set('--secondary-foreground',    hexToHsl(textOnSec));
+
   // ── Adaptive sidebar/navbar brightness hints ──
   // When primary is very dark, expose a flag so CSS can apply a subtle lift
   root.setAttribute('data-brand-dark',  isDark     ? 'true' : 'false');

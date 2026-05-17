@@ -221,7 +221,7 @@ export default function SuperAdminLayout() {
                           className={`flex items-center transition-colors duration-300 relative z-10 ${
                             isCollapsed 
                               ? 'justify-center w-12 h-12 mx-auto rounded-full' 
-                              : \`h-[52px] \${isActive ? 'pl-5' : 'w-[calc(100%-12px)] rounded-full mr-3 px-4'}\`
+                              : `h-[52px] ${isActive ? 'pl-5' : 'w-[calc(100%-12px)] rounded-full mr-3 px-4'}`
                           } ${
                             isActive 
                               ? 'text-foreground' 
