@@ -448,46 +448,23 @@ export default function DashboardPage() {
           <div className="p-5">
             <div className="grid grid-cols-3 gap-4">
               {[
-                {
-                  label: 'Pending',
-                  count: pendingServices,
-                  icon: Clock,
-                  bg: 'bg-amber-950/70 dark:bg-amber-950/80',
-                  border: 'border-amber-700/30',
-                  iconColor: 'text-amber-400',
-                  percentage: totalJobs > 0 ? ((pendingServices / totalJobs) * 100).toFixed(0) : 0,
-                },
-                {
-                  label: 'Ongoing',
-                  count: ongoingServices,
-                  icon: Wrench,
-                  bg: 'bg-blue-950/70 dark:bg-blue-950/80',
-                  border: 'border-blue-700/30',
-                  iconColor: 'text-blue-400',
-                  percentage: totalJobs > 0 ? ((ongoingServices / totalJobs) * 100).toFixed(0) : 0,
-                },
-                {
-                  label: 'Completed',
-                  count: completedServices,
-                  icon: CheckCircle2,
-                  bg: 'bg-green-950/70 dark:bg-green-950/80',
-                  border: 'border-green-700/30',
-                  iconColor: 'text-green-400',
-                  percentage: totalJobs > 0 ? ((completedServices / totalJobs) * 100).toFixed(0) : 0,
-                },
+                { label: 'Pending',   count: pendingServices,  icon: Clock,        iconColor: 'text-amber-400', percentage: totalJobs > 0 ? ((pendingServices  / totalJobs) * 100).toFixed(0) : 0 },
+                { label: 'Ongoing',   count: ongoingServices,  icon: Wrench,       iconColor: 'text-blue-400',  percentage: totalJobs > 0 ? ((ongoingServices  / totalJobs) * 100).toFixed(0) : 0 },
+                { label: 'Completed', count: completedServices, icon: CheckCircle2, iconColor: 'text-green-400', percentage: totalJobs > 0 ? ((completedServices / totalJobs) * 100).toFixed(0) : 0 },
               ].map((item) => (
                 <motion.div
                   key={item.label}
-                  className={`flex flex-col gap-3 p-4 rounded-xl backdrop-blur-sm border ${item.bg} ${item.border}`}
+                  className="flex flex-col gap-3 p-4 rounded-xl border brand-card"
+                  style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}
                   whileHover={{ y: -2, transition: { duration: 0.2 } }}
                 >
                   <div className="flex items-center justify-between">
                     <item.icon className={`w-5 h-5 ${item.iconColor}`} strokeWidth={2} />
-                    <span className="text-xs font-bold text-white/50">{item.percentage}%</span>
+                    <span className="text-xs font-bold text-muted-foreground">{item.percentage}%</span>
                   </div>
                   <div>
-                    <p className="text-3xl font-bold text-white leading-none mb-1">{item.count}</p>
-                    <p className="text-xs font-medium text-white/60">{item.label}</p>
+                    <p className="text-3xl font-bold text-foreground leading-none mb-1">{item.count}</p>
+                    <p className="text-xs font-medium text-muted-foreground">{item.label}</p>
                   </div>
                 </motion.div>
               ))}
