@@ -17,7 +17,7 @@ export default function PartsCatalog() {
   const [category, setCategory] = useState('All');
   const [selected, setSelected] = useState<Part | null>(null);
 
-  const { data: parts, loading } = usePaginatedFetch<Part>('/api/parts');
+  const { data: parts, loading } = usePaginatedFetch<Part>('/api/parts', 500);
 
   const categories = useMemo(() => {
     const cats = new Set(parts.map(p => p.category));

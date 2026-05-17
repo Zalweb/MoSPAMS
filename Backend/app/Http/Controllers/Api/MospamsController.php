@@ -2776,11 +2776,11 @@ class MospamsController extends Controller
         $request = request();
 
         if ($limit = (int) $request->query('limit', 0)) {
-            $rows = $query->limit(max(1, min($limit, 100)))->get();
+            $rows = $query->limit(max(1, min($limit, 500)))->get();
             return ['data' => $rows, 'meta' => null];
         }
 
-        $perPage = max(1, min((int) $request->query('per_page', $defaultPerPage), 100));
+        $perPage = max(1, min((int) $request->query('per_page', $defaultPerPage), 500));
         $paginated = $query->paginate($perPage);
 
         return [
