@@ -1546,6 +1546,9 @@ class MospamsController extends Controller
         abort_if($existingAccount && $provisioner->membership($existingAccount, $shopId), 422, 'This email already has a user in this shop.');
 
         $account = $provisioner->createOrUpdateAccount($data['name'], $data['email'], $data['password'], null, ! $existingAccount);
+        if (! $account->email_verified_at) {
+            $account->update(['email_verified_at' => now()]);
+        }
         $membership = $provisioner->createOrUpdateMembership($account, $shopId, $data['role']);
         $user = $provisioner->ensureTenantUser($account, $shopId, $data['role'], $data['password']);
 

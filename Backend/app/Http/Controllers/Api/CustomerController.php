@@ -523,7 +523,11 @@ class CustomerController extends Controller
         ]);
 
         $user = auth()->user();
-        $customer = $this->resolveCustomer($user);
+        $customer = $this->tenantTable('customers')->where('user_id_fk', $user->user_id)->first();
+
+        if (!$customer) {
+            return response()->json(['error' => 'Vehicle not found'], 404);
+        }
 
         $vehicle = DB::table('customer_vehicles')
             ->where('vehicle_id', $vehicleId)
@@ -552,7 +556,11 @@ class CustomerController extends Controller
     public function deleteVehicle(Request $request, $vehicleId): JsonResponse
     {
         $user = auth()->user();
-        $customer = $this->resolveCustomer($user);
+        $customer = $this->tenantTable('customers')->where('user_id_fk', $user->user_id)->first();
+
+        if (!$customer) {
+            return response()->json(['error' => 'Vehicle not found'], 404);
+        }
 
         $deleted = DB::table('customer_vehicles')
             ->where('vehicle_id', $vehicleId)

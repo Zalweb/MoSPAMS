@@ -216,9 +216,12 @@ class AccountProvisioner
                 'password_hash' => $user->password_hash,
                 'google_id' => $user->google_id,
                 'account_status_id_fk' => $this->activeAccountStatusId(),
+                'email_verified_at' => now(),
                 'created_at' => $user->created_at ?? now(),
                 'updated_at' => now(),
             ]);
+        } elseif (! $account->email_verified_at) {
+            $account->update(['email_verified_at' => now()]);
         }
 
         $user->update(['account_id_fk' => $account->account_id]);

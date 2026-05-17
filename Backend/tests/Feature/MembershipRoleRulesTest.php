@@ -164,6 +164,9 @@ class MembershipRoleRulesTest extends TestCase
     {
         $provisioner = app(AccountProvisioner::class);
         $account = $provisioner->createOrUpdateAccount(ucfirst(strtok($email, '@')), $email, $password);
+        if (! $account->email_verified_at) {
+            $account->update(['email_verified_at' => now()]);
+        }
         $provisioner->createOrUpdateMembership($account, $shopId, $role);
 
         return $provisioner->ensureTenantUser($account, $shopId, $role, $password);
