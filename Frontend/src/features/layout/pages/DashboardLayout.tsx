@@ -297,13 +297,13 @@ export default function DashboardLayout() {
                           {isActive && !isCollapsed && (
                             <>
                               {/* Top curve */}
-                              <div className="absolute -top-[24px] -right-[1px] w-[25px] h-[24px] text-background pointer-events-none z-20">
+                              <div className="absolute -top-[24px] -right-[2px] w-[26px] h-[24px] text-background pointer-events-none z-20">
                                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" preserveAspectRatio="none">
                                   <path d="M24 0V24H0C13.2548 24 24 13.2548 24 0Z" fill="currentColor" />
                                 </svg>
                               </div>
                               {/* Bottom curve */}
-                              <div className="absolute -bottom-[24px] -right-[1px] w-[25px] h-[24px] text-background pointer-events-none z-20">
+                              <div className="absolute -bottom-[24px] -right-[2px] w-[26px] h-[24px] text-background pointer-events-none z-20">
                                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" preserveAspectRatio="none">
                                   <path d="M24 24V0H0C13.2548 0 24 10.7452 24 24Z" fill="currentColor" />
                                 </svg>
