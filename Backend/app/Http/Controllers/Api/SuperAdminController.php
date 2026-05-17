@@ -645,6 +645,10 @@ class SuperAdminController extends Controller
 
     public function storeSubscriptionPlan(Request $request): JsonResponse
     {
+        if (DB::table('subscription_plans')->count() >= 3) {
+            return response()->json(['message' => 'Maximum of 3 subscription plans allowed.'], 422);
+        }
+
         $data = $request->validate([
             'planCode' => ['required', 'string', 'max:30', 'alpha_dash', 'unique:subscription_plans,plan_code'],
             'planName' => ['required', 'string', 'max:100'],
@@ -670,7 +674,12 @@ class SuperAdminController extends Controller
 
     public function updateSubscriptionPlan(Request $request, int $plan): JsonResponse
     {
-        abort_if(!DB::table('subscription_plans')->where('plan_id', $plan)->exists(), 404, 'Plan not found.');
+        $existing = DB::table('subscription_plans')->where('plan_id', $plan)->first();
+        abort_if(!$existing, 404, 'Plan not found.');
+
+        if (strtolower($existing->plan_code) === 'enterprise') {
+            return response()->json(['message' => 'The Enterprise plan cannot be edited.'], 422);
+        }
 
         $data = $request->validate([
             'planCode' => ['sometimes', 'string', 'max:30', 'alpha_dash', Rule::unique('subscription_plans', 'plan_code')->ignore($plan, 'plan_id')],

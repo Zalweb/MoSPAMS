@@ -200,7 +200,7 @@ export default function DashboardLayout() {
         </div>
 
         {/* Nav items */}
-        <nav className="flex-1 py-3 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] -mr-5 pr-5">
+        <nav className="flex-1 py-3 -mr-5 pr-5">
           {visibleGroups.map((group, idx) => (
             <div key={idx} className={idx > 0 ? 'mt-1' : ''}>
               {/* Group separator */}

@@ -136,7 +136,7 @@ export default function SuperAdminLayout() {
         initial={false}
         animate={{ width: isCollapsed ? COLLAPSED_W : EXPANDED_W }}
         transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
-        className={`hidden lg:flex sticky top-4 h-[calc(100vh-32px)] ml-4 my-4 flex-col shrink-0 transition-transform duration-300 z-50 rounded-[32px] overflow-hidden`}
+        className={`hidden lg:flex sticky top-4 h-[calc(100vh-32px)] ml-4 my-4 flex-col shrink-0 transition-transform duration-300 z-50 rounded-[32px]`}
         style={{
           background: 'hsl(var(--foreground))',
           boxShadow: '0 4px 30px -5px rgba(0,0,0,0.2)'
@@ -181,7 +181,7 @@ export default function SuperAdminLayout() {
         </div>
 
         {/* Nav items */}
-        <nav className="flex-1 py-3 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] -mr-5 pr-5">
+        <nav className="flex-1 py-3 -mr-5 pr-5">
           {NAV_SECTIONS.map((group, idx) => (
             <div key={idx} className={idx > 0 ? 'mt-1' : ''}>
               {idx > 0 && (
