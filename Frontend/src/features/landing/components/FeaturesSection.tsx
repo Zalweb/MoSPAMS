@@ -23,7 +23,7 @@ const FEATURES = [
     icon: Receipt,
     title: 'Sales & Transactions',
     description:
-      'Record parts-only and service-plus-parts transactions with Cash and GCash payment tracking, discounts, and net amount calculation.',
+      'Record parts-only and service-plus-parts transactions with Cash and GCash payment tracking, and net amount calculation.',
     color: 'green',
     tags: ['Cash', 'GCash', 'Discounts'],
   },
@@ -110,9 +110,8 @@ export default function FeaturesSection() {
         {/* Section Header */}
         <div
           ref={headerRef}
-          className={`text-center max-w-2xl mx-auto mb-16 transition-all duration-700 ${
-            headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
+          className={`text-center max-w-2xl mx-auto mb-16 transition-all duration-700 ${headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
         >
           <motion.div
             initial={{ opacity: 0, y: 10 }}

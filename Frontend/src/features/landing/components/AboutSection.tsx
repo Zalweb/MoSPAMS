@@ -119,7 +119,7 @@ export default function AboutSection() {
                 </div>
               </div>
               <p className="text-muted-foreground text-sm leading-relaxed mb-4">
-                MoSPAMS V2 is a full multi-tenant SaaS platform. Owner, Staff, Mechanic, and Customer roles are all active with dedicated dashboards and workflows.
+                MoSPAMS is a full multi-tenant SaaS platform. Owner, Staff, Mechanic, and Customer roles are all active with dedicated dashboards and workflows.
               </p>
               <div className="flex flex-wrap gap-2">
                 {['Inventory', 'Services', 'Sales', 'Reports', 'Users', 'Branding', 'Multi-Tenancy', 'Google Auth'].map((tag) => (
