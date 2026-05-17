@@ -37,8 +37,8 @@ export default function UserStatisticsPage() {
             <BarChart data={d.monthlySignups} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="signupsGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.9} />
-                  <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.4} />
+                  <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity={0.9} />
+                  <stop offset="100%" stopColor="hsl(var(--foreground))" stopOpacity={0.4} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />

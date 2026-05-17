@@ -51,7 +51,7 @@ function ChartSection({ title, data, dataKey }: any) {
   const maxVal = Math.max(...data.map((d: any) => d[dataKey]), 1);
   return (
     <div className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-6"><h2 className="text-[16px] font-bold text-foreground mb-4">{title}</h2>
-      <div className="h-[200px] flex items-end gap-[2px]">{data.map((d: any, i: number) => <div key={i} className="flex-1 min-w-[8px] relative group" style={{ height: '100%' }} title={`${d.month}: ${CURRENCY_PREFIX}${d[dataKey].toLocaleString()}`}><div className="absolute bottom-0 w-full rounded-t-sm bg-white/20 hover:bg-white/40 transition-colors" style={{ height: `${Math.max((d[dataKey] / maxVal) * 100, 2)}%` }} /></div>)}</div>
+      <div className="h-[200px] flex items-end gap-[2px]">{data.map((d: any, i: number) => <div key={i} className="flex-1 min-w-[8px] relative group" style={{ height: '100%' }} title={`${d.month}: ${CURRENCY_PREFIX}${d[dataKey].toLocaleString()}`}><div className="absolute bottom-0 w-full rounded-t-sm bg-foreground/20 hover:bg-foreground/40 transition-colors" style={{ height: `${Math.max((d[dataKey] / maxVal) * 100, 2)}%` }} /></div>)}</div>
       <div className="flex justify-between mt-2 text-[10px] text-muted-foreground dark:text-zinc-600">{data.length > 0 && <><span>{data[0].month}</span><span>{data[data.length - 1].month}</span></>}</div>
     </div>
   );
