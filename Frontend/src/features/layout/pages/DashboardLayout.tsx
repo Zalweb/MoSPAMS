@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  LayoutDashboard, Package, Wrench, ShoppingCart,
-  BarChart3, Shield, LogOut, Menu,
+  LayoutDashboard, Package, Wrench, ShoppingCart, BarChart3, Shield, LogOut,
   Home, Calendar, CreditCard, ScrollText, Settings, Bike, Bell, Sun, Moon,
   ChevronLeft, CheckCircle2,
 } from 'lucide-react';
@@ -67,7 +66,7 @@ export default function DashboardLayout() {
   const navigate   = useNavigate();
   const location   = useLocation();
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const [isCollapsed, setIsCollapsed] = useState(() =>
     typeof window !== 'undefined'
       ? localStorage.getItem('sidebar-collapsed') === 'true'
@@ -198,7 +197,7 @@ export default function DashboardLayout() {
           {/* Collapse / expand button — desktop only */}
           <div className={`hidden lg:block transition-opacity duration-300 ${isCollapsed ? 'opacity-0 pointer-events-none absolute' : 'opacity-100'}`}>
               <button
-                onClick={() => { setIsCollapsed(true); setSidebarOpen(false); }}
+                onClick={() => { setIsCollapsed(true); }}
                 className="w-7 h-7 rounded-full bg-background/10 hover:bg-background/20 flex items-center justify-center text-background/70 hover:text-background transition-colors"
               >
               <ChevronLeft className="w-4 h-4" />
@@ -244,7 +243,6 @@ export default function DashboardLayout() {
                       <NavLink
                         to={item.to}
                         end={item.end}
-                        onClick={() => setSidebarOpen(false)}
                         className="block relative"
                       >
                         {/* The gliding background highlight */}
