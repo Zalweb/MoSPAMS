@@ -97,7 +97,30 @@ OWNER_TOOLS = [
     },
 ]
 
+# Staff cannot see financial data (revenue, sales, top parts)
+STAFF_TOOLS = [t for t in OWNER_TOOLS
+               if t["function"]["name"] not in ("get_revenue", "get_recent_sales", "get_top_parts")]
+
+MECHANIC_TOOLS = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_my_assigned_jobs",
+            "description": "Returns all service jobs currently assigned to this mechanic.",
+            "parameters": {"type": "object", "properties": {}, "required": []},
+        },
+    },
+]
+
 CUSTOMER_TOOLS = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_my_profile",
+            "description": "Returns the current customer's own profile: name, email, phone, and account details. Use this when the customer asks about their own info, name, or account.",
+            "parameters": {"type": "object", "properties": {}, "required": []},
+        },
+    },
     {
         "type": "function",
         "function": {
@@ -127,14 +150,6 @@ CUSTOMER_TOOLS = [
         "function": {
             "name": "get_shop_info",
             "description": "Returns the shop/website name, business hours, address, phone, and email. Use this for any question about the shop name, website name, contact details, or opening hours.",
-            "parameters": {"type": "object", "properties": {}, "required": []},
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_my_profile",
-            "description": "Returns the current customer's own profile: name, email, phone, and account details. Use this when the customer asks about their own info, name, or account.",
             "parameters": {"type": "object", "properties": {}, "required": []},
         },
     },

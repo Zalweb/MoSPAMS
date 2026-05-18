@@ -124,6 +124,27 @@ class InternalChatController extends Controller
         return response()->json($customer);
     }
 
+    public function mechanicJobs(Request $request, int $userId)
+    {
+        $shopId    = $this->shopId($request);
+        $mechanic  = DB::table('mechanics')
+            ->where('shop_id_fk', $shopId)
+            ->where('user_id_fk', $userId)
+            ->first();
+        if (!$mechanic) {
+            return response()->json(['error' => 'Mechanic not found'], 404);
+        }
+        $jobs = DB::table('service_job_mechanics')
+            ->join('service_jobs', 'service_jobs.job_id', '=', 'service_job_mechanics.job_id_fk')
+            ->where('service_job_mechanics.mechanic_id_fk', $mechanic->mechanic_id)
+            ->where('service_job_mechanics.shop_id_fk', $shopId)
+            ->select('service_jobs.job_id', 'service_jobs.motorcycle_model',
+                     'service_jobs.job_date', 'service_jobs.service_job_status_id_fk', 'service_jobs.notes')
+            ->orderByDesc('service_jobs.job_date')
+            ->get();
+        return response()->json($jobs);
+    }
+
     public function customerProfile(Request $request, int $userId)
     {
         $shopId   = $this->shopId($request);

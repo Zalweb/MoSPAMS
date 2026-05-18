@@ -27,7 +27,7 @@ class ChatController extends Controller
             return response()->json(['error' => 'No shop associated with this account.'], 422);
         }
 
-        $endpoint = in_array($role, ['owner', 'staff']) ? 'owner' : 'customer';
+        $endpoint = in_array($role, ['owner', 'staff', 'mechanic']) ? 'owner' : 'customer';
         $aiUrl    = config('services.ai.url');
 
         $response = Http::timeout(60)->post("{$aiUrl}/chat/{$endpoint}", [
