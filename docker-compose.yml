@@ -96,6 +96,8 @@ services:
       DEFAULT_SHOP_SUBDOMAIN: ${DEFAULT_SHOP_SUBDOMAIN:-default}
       SHOP_TRIAL_DAYS: ${SHOP_TRIAL_DAYS:-14}
       RUN_MIGRATIONS: "true"
+
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN}
     volumes:
       - storage_data:/var/www/html/storage
       - ./Backend/docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
@@ -137,6 +139,7 @@ services:
       - MAX_DOCS_PER_SHOP=${MAX_DOCS_PER_SHOP:-20}
       - MAX_HISTORY_MESSAGES=${MAX_HISTORY_MESSAGES:-10}
     volumes:
+      - ./ai-service:/app
       - chroma_data:/data/chromadb
     depends_on:
       - app
