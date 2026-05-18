@@ -183,29 +183,46 @@ export default function DashboardPage() {
           <motion.div {...fadeUp(0.25)} className="flex flex-col h-full">
             <div className={CARD} style={CARD_STYLE}>
               <CardHeader icon={Wrench} title="Top Service Types" subtitle="By revenue this month" />
-              <div className="flex-1 p-5 space-y-4">
-                {metrics.topServiceTypes.length === 0 ? (
-                  <div className="flex-1 flex items-center justify-center py-12">
+              <div className="flex-1 p-5 flex flex-col justify-between">
+                <div className="h-64 flex items-center justify-center relative">
+                  {metrics.topServiceTypes.length === 0 ? (
                     <p className="text-sm text-muted-foreground">No service data available</p>
-                  </div>
-                ) : (
-                  <div className="h-64 -mx-2">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={metrics.topServiceTypes.slice(0, 5)} layout="vertical" margin={{ top: 0, right: 0, left: 10, bottom: 0 }}>
-                        <XAxis type="number" hide />
-                        <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontSize: 12 }} width={80} />
-                        <RechartsTooltip
-                          cursor={{ fill: '#27272a', opacity: 0.4 }}
-                          contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '12px', padding: '12px' }}
-                          labelStyle={{ color: '#a1a1aa', fontSize: '12px', marginBottom: '4px' }}
-                          itemStyle={{ color: '#ffffff', fontSize: '14px', fontWeight: 600 }}
-                          formatter={(value: number) => [`₱${value.toLocaleString()}`, 'Revenue']}
-                        />
-                        <Bar dataKey="revenue" fill={svgColors.primary} radius={[0, 4, 4, 0]} barSize={24} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                )}
+                  ) : (
+                    <>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={metrics.topServiceTypes.slice(0, 5)}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={80}
+                            paddingAngle={5}
+                            dataKey="revenue"
+                            nameKey="name"
+                            stroke="none"
+                          >
+                            {metrics.topServiceTypes.slice(0, 5).map((entry, index) => {
+                              const colors = [svgColors.primary, svgColors.secondary, '#3b82f6', '#10b981', '#f59e0b'];
+                              return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
+                            })}
+                          </Pie>
+                          <RechartsTooltip
+                            contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '12px', padding: '12px' }}
+                            itemStyle={{ color: '#ffffff', fontSize: '14px', fontWeight: 600 }}
+                            formatter={(value: number) => [`₱${value.toLocaleString()}`, 'Revenue']}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                        <span className="text-2xl font-bold text-card-foreground">
+                          {metrics.topServiceTypes.slice(0, 5).length}
+                        </span>
+                        <span className="text-xs text-muted-foreground">Top Services</span>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
               <div className="absolute inset-0 bg-gradient-to-br from-[rgb(var(--color-primary-rgb))]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
             </div>
@@ -215,69 +232,43 @@ export default function DashboardPage() {
           <motion.div {...fadeUp(0.3)} className="flex flex-col h-full">
             <div className={CARD} style={CARD_STYLE}>
               <CardHeader icon={DollarSign} title="Payment Methods" subtitle="Transaction breakdown" />
-              <div className="flex-1 p-5 flex flex-col justify-between">
-                <div className="h-64 flex items-center justify-center relative">
-                  {(() => {
-                    const total = metrics.paymentMethods.cash + metrics.paymentMethods.gcash;
-                    if (total === 0) {
-                      return <p className="text-sm text-muted-foreground">No transaction data</p>;
-                    }
-                    const data = [
-                      { name: 'Cash', value: metrics.paymentMethods.cash, color: svgColors.primary },
-                      { name: 'GCash', value: metrics.paymentMethods.gcash, color: svgColors.secondary },
-                    ];
+              <div className="flex-1 p-5 space-y-4">
+                {(() => {
+                  const total = metrics.paymentMethods.cash + metrics.paymentMethods.gcash;
+                  if (total === 0) {
                     return (
-                      <>
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie
-                              data={data}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={60}
-                              outerRadius={80}
-                              paddingAngle={5}
-                              dataKey="value"
-                              stroke="none"
-                            >
-                              {data.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.color} />
-                              ))}
-                            </Pie>
-                            <RechartsTooltip
-                              contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '12px', padding: '12px' }}
-                              itemStyle={{ color: '#ffffff', fontSize: '14px', fontWeight: 600 }}
-                            />
-                          </PieChart>
-                        </ResponsiveContainer>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                          <span className="text-2xl font-bold text-card-foreground">{total}</span>
-                          <span className="text-xs text-muted-foreground">Total</span>
-                        </div>
-                      </>
+                      <div className="flex-1 flex items-center justify-center py-12">
+                        <p className="text-sm text-muted-foreground">No transaction data</p>
+                      </div>
                     );
-                  })()}
-                </div>
-                <div className="pt-4 border-t border-border/50 mt-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: svgColors.primary }} />
-                        <span className="text-xs text-muted-foreground">Cash</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: svgColors.secondary }} />
-                        <span className="text-xs text-muted-foreground">GCash</span>
-                      </div>
+                  }
+                  const data = [
+                    { name: 'Cash', value: metrics.paymentMethods.cash, fill: svgColors.primary },
+                    { name: 'GCash', value: metrics.paymentMethods.gcash, fill: svgColors.secondary },
+                  ];
+                  return (
+                    <div className="h-64 -mx-2">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={data} layout="vertical" margin={{ top: 0, right: 0, left: 10, bottom: 0 }}>
+                          <XAxis type="number" hide />
+                          <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontSize: 12 }} width={60} />
+                          <RechartsTooltip
+                            cursor={{ fill: '#27272a', opacity: 0.4 }}
+                            contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '12px', padding: '12px' }}
+                            labelStyle={{ color: '#a1a1aa', fontSize: '12px', marginBottom: '4px' }}
+                            itemStyle={{ color: '#ffffff', fontSize: '14px', fontWeight: 600 }}
+                            formatter={(value: number) => [value, 'Transactions']}
+                          />
+                          <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={32}>
+                            {data.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.fill} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
                     </div>
-                    <div className="text-right flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">Total Txns</span>
-                      <span className="text-lg font-bold text-card-foreground">
-                        {metrics.paymentMethods.cash + metrics.paymentMethods.gcash}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                  );
+                })()}
               </div>
               <div className="absolute inset-0 bg-gradient-to-br from-[rgb(var(--color-primary-rgb))]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
             </div>
