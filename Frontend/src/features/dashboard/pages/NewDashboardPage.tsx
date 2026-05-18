@@ -201,6 +201,10 @@ export default function DashboardPage() {
                             dataKey="revenue"
                             nameKey="name"
                             stroke="none"
+                            isAnimationActive={true}
+                            animationBegin={300}
+                            animationDuration={1200}
+                            animationEasing="ease-out"
                           >
                             {metrics.topServiceTypes.slice(0, 5).map((_, index) => {
                               const colors = [svgColors.primary, svgColors.secondary, '#3b82f6', '#10b981', '#f59e0b'];
@@ -274,7 +278,15 @@ export default function DashboardPage() {
                             itemStyle={{ color: '#ffffff', fontSize: '14px', fontWeight: 600 }}
                             formatter={(value: number) => [value, 'Transactions']}
                           />
-                          <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={32}>
+                          <Bar 
+                            dataKey="value" 
+                            radius={[0, 4, 4, 0]} 
+                            barSize={32}
+                            isAnimationActive={true}
+                            animationBegin={400}
+                            animationDuration={1200}
+                            animationEasing="ease-out"
+                          >
                             {data.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={entry.fill} />
                             ))}

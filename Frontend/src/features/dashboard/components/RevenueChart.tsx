@@ -128,7 +128,10 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                     stroke={svgColors.primary}
                     strokeWidth={2}
                     fill="url(#colorRevenue)"
-                    animationDuration={1000}
+                    isAnimationActive={true}
+                    animationBegin={200}
+                    animationDuration={1500}
+                    animationEasing="ease-out"
                   />
                 </AreaChart>
               </ResponsiveContainer>
