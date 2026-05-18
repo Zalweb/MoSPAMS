@@ -118,8 +118,8 @@ export default function SuperAdminLayout() {
   const currentLabel = currentItem ? currentItem.label : 'Admin Portal';
 
   return (
-    <div 
-      className="min-h-screen bg-background text-foreground font-sans selection:bg-muted flex"
+    <div
+      className="h-screen overflow-hidden bg-background text-foreground font-sans selection:bg-muted flex"
       style={{
         '--primary': 'var(--foreground)',
         '--primary-foreground': 'var(--background)',
@@ -136,7 +136,7 @@ export default function SuperAdminLayout() {
         initial={false}
         animate={{ width: isCollapsed ? COLLAPSED_W : EXPANDED_W }}
         transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
-        className={`hidden lg:flex sticky top-4 h-[calc(100vh-32px)] ml-4 my-4 flex-col shrink-0 transition-transform duration-300 z-50 rounded-[32px]`}
+        className={`hidden lg:flex h-[calc(100vh-32px)] ml-4 my-4 flex-col shrink-0 z-50 rounded-[32px]`}
         style={{
           background: 'hsl(var(--foreground))',
           boxShadow: '0 4px 30px -5px rgba(0,0,0,0.2)'
@@ -181,7 +181,7 @@ export default function SuperAdminLayout() {
         </div>
 
         {/* Nav items */}
-        <nav className="flex-1 py-3 -mr-5 pr-5">
+        <nav className="flex-1 overflow-y-auto py-3 -mr-5 pr-5">
           {NAV_SECTIONS.map((group, idx) => (
             <div key={idx} className={idx > 0 ? 'mt-1' : ''}>
               {idx > 0 && (
@@ -289,7 +289,7 @@ export default function SuperAdminLayout() {
       </motion.aside>
 
       {/* ── MAIN CONTENT ────────────────────────────────────────────────── */}
-      <main className="flex-1 min-w-0 min-h-screen bg-background">
+      <main className="flex-1 min-w-0 h-full overflow-y-auto bg-background">
         <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border/50">
           <div className="flex items-center gap-4 px-6 h-[64px]">
 
