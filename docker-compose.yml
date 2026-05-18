@@ -99,6 +99,9 @@ services:
 
       INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN}
     volumes:
+      - ./Backend/app:/var/www/html/app
+      - ./Backend/routes:/var/www/html/routes
+      - ./Backend/config:/var/www/html/config
       - storage_data:/var/www/html/storage
       - ./Backend/docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
     ports:
