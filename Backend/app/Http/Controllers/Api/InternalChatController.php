@@ -124,6 +124,20 @@ class InternalChatController extends Controller
         return response()->json($customer);
     }
 
+    public function customerProfile(Request $request, int $userId)
+    {
+        $shopId   = $this->shopId($request);
+        $customer = Customer::where('shop_id_fk', $shopId)
+            ->where('user_id_fk', $userId)
+            ->firstOrFail();
+        return response()->json([
+            'full_name' => $customer->full_name,
+            'email'     => $customer->email,
+            'phone'     => $customer->phone ?? '',
+            'address'   => $customer->address ?? '',
+        ]);
+    }
+
     public function customerServices(Request $request, int $userId)
     {
         $shopId   = $this->shopId($request);

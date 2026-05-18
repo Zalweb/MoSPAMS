@@ -59,6 +59,8 @@ def execute_tool(name: str, arguments: dict, shop_id: int, user_id: int) -> str:
                 })
             case "get_customer_count":
                 return _get("/api/internal/customers/count", shop_id)
+            case "get_my_profile":
+                return _get(f"/api/internal/customer/{user_id}/profile", shop_id)
             case "get_my_service_history":
                 return _get(f"/api/internal/customer/{user_id}/services", shop_id)
             case "get_my_payments":

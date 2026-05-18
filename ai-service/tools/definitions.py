@@ -126,7 +126,15 @@ CUSTOMER_TOOLS = [
         "type": "function",
         "function": {
             "name": "get_shop_info",
-            "description": "Returns shop name, hours, address, and contact info.",
+            "description": "Returns the shop/website name, business hours, address, phone, and email. Use this for any question about the shop name, website name, contact details, or opening hours.",
+            "parameters": {"type": "object", "properties": {}, "required": []},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_my_profile",
+            "description": "Returns the current customer's own profile: name, email, phone, and account details. Use this when the customer asks about their own info, name, or account.",
             "parameters": {"type": "object", "properties": {}, "required": []},
         },
     },
