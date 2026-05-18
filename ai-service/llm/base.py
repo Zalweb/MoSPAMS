@@ -10,7 +10,7 @@ class LLMProvider(ABC):
         pass
 
 class ChatResponse:
-    def __init__(self, content: str | None, tool_calls: list | None = None, raw=None):
+    def __init__(self, content: str | None, tool_calls: list[dict] | None = None, raw=None):
         self.content = content
         self.tool_calls = tool_calls or []
         self.raw = raw
