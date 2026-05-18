@@ -19,6 +19,7 @@ import ResetPasswordPage from '@/features/auth/ResetPasswordPage';
 import LoginPage from '@/features/auth/LoginPage';
 import LandingPage from '@/features/landing/LandingPage';
 import ShopNotFoundPage from '@/features/common/ShopNotFoundPage';
+import ChatBubble from '@/features/chat/components/ChatBubble';
 
 // All page-level components are lazy-loaded
 const ShopRegistrationPage = lazy(() => import('@/features/registration/pages/ShopRegistrationPage'));
@@ -146,7 +147,12 @@ function RequireActiveShop() {
     );
   }
 
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+      <ChatBubble />
+    </>
+  );
 }
 
 function DashboardIndexRedirect() {
