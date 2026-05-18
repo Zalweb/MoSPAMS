@@ -31,6 +31,12 @@ def _patch(path: str, shop_id: int) -> str:
 def execute_tool(name: str, arguments: dict, shop_id: int, user_id: int) -> str:
     try:
         match name:
+            case "get_my_profile":
+                return _get(f"/api/internal/user/{user_id}/profile", shop_id)
+            case "get_customer_list":
+                return _get("/api/internal/customers", shop_id)
+            case "get_mechanic_list":
+                return _get("/api/internal/mechanics", shop_id)
             case "get_low_stock_parts":
                 return _get("/api/internal/parts/low-stock", shop_id)
             case "get_revenue":

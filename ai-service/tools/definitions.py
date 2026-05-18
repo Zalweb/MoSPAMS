@@ -2,6 +2,30 @@ OWNER_TOOLS = [
     {
         "type": "function",
         "function": {
+            "name": "get_my_profile",
+            "description": "Returns the logged-in user's own name, username, email, and role. Use this when the user asks about their own name or account.",
+            "parameters": {"type": "object", "properties": {}, "required": []},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_customer_list",
+            "description": "Returns the full list of customers registered in the shop with their names, emails, and phone numbers.",
+            "parameters": {"type": "object", "properties": {}, "required": []},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_mechanic_list",
+            "description": "Returns the list of mechanics in the shop with their names and specializations.",
+            "parameters": {"type": "object", "properties": {}, "required": []},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "get_low_stock_parts",
             "description": "Returns parts that are at or below their reorder level.",
             "parameters": {"type": "object", "properties": {}, "required": []},

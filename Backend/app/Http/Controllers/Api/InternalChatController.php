@@ -8,6 +8,7 @@ use App\Models\Sale;
 use App\Models\ServiceJob;
 use App\Models\ServiceType;
 use App\Models\Shop;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
@@ -238,6 +239,37 @@ class InternalChatController extends Controller
         }
         $job->update(['service_job_status_id_fk' => 5]);
         return response()->json(['cancelled' => true, 'job_id' => $jobId]);
+    }
+
+    public function userProfile(Request $request, int $userId)
+    {
+        $user = User::with('role')->findOrFail($userId);
+        return response()->json([
+            'full_name' => $user->full_name,
+            'username'  => $user->username,
+            'email'     => $user->email,
+            'role'      => $user->role?->role_name ?? '',
+        ]);
+    }
+
+    public function customerList(Request $request)
+    {
+        $shopId = $this->shopId($request);
+        $customers = Customer::where('shop_id_fk', $shopId)
+            ->orderBy('full_name')
+            ->get(['customer_id', 'full_name', 'email', 'phone']);
+        return response()->json(['total' => $customers->count(), 'customers' => $customers]);
+    }
+
+    public function mechanicList(Request $request)
+    {
+        $shopId = $this->shopId($request);
+        $mechanics = DB::table('mechanics')
+            ->where('shop_id_fk', $shopId)
+            ->select('mechanic_id', 'full_name', 'specialization')
+            ->orderBy('full_name')
+            ->get();
+        return response()->json(['total' => $mechanics->count(), 'mechanics' => $mechanics]);
     }
 
     public function createVehicle(Request $request)

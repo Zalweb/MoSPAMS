@@ -13,9 +13,14 @@ from chat.token_budget import maybe_trim
 MAX_TOOL_ITERATIONS = 5
 
 _GROUNDING_RULE = (
-    "IMPORTANT: Only answer using tool results or the Shop Knowledge Base above. "
-    "If the information is not available through tools or documents, say "
-    "'I don't have access to that information.' Never guess or make up answers."
+    "CRITICAL — NEVER HALLUCINATE DATA: "
+    "You must NEVER invent, guess, or make up names, numbers, IDs, or any database records. "
+    "For any question about shop data (customers, mechanics, jobs, parts, sales, revenue, payments), "
+    "you MUST call the appropriate tool first and base your answer solely on the tool result. "
+    "If you are about to list customer names, mechanic names, job details, or any records "
+    "without having called a tool, STOP and call the tool first. "
+    "If a required tool is not available, say so honestly — never invent the data. "
+    "For greetings, general conversation, and non-data questions, respond naturally."
 )
 
 def _tools_for_role(role: str) -> list:
@@ -59,7 +64,7 @@ def _system_prompt(role: str, shop_id: int, rag_context: list[str]) -> str:
 
     rules = (
         "RULES:\n"
-        "1. For any data question, you MUST invoke the correct tool function — do NOT write text instead of calling the tool.\n"
+        "1. For shop data questions (inventory, jobs, sales, customers, etc.), invoke the correct tool — do NOT guess the data.\n"
         "2. After receiving a tool result, write a clear concise answer in plain text. Do NOT call more tools.\n"
         "3. Format lists with bullet points. Use PHP (₱) for currency.\n"
         f"4. {_GROUNDING_RULE}\n"
