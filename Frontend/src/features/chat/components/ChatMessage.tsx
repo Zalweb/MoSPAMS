@@ -1,4 +1,4 @@
-import { Message } from '../hooks/useChat';
+import type { Message } from '../hooks/useChat';
 
 interface Props { message: Message; }
 
