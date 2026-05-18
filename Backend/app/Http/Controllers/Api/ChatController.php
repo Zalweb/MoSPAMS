@@ -49,53 +49,72 @@ class ChatController extends Controller
             }
         }
 
-        $conversation = ChatConversation::firstOrCreate(
-            ['session_id' => $request->session_id],
-            ['user_id_fk' => $user->user_id, 'shop_id_fk' => $shopId]
-        );
+        try {
+            $conversation = ChatConversation::firstOrCreate(
+                ['session_id' => $request->session_id],
+                ['user_id_fk' => $user->user_id, 'shop_id_fk' => $shopId]
+            );
 
-        $endpoint = in_array($role, ['owner', 'staff', 'mechanic']) ? 'owner' : 'customer';
-        $aiUrl    = config('services.ai.url');
+            $endpoint = in_array($role, ['owner', 'staff', 'mechanic']) ? 'owner' : 'customer';
+            $aiUrl    = config('services.ai.url');
 
-        $response = Http::timeout(60)->post("{$aiUrl}/chat/{$endpoint}", [
-            'shop_id'    => $shopId,
-            'user_id'    => $user->user_id,
-            'role'       => $role,
-            'session_id' => $request->session_id,
-            'message'    => $request->message,
-        ]);
+            $response = Http::timeout(60)->post("{$aiUrl}/chat/{$endpoint}", [
+                'shop_id'    => $shopId,
+                'user_id'    => $user->user_id,
+                'role'       => $role,
+                'session_id' => $request->session_id,
+                'message'    => $request->message,
+            ]);
 
-        if ($response->failed()) {
-            return response()->json(['error' => 'AI service unavailable. Please try again.'], 503);
+            if ($response->failed()) {
+                \Log::error('AI chat service error', [
+                    'status' => $response->status(),
+                    'body'   => $response->body(),
+                    'role'   => $role,
+                    'user'   => $user->user_id,
+                ]);
+                return response()->json(['error' => 'AI service temporarily unavailable. Please try again.'], 503);
+            }
+
+            $data   = $response->json();
+            $answer = $data['response'] ?? '';
+
+            ChatMessage::create([
+                'conversation_id_fk' => $conversation->conversation_id,
+                'role'               => 'user',
+                'content'            => $request->message,
+            ]);
+            ChatMessage::create([
+                'conversation_id_fk' => $conversation->conversation_id,
+                'role'               => 'assistant',
+                'content'            => $answer,
+            ]);
+
+            if (!$conversation->title) {
+                $conversation->update(['title' => substr($request->message, 0, 80)]);
+            }
+            $conversation->touch();
+
+            if ($limit !== PHP_INT_MAX) {
+                ChatDailyUsage::where('user_id_fk', $user->user_id)
+                    ->where('shop_id_fk', $shopId)
+                    ->where('usage_date', today())
+                    ->increment('message_count');
+            }
+
+            return response()->json($data);
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            \Log::error('AI chat connection failed', ['error' => $e->getMessage(), 'role' => $role]);
+            return response()->json(['error' => 'Could not reach the AI service. Please try again later.'], 503);
+        } catch (\Exception $e) {
+            \Log::error('Chat send error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'role'  => $role,
+                'user'  => $user->user_id ?? null,
+            ]);
+            return response()->json(['error' => 'Something went wrong. Please try again.'], 500);
         }
-
-        $data   = $response->json();
-        $answer = $data['response'] ?? '';
-
-        ChatMessage::create([
-            'conversation_id_fk' => $conversation->conversation_id,
-            'role'               => 'user',
-            'content'            => $request->message,
-        ]);
-        ChatMessage::create([
-            'conversation_id_fk' => $conversation->conversation_id,
-            'role'               => 'assistant',
-            'content'            => $answer,
-        ]);
-
-        if (!$conversation->title) {
-            $conversation->update(['title' => substr($request->message, 0, 80)]);
-        }
-        $conversation->touch();
-
-        if ($limit !== PHP_INT_MAX) {
-            ChatDailyUsage::where('user_id_fk', $user->user_id)
-                ->where('shop_id_fk', $shopId)
-                ->where('usage_date', today())
-                ->increment('message_count');
-        }
-
-        return response()->json($data);
     }
 
     public function stream(Request $request)
@@ -128,88 +147,101 @@ class ChatController extends Controller
             }
         }
 
-        $conversation = ChatConversation::firstOrCreate(
-            ['session_id' => $request->session_id],
-            ['user_id_fk' => $user->user_id, 'shop_id_fk' => $shopId]
-        );
+        try {
+            $conversation = ChatConversation::firstOrCreate(
+                ['session_id' => $request->session_id],
+                ['user_id_fk' => $user->user_id, 'shop_id_fk' => $shopId]
+            );
 
-        ChatMessage::create([
-            'conversation_id_fk' => $conversation->conversation_id,
-            'role'               => 'user',
-            'content'            => $request->message,
-        ]);
+            ChatMessage::create([
+                'conversation_id_fk' => $conversation->conversation_id,
+                'role'               => 'user',
+                'content'            => $request->message,
+            ]);
 
-        if (!$conversation->title) {
-            $conversation->update(['title' => substr($request->message, 0, 80)]);
-        }
+            if (!$conversation->title) {
+                $conversation->update(['title' => substr($request->message, 0, 80)]);
+            }
 
-        $endpoint       = in_array($role, ['owner', 'staff', 'mechanic']) ? 'owner' : 'customer';
-        $aiUrl          = config('services.ai.url');
-        $conversationId = $conversation->conversation_id;
-        $userId         = $user->user_id;
-        $shopIdVal      = $shopId;
-        $limitVal       = $limit;
+            $endpoint       = in_array($role, ['owner', 'staff', 'mechanic']) ? 'owner' : 'customer';
+            $aiUrl          = config('services.ai.url');
+            $conversationId = $conversation->conversation_id;
+            $userId         = $user->user_id;
+            $shopIdVal      = $shopId;
+            $limitVal       = $limit;
 
-        $payload = [
-            'shop_id'    => $shopId,
-            'user_id'    => $user->user_id,
-            'role'       => $role,
-            'session_id' => $request->session_id,
-            'message'    => $request->message,
-        ];
+            $payload = [
+                'shop_id'    => $shopId,
+                'user_id'    => $user->user_id,
+                'role'       => $role,
+                'session_id' => $request->session_id,
+                'message'    => $request->message,
+            ];
 
-        return response()->stream(
-            function () use ($aiUrl, $endpoint, $payload, $conversationId, $userId, $shopIdVal, $limitVal) {
-                $client = new GuzzleClient();
-                $guzzleResponse = $client->post("{$aiUrl}/chat/stream/{$endpoint}", [
-                    'json'    => $payload,
-                    'stream'  => true,
-                    'timeout' => 60,
-                ]);
+            return response()->stream(
+                function () use ($aiUrl, $endpoint, $payload, $conversationId, $userId, $shopIdVal, $limitVal) {
+                    try {
+                        $client = new GuzzleClient();
+                        $guzzleResponse = $client->post("{$aiUrl}/chat/stream/{$endpoint}", [
+                            'json'    => $payload,
+                            'stream'  => true,
+                            'timeout' => 60,
+                        ]);
 
-                $accumulated = '';
-                $body        = $guzzleResponse->getBody();
+                        $accumulated = '';
+                        $body        = $guzzleResponse->getBody();
 
-                while (!$body->eof()) {
-                    $line = '';
-                    while (!$body->eof()) {
-                        $char = $body->read(1);
-                        if ($char === "\n") break;
-                        $line .= $char;
+                        while (!$body->eof()) {
+                            $line = '';
+                            while (!$body->eof()) {
+                                $char = $body->read(1);
+                                if ($char === "\n") break;
+                                $line .= $char;
+                            }
+                            $line = trim($line);
+                            if (!str_starts_with($line, 'data: ')) continue;
+                            $data = substr($line, 6);
+                            if ($data === '[DONE]') break;
+                            $accumulated .= $data;
+                            echo 'data: ' . json_encode(['token' => $data]) . "\n\n";
+                            ob_flush();
+                            flush();
+                        }
+
+                        ChatMessage::create([
+                            'conversation_id_fk' => $conversationId,
+                            'role'               => 'assistant',
+                            'content'            => $accumulated,
+                        ]);
+
+                        if ($limitVal !== PHP_INT_MAX) {
+                            ChatDailyUsage::where('user_id_fk', $userId)
+                                ->where('shop_id_fk', $shopIdVal)
+                                ->where('usage_date', today())
+                                ->increment('message_count');
+                        }
+
+                        echo 'data: ' . json_encode(['done' => true]) . "\n\n";
+                        ob_flush();
+                        flush();
+                    } catch (\Exception $e) {
+                        \Log::error('AI stream error', ['error' => $e->getMessage(), 'role' => $payload['role'] ?? 'unknown']);
+                        echo 'data: ' . json_encode(['token' => 'Sorry, the AI service is temporarily unavailable. Please try again.']) . "\n\n";
+                        echo 'data: ' . json_encode(['done' => true]) . "\n\n";
+                        ob_flush();
+                        flush();
                     }
-                    $line = trim($line);
-                    if (!str_starts_with($line, 'data: ')) continue;
-                    $data = substr($line, 6);
-                    if ($data === '[DONE]') break;
-                    $accumulated .= $data;
-                    echo 'data: ' . json_encode(['token' => $data]) . "\n\n";
-                    ob_flush();
-                    flush();
-                }
-
-                ChatMessage::create([
-                    'conversation_id_fk' => $conversationId,
-                    'role'               => 'assistant',
-                    'content'            => $accumulated,
-                ]);
-
-                if ($limitVal !== PHP_INT_MAX) {
-                    ChatDailyUsage::where('user_id_fk', $userId)
-                        ->where('shop_id_fk', $shopIdVal)
-                        ->where('usage_date', today())
-                        ->increment('message_count');
-                }
-
-                echo 'data: ' . json_encode(['done' => true]) . "\n\n";
-                ob_flush();
-                flush();
-            },
-            200,
-            [
-                'Content-Type'      => 'text/event-stream',
-                'Cache-Control'     => 'no-cache',
-                'X-Accel-Buffering' => 'no',
-            ]
-        );
+                },
+                200,
+                [
+                    'Content-Type'      => 'text/event-stream',
+                    'Cache-Control'     => 'no-cache',
+                    'X-Accel-Buffering' => 'no',
+                ]
+            );
+        } catch (\Exception $e) {
+            \Log::error('Chat stream setup error', ['error' => $e->getMessage(), 'role' => $role]);
+            return response()->json(['error' => 'Something went wrong. Please try again.'], 500);
+        }
     }
 }

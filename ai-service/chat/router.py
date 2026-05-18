@@ -1,12 +1,15 @@
 import os
 import uuid
+import logging
 from fastapi import APIRouter, HTTPException, Request, UploadFile, File, Form
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel
 import chat.handler as _handler
 from rag.ingestor import ingest_file
 from rag.vectorstore import list_docs, delete_doc
 import config
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -28,22 +31,33 @@ class ChatRequest(BaseModel):
 @router.post("/chat/owner")
 @router.post("/chat/customer")
 async def chat(req: ChatRequest):
-    answer = await _handler.handle_chat(
-        shop_id=req.shop_id, user_id=req.user_id, role=req.role,
-        session_id=req.session_id, message=req.message,
-    )
-    return {"response": answer, "session_id": req.session_id}
+    try:
+        answer = await _handler.handle_chat(
+            shop_id=req.shop_id, user_id=req.user_id, role=req.role,
+            session_id=req.session_id, message=req.message,
+        )
+        return {"response": answer, "session_id": req.session_id}
+    except Exception as e:
+        logger.error("Chat error for role=%s user=%s: %s", req.role, req.user_id, e, exc_info=True)
+        return JSONResponse(
+            status_code=500,
+            content={"response": "I'm sorry, I encountered an error processing your request. Please try again.", "session_id": req.session_id},
+        )
 
 
 @router.post("/chat/stream/owner")
 @router.post("/chat/stream/customer")
 async def chat_stream(req: ChatRequest):
     async def event_generator():
-        async for token in _handler.handle_chat_stream(
-            shop_id=req.shop_id, user_id=req.user_id, role=req.role,
-            session_id=req.session_id, message=req.message,
-        ):
-            yield f"data: {token}\n\n"
+        try:
+            async for token in _handler.handle_chat_stream(
+                shop_id=req.shop_id, user_id=req.user_id, role=req.role,
+                session_id=req.session_id, message=req.message,
+            ):
+                yield f"data: {token}\n\n"
+        except Exception as e:
+            logger.error("Stream error for role=%s user=%s: %s", req.role, req.user_id, e, exc_info=True)
+            yield f"data: I'm sorry, something went wrong. Please try again.\n\n"
         yield "data: [DONE]\n\n"
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
