@@ -50,12 +50,12 @@ OWNER_TOOLS = [
         "type": "function",
         "function": {
             "name": "get_service_jobs",
-            "description": "Returns service jobs filtered by status and/or date.",
+            "description": "Returns service jobs filtered by status and/or date. Use this to count or list jobs. Status values: pending, in_progress, completed, cancelled, booked, work_done. Leave status empty to get all jobs.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "status":    {"type": "string", "description": "pending | in_progress | completed"},
-                    "from_date": {"type": "string", "description": "YYYY-MM-DD"},
+                    "status":    {"type": "string", "description": "pending | in_progress | completed | cancelled | booked | work_done — leave empty for all"},
+                    "from_date": {"type": "string", "description": "YYYY-MM-DD — filter jobs on or after this date"},
                 },
                 "required": [],
             },
@@ -65,7 +65,7 @@ OWNER_TOOLS = [
         "type": "function",
         "function": {
             "name": "get_mechanic_performance",
-            "description": "Returns jobs completed per mechanic.",
+            "description": "Returns each mechanic's name and how many jobs they have completed. Use for performance/ranking questions.",
             "parameters": {"type": "object", "properties": {}, "required": []},
         },
     },
@@ -115,7 +115,7 @@ OWNER_TOOLS = [
         "type": "function",
         "function": {
             "name": "get_customer_count",
-            "description": "Returns the total number of customers registered in the shop.",
+            "description": "Returns ONLY the total count of customers. Use this when the user asks 'how many customers'. Do NOT use this to list customer names — use get_customer_list for that.",
             "parameters": {"type": "object", "properties": {}, "required": []},
         },
     },

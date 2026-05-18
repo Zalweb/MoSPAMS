@@ -45,7 +45,7 @@ class InternalChatController extends Controller
     public function serviceJobs(Request $request)
     {
         $shopId    = $this->shopId($request);
-        $statusMap = ['pending' => 1, 'in_progress' => 2, 'completed' => 3];
+        $statusMap = ['pending' => 1, 'in_progress' => 2, 'completed' => 3, 'cancelled' => 4, 'booked' => 5, 'work_done' => 6];
         $query = ServiceJob::where('shop_id_fk', $shopId)
             ->with('customer:customer_id,full_name');
         if ($status = $request->query('status')) {
