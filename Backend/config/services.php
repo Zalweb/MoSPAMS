@@ -51,4 +51,9 @@ return [
         'zone_id' => env('CLOUDFLARE_ZONE_ID'),
     ],
 
+    'ai' => [
+        'url'            => env('AI_SERVICE_URL', 'http://ai-service:8001'),
+        'internal_token' => env('INTERNAL_SERVICE_TOKEN', ''),
+    ],
+
 ];
