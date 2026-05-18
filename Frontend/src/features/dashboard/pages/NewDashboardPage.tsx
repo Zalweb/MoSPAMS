@@ -1,4 +1,6 @@
 import { DollarSign, TrendingDown, TrendingUp, Package, Wrench, Users, AlertTriangle, Clock, CheckCircle2, ArrowUpRight, ShoppingCart } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { useSvgBrandColors } from '@/shared/hooks/useSvgBrandColors';
 import { DashboardHeader } from '../components/DashboardHeader';
 import { KPICard } from '../components/KPICard';
 import { RevenueChart } from '../components/RevenueChart';
@@ -50,6 +52,7 @@ function CardHeader({
 export default function DashboardPage() {
   const { user } = useAuth();
   const { metrics, recentTransactions, recentServices, loading, error } = useDashboardData();
+  const svgColors = useSvgBrandColors();
 
   const thisWeekRevenue = metrics?.thisWeekRevenue ?? 0;
   const weeklyRevenueChange = metrics?.weeklyRevenueChange ?? 0;
@@ -186,32 +189,22 @@ export default function DashboardPage() {
                     <p className="text-sm text-muted-foreground">No service data available</p>
                   </div>
                 ) : (
-                  metrics.topServiceTypes.slice(0, 5).map((service, idx) => {
-                    const maxRevenue = Math.max(...metrics.topServiceTypes.map(s => s.revenue));
-                    const percentage = maxRevenue > 0 ? (service.revenue / maxRevenue) * 100 : 0;
-                    return (
-                      <div key={service.name} className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-muted-foreground w-5">#{idx + 1}</span>
-                            <span className="text-sm font-medium text-card-foreground">{service.name}</span>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm font-bold text-card-foreground">₱{service.revenue.toLocaleString()}</p>
-                            <p className="text-xs text-muted-foreground">{service.count} jobs</p>
-                          </div>
-                        </div>
-                        <div className="h-2 bg-secondary dark:bg-zinc-800 rounded-full overflow-hidden">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${percentage}%` }}
-                            transition={{ delay: 0.3 + idx * 0.1, duration: 0.8, ease: 'easeOut' }}
-                            className="h-full bg-[rgb(var(--color-primary-rgb))] rounded-full"
-                          />
-                        </div>
-                      </div>
-                    );
-                  })
+                  <div className="h-64 -mx-2">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={metrics.topServiceTypes.slice(0, 5)} layout="vertical" margin={{ top: 0, right: 0, left: 10, bottom: 0 }}>
+                        <XAxis type="number" hide />
+                        <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontSize: 12 }} width={80} />
+                        <RechartsTooltip
+                          cursor={{ fill: '#27272a', opacity: 0.4 }}
+                          contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '12px', padding: '12px' }}
+                          labelStyle={{ color: '#a1a1aa', fontSize: '12px', marginBottom: '4px' }}
+                          itemStyle={{ color: '#ffffff', fontSize: '14px', fontWeight: 600 }}
+                          formatter={(value: number) => [`₱${value.toLocaleString()}`, 'Revenue']}
+                        />
+                        <Bar dataKey="revenue" fill={svgColors.primary} radius={[0, 4, 4, 0]} barSize={24} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
                 )}
               </div>
               <div className="absolute inset-0 bg-gradient-to-br from-[rgb(var(--color-primary-rgb))]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
@@ -223,61 +216,66 @@ export default function DashboardPage() {
             <div className={CARD} style={CARD_STYLE}>
               <CardHeader icon={DollarSign} title="Payment Methods" subtitle="Transaction breakdown" />
               <div className="flex-1 p-5 flex flex-col justify-between">
-                <div className="space-y-6">
+                <div className="h-64 flex items-center justify-center relative">
                   {(() => {
                     const total = metrics.paymentMethods.cash + metrics.paymentMethods.gcash;
-                    const cashPct = total > 0 ? (metrics.paymentMethods.cash / total) * 100 : 0;
-                    const gcashPct = total > 0 ? (metrics.paymentMethods.gcash / total) * 100 : 0;
+                    if (total === 0) {
+                      return <p className="text-sm text-muted-foreground">No transaction data</p>;
+                    }
+                    const data = [
+                      { name: 'Cash', value: metrics.paymentMethods.cash, color: svgColors.primary },
+                      { name: 'GCash', value: metrics.paymentMethods.gcash, color: svgColors.secondary },
+                    ];
                     return (
                       <>
-                        <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium text-card-foreground">Cash</span>
-                            <div className="text-right">
-                              <p className="text-lg font-bold text-card-foreground">{metrics.paymentMethods.cash}</p>
-                              <p className="text-xs text-muted-foreground">{cashPct.toFixed(0)}%</p>
-                            </div>
-                          </div>
-                          <div className="h-2.5 bg-secondary dark:bg-zinc-800 rounded-full overflow-hidden">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${cashPct}%` }}
-                              transition={{ delay: 0.4, duration: 0.8, ease: 'easeOut' }}
-                              className="h-full bg-[rgb(var(--color-primary-rgb))] rounded-full"
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={data}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={60}
+                              outerRadius={80}
+                              paddingAngle={5}
+                              dataKey="value"
+                              stroke="none"
+                            >
+                              {data.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.color} />
+                              ))}
+                            </Pie>
+                            <RechartsTooltip
+                              contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '12px', padding: '12px' }}
+                              itemStyle={{ color: '#ffffff', fontSize: '14px', fontWeight: 600 }}
                             />
-                          </div>
+                          </PieChart>
+                        </ResponsiveContainer>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                          <span className="text-2xl font-bold text-card-foreground">{total}</span>
+                          <span className="text-xs text-muted-foreground">Total</span>
                         </div>
-                        <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium text-card-foreground">GCash</span>
-                            <div className="text-right">
-                              <p className="text-lg font-bold text-card-foreground">{metrics.paymentMethods.gcash}</p>
-                              <p className="text-xs text-muted-foreground">{gcashPct.toFixed(0)}%</p>
-                            </div>
-                          </div>
-                          <div className="h-2.5 bg-secondary dark:bg-zinc-800 rounded-full overflow-hidden">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${gcashPct}%` }}
-                              transition={{ delay: 0.5, duration: 0.8, ease: 'easeOut' }}
-                              className="h-full bg-[rgb(var(--color-primary-rgb))]/60 rounded-full"
-                            />
-                          </div>
-                        </div>
-                        {/* Spacer rows so this card matches the 5-row service card height */}
-                        {[...Array(Math.max(0, 5 - 2))].map((_, i) => (
-                          <div key={i} className="h-10" />
-                        ))}
                       </>
                     );
                   })()}
                 </div>
                 <div className="pt-4 border-t border-border/50 mt-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Total Transactions</span>
-                    <span className="text-2xl font-bold text-card-foreground">
-                      {metrics.paymentMethods.cash + metrics.paymentMethods.gcash}
-                    </span>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: svgColors.primary }} />
+                        <span className="text-xs text-muted-foreground">Cash</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: svgColors.secondary }} />
+                        <span className="text-xs text-muted-foreground">GCash</span>
+                      </div>
+                    </div>
+                    <div className="text-right flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">Total Txns</span>
+                      <span className="text-lg font-bold text-card-foreground">
+                        {metrics.paymentMethods.cash + metrics.paymentMethods.gcash}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
