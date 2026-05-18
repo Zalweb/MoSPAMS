@@ -1,8 +1,11 @@
 import type { Message } from '../hooks/useChat';
 
-interface Props { message: Message; }
+interface Props {
+  message: Message;
+  isStreaming?: boolean;
+}
 
-export default function ChatMessage({ message }: Props) {
+export default function ChatMessage({ message, isStreaming = false }: Props) {
   const isUser = message.role === 'user';
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-3`}>
@@ -14,6 +17,9 @@ export default function ChatMessage({ message }: Props) {
           }`}
       >
         {message.content}
+        {isStreaming && !isUser && (
+          <span className="inline-block w-1.5 h-4 bg-zinc-400 ml-0.5 align-middle animate-pulse" />
+        )}
       </div>
     </div>
   );

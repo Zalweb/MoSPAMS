@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { sendMessage } from '../api/chatApi';
+import { streamMessage } from '../api/chatApi';
 
 export interface Message {
   id: string;
@@ -14,26 +14,34 @@ export function useChat() {
   const [error, setError] = useState<string | null>(null);
   const sessionId = useRef(crypto.randomUUID());
 
-  const append = (role: Message['role'], content: string) => {
-    setMessages(prev => [
-      ...prev,
-      { id: crypto.randomUUID(), role, content, timestamp: new Date() },
-    ]);
-  };
-
   const send = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return;
     setError(null);
-    append('user', text);
+
+    const userMsg: Message = { id: crypto.randomUUID(), role: 'user', content: text, timestamp: new Date() };
+    setMessages(prev => [...prev, userMsg]);
+
+    const assistantId = crypto.randomUUID();
+    setMessages(prev => [...prev, { id: assistantId, role: 'assistant', content: '', timestamp: new Date() }]);
     setIsLoading(true);
-    try {
-      const res = await sendMessage(text, sessionId.current);
-      append('assistant', res.response);
-    } catch {
-      setError('Failed to get a response. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
+
+    await streamMessage(
+      text,
+      sessionId.current,
+      (token) => {
+        setMessages(prev =>
+          prev.map(m => m.id === assistantId ? { ...m, content: m.content + token } : m)
+        );
+      },
+      () => {
+        setIsLoading(false);
+      },
+      (err) => {
+        setError(err);
+        setMessages(prev => prev.filter(m => m.id !== assistantId));
+        setIsLoading(false);
+      },
+    );
   }, [isLoading]);
 
   const reset = useCallback(() => {

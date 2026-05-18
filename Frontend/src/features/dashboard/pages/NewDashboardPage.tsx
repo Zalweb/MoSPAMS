@@ -3,7 +3,7 @@ import { DashboardHeader } from '../components/DashboardHeader';
 import { KPICard } from '../components/KPICard';
 import { RevenueChart } from '../components/RevenueChart';
 import { TransactionTable } from '../components/TransactionTable';
-import { AIAssistant } from '../components/AIAssistant';
+
 import { DashboardSkeleton } from '../components/DashboardSkeleton';
 import { useDashboardData } from '@/shared/hooks/useDashboardData';
 import { useAuth } from '@/features/auth/context/AuthContext';
@@ -166,15 +166,10 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Revenue Chart + AI Assistant */}
+      {/* Revenue Chart */}
       {isOwnerOrStaff && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <RevenueChart data={metrics?.revenueByDay || []} loading={loading} />
-          </div>
-          <div className="lg:col-span-1">
-            <AIAssistant metrics={metrics} />
-          </div>
+        <div className="w-full">
+          <RevenueChart data={metrics?.revenueByDay || []} loading={loading} />
         </div>
       )}
 

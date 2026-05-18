@@ -1,6 +1,7 @@
 import os
 import uuid
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, Request, UploadFile, File, Form
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 import chat.handler as _handler
 from rag.ingestor import ingest_file
@@ -15,12 +16,14 @@ ALLOWED_MIMES = {
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 }
 
+
 class ChatRequest(BaseModel):
     shop_id:    int
     user_id:    int
     role:       str
     session_id: str
     message:    str
+
 
 @router.post("/chat/owner")
 @router.post("/chat/customer")
@@ -30,6 +33,21 @@ async def chat(req: ChatRequest):
         session_id=req.session_id, message=req.message,
     )
     return {"response": answer, "session_id": req.session_id}
+
+
+@router.post("/chat/stream/owner")
+@router.post("/chat/stream/customer")
+async def chat_stream(req: ChatRequest):
+    async def event_generator():
+        async for token in _handler.handle_chat_stream(
+            shop_id=req.shop_id, user_id=req.user_id, role=req.role,
+            session_id=req.session_id, message=req.message,
+        ):
+            yield f"data: {token}\n\n"
+        yield "data: [DONE]\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+
 
 @router.post("/rag/ingest")
 async def ingest(
@@ -48,7 +66,7 @@ async def ingest(
     if len(existing) >= config.MAX_DOCS_PER_SHOP:
         raise HTTPException(400, f"Document limit ({config.MAX_DOCS_PER_SHOP}) reached.")
 
-    doc_id = str(uuid.uuid4())
+    doc_id  = str(uuid.uuid4())
     tmp_dir = f"/tmp/mospams_uploads/{shop_id}"
     os.makedirs(tmp_dir, exist_ok=True)
     tmp_path = f"{tmp_dir}/{doc_id}.bin"
@@ -63,10 +81,12 @@ async def ingest(
 
     return {"doc_id": doc_id, "doc_name": doc_name, "chunks_indexed": count}
 
+
 @router.delete("/rag/document/{doc_id}")
 def remove_doc(doc_id: str, shop_id: int):
     delete_doc(shop_id=shop_id, doc_id=doc_id)
     return {"deleted": doc_id}
+
 
 @router.get("/rag/documents")
 def get_docs(shop_id: int):

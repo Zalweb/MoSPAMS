@@ -1,3 +1,4 @@
+from typing import Generator
 from openai import OpenAI
 import config
 from llm.base import LLMProvider, ChatResponse
@@ -19,10 +20,10 @@ class OpenAICompatClient(LLMProvider):
             max_tokens=1024,
         )
         if tools:
-            kwargs["tools"] = tools
+            kwargs["tools"]       = tools
             kwargs["tool_choice"] = "auto"
 
-        raw = self._client.chat.completions.create(**kwargs)
+        raw    = self._client.chat.completions.create(**kwargs)
         choice = raw.choices[0].message
         tool_calls = []
         if choice.tool_calls:
@@ -34,6 +35,19 @@ class OpenAICompatClient(LLMProvider):
                 for tc in choice.tool_calls
             ]
         return ChatResponse(content=choice.content, tool_calls=tool_calls, raw=raw)
+
+    def chat_stream(self, messages: list[dict]) -> Generator[str, None, None]:
+        stream = self._client.chat.completions.create(
+            model=self._model,
+            messages=messages,
+            temperature=0.7,
+            max_tokens=1024,
+            stream=True,
+        )
+        for chunk in stream:
+            delta = chunk.choices[0].delta
+            if delta.content:
+                yield delta.content
 
     def is_available(self) -> bool:
         return bool(config.LLM_API_KEY)

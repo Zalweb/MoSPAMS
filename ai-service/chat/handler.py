@@ -1,11 +1,13 @@
 import json
 from datetime import date
+from typing import AsyncGenerator
 from llm.factory import get_llm_provider, get_fallback_provider
 from rag.embedder import embed
 from rag.vectorstore import query
 from tools.definitions import OWNER_TOOLS, STAFF_TOOLS, MECHANIC_TOOLS, CUSTOMER_TOOLS
 from tools.executor import execute_tool
 from chat.history import get_history, append_message
+from chat.token_budget import maybe_trim
 
 MAX_TOOL_ITERATIONS = 5
 
@@ -25,7 +27,7 @@ def _tools_for_role(role: str) -> list:
     return CUSTOMER_TOOLS
 
 def _system_prompt(role: str, shop_id: int, rag_context: list[str]) -> str:
-    ctx = "\n\n".join(rag_context) if rag_context else "No additional context available."
+    ctx   = "\n\n".join(rag_context) if rag_context else "No additional context available."
     today = date.today().isoformat()
 
     if role == "owner":
@@ -64,23 +66,27 @@ def _system_prompt(role: str, shop_id: int, rag_context: list[str]) -> str:
 
     return f"{persona}\n{rules}\nShop Knowledge Base:\n{ctx}"
 
+
+def _build_messages(session_id: str, system: str, message: str, provider) -> list[dict]:
+    history  = get_history(session_id)
+    messages = [{"role": "system", "content": system}] + history + [{"role": "user", "content": message}]
+    return maybe_trim(messages, provider, system)
+
+
 async def handle_chat(
     shop_id: int, user_id: int, role: str, session_id: str, message: str
 ) -> str:
-    embedding = embed(message)
+    embedding  = embed(message)
     rag_chunks = query(shop_id=shop_id, embedding=embedding, n=3)
 
-    system = _system_prompt(role, shop_id, rag_chunks)
-    history = get_history(session_id)
-    messages = [{"role": "system", "content": system}] + history + [{"role": "user", "content": message}]
-    append_message(session_id, "user", message)
-
-    tools = _tools_for_role(role)
-
+    system   = _system_prompt(role, shop_id, rag_chunks)
     provider = get_llm_provider()
     if not provider.is_available():
         provider = get_fallback_provider()
-        tools = []
+
+    tools    = _tools_for_role(role) if provider.is_available() else []
+    messages = _build_messages(session_id, system, message, provider)
+    append_message(session_id, "user", message)
 
     for _ in range(MAX_TOOL_ITERATIONS):
         response = provider.chat(messages, tools=tools)
@@ -94,27 +100,65 @@ async def handle_chat(
             "role": "assistant",
             "content": None,
             "tool_calls": [
-                {
-                    "id": tc["id"],
-                    "type": "function",
-                    "function": tc["function"],
-                }
+                {"id": tc["id"], "type": "function", "function": tc["function"]}
                 for tc in response.tool_calls
             ],
         })
 
         for tc in response.tool_calls:
-            args = json.loads(tc["function"]["arguments"])
-            result = execute_tool(
-                name=tc["function"]["name"],
-                arguments=args,
-                shop_id=shop_id,
-                user_id=user_id,
-            )
+            args   = json.loads(tc["function"]["arguments"])
+            result = execute_tool(name=tc["function"]["name"], arguments=args, shop_id=shop_id, user_id=user_id)
             messages.append({"role": "tool", "tool_call_id": tc["id"], "content": result})
 
     # Loop exhausted — force a final text answer from accumulated tool results
     response = provider.chat(messages, tools=None)
-    answer = response.content or "I'm sorry, I couldn't generate a response."
+    answer   = response.content or "I'm sorry, I couldn't generate a response."
     append_message(session_id, "assistant", answer)
     return answer
+
+
+async def handle_chat_stream(
+    shop_id: int, user_id: int, role: str, session_id: str, message: str
+) -> AsyncGenerator[str, None]:
+    embedding  = embed(message)
+    rag_chunks = query(shop_id=shop_id, embedding=embedding, n=3)
+
+    system   = _system_prompt(role, shop_id, rag_chunks)
+    provider = get_llm_provider()
+    if not provider.is_available():
+        provider = get_fallback_provider()
+
+    tools    = _tools_for_role(role) if provider.is_available() else []
+    messages = _build_messages(session_id, system, message, provider)
+    append_message(session_id, "user", message)
+
+    # Run tool-calling loop (non-streaming) to resolve all tool calls first
+    for _ in range(MAX_TOOL_ITERATIONS):
+        response = provider.chat(messages, tools=tools)
+
+        if not response.tool_calls:
+            # No more tools needed — stream this final answer
+            break
+
+        messages.append({
+            "role": "assistant",
+            "content": None,
+            "tool_calls": [
+                {"id": tc["id"], "type": "function", "function": tc["function"]}
+                for tc in response.tool_calls
+            ],
+        })
+
+        for tc in response.tool_calls:
+            args   = json.loads(tc["function"]["arguments"])
+            result = execute_tool(name=tc["function"]["name"], arguments=args, shop_id=shop_id, user_id=user_id)
+            messages.append({"role": "tool", "tool_call_id": tc["id"], "content": result})
+
+    # Stream the final synthesis
+    accumulated = ""
+    for token in provider.chat_stream(messages):
+        accumulated += token
+        yield token
+
+    if accumulated:
+        append_message(session_id, "assistant", accumulated)
