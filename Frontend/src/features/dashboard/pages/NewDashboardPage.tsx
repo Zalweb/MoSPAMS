@@ -202,7 +202,7 @@ export default function DashboardPage() {
                             nameKey="name"
                             stroke="none"
                           >
-                            {metrics.topServiceTypes.slice(0, 5).map((entry, index) => {
+                            {metrics.topServiceTypes.slice(0, 5).map((_, index) => {
                               const colors = [svgColors.primary, svgColors.secondary, '#3b82f6', '#10b981', '#f59e0b'];
                               return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
                             })}
