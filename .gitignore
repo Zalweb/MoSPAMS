@@ -28,6 +28,16 @@ vendor/
 tools/composer.phar
 
 # ============================================================
+# PYTHON — bytecode and virtual envs; never commit
+# ============================================================
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+ai-service/.venv/
+
+# ============================================================
 # BUILD OUTPUTS — generated; never commit
 # ============================================================
 Frontend/dist/
