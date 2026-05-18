@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Store, Palette, Globe, Upload, Copy, RefreshCw, Check, AlertCircle, User, Lock, ExternalLink } from 'lucide-react';
+import { Store, Palette, Globe, Upload, Copy, RefreshCw, Check, AlertCircle, User, Lock, ExternalLink, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiGet, apiMutation } from '@/shared/lib/api';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { useTenantBranding } from '@/shared/contexts/TenantBrandingContext';
+import KnowledgeBaseSettings from './KnowledgeBaseSettings';
 
 interface ShopBranding {
   shopName: string;
@@ -19,7 +20,7 @@ interface ShopBranding {
   domainStatus: 'NONE' | 'PENDING' | 'VERIFIED' | 'ACTIVE';
 }
 
-type TabType = 'user' | 'password' | 'shop' | 'branding' | 'domain';
+type TabType = 'user' | 'password' | 'shop' | 'branding' | 'domain' | 'knowledge';
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -323,6 +324,15 @@ export default function SettingsPage() {
           <Globe className="w-4 h-4" strokeWidth={2} />
           Domain & Access
         </button>
+        <button
+          onClick={() => setActiveTab('knowledge')}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${
+            activeTab === 'knowledge' ? 'text-foreground border-white' : 'text-muted-foreground border-transparent hover:text-muted-foreground dark:text-zinc-300'
+          }`}
+        >
+          <BookOpen className="w-4 h-4" strokeWidth={2} />
+          Knowledge Base
+        </button>
       </div>
 
       <div className="brand-card backdrop-blur-xl rounded-2xl border p-6 shadow-sm" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
@@ -619,6 +629,10 @@ export default function SettingsPage() {
               {saving ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
+        )}
+
+        {activeTab === 'knowledge' && (
+          <KnowledgeBaseSettings shopId={Number(user?.shopId ?? 0)} />
         )}
 
         {activeTab === 'domain' && (
