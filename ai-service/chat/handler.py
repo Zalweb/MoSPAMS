@@ -1,3 +1,4 @@
+import asyncio
 import json
 from datetime import date
 from typing import AsyncGenerator
@@ -132,12 +133,13 @@ async def handle_chat_stream(
     messages = _build_messages(session_id, system, message, provider)
     append_message(session_id, "user", message)
 
-    # Run tool-calling loop (non-streaming) to resolve all tool calls first
+    final_answer = None
+
     for _ in range(MAX_TOOL_ITERATIONS):
         response = provider.chat(messages, tools=tools)
 
         if not response.tool_calls:
-            # No more tools needed — stream this final answer
+            final_answer = response.content or ""
             break
 
         messages.append({
@@ -154,11 +156,19 @@ async def handle_chat_stream(
             result = execute_tool(name=tc["function"]["name"], arguments=args, shop_id=shop_id, user_id=user_id)
             messages.append({"role": "tool", "tool_call_id": tc["id"], "content": result})
 
-    # Stream the final synthesis
-    accumulated = ""
-    for token in provider.chat_stream(messages):
-        accumulated += token
-        yield token
-
-    if accumulated:
-        append_message(session_id, "assistant", accumulated)
+    if final_answer is not None:
+        # Yield word-by-word for typewriter effect (no second LLM call needed)
+        words = final_answer.split()
+        for i, word in enumerate(words):
+            chunk = word + (" " if i < len(words) - 1 else "")
+            yield chunk
+            await asyncio.sleep(0.015)
+        append_message(session_id, "assistant", final_answer)
+    else:
+        # Loop exhausted without a text response — synthesize via real streaming
+        accumulated = ""
+        for token in provider.chat_stream(messages):
+            accumulated += token
+            yield token
+        if accumulated:
+            append_message(session_id, "assistant", accumulated)
