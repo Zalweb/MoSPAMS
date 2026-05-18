@@ -2,7 +2,7 @@ def test_embed_returns_list_of_floats():
     from rag.embedder import embed
     result = embed("motorcycle oil change")
     assert isinstance(result, list)
-    assert len(result) == 384   # all-MiniLM-L6-v2 output dim
+    assert len(result) == 384   # BAAI/bge-small-en-v1.5 output dim
     assert isinstance(result[0], float)
 
 def test_embed_batch_returns_list_of_lists():
