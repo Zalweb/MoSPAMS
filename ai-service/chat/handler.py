@@ -16,7 +16,8 @@ def _system_prompt(role: str, shop_id: int, rag_context: list[str]) -> str:
         return (
             f"You are a helpful AI shop assistant for a motorcycle repair shop (shop ID {shop_id}).\n"
             f"Today is {today}.\n"
-            "Use tools to answer data-related questions. Be concise and factual.\n"
+            "Use tools to fetch data, then immediately answer the user in plain text. "
+            "Call at most ONE tool per question. Once you have the tool result, write your answer — do NOT call more tools.\n"
             "Format lists with bullet points. Use PHP for currency.\n\n"
             f"Shop Knowledge Base:\n{ctx}"
         )
@@ -24,6 +25,7 @@ def _system_prompt(role: str, shop_id: int, rag_context: list[str]) -> str:
         f"You are a helpful customer service assistant for a motorcycle shop (shop ID {shop_id}).\n"
         f"Today is {today}.\n"
         "Help customers with: service history, booking, vehicles, payments, and shop info.\n"
+        "Call at most ONE tool per question. Once you have the result, write your answer — do NOT call more tools.\n"
         "Be polite and professional. If you cannot help, offer to escalate to shop staff.\n\n"
         f"Shop Knowledge Base:\n{ctx}"
     )
@@ -77,6 +79,8 @@ async def handle_chat(
             )
             messages.append({"role": "tool", "tool_call_id": tc["id"], "content": result})
 
-    fallback_answer = "I've reached my limit for this question. Please try rephrasing."
-    append_message(session_id, "assistant", fallback_answer)
-    return fallback_answer
+    # Loop exhausted — force a final text answer from accumulated tool results
+    response = provider.chat(messages, tools=None)
+    answer = response.content or "I'm sorry, I couldn't generate a response."
+    append_message(session_id, "assistant", answer)
+    return answer
