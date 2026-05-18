@@ -223,6 +223,21 @@ export default function DashboardPage() {
                     </>
                   )}
                 </div>
+                {metrics.topServiceTypes.length > 0 && (
+                  <div className="pt-4 border-t border-border/50 mt-4 flex flex-wrap justify-center gap-3">
+                    {metrics.topServiceTypes.slice(0, 5).map((service, index) => {
+                      const colors = [svgColors.primary, svgColors.secondary, '#3b82f6', '#10b981', '#f59e0b'];
+                      return (
+                        <div key={service.name} className="flex items-center gap-1.5">
+                          <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: colors[index % colors.length] }} />
+                          <span className="text-xs text-muted-foreground truncate max-w-[80px]" title={service.name}>
+                            {service.name}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
               <div className="absolute inset-0 bg-gradient-to-br from-[rgb(var(--color-primary-rgb))]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
             </div>
