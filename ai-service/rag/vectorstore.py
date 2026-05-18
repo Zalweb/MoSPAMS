@@ -42,3 +42,10 @@ def query(shop_id: int, embedding: list[float], n: int = 3) -> list[str]:
 def delete_doc(shop_id: int, doc_id: str) -> None:
     col = _collection(shop_id)
     col.delete(where={"doc_id": doc_id})
+
+def list_docs(shop_id: int) -> list[str]:
+    col = _collection(shop_id)
+    if col.count() == 0:
+        return []
+    all_meta = col.get(where={"shop_id": shop_id})["metadatas"]
+    return list({m["doc_id"] for m in all_meta})
