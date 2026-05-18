@@ -97,4 +97,102 @@ class CustomerControllerTest extends TestCase
 
         $response->assertOk()->assertJsonStructure(['data' => []]);
     }
+
+    public function test_customer_can_cancel_a_pending_service(): void
+    {
+        $seed     = $this->seedBase();
+        $customer = $this->createCustomer($seed, 'customer@test.com');
+        $token    = \App\Models\User::find($customer->user_id)
+            ->createToken('test', [sprintf('tenant:%d', (int) $seed['shopId'])])
+            ->plainTextToken;
+
+        $customerId      = DB::table('customers')->where('user_id_fk', $customer->user_id)->value('customer_id');
+        $pendingStatusId = DB::table('service_job_statuses')->where('status_code', 'pending')->value('service_job_status_id');
+
+        $jobId = DB::table('service_jobs')->insertGetId([
+            'shop_id_fk'               => $seed['shopId'],
+            'customer_id_fk'           => $customerId,
+            'created_by_fk'            => $customer->user_id,
+            'service_job_status_id_fk' => $pendingStatusId,
+            'job_date'                 => now()->toDateString(),
+            'motorcycle_model'         => 'Honda Click',
+            'created_at'               => now(),
+            'updated_at'               => now(),
+        ]);
+
+        $this->withToken($token)
+            ->deleteJson("http://default.mospams.local/api/customer/services/{$jobId}")
+            ->assertOk()
+            ->assertJsonPath('message', 'Service cancelled successfully');
+
+        $cancelledStatusId = DB::table('service_job_statuses')->where('status_code', 'cancelled')->value('service_job_status_id');
+        $this->assertDatabaseHas('service_jobs', [
+            'job_id'                   => $jobId,
+            'service_job_status_id_fk' => $cancelledStatusId,
+        ]);
+    }
+
+    public function test_customer_cannot_cancel_a_non_pending_service(): void
+    {
+        $seed     = $this->seedBase();
+        $customer = $this->createCustomer($seed, 'customer@test.com');
+        $token    = \App\Models\User::find($customer->user_id)
+            ->createToken('test', [sprintf('tenant:%d', (int) $seed['shopId'])])
+            ->plainTextToken;
+
+        $customerId        = DB::table('customers')->where('user_id_fk', $customer->user_id)->value('customer_id');
+        $inProgressStatusId = DB::table('service_job_statuses')->where('status_code', 'in_progress')->value('service_job_status_id');
+
+        $jobId = DB::table('service_jobs')->insertGetId([
+            'shop_id_fk'               => $seed['shopId'],
+            'customer_id_fk'           => $customerId,
+            'created_by_fk'            => $customer->user_id,
+            'service_job_status_id_fk' => $inProgressStatusId,
+            'job_date'                 => now()->toDateString(),
+            'motorcycle_model'         => 'Yamaha Mio',
+            'created_at'               => now(),
+            'updated_at'               => now(),
+        ]);
+
+        $this->withToken($token)
+            ->deleteJson("http://default.mospams.local/api/customer/services/{$jobId}")
+            ->assertStatus(400);
+    }
+
+    public function test_customer_cannot_cancel_another_customers_service(): void
+    {
+        $seed      = $this->seedBase();
+        $customer1 = $this->createCustomer($seed, 'customer1@test.com');
+        $customer2 = $this->createCustomer($seed, 'customer2@test.com');
+
+        $token1 = \App\Models\User::find($customer1->user_id)
+            ->createToken('c1', [sprintf('tenant:%d', (int) $seed['shopId'])])
+            ->plainTextToken;
+        $token2 = \App\Models\User::find($customer2->user_id)
+            ->createToken('c2', [sprintf('tenant:%d', (int) $seed['shopId'])])
+            ->plainTextToken;
+
+        $customer1Id     = DB::table('customers')->where('user_id_fk', $customer1->user_id)->value('customer_id');
+        $pendingStatusId = DB::table('service_job_statuses')->where('status_code', 'pending')->value('service_job_status_id');
+
+        $jobId = DB::table('service_jobs')->insertGetId([
+            'shop_id_fk'               => $seed['shopId'],
+            'customer_id_fk'           => $customer1Id,
+            'created_by_fk'            => $customer1->user_id,
+            'service_job_status_id_fk' => $pendingStatusId,
+            'job_date'                 => now()->toDateString(),
+            'motorcycle_model'         => 'Kawasaki Barako',
+            'created_at'               => now(),
+            'updated_at'               => now(),
+        ]);
+
+        $this->withToken($token2)
+            ->deleteJson("http://default.mospams.local/api/customer/services/{$jobId}")
+            ->assertStatus(404);
+
+        $this->assertDatabaseHas('service_jobs', [
+            'job_id'                   => $jobId,
+            'service_job_status_id_fk' => $pendingStatusId,
+        ]);
+    }
 }

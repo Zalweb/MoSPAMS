@@ -1681,23 +1681,30 @@ class MospamsController extends Controller
 
     public function salesReport(Request $request): JsonResponse
     {
-        $shopId = $this->shopId();
-        $cacheKey = $this->tenantCacheKey('report:sales:summary', $shopId);
+        $shopId   = $this->shopId();
+        $dateFrom = $request->query('date_from');
+        $dateTo   = $request->query('date_to');
 
-        $data = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($shopId) {
+        $suffix   = ($dateFrom || $dateTo) ? ':' . ($dateFrom ?? '') . ':' . ($dateTo ?? '') : '';
+        $cacheKey = $this->tenantCacheKey('report:sales:summary', $shopId) . $suffix;
+
+        $data = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($shopId, $dateFrom, $dateTo) {
+            $salesBase = fn () => DB::table('sales')
+                ->where('shop_id_fk', $shopId)
+                ->when($dateFrom, fn ($q) => $q->whereDate('sale_date', '>=', $dateFrom))
+                ->when($dateTo,   fn ($q) => $q->whereDate('sale_date', '<=', $dateTo));
+
+            $paymentsBase = fn () => DB::table('payments')
+                ->join('sales', 'sales.sale_id', '=', 'payments.sale_id_fk')
+                ->where('sales.shop_id_fk', $shopId)
+                ->when($dateFrom, fn ($q) => $q->whereDate('sales.sale_date', '>=', $dateFrom))
+                ->when($dateTo,   fn ($q) => $q->whereDate('sales.sale_date', '<=', $dateTo));
+
             return [
-                'totalRevenue' => (float) DB::table('sales')->where('shop_id_fk', $shopId)->sum('net_amount'),
-                'transactions' => DB::table('sales')->where('shop_id_fk', $shopId)->count(),
-                'cash' => (float) DB::table('payments')
-                    ->join('sales', 'sales.sale_id', '=', 'payments.sale_id_fk')
-                    ->where('sales.shop_id_fk', $shopId)
-                    ->where('payment_method', 'Cash')
-                    ->sum('amount_paid'),
-                'gcash' => (float) DB::table('payments')
-                    ->join('sales', 'sales.sale_id', '=', 'payments.sale_id_fk')
-                    ->where('sales.shop_id_fk', $shopId)
-                    ->where('payment_method', 'GCash')
-                    ->sum('amount_paid'),
+                'totalRevenue' => (float) $salesBase()->sum('net_amount'),
+                'transactions' => $salesBase()->count(),
+                'cash'         => (float) $paymentsBase()->where('payment_method', 'Cash')->sum('amount_paid'),
+                'gcash'        => (float) $paymentsBase()->where('payment_method', 'GCash')->sum('amount_paid'),
             ];
         });
 
@@ -1720,27 +1727,44 @@ class MospamsController extends Controller
         return response()->json(['data' => $data]);
     }
 
-    public function servicesReport(): JsonResponse
+    public function servicesReport(Request $request): JsonResponse
     {
-        $shopId = $this->shopId();
-        return response()->json(['data' => DB::table('service_jobs')
+        $shopId   = $this->shopId();
+        $dateFrom = $request->query('date_from');
+        $dateTo   = $request->query('date_to');
+
+        $data = DB::table('service_jobs')
             ->where('shop_id_fk', $shopId)
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
+            ->when($dateFrom, fn ($q) => $q->whereDate('service_jobs.job_date', '>=', $dateFrom))
+            ->when($dateTo,   fn ($q) => $q->whereDate('service_jobs.job_date', '<=', $dateTo))
             ->select('service_job_statuses.status_name as status', DB::raw('COUNT(*) as count'))
             ->groupBy('service_job_statuses.status_name')
-            ->pluck('count', 'status')]);
+            ->pluck('count', 'status');
+
+        return response()->json(['data' => $data]);
     }
 
-    public function incomeReport(): JsonResponse
+    public function incomeReport(Request $request): JsonResponse
     {
-        $shopId = $this->shopId();
-        $sales = (float) DB::table('sales')->where('shop_id_fk', $shopId)->sum('net_amount');
+        $shopId   = $this->shopId();
+        $dateFrom = $request->query('date_from');
+        $dateTo   = $request->query('date_to');
+
+        $sales = (float) DB::table('sales')
+            ->where('shop_id_fk', $shopId)
+            ->when($dateFrom, fn ($q) => $q->whereDate('sale_date', '>=', $dateFrom))
+            ->when($dateTo,   fn ($q) => $q->whereDate('sale_date', '<=', $dateTo))
+            ->sum('net_amount');
+
         $labor = (float) DB::table('service_job_items')
             ->join('service_jobs', 'service_jobs.job_id', '=', 'service_job_items.job_id_fk')
             ->where('service_jobs.shop_id_fk', $shopId)
+            ->when($dateFrom, fn ($q) => $q->whereDate('service_jobs.job_date', '>=', $dateFrom))
+            ->when($dateTo,   fn ($q) => $q->whereDate('service_jobs.job_date', '<=', $dateTo))
             ->sum('labor_cost');
 
-        return response()->json(['data' => ['sales' => $sales, 'labor' => $labor, 'total' => $sales]]);
+        return response()->json(['data' => ['sales' => $sales, 'labor' => $labor, 'total' => $sales + $labor]]);
     }
 
     public function dashboardStats(): JsonResponse
