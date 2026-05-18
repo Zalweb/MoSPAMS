@@ -1,228 +1,66 @@
-OWNER_TOOLS = [
-    {
-        "type": "function",
-        "function": {
-            "name": "get_my_profile",
-            "description": "Returns the logged-in user's own name, username, email, and role. Use this when the user asks about their own name or account.",
-            "parameters": {"type": "object", "properties": {}, "required": []},
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_customer_list",
-            "description": "Returns the full list of customers registered in the shop with their names, emails, and phone numbers.",
-            "parameters": {"type": "object", "properties": {}, "required": []},
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_mechanic_list",
-            "description": "Returns the list of mechanics in the shop with their names and specializations.",
-            "parameters": {"type": "object", "properties": {}, "required": []},
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_low_stock_parts",
-            "description": "Returns parts that are at or below their reorder level.",
-            "parameters": {"type": "object", "properties": {}, "required": []},
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_revenue",
-            "description": "Returns total net revenue for a date range.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "from_date": {"type": "string", "description": "YYYY-MM-DD"},
-                    "to_date":   {"type": "string", "description": "YYYY-MM-DD"},
+_DB_OPERATION_TOOL = {
+    "type": "function",
+    "function": {
+        "name": "execute_db_operation",
+        "description": (
+            "The universal database tool. Use this for EVERY question or request about shop data. "
+            "Supports reading, listing, counting, creating, and updating any entity. "
+            "Never say you cannot access data — call this tool first."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string",
+                    "enum": ["list", "count", "get", "create", "update"],
+                    "description": (
+                        "list=get multiple records, count=get total number, "
+                        "get=single record by record_id, create=insert new record, update=modify existing record"
+                    ),
                 },
-                "required": [],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_service_jobs",
-            "description": "Returns service jobs filtered by status and/or date. Use this to count or list jobs. Status values: pending, in_progress, completed, cancelled, booked, work_done. Leave status empty to get all jobs.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "status":    {"type": "string", "description": "pending | in_progress | completed | cancelled | booked | work_done — leave empty for all"},
-                    "from_date": {"type": "string", "description": "YYYY-MM-DD — filter jobs on or after this date"},
+                "entity": {
+                    "type": "string",
+                    "description": (
+                        "customers | service_jobs | parts | mechanics | sales | "
+                        "service_types | shop | user_profile | payments"
+                    ),
                 },
-                "required": [],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_mechanic_performance",
-            "description": "Returns each mechanic's name and how many jobs they have completed. Use for performance/ranking questions.",
-            "parameters": {"type": "object", "properties": {}, "required": []},
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_recent_sales",
-            "description": "Returns the N most recent transactions.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "limit": {"type": "integer", "description": "Number of records (default 5)"},
+                "filters": {
+                    "type": "object",
+                    "description": (
+                        "Key-value filter conditions. Examples: "
+                        "{\"status\": \"completed\"}, {\"name\": \"John\"}, "
+                        "{\"from_date\": \"2025-01-01\"}, {\"low_stock\": true}, "
+                        "{\"category\": \"Engine Parts\"}"
+                    ),
                 },
-                "required": [],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_top_parts",
-            "description": "Returns best-selling parts by units sold.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "limit": {"type": "integer", "description": "Top N parts (default 5)"},
+                "data": {
+                    "type": "object",
+                    "description": (
+                        "For create/update: field values to set. Examples: "
+                        "{\"notes\": \"Oil changed\"}, {\"status\": \"completed\"}, "
+                        "{\"stock_quantity\": 10}"
+                    ),
                 },
-                "required": [],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_customer_info",
-            "description": "Returns a customer's profile and service history by name or email.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "query": {"type": "string", "description": "Name or email to search"},
+                "record_id": {
+                    "type": "integer",
+                    "description": "For get/update: the primary key ID of the target record.",
                 },
-                "required": ["query"],
+                "limit": {
+                    "type": "integer",
+                    "description": "Max records for list action. Default 20, max 100.",
+                },
+                "order_by": {
+                    "type": "string",
+                    "description": "Sort field + direction: 'job_date desc', 'full_name asc', 'created_at desc'",
+                },
             },
+            "required": ["action", "entity"],
         },
     },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_customer_count",
-            "description": "Returns ONLY the total count of customers. Use this when the user asks 'how many customers'. Do NOT use this to list customer names — use get_customer_list for that.",
-            "parameters": {"type": "object", "properties": {}, "required": []},
-        },
-    },
-]
+}
 
-# Staff cannot see financial data (revenue, sales, top parts)
-STAFF_TOOLS = [t for t in OWNER_TOOLS
-               if t["function"]["name"] not in ("get_revenue", "get_recent_sales", "get_top_parts")]
-
-MECHANIC_TOOLS = [
-    {
-        "type": "function",
-        "function": {
-            "name": "get_my_assigned_jobs",
-            "description": "Returns all service jobs currently assigned to this mechanic.",
-            "parameters": {"type": "object", "properties": {}, "required": []},
-        },
-    },
-]
-
-CUSTOMER_TOOLS = [
-    {
-        "type": "function",
-        "function": {
-            "name": "get_my_profile",
-            "description": "Returns the current customer's own profile: name, email, phone, and account details. Use this when the customer asks about their own info, name, or account.",
-            "parameters": {"type": "object", "properties": {}, "required": []},
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_my_service_history",
-            "description": "Returns the customer's own service job history.",
-            "parameters": {"type": "object", "properties": {}, "required": []},
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_my_payments",
-            "description": "Returns the customer's own payment records.",
-            "parameters": {"type": "object", "properties": {}, "required": []},
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_service_info",
-            "description": "Returns available service types with price and duration.",
-            "parameters": {"type": "object", "properties": {}, "required": []},
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_shop_info",
-            "description": "Returns the shop/website name, business hours, address, phone, and email. Use this for any question about the shop name, website name, contact details, or opening hours.",
-            "parameters": {"type": "object", "properties": {}, "required": []},
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "create_service_request",
-            "description": "Books a new service job for the customer's motorcycle.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "service_type_id": {"type": "integer"},
-                    "motorcycle_model": {"type": "string"},
-                    "notes": {"type": "string"},
-                    "job_date": {"type": "string", "description": "YYYY-MM-DD"},
-                },
-                "required": ["service_type_id", "motorcycle_model", "job_date"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "cancel_service_request",
-            "description": "Cancels a pending service job. Only works if status is pending.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "job_id": {"type": "integer"},
-                },
-                "required": ["job_id"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "create_vehicle",
-            "description": "Registers a new motorcycle under the customer's account.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "make":         {"type": "string"},
-                    "model":        {"type": "string"},
-                    "year":         {"type": "integer"},
-                    "plate_number": {"type": "string"},
-                },
-                "required": ["make", "model", "year", "plate_number"],
-            },
-        },
-    },
-]
+OWNER_TOOLS    = [_DB_OPERATION_TOOL]
+STAFF_TOOLS    = [_DB_OPERATION_TOOL]
+MECHANIC_TOOLS = [_DB_OPERATION_TOOL]
+CUSTOMER_TOOLS = [_DB_OPERATION_TOOL]

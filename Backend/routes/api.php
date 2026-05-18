@@ -49,6 +49,7 @@ Route::middleware('service.token')->prefix('internal')->group(function () {
     Route::get('/service-jobs',                       [InternalChatController::class, 'serviceJobs']);
     Route::get('/mechanics/performance',              [InternalChatController::class, 'mechanicPerformance']);
     Route::get('/sales/recent',                       [InternalChatController::class, 'recentSales']);
+    Route::post('/db',                                [InternalChatController::class, 'dbOperation']);
     Route::get('/customers/count',                    [InternalChatController::class, 'customerCount']);
     Route::get('/customers',                          [InternalChatController::class, 'customerList']);
     Route::get('/customer/search',                    [InternalChatController::class, 'customerSearch']);
