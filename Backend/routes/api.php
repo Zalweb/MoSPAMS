@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BillingWebhookController;
+use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DomainOnboardingController;
 use App\Http\Controllers\Api\GoogleAuthController;
+use App\Http\Controllers\Api\InternalChatController;
 use App\Http\Controllers\Api\MechanicController;
 use App\Http\Controllers\Api\MospamsController;
 use App\Http\Controllers\Api\OwnerMechanicController;
@@ -39,9 +41,28 @@ Route::get('/shop/info', [ShopBrandingController::class, 'publicShopInfo']);
 
 Route::post('/webhooks/paymongo', [BillingWebhookController::class, 'paymongo'])->middleware('throttle:billing-webhooks');
 
+Route::middleware('service.token')->prefix('internal')->group(function () {
+    Route::get('/parts/low-stock',                    [InternalChatController::class, 'lowStockParts']);
+    Route::get('/parts/top',                          [InternalChatController::class, 'topParts']);
+    Route::get('/revenue',                            [InternalChatController::class, 'revenue']);
+    Route::get('/service-jobs',                       [InternalChatController::class, 'serviceJobs']);
+    Route::get('/mechanics/performance',              [InternalChatController::class, 'mechanicPerformance']);
+    Route::get('/sales/recent',                       [InternalChatController::class, 'recentSales']);
+    Route::get('/customer/search',                    [InternalChatController::class, 'customerSearch']);
+    Route::get('/customer/{userId}/services',         [InternalChatController::class, 'customerServices']);
+    Route::get('/customer/{userId}/payments',         [InternalChatController::class, 'customerPayments']);
+    Route::get('/service-types',                      [InternalChatController::class, 'serviceTypes']);
+    Route::get('/shop-info',                          [InternalChatController::class, 'shopInfo']);
+    Route::post('/service-request',                   [InternalChatController::class, 'createServiceRequest']);
+    Route::patch('/service-request/{jobId}/cancel',   [InternalChatController::class, 'cancelServiceRequest']);
+    Route::post('/customer/vehicle',                  [InternalChatController::class, 'createVehicle']);
+});
+
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::post('/chat', [ChatController::class, 'send']);
 
     Route::prefix('superadmin')->middleware(['role:SuperAdmin', 'platform.token'])->group(function () {
         Route::get('/analytics', [SuperAdminController::class, 'analytics']);

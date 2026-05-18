@@ -2,10 +2,13 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class InternalChatControllerTest extends TestCase
 {
+    use RefreshDatabase;
+
     private string $token;
 
     protected function setUp(): void

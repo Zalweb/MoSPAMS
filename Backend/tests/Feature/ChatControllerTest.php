@@ -11,6 +11,12 @@ class ChatControllerTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->artisan('db:seed', ['--class' => 'RolesAndStatusesSeeder']);
+    }
+
     public function test_chat_requires_authentication(): void
     {
         $response = $this->postJson('/api/chat', [

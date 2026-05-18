@@ -95,6 +95,8 @@ class ResolveTenantContext
     private function isExempt(Request $request): bool
     {
         return $request->is('api/superadmin/*')
+            || $request->is('api/internal/*')
+            || $request->is('api/chat')
             || $request->is('api/me')
             || $request->is('api/logout')
             || $request->is('api/webhooks/*')
