@@ -39,7 +39,7 @@ export default function ChatWindow({ onClose }: Props) {
  };
 
  return (
- <div className="fixed bottom-24 right-6 w-80 sm:w-96 h-[520px] z-50
+ <div className="fixed bottom-24 right-4 lg:bottom-6 lg:right-6 w-[calc(100vw-32px)] sm:w-96 h-[520px] max-h-[80vh] z-[100]
  flex flex-col rounded-2xl overflow-hidden
  bg-zinc-900 border border-zinc-700 shadow-2xl shadow-black/60">
  {/* Header */}

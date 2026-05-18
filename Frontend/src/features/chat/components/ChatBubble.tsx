@@ -11,7 +11,7 @@ export default function ChatBubble() {
  <button
  onClick={() => setOpen(prev => !prev)}
  aria-label="Open AI Assistant"
- className="fixed bottom-6 right-6 w-14 h-14 rounded-full z-50
+ className="fixed bottom-24 right-4 lg:bottom-6 lg:right-6 w-14 h-14 rounded-full z-50
  bg-zinc-900 border border-zinc-700 shadow-xl
  hover:scale-105 hover:shadow-zinc-800/50
  transition-all duration-200
