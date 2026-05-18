@@ -181,7 +181,7 @@ export default function SuperAdminShopsPage() {
                       <Button variant="outline" className="h-8 px-3 text-[11px] border-border dark:border-zinc-700 bg-muted hover:bg-secondary dark:bg-zinc-800 hover:border-border dark:border-zinc-700" onClick={() => void onOpenDiagnostics(shop.shopId)}>
                         Diagnostics
                       </Button>
-                      {shop.registration.status === 'PENDING' ? (
+                      {(shop.registration.status === 'PENDING' || shop.registration.status === 'PENDING_APPROVAL') ? (
                         <>
                           <Button
                             variant="outline"

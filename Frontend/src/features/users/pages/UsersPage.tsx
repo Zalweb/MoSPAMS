@@ -16,9 +16,9 @@ import MechanicManagementPage from '@/features/mechanic/pages/MechanicManagement
 
 const newUserSchema = z.object({
   name: z.string().min(2, 'Required'),
-  email: z.string().email(),
+  email: z.string().email('Invalid email address'),
   role: z.enum(['Staff', 'Mechanic', 'Customer']),
-  password: z.string().min(6, 'Min 6 characters'),
+  password: z.string().min(8, 'Min 8 characters required'),
 });
 const editUserSchema = z.object({
   name: z.string().min(2, 'Required'),

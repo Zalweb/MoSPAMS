@@ -165,6 +165,19 @@ class CustomerController extends Controller
             ->select('service_jobs.*', 'customers.full_name as customer_name', 'service_job_statuses.status_name')
             ->first();
 
+        $queueMsg = $queuePosition ? " Queue position: #{$queuePosition}." : '';
+        $mechanicMsg = $mechanicName ? " Assigned to: {$mechanicName}." : '';
+        DB::table('notifications')->insert([
+            'user_id_fk'        => $user->user_id,
+            'notification_type' => 'booking_confirmed',
+            'title'             => 'Service Booking Received',
+            'message'           => "Your service request has been received and is now pending.{$queueMsg}{$mechanicMsg}",
+            'reference_type'    => 'service_jobs',
+            'reference_id'      => $jobId,
+            'is_read'           => 0,
+            'created_at'        => now(),
+        ]);
+
         return response()->json([
             'id'            => (string) $service->job_id,
             'customer_name' => $service->customer_name,
@@ -232,6 +245,18 @@ class CustomerController extends Controller
         ]);
 
         $this->logActivity($user->user_id, $user->shop_id_fk, 'Cancelled service request', 'service_jobs', $jobId, $user->account_id_fk);
+
+        // Notify the customer that their cancellation was processed
+        DB::table('notifications')->insert([
+            'user_id_fk'        => $user->user_id,
+            'notification_type' => 'service_cancelled',
+            'title'             => 'Service Cancelled',
+            'message'           => "Your service request (Job #{$jobId}) has been successfully cancelled.",
+            'reference_type'    => 'service_jobs',
+            'reference_id'      => $jobId,
+            'is_read'           => 0,
+            'created_at'        => now(),
+        ]);
 
         return response()->json(['message' => 'Service cancelled successfully']);
     }

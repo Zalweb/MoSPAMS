@@ -282,7 +282,7 @@ export default function AssignedJobsPage() {
                         className="flex items-center gap-1.5 text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
                       >
                         <span>✓</span>
-                        Mark Complete
+                        Open &amp; Complete
                       </button>
                     )}
                   </div>

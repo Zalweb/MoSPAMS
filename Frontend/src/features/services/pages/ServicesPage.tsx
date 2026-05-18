@@ -121,14 +121,14 @@ export default function Services() {
   }), [services, search, statusFilter]);
 
   const statusCounts = useMemo(() => ({
-    All: services.length,
+    All: meta?.total ?? services.length,
     Pending: services.filter(s => s.status === 'Pending').length,
     Confirmed: services.filter(s => s.status === 'Confirmed').length,
     Ongoing: services.filter(s => s.status === 'Ongoing').length,
     'Work Done': services.filter(s => s.status === 'Work Done').length,
     Completed: services.filter(s => s.status === 'Completed').length,
     Cancelled: services.filter(s => s.status === 'Cancelled').length,
-  }), [services]);
+  }), [services, meta]);
 
   const workDoneCount = useMemo(() => services.filter(s => s.statusCode === 'work_done').length, [services]);
   const pendingRequestsCount = useMemo(() => services.filter(s => s.statusCode === 'in_progress').length, [services]);
