@@ -105,6 +105,13 @@ class InternalChatController extends Controller
         return response()->json($parts);
     }
 
+    public function customerCount(Request $request)
+    {
+        $shopId = $this->shopId($request);
+        $count  = Customer::where('shop_id_fk', $shopId)->count();
+        return response()->json(['total_customers' => $count]);
+    }
+
     public function customerSearch(Request $request)
     {
         $shopId  = $this->shopId($request);

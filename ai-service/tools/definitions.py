@@ -87,6 +87,14 @@ OWNER_TOOLS = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_customer_count",
+            "description": "Returns the total number of customers registered in the shop.",
+            "parameters": {"type": "object", "properties": {}, "required": []},
+        },
+    },
 ]
 
 CUSTOMER_TOOLS = [
