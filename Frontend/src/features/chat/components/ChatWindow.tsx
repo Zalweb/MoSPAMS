@@ -120,16 +120,8 @@ export default function ChatWindow({ onClose }: Props) {
               </div>
             </div>
 
-            {messages.map((msg, i) => (
-              <ChatMessage
-                key={msg.id}
-                message={msg}
-                isStreaming={isLoading && i === messages.length - 1 && msg.role === 'assistant'}
-              />
-            ))}
-            {isLoading && messages.length > 0 && messages[messages.length - 1]?.role !== 'assistant' && (
-              <ChatTypingIndicator />
-            )}
+            {messages.map(msg => <ChatMessage key={msg.id} message={msg} />)}
+            {isLoading && <ChatTypingIndicator />}
             {error && (
               <p className="text-xs text-red-400 text-center px-2">{error}</p>
             )}
