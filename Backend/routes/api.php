@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BillingWebhookController;
 use App\Http\Controllers\Api\ChatController;
+use App\Http\Controllers\Api\ChatHistoryController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DomainOnboardingController;
 use App\Http\Controllers\Api\GoogleAuthController;
@@ -66,6 +67,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::post('/chat', [ChatController::class, 'send']);
+    Route::post('/chat/stream', [ChatController::class, 'stream']);
+    Route::get('/chat/history', [ChatHistoryController::class, 'index']);
+    Route::get('/chat/history/{id}', [ChatHistoryController::class, 'show']);
+    Route::delete('/chat/history/{id}', [ChatHistoryController::class, 'destroy']);
 
     Route::prefix('superadmin')->middleware(['role:SuperAdmin', 'platform.token'])->group(function () {
         Route::get('/analytics', [SuperAdminController::class, 'analytics']);
