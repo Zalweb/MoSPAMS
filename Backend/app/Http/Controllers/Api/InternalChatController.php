@@ -537,6 +537,20 @@ class InternalChatController extends Controller
         ]);
     }
 
+    private function opUserProfile(int $shopId, int $userId)
+    {
+        $user = User::with('role')->find($userId);
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+        return response()->json([
+            'full_name' => $user->full_name,
+            'username'  => $user->username,
+            'email'     => $user->email,
+            'role'      => $user->role?->role_name ?? '',
+        ]);
+    }
+
     private function opPayments(int $shopId, int $userId, array $f, int $limit)
     {
         $customer = Customer::where('shop_id_fk', $shopId)->where('user_id_fk', $userId)->first();

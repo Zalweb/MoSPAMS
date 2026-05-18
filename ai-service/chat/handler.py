@@ -86,7 +86,7 @@ Call this tool for EVERY data question — never guess or invent data.
 - update → modifies record by record_id, returns updated record
 
 **Example calls:**
-- "What is my name?"            → action=get, entity=user_profile
+- "What is my name?"            → action=list, entity=user_profile
 - "How many customers?"         → action=count, entity=customers
 - "List all customers"          → action=list, entity=customers
 - "Find customer named Frienzal"→ action=list, entity=customers, filters={"name":"Frienzal"}
