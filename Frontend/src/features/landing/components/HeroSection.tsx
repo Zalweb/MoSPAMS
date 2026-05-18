@@ -19,12 +19,7 @@ export default function HeroSection() {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-zinc-700/10 rounded-full blur-3xl" />
       </div>
 
-      <div className="absolute top-40 right-20 opacity-20">
-        <Sparkles className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />
-      </div>
-      <div className="absolute bottom-40 left-20 opacity-20">
-        <Sparkles className="w-6 h-6 text-muted-foreground" strokeWidth={1.5} />
-      </div>
+
 
       <div ref={heroRef} className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-4xl mx-auto mb-16">
@@ -84,25 +79,7 @@ export default function HeroSection() {
             </button>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={isVisible ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 0.32, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="flex flex-wrap items-center justify-center gap-8 text-muted-foreground text-sm"
-          >
-            <div className="flex items-center gap-2">
-              <Shield className="w-4 h-4" strokeWidth={2} />
-              <span>Secure & reliable</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4" strokeWidth={2} />
-              <span>Real-time sync</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4" strokeWidth={2} />
-              <span>Analytics included</span>
-            </div>
-          </motion.div>
+
         </div>
 
         <motion.div
