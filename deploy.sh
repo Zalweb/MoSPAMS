@@ -19,15 +19,16 @@ cd /var/www/mospams
 echo "--- Pulling latest code..."
 git pull origin main
 
-echo "--- Rebuilding app container..."
-docker compose build app
+echo "--- Rebuilding and restarting all services..."
+docker compose build app ai-service
+docker compose up -d
 
-echo "--- Restarting app container..."
-docker compose up -d app
+echo "--- Waiting for containers to be healthy..."
+sleep 10
+docker compose ps
 
-echo "--- Waiting for container to be healthy..."
-sleep 5
-docker compose ps app
+echo "--- Pulling Ollama fallback model (skipped if already present)..."
+docker exec mospams-ollama ollama pull phi3:mini || true
 
 echo "--- Backend deployed successfully."
 REMOTE

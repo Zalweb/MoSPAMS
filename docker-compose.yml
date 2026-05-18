@@ -115,12 +115,57 @@ services:
       retries: 3
       start_period: 60s
 
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    container_name: mospams-ai-service
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    environment:
+      - LLM_PROVIDER=${LLM_PROVIDER:-nvidia_nim}
+      - LLM_MODEL=${LLM_MODEL:-meta/llama-3.1-8b-instruct}
+      - LLM_API_KEY=${LLM_API_KEY}
+      - LLM_BASE_URL=${LLM_BASE_URL:-https://integrate.api.nvidia.com/v1}
+      - LLM_FALLBACK_MODEL=${LLM_FALLBACK_MODEL:-phi3:mini}
+      - OLLAMA_BASE_URL=http://mospams-ollama:11434
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+      - LARAVEL_INTERNAL_URL=http://app:80
+      - CHROMA_PATH=/data/chromadb
+      - MAX_UPLOAD_BYTES=${MAX_UPLOAD_BYTES:-10485760}
+      - MAX_DOCS_PER_SHOP=${MAX_DOCS_PER_SHOP:-20}
+      - MAX_HISTORY_MESSAGES=${MAX_HISTORY_MESSAGES:-10}
+    volumes:
+      - chroma_data:/data/chromadb
+    depends_on:
+      - app
+    networks:
+      - mospams-network
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: mospams-ollama
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
+    deploy:
+      resources:
+        limits:
+          memory: 3G
+    networks:
+      - mospams-network
+
 volumes:
   mysql_data:
     driver: local
   redis_data:
     driver: local
   storage_data:
+    driver: local
+  chroma_data:
+    driver: local
+  ollama_data:
     driver: local
 
 networks:
