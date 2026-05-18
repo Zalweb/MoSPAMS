@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router';
-import { Sparkles, ArrowRight, Zap, Shield, TrendingUp } from 'lucide-react';
+import { ArrowRight, TrendingUp } from 'lucide-react';
 import { useScrollAnimation } from '@/shared/hooks/useScrollAnimation';
 
 export default function HeroSection() {
