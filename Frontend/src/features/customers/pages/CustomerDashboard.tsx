@@ -93,7 +93,7 @@ export default function CustomerDashboard() {
  Welcome back to your personalized service hub. You can track your motorcycle's health and manage bookings here.
  </p>
  </div>
- <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[rgb(var(--color-primary-rgb))]/10 to-transparent blur-3xl -mr-20 -mt-20 opacity-50" />
+ <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[rgb(var(--color-primary-rgb))]/10 to-transparent -mr-20 -mt-20 opacity-50" />
  </motion.div>
 
  {/* Stats Row */}

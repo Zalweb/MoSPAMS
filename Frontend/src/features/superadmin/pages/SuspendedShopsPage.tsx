@@ -6,103 +6,103 @@ import type { SuperAdminShop } from '@/shared/types';
 import { toast } from 'sonner';
 
 export default function SuspendedShopsPage() {
-  const [loading, setLoading] = useState(true);
-  const [shops, setShops] = useState<SuperAdminShop[]>([]);
-  const [actionLoading, setActionLoading] = useState(false);
+ const [loading, setLoading] = useState(true);
+ const [shops, setShops] = useState<SuperAdminShop[]>([]);
+ const [actionLoading, setActionLoading] = useState(false);
 
-  useEffect(() => {
-    loadSuspendedShops();
-  }, []);
+ useEffect(() => {
+ loadSuspendedShops();
+ }, []);
 
-  async function loadSuspendedShops() {
-    setLoading(true);
-    try {
-      const response = await getShops();
-      const suspended = response.data.filter(shop => shop.statusCode === 'SUSPENDED');
-      setShops(suspended);
-    } catch (error) {
-      console.error('Failed to load suspended shops', error);
-      toast.error('Failed to load suspended shops');
-    } finally {
-      setLoading(false);
-    }
-  }
+ async function loadSuspendedShops() {
+ setLoading(true);
+ try {
+ const response = await getShops();
+ const suspended = response.data.filter(shop => shop.statusCode === 'SUSPENDED');
+ setShops(suspended);
+ } catch (error) {
+ console.error('Failed to load suspended shops', error);
+ toast.error('Failed to load suspended shops');
+ } finally {
+ setLoading(false);
+ }
+ }
 
-  async function handleReactivate(shopId: number, shopName: string) {
-    setActionLoading(true);
-    try {
-      await setShopStatus(shopId, 'activate');
-      toast.success(`${shopName} has been reactivated`);
-      await loadSuspendedShops();
-    } catch (error) {
-      console.error('Failed to reactivate shop', error);
-      toast.error('Failed to reactivate shop');
-    } finally {
-      setActionLoading(false);
-    }
-  }
+ async function handleReactivate(shopId: number, shopName: string) {
+ setActionLoading(true);
+ try {
+ await setShopStatus(shopId, 'activate');
+ toast.success(`${shopName} has been reactivated`);
+ await loadSuspendedShops();
+ } catch (error) {
+ console.error('Failed to reactivate shop', error);
+ toast.error('Failed to reactivate shop');
+ } finally {
+ setActionLoading(false);
+ }
+ }
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl sm:text-[28px] font-bold text-foreground tracking-tight">Suspended Shops</h1>
-        <p className="text-[13px] sm:text-[14px] text-muted-foreground mt-1">Manage shops that have been suspended</p>
-      </div>
+ return (
+ <div className="space-y-6">
+ <div>
+ <h1 className="text-2xl sm:text-[28px] font-bold text-foreground tracking-tight">Suspended Shops</h1>
+ <p className="text-[13px] sm:text-[14px] text-muted-foreground mt-1">Manage shops that have been suspended</p>
+ </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-        </div>
-      ) : shops.length === 0 ? (
-        <div className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-12 text-center">
-          <Shield className="w-16 h-16 mx-auto mb-4 text-muted-foreground dark:text-zinc-600" />
-          <h3 className="text-lg font-semibold text-foreground mb-2">No Suspended Shops</h3>
-          <p className="text-muted-foreground">All shops are currently active</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {shops.map((shop) => (
-            <motion.div
-              key={shop.shopId}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-6 hover:border-border dark:border-zinc-700 transition-all"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-12 h-12 rounded-xl bg-foreground/10 border border-foreground/20 flex items-center justify-center">
-                  <AlertTriangle className="w-6 h-6 text-foreground" strokeWidth={2} />
-                </div>
-                <span className="px-2 py-1 rounded-full bg-foreground/10 text-foreground border border-foreground/20 text-xs font-semibold">
-                  Suspended
-                </span>
-              </div>
+ {loading ? (
+ <div className="flex items-center justify-center py-20">
+ <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+ </div>
+ ) : shops.length === 0 ? (
+ <div className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-12 text-center">
+ <Shield className="w-16 h-16 mx-auto mb-4 text-muted-foreground dark:text-zinc-600" />
+ <h3 className="text-lg font-semibold text-foreground mb-2">No Suspended Shops</h3>
+ <p className="text-muted-foreground">All shops are currently active</p>
+ </div>
+ ) : (
+ <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+ {shops.map((shop) => (
+ <motion.div
+ key={shop.shopId}
+ initial={{ opacity: 0, y: 20 }}
+ animate={{ opacity: 1, y: 0 }}
+ className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border p-6 hover:border-border dark:border-zinc-700 transition-all"
+ >
+ <div className="flex items-start justify-between mb-4">
+ <div className="w-12 h-12 rounded-xl bg-foreground/10 border border-foreground/20 flex items-center justify-center">
+ <AlertTriangle className="w-6 h-6 text-foreground" strokeWidth={2} />
+ </div>
+ <span className="px-2 py-1 rounded-full bg-foreground/10 text-foreground border border-foreground/20 text-xs font-semibold">
+ Suspended
+ </span>
+ </div>
 
-              <h3 className="text-lg font-bold text-foreground mb-1">{shop.shopName}</h3>
-              <p className="text-sm text-muted-foreground mb-4">Shop ID: #{shop.shopId}</p>
+ <h3 className="text-lg font-bold text-foreground mb-1">{shop.shopName}</h3>
+ <p className="text-sm text-muted-foreground mb-4">Shop ID: #{shop.shopId}</p>
 
-              <div className="space-y-2 mb-6">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Store className="w-4 h-4" strokeWidth={2} />
-                  <span>{shop.applicant?.email || shop.owner?.email || 'No email'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Calendar className="w-4 h-4" strokeWidth={2} />
-                  <span>Created: {shop.createdAt ? new Date(shop.createdAt).toLocaleDateString() : 'N/A'}</span>
-                </div>
-              </div>
+ <div className="space-y-2 mb-6">
+ <div className="flex items-center gap-2 text-sm text-muted-foreground">
+ <Store className="w-4 h-4" strokeWidth={2} />
+ <span>{shop.applicant?.email || shop.owner?.email || 'No email'}</span>
+ </div>
+ <div className="flex items-center gap-2 text-sm text-muted-foreground">
+ <Calendar className="w-4 h-4" strokeWidth={2} />
+ <span>Created: {shop.createdAt ? new Date(shop.createdAt).toLocaleDateString() : 'N/A'}</span>
+ </div>
+ </div>
 
-              <button
-                onClick={() => handleReactivate(shop.shopId, shop.shopName)}
-                disabled={actionLoading}
-                className="w-full px-4 py-2 rounded-lg bg-foreground text-foreground text-sm font-semibold hover:bg-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                <RefreshCw className="w-4 h-4" strokeWidth={2} />
-                {actionLoading ? 'Reactivating...' : 'Reactivate Shop'}
-              </button>
-            </motion.div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+ <button
+ onClick={() => handleReactivate(shop.shopId, shop.shopName)}
+ disabled={actionLoading}
+ className="w-full px-4 py-2 rounded-lg bg-foreground text-foreground text-sm font-semibold hover:bg-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+ >
+ <RefreshCw className="w-4 h-4" strokeWidth={2} />
+ {actionLoading ? 'Reactivating...' : 'Reactivate Shop'}
+ </button>
+ </motion.div>
+ ))}
+ </div>
+ )}
+ </div>
+ );
 }

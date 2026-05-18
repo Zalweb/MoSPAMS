@@ -15,8 +15,8 @@ export default function HeroSection() {
  return (
  <section id="home" className="relative pt-32 pb-24 overflow-hidden">
  <div className="absolute inset-0 pointer-events-none">
- <div className="absolute top-20 left-1/4 w-96 h-96 bg-zinc-800/10 rounded-full blur-3xl" />
- <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-zinc-700/10 rounded-full blur-3xl" />
+ <div className="absolute top-20 left-1/4 w-96 h-96 rounded-full bg-[radial-gradient(circle,rgba(128,128,128,0.1)_0%,transparent_60%)]" />
+ <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full bg-[radial-gradient(circle,rgba(128,128,128,0.1)_0%,transparent_60%)]" />
  </div>
 
 

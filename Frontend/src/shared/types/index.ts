@@ -1,283 +1,283 @@
 export type Role = 'SuperAdmin' | 'Owner' | 'Staff' | 'Mechanic' | 'Customer' | 'Admin';
 
 export interface Category {
-  id: string;
-  name: string;
-  description?: string;
+ id: string;
+ name: string;
+ description?: string;
 }
 
 export interface Part {
-  id: string;
-  name: string;
-  brand?: string;
-  partCode?: string;
-  category: string;
-  stock: number;
-  minStock: number;
-  price: number;
-  barcode: string;
-  imageUrl?: string;
-  createdAt: string;
+ id: string;
+ name: string;
+ brand?: string;
+ partCode?: string;
+ category: string;
+ stock: number;
+ minStock: number;
+ price: number;
+ barcode: string;
+ imageUrl?: string;
+ createdAt: string;
 }
 
 export interface ServiceType {
-  id: string;
-  name: string;
-  defaultLaborCost: number;
+ id: string;
+ name: string;
+ defaultLaborCost: number;
 }
 
 export interface ServiceRecord {
-  id: string;
-  customerId?: string | null;
-  customerName: string;
-  motorcycleModel: string;
-  serviceType: string;
-  laborCost: number;
-  status: 'Pending' | 'Confirmed' | 'Ongoing' | 'In Progress' | 'Work Done' | 'Completed' | 'Cancelled';
-  statusCode: string;
-  partsUsed: { jobPartId: string; partId: string; name?: string; quantity: number; unitPrice?: number; status: string }[];
-  partRequests: { jobPartId: string; partId: string; name: string; quantity: number; unitPrice: number; requestedBy: string; status: string }[];
-  mechanics: { id: string; name: string }[];
-  preferredMechanic?: { id: string; name: string } | null;
-  queuePosition?: number | null;
-  notes: string;
-  createdAt: string;
-  completedAt?: string;
+ id: string;
+ customerId?: string | null;
+ customerName: string;
+ motorcycleModel: string;
+ serviceType: string;
+ laborCost: number;
+ status: 'Pending' | 'Confirmed' | 'Ongoing' | 'In Progress' | 'Work Done' | 'Completed' | 'Cancelled';
+ statusCode: string;
+ partsUsed: { jobPartId: string; partId: string; name?: string; quantity: number; unitPrice?: number; status: string }[];
+ partRequests: { jobPartId: string; partId: string; name: string; quantity: number; unitPrice: number; requestedBy: string; status: string }[];
+ mechanics: { id: string; name: string }[];
+ preferredMechanic?: { id: string; name: string } | null;
+ queuePosition?: number | null;
+ notes: string;
+ createdAt: string;
+ completedAt?: string;
 }
 
 export interface CustomerService {
-  id: string;
-  customerName: string;
-  vehicleId?: string | null;
-  motorcycleModel: string;
-  serviceType: string;
-  laborCost: number;
-  status: string;
-  statusCode: string;
-  totalBill?: number;
-  notes: string;
-  mechanics: { name: string }[];
-  partsUsed: { name: string; quantity: number }[];
-  createdAt: string;
-  completedAt?: string;
-  hasRating?: boolean;
+ id: string;
+ customerName: string;
+ vehicleId?: string | null;
+ motorcycleModel: string;
+ serviceType: string;
+ laborCost: number;
+ status: string;
+ statusCode: string;
+ totalBill?: number;
+ notes: string;
+ mechanics: { name: string }[];
+ partsUsed: { name: string; quantity: number }[];
+ createdAt: string;
+ completedAt?: string;
+ hasRating?: boolean;
 }
 
 export interface Transaction {
-  id: string;
-  type: 'parts-only' | 'service+parts';
-  customerName?: string | null;
-  customerId?: string | null;
-  items: { partId: string; name: string; quantity: number; price: number }[];
-  serviceId?: string;
-  serviceLaborCost?: number;
-  paymentMethod: 'Cash' | 'GCash';
-  total: number;
-  createdAt: string;
+ id: string;
+ type: 'parts-only' | 'service+parts';
+ customerName?: string | null;
+ customerId?: string | null;
+ items: { partId: string; name: string; quantity: number; price: number }[];
+ serviceId?: string;
+ serviceLaborCost?: number;
+ paymentMethod: 'Cash' | 'GCash';
+ total: number;
+ createdAt: string;
 }
 
 export interface User {
-  id: string;
-  name: string;
-  username?: string;
-  email: string;
-  role: Role;
-  status: 'Active' | 'Inactive';
-  shopId?: string | null;
-  shopName?: string | null;
-  shopStatus?: string | null;
-  lastActive: string;
+ id: string;
+ name: string;
+ username?: string;
+ email: string;
+ role: Role;
+ status: 'Active' | 'Inactive';
+ shopId?: string | null;
+ shopName?: string | null;
+ shopStatus?: string | null;
+ lastActive: string;
 }
 
 export interface Account {
-  id: string;
-  name: string;
-  email: string;
-  status: string;
+ id: string;
+ name: string;
+ email: string;
+ status: string;
 }
 
 export interface Membership {
-  id: string;
-  shopId: string;
-  shopName: string | null;
-  role: Role;
-  status: string;
-  shopStatus: string | null;
+ id: string;
+ shopId: string;
+ shopName: string | null;
+ role: Role;
+ status: string;
+ shopStatus: string | null;
 }
 
 export interface TenantShopSummary {
-  shopId: string;
-  shopName: string;
-  shopStatus: string | null;
+ shopId: string;
+ shopName: string;
+ shopStatus: string | null;
 }
 
 export interface PendingShopJoin {
-  joinToken: string;
-  allowedJoinRole: 'Customer';
-  account: Account | null;
-  shop: TenantShopSummary;
+ joinToken: string;
+ allowedJoinRole: 'Customer';
+ account: Account | null;
+ shop: TenantShopSummary;
 }
 
 export interface StoredUser extends User {
-  passwordHash: string;
+ passwordHash: string;
 }
 
 export interface StockMovement {
-  id: string;
-  partId: string;
-  partName: string;
-  type: 'in' | 'out' | 'adjust';
-  qty: number;
-  reason: string;
-  userId: string;
-  userName: string;
-  timestamp: string;
+ id: string;
+ partId: string;
+ partName: string;
+ type: 'in' | 'out' | 'adjust';
+ qty: number;
+ reason: string;
+ userId: string;
+ userName: string;
+ timestamp: string;
 }
 
 export interface ActivityLog {
-  id: string;
-  user: string;
-  action: string;
-  timestamp: string;
+ id: string;
+ user: string;
+ action: string;
+ timestamp: string;
 }
 
 export type View = 'login' | 'overview' | 'inventory' | 'services' | 'sales' | 'reports' | 'users';
 
 export interface RoleRequest {
-  id: number;
-  user_id: string;
-  user_name: string;
-  user_email: string;
-  requested_role: 'Staff' | 'Mechanic';
-  status: 'pending' | 'approved' | 'denied';
-  created_at: string;
+ id: number;
+ user_id: string;
+ user_name: string;
+ user_email: string;
+ requested_role: 'Staff' | 'Mechanic';
+ status: 'pending' | 'approved' | 'denied';
+ created_at: string;
 }
 
 export interface GoogleData {
-  google_id: string;
-  name: string;
-  email: string;
+ google_id: string;
+ name: string;
+ email: string;
 }
 
 export interface TenantBranding {
-  shopId: number;
-  shopName: string;
-  subdomain: string | null;
-  customDomain: string | null;
-  domainStatus: string | null;
-  logoUrl: string | null;
-  primaryColor: string;
-  secondaryColor: string;
-  phone: string | null;
-  address: string | null;
-  description: string | null;
-  socialMedia: {
-    facebook: string | null;
-    instagram: string | null;
-  };
-  businessHours: Record<string, unknown> | null;
+ shopId: number;
+ shopName: string;
+ subdomain: string | null;
+ customDomain: string | null;
+ domainStatus: string | null;
+ logoUrl: string | null;
+ primaryColor: string;
+ secondaryColor: string;
+ phone: string | null;
+ address: string | null;
+ description: string | null;
+ socialMedia: {
+ facebook: string | null;
+ instagram: string | null;
+ };
+ businessHours: Record<string, unknown> | null;
 }
 
 export interface SuperAdminShop {
-  shopId: number;
-  shopName: string;
-  email?: string | null;
-  phone: string | null;
-  address: string | null;
-  statusCode: 'ACTIVE' | 'SUSPENDED' | 'PENDING' | 'INACTIVE' | string;
-  statusName: string;
-  owner: {
-    userId: number | null;
-    name: string | null;
-    email: string | null;
-  };
-  applicant: {
-    name: string | null;
-    email: string | null;
-  };
-  registration: {
-    status: 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED' | 'SYSTEM_PROVISIONED' | string;
-    rejectionReason: string | null;
-    approvedAt: string | null;
-    rejectedAt: string | null;
-  };
-  subscription: {
-    shopSubscriptionId: number;
-    status: string;
-    startsAt: string | null;
-    endsAt: string | null;
-    renewsAt: string | null;
-    plan: {
-      planId: number;
-      planCode: string;
-      planName: string;
-      monthlyPrice: number;
-    };
-  } | null;
-  createdAt: string | null;
+ shopId: number;
+ shopName: string;
+ email?: string | null;
+ phone: string | null;
+ address: string | null;
+ statusCode: 'ACTIVE' | 'SUSPENDED' | 'PENDING' | 'INACTIVE' | string;
+ statusName: string;
+ owner: {
+ userId: number | null;
+ name: string | null;
+ email: string | null;
+ };
+ applicant: {
+ name: string | null;
+ email: string | null;
+ };
+ registration: {
+ status: 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED' | 'SYSTEM_PROVISIONED' | string;
+ rejectionReason: string | null;
+ approvedAt: string | null;
+ rejectedAt: string | null;
+ };
+ subscription: {
+ shopSubscriptionId: number;
+ status: string;
+ startsAt: string | null;
+ endsAt: string | null;
+ renewsAt: string | null;
+ plan: {
+ planId: number;
+ planCode: string;
+ planName: string;
+ monthlyPrice: number;
+ };
+ } | null;
+ createdAt: string | null;
 }
 
 export interface SubscriptionPlan {
-  planId: number;
-  planCode: string;
-  planName: string;
-  monthlyPrice: number;
-  description: string | null;
-  isActive: boolean;
-  createdAt: string | null;
-  updatedAt: string | null;
+ planId: number;
+ planCode: string;
+ planName: string;
+ monthlyPrice: number;
+ description: string | null;
+ isActive: boolean;
+ createdAt: string | null;
+ updatedAt: string | null;
 }
 
 export interface ShopSubscription {
-  shopSubscriptionId: number;
-  shopId: number;
-  shopName: string;
-  planId: number;
-  planCode: string;
-  planName: string;
-  monthlyPrice: number;
-  status: string;
-  startsAt: string | null;
-  endsAt: string | null;
-  renewsAt: string | null;
-  createdAt: string | null;
-  updatedAt: string | null;
+ shopSubscriptionId: number;
+ shopId: number;
+ shopName: string;
+ planId: number;
+ planCode: string;
+ planName: string;
+ monthlyPrice: number;
+ status: string;
+ startsAt: string | null;
+ endsAt: string | null;
+ renewsAt: string | null;
+ createdAt: string | null;
+ updatedAt: string | null;
 }
 
 export interface SubscriptionPayment {
-  subscriptionPaymentId: number;
-  shopSubscriptionId: number;
-  shopId: number;
-  shopName: string;
-  planName: string;
-  paymentStatus: string;
-  amount: number;
-  paymentMethod: string | null;
-  dueAt: string | null;
-  paidAt: string | null;
-  referenceNumber: string | null;
-  notes: string | null;
-  createdAt: string | null;
+ subscriptionPaymentId: number;
+ shopSubscriptionId: number;
+ shopId: number;
+ shopName: string;
+ planName: string;
+ paymentStatus: string;
+ amount: number;
+ paymentMethod: string | null;
+ dueAt: string | null;
+ paidAt: string | null;
+ referenceNumber: string | null;
+ notes: string | null;
+ createdAt: string | null;
 }
 
 export interface PlatformAdmin {
-  userId: number;
-  name: string;
-  email: string;
-  status: string;
-  statusCode: string;
-  lastActive: string | null;
+ userId: number;
+ name: string;
+ email: string;
+ status: string;
+ statusCode: string;
+ lastActive: string | null;
 }
 
 export interface PlatformAuditLog {
-  logId: number;
-  shopId: number | null;
-  shopName: string | null;
-  userId: number | null;
-  actorName: string | null;
-  action: string;
-  tableName: string | null;
-  recordId: number | null;
-  description: string | null;
-  loggedAt: string | null;
+ logId: number;
+ shopId: number | null;
+ shopName: string | null;
+ userId: number | null;
+ actorName: string | null;
+ action: string;
+ tableName: string | null;
+ recordId: number | null;
+ description: string | null;
+ loggedAt: string | null;
 }

@@ -84,221 +84,221 @@ const ShopFeedbackPage = lazy(() => import('@/features/superadmin/pages/Settings
 
 // Page-level suspense fallback
 function PageLoader() {
-  return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
-    </div>
-  );
+ return (
+ <div className="min-h-screen bg-background flex items-center justify-center">
+ <div className="w-8 h-8 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+ </div>
+ );
 }
 
 function RequireAuth() {
-  const { user, ready } = useAuth();
-  const location = useLocation();
-  if (!ready) return null;
-  if (!user) return <Navigate to="/" state={{ from: location }} replace />;
-  return <Outlet />;
+ const { user, ready } = useAuth();
+ const location = useLocation();
+ if (!ready) return null;
+ if (!user) return <Navigate to="/" state={{ from: location }} replace />;
+ return <Outlet />;
 }
 
 function RequireRole({ role }: { role: Role }) {
-  const { user, ready } = useAuth();
-  if (!ready) return null;
-  if (!user) return <Navigate to="/" replace />;
-  if (normalizeRole(user.role) !== normalizeRole(role)) return <Navigate to={defaultRouteForUser(user)} replace />;
-  return <Outlet />;
+ const { user, ready } = useAuth();
+ if (!ready) return null;
+ if (!user) return <Navigate to="/" replace />;
+ if (normalizeRole(user.role) !== normalizeRole(role)) return <Navigate to={defaultRouteForUser(user)} replace />;
+ return <Outlet />;
 }
 
 function RequireCustomer() {
-  const { user, ready } = useAuth();
-  if (!ready) return null;
-  if (!user) return <Navigate to="/" replace />;
-  if (normalizeRole(user.role) !== 'Customer') return <Navigate to={defaultRouteForUser(user)} replace />;
-  return <Outlet />;
+ const { user, ready } = useAuth();
+ if (!ready) return null;
+ if (!user) return <Navigate to="/" replace />;
+ if (normalizeRole(user.role) !== 'Customer') return <Navigate to={defaultRouteForUser(user)} replace />;
+ return <Outlet />;
 }
 
 function RequireMechanic() {
-  const { user, ready } = useAuth();
-  if (!ready) return null;
-  if (!user) return <Navigate to="/" replace />;
-  if (normalizeRole(user.role) !== 'Mechanic') return <Navigate to={defaultRouteForUser(user)} replace />;
-  return <Outlet />;
+ const { user, ready } = useAuth();
+ if (!ready) return null;
+ if (!user) return <Navigate to="/" replace />;
+ if (normalizeRole(user.role) !== 'Mechanic') return <Navigate to={defaultRouteForUser(user)} replace />;
+ return <Outlet />;
 }
 
 function RequireSuperAdmin() {
-  const { user, ready } = useAuth();
-  if (!ready) return null;
-  if (!user) return <Navigate to="/" replace />;
-  if (normalizeRole(user.role) !== 'SuperAdmin') return <Navigate to={defaultRouteForUser(user)} replace />;
-  return <Outlet />;
+ const { user, ready } = useAuth();
+ if (!ready) return null;
+ if (!user) return <Navigate to="/" replace />;
+ if (normalizeRole(user.role) !== 'SuperAdmin') return <Navigate to={defaultRouteForUser(user)} replace />;
+ return <Outlet />;
 }
 
 function RequireActiveShop() {
-  const { user } = useAuth();
-  if (!user) return <Navigate to="/" replace />;
+ const { user } = useAuth();
+ if (!user) return <Navigate to="/" replace />;
 
-  if (normalizeRole(user.role) === 'SuperAdmin') {
-    return <Navigate to="/superadmin/analytics" replace />;
-  }
+ if (normalizeRole(user.role) === 'SuperAdmin') {
+ return <Navigate to="/superadmin/analytics" replace />;
+ }
 
-  if (user.shopStatus && user.shopStatus !== 'ACTIVE') {
-    return (
-      <Suspense fallback={<PageLoader />}>
-        <ShopBlockedScreen shopStatus={user.shopStatus} />
-      </Suspense>
-    );
-  }
+ if (user.shopStatus && user.shopStatus !== 'ACTIVE') {
+ return (
+ <Suspense fallback={<PageLoader />}>
+ <ShopBlockedScreen shopStatus={user.shopStatus} />
+ </Suspense>
+ );
+ }
 
-  return (
-    <>
-      <Outlet />
-      <ChatBubble />
-    </>
-  );
+ return (
+ <>
+ <Outlet />
+ <ChatBubble />
+ </>
+ );
 }
 
 function DashboardIndexRedirect() {
-  const { user } = useAuth();
-  const role = normalizeRole(user?.role);
-  if (role === 'Customer') return <Navigate to="/dashboard/customer" replace />;
-  if (role === 'Mechanic') return <Navigate to="/dashboard/mechanic" replace />;
-  return <Suspense fallback={<PageLoader />}><NewDashboardWrapper /></Suspense>;
+ const { user } = useAuth();
+ const role = normalizeRole(user?.role);
+ if (role === 'Customer') return <Navigate to="/dashboard/customer" replace />;
+ if (role === 'Mechanic') return <Navigate to="/dashboard/mechanic" replace />;
+ return <Suspense fallback={<PageLoader />}><NewDashboardWrapper /></Suspense>;
 }
 
 function LoginRoute() {
-  const { user, ready } = useAuth();
-  if (!ready) return null;
-  if (user) return <Navigate to={defaultRouteForUser(user)} replace />;
-  return <LoginPage />;
+ const { user, ready } = useAuth();
+ if (!ready) return null;
+ if (user) return <Navigate to={defaultRouteForUser(user)} replace />;
+ return <LoginPage />;
 }
 
 function App() {
-  const tenant = useTenantBranding();
-  const hostMode = currentHostMode();
+ const tenant = useTenantBranding();
+ const hostMode = currentHostMode();
 
-  if (tenant.statusCode === 404) {
-    return <ShopNotFoundPage />;
-  }
+ if (tenant.statusCode === 404) {
+ return <ShopNotFoundPage />;
+ }
 
-  return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ''}>
-      <BrowserRouter>
-        <AuthProvider>
-          <DataProvider>
-            <Toaster position="top-right" richColors closeButton />
-            <ErrorBoundary>
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                {hostMode === 'public' ? (
-                  <>
-                    <Route path="/" element={<LandingPage />} />
-                    <Route path="/register-shop" element={<ShopRegistrationPage />} />
-                    <Route path="/register" element={<UserRegistrationPage />} />
-                    <Route path="/auth/google" element={<GoogleAuthProxyPage />} />
-                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                    <Route path="/reset-password" element={<ResetPasswordPage />} />
-                    <Route path="*" element={<NotFound />} />
-                  </>
-                ) : hostMode === 'platform' ? (
-                  <>
-                    <Route path="/" element={<LoginRoute />} />
-                    <Route path="/login" element={<LoginRoute />} />
-                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                    <Route path="/reset-password" element={<ResetPasswordPage />} />
-                    <Route element={<RequireAuth />}>
-                      <Route element={<RequireSuperAdmin />}>
-                        <Route path="superadmin" element={<ThemeProvider><SuperAdminLayout /></ThemeProvider>}>
-                          <Route index element={<Navigate to="/superadmin/analytics" replace />} />
-                          <Route path="analytics" element={<SuperAdminAnalyticsPage />} />
+ return (
+ <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ''}>
+ <BrowserRouter>
+ <AuthProvider>
+ <DataProvider>
+ <Toaster position="top-right" richColors closeButton />
+ <ErrorBoundary>
+ <Suspense fallback={<PageLoader />}>
+ <Routes>
+ {hostMode === 'public' ? (
+ <>
+ <Route path="/" element={<LandingPage />} />
+ <Route path="/register-shop" element={<ShopRegistrationPage />} />
+ <Route path="/register" element={<UserRegistrationPage />} />
+ <Route path="/auth/google" element={<GoogleAuthProxyPage />} />
+ <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+ <Route path="/reset-password" element={<ResetPasswordPage />} />
+ <Route path="*" element={<NotFound />} />
+ </>
+ ) : hostMode === 'platform' ? (
+ <>
+ <Route path="/" element={<LoginRoute />} />
+ <Route path="/login" element={<LoginRoute />} />
+ <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+ <Route path="/reset-password" element={<ResetPasswordPage />} />
+ <Route element={<RequireAuth />}>
+ <Route element={<RequireSuperAdmin />}>
+ <Route path="superadmin" element={<ThemeProvider><SuperAdminLayout /></ThemeProvider>}>
+ <Route index element={<Navigate to="/superadmin/analytics" replace />} />
+ <Route path="analytics" element={<SuperAdminAnalyticsPage />} />
 
-                          <Route path="shops" element={<SuperAdminShopsPage />} />
-                          <Route path="shops/pending" element={<PendingShopsPage />} />
-                          <Route path="shops/new" element={<CreateShopPage />} />
-                          <Route path="shops/suspended" element={<SuspendedShopsPage />} />
+ <Route path="shops" element={<SuperAdminShopsPage />} />
+ <Route path="shops/pending" element={<PendingShopsPage />} />
+ <Route path="shops/new" element={<CreateShopPage />} />
+ <Route path="shops/suspended" element={<SuspendedShopsPage />} />
 
-                          <Route path="subscriptions" element={<SuperAdminSubscriptionsPage />} />
-                          <Route path="billing/payments" element={<PaymentsHistoryPage />} />
-                          <Route path="billing/reports" element={<RevenueReportsPage />} />
-                          <Route path="billing/overdue" element={<OverdueAccountsPage />} />
+ <Route path="subscriptions" element={<SuperAdminSubscriptionsPage />} />
+ <Route path="billing/payments" element={<PaymentsHistoryPage />} />
+ <Route path="billing/reports" element={<RevenueReportsPage />} />
+ <Route path="billing/overdue" element={<OverdueAccountsPage />} />
 
-                          <Route path="access-control" element={<SuperAdminAccessControlPage />} />
-                          <Route path="admins/new" element={<AddPlatformAdminPage />} />
+ <Route path="access-control" element={<SuperAdminAccessControlPage />} />
+ <Route path="admins/new" element={<AddPlatformAdminPage />} />
 
-                          <Route path="reports/revenue" element={<RevenueAnalyticsPage />} />
-                          <Route path="reports/growth" element={<ShopGrowthPage />} />
-                          <Route path="reports/users" element={<UserStatisticsPage />} />
-                          <Route path="reports/performance" element={<SystemPerformancePage />} />
+ <Route path="reports/revenue" element={<RevenueAnalyticsPage />} />
+ <Route path="reports/growth" element={<ShopGrowthPage />} />
+ <Route path="reports/users" element={<UserStatisticsPage />} />
+ <Route path="reports/performance" element={<SystemPerformancePage />} />
 
-                          <Route path="audit-logs" element={<SuperAdminAuditLogsPage />} />
+ <Route path="audit-logs" element={<SuperAdminAuditLogsPage />} />
 
-                          <Route path="settings" element={<SuperAdminSettingsPage />} />`r`n                          <Route path="profile" element={<SuperAdminProfilePage />} />
+ <Route path="settings" element={<SuperAdminSettingsPage />} />`r`n <Route path="profile" element={<SuperAdminProfilePage />} />
 
-                          <Route path="support/tickets" element={<SupportTicketsPage />} />
-                          <Route path="support/feedback" element={<ShopFeedbackPage />} />
+ <Route path="support/tickets" element={<SupportTicketsPage />} />
+ <Route path="support/feedback" element={<ShopFeedbackPage />} />
 
-                          <Route path="*" element={<NotFound />} />
-                        </Route>
-                      </Route>
-                    </Route>
-                    <Route path="*" element={<NotFound />} />
-                  </>
-                ) : (
-                  <>
-                    <Route path="/" element={<LoginRoute />} />
-                    <Route path="/login" element={<LoginRoute />} />
-                    <Route path="/register" element={<UserRegistrationPage />} />
-                    <Route path="/auth/callback" element={<GoogleAuthCallbackPage />} />
-                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                    <Route path="/reset-password" element={<ResetPasswordPage />} />
-                    <Route element={<RequireAuth />}>
-                      <Route element={<RequireActiveShop />}>
-                        <Route path="dashboard" element={<ThemeProvider><DashboardLayout /></ThemeProvider>}>
-                          <Route index element={<DashboardIndexRedirect />} />
-                          <Route path="inventory" element={<InventoryPage />} />
-                          <Route path="services" element={<ServicesPage />} />
-                          <Route path="sales" element={<SalesPage />} />
-                          <Route path="reports" element={<ReportsPage />} />
-                          <Route element={<RequireRole role="Owner" />}>
-                            <Route path="users" element={<UsersPage />} />
-                            <Route path="approvals" element={<ApprovalsPage />} />
-                            <Route path="activity-logs" element={<ActivityLogsPage />} />
-                            <Route path="settings" element={<SettingsPage />} />
-                            <Route path="customers" element={<CustomerManagementPage />} />
-                            <Route path="mechanics" element={<MechanicManagementPage />} />
-                          </Route>
-                          <Route element={<RequireRole role="Staff" />}>
-                            <Route path="staff/settings" element={<StaffSettingsPage />} />
-                          </Route>
-                          <Route element={<RequireCustomer />}>
-                            <Route path="customer" element={<CustomerDashboard />} />
-                            <Route path="customer/book" element={<BookService />} />
-                            <Route path="customer/history" element={<ServiceHistory />} />
-                            <Route path="customer/payments" element={<Payments />} />
-                            <Route path="customer/parts" element={<PartsCatalog />} />
-                            <Route path="customer/settings" element={<CustomerSettings />} />
-                            <Route path="customer/vehicles" element={<CustomerVehicles />} />
-                          </Route>
-                          <Route element={<RequireMechanic />}>
-                            <Route path="mechanic" element={<MechanicDashboardPage />} />
-                            <Route path="mechanic/jobs" element={<AssignedJobsPage />} />
-                            <Route path="mechanic/jobs/:id" element={<JobDetailsPage />} />
-                            <Route path="mechanic/history" element={<JobHistoryPage />} />
-                            <Route path="mechanic/performance" element={<PerformanceDashboardPage />} />
-                            <Route path="mechanic/settings" element={<MechanicSettingsPage />} />
-                          </Route>
-                          <Route path="*" element={<NotFound />} />
-                        </Route>
-                      </Route>
-                    </Route>
-                    <Route path="*" element={<NotFound />} />
-                  </>
-                )}
-              </Routes>
-            </Suspense>
-            </ErrorBoundary>
-          </DataProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </GoogleOAuthProvider>
-  );
+ <Route path="*" element={<NotFound />} />
+ </Route>
+ </Route>
+ </Route>
+ <Route path="*" element={<NotFound />} />
+ </>
+ ) : (
+ <>
+ <Route path="/" element={<LoginRoute />} />
+ <Route path="/login" element={<LoginRoute />} />
+ <Route path="/register" element={<UserRegistrationPage />} />
+ <Route path="/auth/callback" element={<GoogleAuthCallbackPage />} />
+ <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+ <Route path="/reset-password" element={<ResetPasswordPage />} />
+ <Route element={<RequireAuth />}>
+ <Route element={<RequireActiveShop />}>
+ <Route path="dashboard" element={<ThemeProvider><DashboardLayout /></ThemeProvider>}>
+ <Route index element={<DashboardIndexRedirect />} />
+ <Route path="inventory" element={<InventoryPage />} />
+ <Route path="services" element={<ServicesPage />} />
+ <Route path="sales" element={<SalesPage />} />
+ <Route path="reports" element={<ReportsPage />} />
+ <Route element={<RequireRole role="Owner" />}>
+ <Route path="users" element={<UsersPage />} />
+ <Route path="approvals" element={<ApprovalsPage />} />
+ <Route path="activity-logs" element={<ActivityLogsPage />} />
+ <Route path="settings" element={<SettingsPage />} />
+ <Route path="customers" element={<CustomerManagementPage />} />
+ <Route path="mechanics" element={<MechanicManagementPage />} />
+ </Route>
+ <Route element={<RequireRole role="Staff" />}>
+ <Route path="staff/settings" element={<StaffSettingsPage />} />
+ </Route>
+ <Route element={<RequireCustomer />}>
+ <Route path="customer" element={<CustomerDashboard />} />
+ <Route path="customer/book" element={<BookService />} />
+ <Route path="customer/history" element={<ServiceHistory />} />
+ <Route path="customer/payments" element={<Payments />} />
+ <Route path="customer/parts" element={<PartsCatalog />} />
+ <Route path="customer/settings" element={<CustomerSettings />} />
+ <Route path="customer/vehicles" element={<CustomerVehicles />} />
+ </Route>
+ <Route element={<RequireMechanic />}>
+ <Route path="mechanic" element={<MechanicDashboardPage />} />
+ <Route path="mechanic/jobs" element={<AssignedJobsPage />} />
+ <Route path="mechanic/jobs/:id" element={<JobDetailsPage />} />
+ <Route path="mechanic/history" element={<JobHistoryPage />} />
+ <Route path="mechanic/performance" element={<PerformanceDashboardPage />} />
+ <Route path="mechanic/settings" element={<MechanicSettingsPage />} />
+ </Route>
+ <Route path="*" element={<NotFound />} />
+ </Route>
+ </Route>
+ </Route>
+ <Route path="*" element={<NotFound />} />
+ </>
+ )}
+ </Routes>
+ </Suspense>
+ </ErrorBoundary>
+ </DataProvider>
+ </AuthProvider>
+ </BrowserRouter>
+ </GoogleOAuthProvider>
+ );
 }
 
 export default App;

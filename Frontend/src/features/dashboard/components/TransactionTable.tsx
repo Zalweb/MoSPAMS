@@ -3,144 +3,144 @@ import { ArrowUpRight, ArrowDownRight, MoreHorizontal, Search, Filter, Download,
 import type { Transaction } from '@/shared/types/shop';
 
 interface TransactionTableProps {
-  transactions: Transaction[];
-  loading?: boolean;
+ transactions: Transaction[];
+ loading?: boolean;
 }
 
 export function TransactionTable({ transactions, loading }: TransactionTableProps) {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'bg-green-500/10 text-green-400 border-green-500/20';
-      case 'pending':
-        return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
-      case 'cancelled':
-        return 'bg-red-500/10 text-red-400 border-red-500/20';
-      default:
-        return 'bg-zinc-500/10 text-muted-foreground border-zinc-500/20';
-    }
-  };
+ const getStatusColor = (status: string) => {
+ switch (status) {
+ case 'completed':
+ return 'bg-green-500/10 text-green-400 border-green-500/20';
+ case 'pending':
+ return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+ case 'cancelled':
+ return 'bg-red-500/10 text-red-400 border-red-500/20';
+ default:
+ return 'bg-zinc-500/10 text-muted-foreground border-zinc-500/20';
+ }
+ };
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="relative group"
-    >
-      <div className="relative brand-card border rounded-2xl overflow-hidden transition-all duration-300" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-border/50">
-          <div>
-            <h3 className="text-lg font-semibold text-card-foreground mb-1">Transaction History</h3>
-            <p className="text-sm text-muted-foreground">Recent financial activity</p>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <button className="p-2 rounded-lg bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 hover:bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700/50 text-muted-foreground hover:text-card-foreground transition-colors">
-              <Search className="w-4 h-4" />
-            </button>
-            <button className="p-2 rounded-lg bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 hover:bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700/50 text-muted-foreground hover:text-card-foreground transition-colors">
-              <Filter className="w-4 h-4" />
-            </button>
-            <button className="p-2 rounded-lg bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 hover:bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700/50 text-muted-foreground hover:text-card-foreground transition-colors">
-              <Download className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+ return (
+ <motion.div
+ initial={{ opacity: 0, y: 20 }}
+ animate={{ opacity: 1, y: 0 }}
+ transition={{ delay: 0.3, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+ className="relative group"
+ >
+ <div className="relative brand-card border rounded-2xl overflow-hidden transition-all duration-300" style={{ background: 'var(--brand-surface-gradient)', borderColor: 'var(--brand-border)' }}>
+ {/* Header */}
+ <div className="flex items-center justify-between p-6 border-b border-border/50">
+ <div>
+ <h3 className="text-lg font-semibold text-card-foreground mb-1">Transaction History</h3>
+ <p className="text-sm text-muted-foreground">Recent financial activity</p>
+ </div>
+ 
+ <div className="flex items-center gap-2">
+ <button className="p-2 rounded-lg bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 hover:bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700/50 text-muted-foreground hover:text-card-foreground transition-colors">
+ <Search className="w-4 h-4" />
+ </button>
+ <button className="p-2 rounded-lg bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 hover:bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700/50 text-muted-foreground hover:text-card-foreground transition-colors">
+ <Filter className="w-4 h-4" />
+ </button>
+ <button className="p-2 rounded-lg bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 hover:bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700/50 text-muted-foreground hover:text-card-foreground transition-colors">
+ <Download className="w-4 h-4" />
+ </button>
+ </div>
+ </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
-          {loading ? (
-            <div className="p-12 flex items-center justify-center">
-              <div className="w-12 h-12 border-4 border-border dark:border-zinc-700 border-t-[rgb(var(--color-primary-rgb))] rounded-full animate-spin" />
-            </div>
-          ) : transactions.length === 0 ? (
-            <div className="p-16 flex flex-col items-center justify-center text-center">
-              <div className="w-16 h-16 rounded-full bg-muted/50 dark:bg-zinc-800/50 flex items-center justify-center mb-4">
-                <FileText className="w-8 h-8 text-muted-foreground/50" strokeWidth={1.5} />
-              </div>
-              <p className="text-base font-semibold text-foreground mb-1">No transactions yet</p>
-              <p className="text-sm text-muted-foreground max-w-[250px]">When you start making sales or paying expenses, they will appear here.</p>
-            </div>
-          ) : (
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border/50">
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Date</th>
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Description</th>
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Type</th>
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Category</th>
-                  <th className="text-right px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Amount</th>
-                  <th className="text-center px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
-                  <th className="text-right px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border dark:divide-zinc-800/30">
-                {transactions.map((transaction, index) => (
-                  <motion.tr
-                    key={transaction.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05, duration: 0.3 }}
-                    className="hover:bg-muted/50 dark:hover:bg-white/5 transition-colors group/row"
-                  >
-                    <td className="px-6 py-4">
-                      <p className="text-sm text-muted-foreground tabular-nums">
-                        {new Date(transaction.date).toLocaleDateString('en-US', { 
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        })}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm font-medium text-card-foreground">{transaction.description}</p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        {transaction.type === 'income' ? (
-                          <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
-                            <ArrowUpRight className="w-4 h-4 text-green-400" />
-                          </div>
-                        ) : (
-                          <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
-                            <ArrowDownRight className="w-4 h-4 text-red-400" />
-                          </div>
-                        )}
-                        <span className="text-sm text-muted-foreground capitalize">{transaction.type}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-sm text-muted-foreground">{transaction.category}</span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <p className={`text-sm font-semibold tabular-nums ${
-                        transaction.type === 'income' ? 'text-green-400' : 'text-red-400'
-                      }`}>
-                        {transaction.type === 'income' ? '+' : '-'}₱{transaction.amount.toLocaleString()}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${getStatusColor(transaction.status)}`}>
-                        {transaction.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button className="p-1.5 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-card-foreground transition-colors opacity-0 group-hover/row:opacity-100">
-                        <MoreHorizontal className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+ {/* Table */}
+ <div className="overflow-x-auto">
+ {loading ? (
+ <div className="p-12 flex items-center justify-center">
+ <div className="w-12 h-12 border-4 border-border dark:border-zinc-700 border-t-[rgb(var(--color-primary-rgb))] rounded-full animate-spin" />
+ </div>
+ ) : transactions.length === 0 ? (
+ <div className="p-16 flex flex-col items-center justify-center text-center">
+ <div className="w-16 h-16 rounded-full bg-muted/50 dark:bg-zinc-800/50 flex items-center justify-center mb-4">
+ <FileText className="w-8 h-8 text-muted-foreground/50" strokeWidth={1.5} />
+ </div>
+ <p className="text-base font-semibold text-foreground mb-1">No transactions yet</p>
+ <p className="text-sm text-muted-foreground max-w-[250px]">When you start making sales or paying expenses, they will appear here.</p>
+ </div>
+ ) : (
+ <table className="w-full">
+ <thead>
+ <tr className="border-b border-border/50">
+ <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Date</th>
+ <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Description</th>
+ <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Type</th>
+ <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Category</th>
+ <th className="text-right px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Amount</th>
+ <th className="text-center px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+ <th className="text-right px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider"></th>
+ </tr>
+ </thead>
+ <tbody className="divide-y divide-border dark:divide-zinc-800/30">
+ {transactions.map((transaction, index) => (
+ <motion.tr
+ key={transaction.id}
+ initial={{ opacity: 0, x: -20 }}
+ animate={{ opacity: 1, x: 0 }}
+ transition={{ delay: index * 0.05, duration: 0.3 }}
+ className="hover:bg-muted/50 dark:hover:bg-white/5 transition-colors group/row"
+ >
+ <td className="px-6 py-4">
+ <p className="text-sm text-muted-foreground tabular-nums">
+ {new Date(transaction.date).toLocaleDateString('en-US', { 
+ year: 'numeric',
+ month: 'short',
+ day: 'numeric'
+ })}
+ </p>
+ </td>
+ <td className="px-6 py-4">
+ <p className="text-sm font-medium text-card-foreground">{transaction.description}</p>
+ </td>
+ <td className="px-6 py-4">
+ <div className="flex items-center gap-2">
+ {transaction.type === 'income' ? (
+ <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
+ <ArrowUpRight className="w-4 h-4 text-green-400" />
+ </div>
+ ) : (
+ <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
+ <ArrowDownRight className="w-4 h-4 text-red-400" />
+ </div>
+ )}
+ <span className="text-sm text-muted-foreground capitalize">{transaction.type}</span>
+ </div>
+ </td>
+ <td className="px-6 py-4">
+ <span className="text-sm text-muted-foreground">{transaction.category}</span>
+ </td>
+ <td className="px-6 py-4 text-right">
+ <p className={`text-sm font-semibold tabular-nums ${
+ transaction.type === 'income' ? 'text-green-400' : 'text-red-400'
+ }`}>
+ {transaction.type === 'income' ? '+' : '-'}₱{transaction.amount.toLocaleString()}
+ </p>
+ </td>
+ <td className="px-6 py-4 text-center">
+ <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${getStatusColor(transaction.status)}`}>
+ {transaction.status}
+ </span>
+ </td>
+ <td className="px-6 py-4 text-right">
+ <button className="p-1.5 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-card-foreground transition-colors opacity-0 group-hover/row:opacity-100">
+ <MoreHorizontal className="w-4 h-4" />
+ </button>
+ </td>
+ </motion.tr>
+ ))}
+ </tbody>
+ </table>
+ )}
+ </div>
 
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[rgb(var(--color-primary-rgb))]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-      </div>
-    </motion.div>
-  );
+ {/* Gradient overlay */}
+ <div className="absolute inset-0 bg-gradient-to-br from-[rgb(var(--color-primary-rgb))]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+ </div>
+ </motion.div>
+ );
 }

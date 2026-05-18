@@ -15,12 +15,12 @@ import { queryClient } from '@/shared/lib/queryClient'
 registerSW()
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <TenantBrandingProvider>
-        <App />
-      </TenantBrandingProvider>
-      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
-    </QueryClientProvider>
-  </StrictMode>,
+ <StrictMode>
+ <QueryClientProvider client={queryClient}>
+ <TenantBrandingProvider>
+ <App />
+ </TenantBrandingProvider>
+ {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+ </QueryClientProvider>
+ </StrictMode>,
 )

@@ -108,8 +108,8 @@ export default function ForgotPasswordPage() {
  return (
  <div className="dark text-foreground min-h-screen bg-gradient-to-br from-zinc-950 via-black to-zinc-900 flex items-center justify-center relative overflow-hidden px-6">
  <div className="absolute inset-0 pointer-events-none">
- <div className="absolute top-0 left-1/4 w-96 h-96 bg-zinc-800/5 rounded-full blur-3xl" />
- <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-zinc-700/5 rounded-full blur-3xl" />
+ <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full bg-[radial-gradient(circle,rgba(128,128,128,0.1)_0%,transparent_60%)]" />
+ <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full bg-[radial-gradient(circle,rgba(128,128,128,0.1)_0%,transparent_60%)]" />
  </div>
 
  <div className="relative z-10 w-full max-w-md">

@@ -8,234 +8,234 @@ import { toast } from 'sonner';
 const CURRENCY_PREFIX = '\u20b1';
 
 export default function PaymentsHistoryPage() {
-  const [loading, setLoading] = useState(true);
-  const [payments, setPayments] = useState<SubscriptionPayment[]>([]);
-  const [filter, setFilter] = useState<'all' | 'PAID' | 'PENDING' | 'FAILED'>('all');
+ const [loading, setLoading] = useState(true);
+ const [payments, setPayments] = useState<SubscriptionPayment[]>([]);
+ const [filter, setFilter] = useState<'all' | 'PAID' | 'PENDING' | 'FAILED'>('all');
 
-  useEffect(() => {
-    loadPayments();
-  }, []);
+ useEffect(() => {
+ loadPayments();
+ }, []);
 
-  async function loadPayments() {
-    setLoading(true);
-    try {
-      const response = await getSubscriptionPayments();
-      setPayments(response.data);
-    } catch (error) {
-      console.error('Failed to load payments', error);
-      toast.error('Failed to load payments');
-    } finally {
-      setLoading(false);
-    }
-  }
+ async function loadPayments() {
+ setLoading(true);
+ try {
+ const response = await getSubscriptionPayments();
+ setPayments(response.data);
+ } catch (error) {
+ console.error('Failed to load payments', error);
+ toast.error('Failed to load payments');
+ } finally {
+ setLoading(false);
+ }
+ }
 
-  function handleExportCsv() {
-    if (payments.length === 0) {
-      toast.error('No payments to export');
-      return;
-    }
-    const headers = ['ID', 'Shop', 'Amount', 'Method', 'Status', 'Due Date', 'Paid Date'];
-    const rows = payments.map(p => [
-      p.subscriptionPaymentId,
-      '"' + ((p as any).shopName || '').replace(/"/g, '""') + '"',
-      p.amount,
-      (p as any).paymentMethod || '',
-      (p as any).paymentStatus || '',
-      (p as any).dueAt ? new Date((p as any).dueAt).toISOString().split('T')[0] : '',
-      (p as any).paidAt ? new Date((p as any).paidAt).toISOString().split('T')[0] : '',
-    ]);
-    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'payments-export-' + new Date().toISOString().split('T')[0] + '.csv';
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success('CSV exported');
-  }
+ function handleExportCsv() {
+ if (payments.length === 0) {
+ toast.error('No payments to export');
+ return;
+ }
+ const headers = ['ID', 'Shop', 'Amount', 'Method', 'Status', 'Due Date', 'Paid Date'];
+ const rows = payments.map(p => [
+ p.subscriptionPaymentId,
+ '"' + ((p as any).shopName || '').replace(/"/g, '""') + '"',
+ p.amount,
+ (p as any).paymentMethod || '',
+ (p as any).paymentStatus || '',
+ (p as any).dueAt ? new Date((p as any).dueAt).toISOString().split('T')[0] : '',
+ (p as any).paidAt ? new Date((p as any).paidAt).toISOString().split('T')[0] : '',
+ ]);
+ const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+ const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+ const url = URL.createObjectURL(blob);
+ const a = document.createElement('a');
+ a.href = url;
+ a.download = 'payments-export-' + new Date().toISOString().split('T')[0] + '.csv';
+ a.click();
+ URL.revokeObjectURL(url);
+ toast.success('CSV exported');
+ }
 
-  const filteredPayments = filter === 'all' 
-    ? payments 
-    : payments.filter(p => (p as any).paymentStatus === filter);
+ const filteredPayments = filter === 'all' 
+ ? payments 
+ : payments.filter(p => (p as any).paymentStatus === filter);
 
-  const totalPaid = payments
-    .filter(p => (p as any).paymentStatus === 'PAID')
-    .reduce((sum, p) => sum + p.amount, 0);
+ const totalPaid = payments
+ .filter(p => (p as any).paymentStatus === 'PAID')
+ .reduce((sum, p) => sum + p.amount, 0);
 
-  const totalPending = payments
-    .filter(p => (p as any).paymentStatus === 'PENDING')
-    .reduce((sum, p) => sum + p.amount, 0);
+ const totalPending = payments
+ .filter(p => (p as any).paymentStatus === 'PENDING')
+ .reduce((sum, p) => sum + p.amount, 0);
 
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-[28px] font-bold text-foreground tracking-tight">Payments History</h1>
-          <p className="text-[13px] sm:text-[14px] text-muted-foreground mt-1">Track all subscription payments</p>
-        </div>
+ return (
+ <div className="space-y-6">
+ <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+ <div>
+ <h1 className="text-2xl sm:text-[28px] font-bold text-foreground tracking-tight">Payments History</h1>
+ <p className="text-[13px] sm:text-[14px] text-muted-foreground mt-1">Track all subscription payments</p>
+ </div>
 
-        <button
-          onClick={handleExportCsv}
-          className="px-4 py-2 rounded-lg bg-white text-black text-sm font-semibold hover:bg-zinc-200 transition-colors flex items-center gap-2 w-fit"
-        >
-          <Download className="w-4 h-4" strokeWidth={2} />
-          Export CSV
-        </button>
-      </div>
+ <button
+ onClick={handleExportCsv}
+ className="px-4 py-2 rounded-lg bg-white text-black text-sm font-semibold hover:bg-zinc-200 transition-colors flex items-center gap-2 w-fit"
+ >
+ <Download className="w-4 h-4" strokeWidth={2} />
+ Export CSV
+ </button>
+ </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-card rounded-xl border border-border p-5">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-lg bg-foreground/10 border border-foreground/20 flex items-center justify-center">
-              <DollarSign className="w-5 h-5 text-foreground" strokeWidth={2} />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Total Paid</p>
-              <p className="text-xl font-bold text-foreground">{CURRENCY_PREFIX}{totalPaid.toLocaleString()}</p>
-            </div>
-          </div>
-        </div>
+ {/* Stats */}
+ <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+ <div className="bg-card rounded-xl border border-border p-5">
+ <div className="flex items-center gap-3 mb-2">
+ <div className="w-10 h-10 rounded-lg bg-foreground/10 border border-foreground/20 flex items-center justify-center">
+ <DollarSign className="w-5 h-5 text-foreground" strokeWidth={2} />
+ </div>
+ <div>
+ <p className="text-xs text-muted-foreground">Total Paid</p>
+ <p className="text-xl font-bold text-foreground">{CURRENCY_PREFIX}{totalPaid.toLocaleString()}</p>
+ </div>
+ </div>
+ </div>
 
-        <div className="bg-card rounded-xl border border-border p-5">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-lg bg-foreground/10 border border-foreground/20 flex items-center justify-center">
-              <Calendar className="w-5 h-5 text-foreground" strokeWidth={2} />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Pending</p>
-              <p className="text-xl font-bold text-foreground">{CURRENCY_PREFIX}{totalPending.toLocaleString()}</p>
-            </div>
-          </div>
-        </div>
+ <div className="bg-card rounded-xl border border-border p-5">
+ <div className="flex items-center gap-3 mb-2">
+ <div className="w-10 h-10 rounded-lg bg-foreground/10 border border-foreground/20 flex items-center justify-center">
+ <Calendar className="w-5 h-5 text-foreground" strokeWidth={2} />
+ </div>
+ <div>
+ <p className="text-xs text-muted-foreground">Pending</p>
+ <p className="text-xl font-bold text-foreground">{CURRENCY_PREFIX}{totalPending.toLocaleString()}</p>
+ </div>
+ </div>
+ </div>
 
-        <div className="bg-card rounded-xl border border-border p-5">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-lg bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 flex items-center justify-center">
-              <FileText className="w-5 h-5 text-foreground" strokeWidth={2} />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Total Payments</p>
-              <p className="text-xl font-bold text-foreground">{payments.length}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+ <div className="bg-card rounded-xl border border-border p-5">
+ <div className="flex items-center gap-3 mb-2">
+ <div className="w-10 h-10 rounded-lg bg-secondary dark:bg-zinc-800 border border-border dark:border-zinc-700 flex items-center justify-center">
+ <FileText className="w-5 h-5 text-foreground" strokeWidth={2} />
+ </div>
+ <div>
+ <p className="text-xs text-muted-foreground">Total Payments</p>
+ <p className="text-xl font-bold text-foreground">{payments.length}</p>
+ </div>
+ </div>
+ </div>
+ </div>
 
-      {/* Filters */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2">
-        <Filter className="w-4 h-4 text-muted-foreground shrink-0" strokeWidth={2} />
-        {['all', 'PAID', 'PENDING', 'FAILED'].map((status) => (
-          <button
-            key={status}
-            onClick={() => setFilter(status as any)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-              filter === status
-                ? 'bg-white text-black'
-                : 'bg-muted border border-border text-muted-foreground hover:text-foreground hover:bg-secondary dark:bg-zinc-800'
-            }`}
-          >
-            {status === 'all' ? 'All' : status}
-          </button>
-        ))}
-      </div>
+ {/* Filters */}
+ <div className="flex items-center gap-2 overflow-x-auto pb-2">
+ <Filter className="w-4 h-4 text-muted-foreground shrink-0" strokeWidth={2} />
+ {['all', 'PAID', 'PENDING', 'FAILED'].map((status) => (
+ <button
+ key={status}
+ onClick={() => setFilter(status as any)}
+ className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+ filter === status
+ ? 'bg-white text-black'
+ : 'bg-muted border border-border text-muted-foreground hover:text-foreground hover:bg-secondary dark:bg-zinc-800'
+ }`}
+ >
+ {status === 'all' ? 'All' : status}
+ </button>
+ ))}
+ </div>
 
-      {/* Payments Table */}
-      <div className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border overflow-hidden">
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-          </div>
-        ) : filteredPayments.length === 0 ? (
-          <div className="text-center py-20">
-            <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground dark:text-zinc-600" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">No Payments Found</h3>
-            <p className="text-muted-foreground">
-              {filter === 'all' ? 'No payment records available' : `No ${filter.toLowerCase()} payments`}
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border bg-muted/50">
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Payment ID
-                  </th>
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Shop
-                  </th>
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Amount
-                  </th>
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Method
-                  </th>
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Due Date
-                  </th>
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Paid Date
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredPayments.map((payment) => (
-                  <motion.tr
-                    key={payment.subscriptionPaymentId}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="border-b border-border hover:bg-muted/50 transition-colors"
-                  >
-                    <td className="px-6 py-4 text-sm text-muted-foreground dark:text-zinc-300">
-                      #{payment.subscriptionPaymentId}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-foreground font-medium">
-                      {(payment as any).shopName || `Shop #${(payment as any).shopId}`}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-foreground font-semibold">
-                      {CURRENCY_PREFIX}{payment.amount.toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">
-                      {(payment as any).paymentMethod || 'N/A'}
-                    </td>
-                    <td className="px-6 py-4">
-                      <StatusBadge status={(payment as any).paymentStatus} />
-                    </td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">
-                      {(payment as any).dueAt ? new Date((payment as any).dueAt).toLocaleDateString() : 'N/A'}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">
-                      {(payment as any).paidAt ? new Date((payment as any).paidAt).toLocaleDateString() : '-'}
-                    </td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+ {/* Payments Table */}
+ <div className="bg-gradient-to-br from-card to-foreground/[0.03] rounded-2xl border border-border overflow-hidden">
+ {loading ? (
+ <div className="flex items-center justify-center py-20">
+ <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+ </div>
+ ) : filteredPayments.length === 0 ? (
+ <div className="text-center py-20">
+ <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground dark:text-zinc-600" />
+ <h3 className="text-lg font-semibold text-foreground mb-2">No Payments Found</h3>
+ <p className="text-muted-foreground">
+ {filter === 'all' ? 'No payment records available' : `No ${filter.toLowerCase()} payments`}
+ </p>
+ </div>
+ ) : (
+ <div className="overflow-x-auto">
+ <table className="w-full">
+ <thead>
+ <tr className="border-b border-border bg-muted/50">
+ <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+ Payment ID
+ </th>
+ <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+ Shop
+ </th>
+ <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+ Amount
+ </th>
+ <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+ Method
+ </th>
+ <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+ Status
+ </th>
+ <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+ Due Date
+ </th>
+ <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+ Paid Date
+ </th>
+ </tr>
+ </thead>
+ <tbody>
+ {filteredPayments.map((payment) => (
+ <motion.tr
+ key={payment.subscriptionPaymentId}
+ initial={{ opacity: 0 }}
+ animate={{ opacity: 1 }}
+ className="border-b border-border hover:bg-muted/50 transition-colors"
+ >
+ <td className="px-6 py-4 text-sm text-muted-foreground dark:text-zinc-300">
+ #{payment.subscriptionPaymentId}
+ </td>
+ <td className="px-6 py-4 text-sm text-foreground font-medium">
+ {(payment as any).shopName || `Shop #${(payment as any).shopId}`}
+ </td>
+ <td className="px-6 py-4 text-sm text-foreground font-semibold">
+ {CURRENCY_PREFIX}{payment.amount.toLocaleString()}
+ </td>
+ <td className="px-6 py-4 text-sm text-muted-foreground">
+ {(payment as any).paymentMethod || 'N/A'}
+ </td>
+ <td className="px-6 py-4">
+ <StatusBadge status={(payment as any).paymentStatus} />
+ </td>
+ <td className="px-6 py-4 text-sm text-muted-foreground">
+ {(payment as any).dueAt ? new Date((payment as any).dueAt).toLocaleDateString() : 'N/A'}
+ </td>
+ <td className="px-6 py-4 text-sm text-muted-foreground">
+ {(payment as any).paidAt ? new Date((payment as any).paidAt).toLocaleDateString() : '-'}
+ </td>
+ </motion.tr>
+ ))}
+ </tbody>
+ </table>
+ </div>
+ )}
+ </div>
+ </div>
+ );
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    PAID: 'bg-foreground/10 text-foreground border-foreground/20',
-    PENDING: 'bg-foreground/10 text-foreground border-foreground/20',
-    FAILED: 'bg-foreground/10 text-foreground border-foreground/20',
-    REFUNDED: 'bg-foreground/10 text-foreground border-foreground/20',
-  };
+ const styles: Record<string, string> = {
+ PAID: 'bg-foreground/10 text-foreground border-foreground/20',
+ PENDING: 'bg-foreground/10 text-foreground border-foreground/20',
+ FAILED: 'bg-foreground/10 text-foreground border-foreground/20',
+ REFUNDED: 'bg-foreground/10 text-foreground border-foreground/20',
+ };
 
-  const style = styles[status] || 'bg-zinc-500/10 text-muted-foreground border-zinc-500/20';
+ const style = styles[status] || 'bg-zinc-500/10 text-muted-foreground border-zinc-500/20';
 
-  return (
-    <span className={`px-2 py-1 rounded-md text-xs font-semibold border ${style}`}>
-      {status}
-    </span>
-  );
+ return (
+ <span className={`px-2 py-1 rounded-md text-xs font-semibold border ${style}`}>
+ {status}
+ </span>
+ );
 }

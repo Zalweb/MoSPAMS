@@ -1,50 +1,50 @@
 export type HostMode = 'platform' | 'public' | 'tenant';
 
 const PLATFORM_HOSTS = (import.meta.env.VITE_PLATFORM_ADMIN_HOSTS ?? 'admin.mospams.local,admin.mospams.shop')
-  .split(',')
-  .map((host: string) => normalizeHost(host))
-  .filter(Boolean);
+ .split(',')
+ .map((host: string) => normalizeHost(host))
+ .filter(Boolean);
 
 const PUBLIC_HOSTS = (import.meta.env.VITE_PUBLIC_HOSTS ?? 'mospams.app,mospams.local,mospams.shop')
-  .split(',')
-  .map((host: string) => normalizeHost(host))
-  .filter(Boolean);
+ .split(',')
+ .map((host: string) => normalizeHost(host))
+ .filter(Boolean);
 
 export function normalizeHost(host: string): string {
-  return host.trim().toLowerCase().split(':')[0];
+ return host.trim().toLowerCase().split(':')[0];
 }
 
 export function isPlatformHost(host: string): boolean {
-  return PLATFORM_HOSTS.includes(normalizeHost(host));
+ return PLATFORM_HOSTS.includes(normalizeHost(host));
 }
 
 export function isPublicHost(host: string): boolean {
-  return PUBLIC_HOSTS.includes(normalizeHost(host));
+ return PUBLIC_HOSTS.includes(normalizeHost(host));
 }
 
 export function detectHostMode(host: string): HostMode {
-  if (isPlatformHost(host)) {
-    return 'platform';
-  }
+ if (isPlatformHost(host)) {
+ return 'platform';
+ }
 
-  if (isPublicHost(host)) {
-    return 'public';
-  }
+ if (isPublicHost(host)) {
+ return 'public';
+ }
 
-  // localhost and loopback addresses have no subdomain context; treat them as
-  // the public/landing-page host so the landing page is the default entry point.
-  const normalizedHost = normalizeHost(host);
-  if (normalizedHost === 'localhost' || normalizedHost === '127.0.0.1') {
-    return 'public';
-  }
+ // localhost and loopback addresses have no subdomain context; treat them as
+ // the public/landing-page host so the landing page is the default entry point.
+ const normalizedHost = normalizeHost(host);
+ if (normalizedHost === 'localhost' || normalizedHost === '127.0.0.1') {
+ return 'public';
+ }
 
-  return 'tenant';
+ return 'tenant';
 }
 
 export function currentHostMode(): HostMode {
-  if (typeof window === 'undefined') {
-    return 'tenant';
-  }
+ if (typeof window === 'undefined') {
+ return 'tenant';
+ }
 
-  return detectHostMode(window.location.host);
+ return detectHostMode(window.location.host);
 }

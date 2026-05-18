@@ -75,8 +75,8 @@ export default function PricingSection() {
  </div>
 
  <div className="absolute inset-0 pointer-events-none">
- <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
- <div className="absolute top-1/2 right-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+ <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-white/5 rounded-full " />
+ <div className="absolute top-1/2 right-1/4 w-96 h-96 bg-white/5 rounded-full " />
  </div>
 
  <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
