@@ -61,15 +61,19 @@ class InternalChatController extends Controller
     {
         $shopId = $this->shopId($request);
         $data = DB::table('mechanics')
-            ->leftJoin('service_jobs', function ($join) use ($shopId) {
-                $join->on('service_jobs.created_by_fk', '=', 'mechanics.mechanic_id')
-                     ->where('service_jobs.service_job_status_id_fk', 3)
-                     ->where('service_jobs.shop_id_fk', $shopId);
+            ->leftJoin('service_job_mechanics', function ($join) use ($shopId) {
+                $join->on('service_job_mechanics.mechanic_id_fk', '=', 'mechanics.mechanic_id')
+                     ->where('service_job_mechanics.shop_id_fk', $shopId);
+            })
+            ->leftJoin('service_jobs', function ($join) {
+                $join->on('service_jobs.job_id', '=', 'service_job_mechanics.job_id_fk')
+                     ->whereIn('service_jobs.service_job_status_id_fk', [3, 6]);
             })
             ->where('mechanics.shop_id_fk', $shopId)
             ->select('mechanics.mechanic_id', 'mechanics.full_name',
                      DB::raw('COUNT(service_jobs.job_id) as completed_jobs'))
             ->groupBy('mechanics.mechanic_id', 'mechanics.full_name')
+            ->orderByDesc('completed_jobs')
             ->get();
         return response()->json($data);
     }
