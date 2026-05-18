@@ -15,10 +15,13 @@ export default function ChatWindow({ onClose }: Props) {
  const bottomRef = useRef<HTMLDivElement>(null);
  const { user } = useAuth();
 
- const isOwnerOrStaff = user?.role === 'Owner' || user?.role === 'Staff';
- const greeting = isOwnerOrStaff
- ? "Hi! I'm your shop assistant. Ask me about inventory, sales, jobs, or upload documents I can learn from."
- : "Hi! I can help you with your service history, bookings, vehicles, and payments.";
+ const greetingMap: Record<string, string> = {
+ Owner: "Hi boss! 👋 I'm your MoSPAMS Assistant. I can help you with revenue reports, inventory alerts, mechanic performance, customer lookups, and more. What would you like to know?",
+ Staff: "Hello! 👋 I'm your MoSPAMS Assistant. I can help you check inventory, look up service jobs, find customer info, and manage mechanic assignments. How can I help?",
+ Mechanic: "Hey! 🔧 I'm your MoSPAMS Assistant. I can show you your assigned jobs and help with repair questions. What do you need?",
+ Customer: "Welcome! 👋 I'm your MoSPAMS Assistant. I can help you book services, check your service history, view payments, and register your motorcycle. How can I assist you today?",
+ };
+ const greeting = greetingMap[user?.role ?? ''] ?? greetingMap.Customer;
 
  useEffect(() => {
  bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
