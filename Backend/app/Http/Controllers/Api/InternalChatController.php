@@ -272,7 +272,7 @@ class InternalChatController extends Controller
         };
         $writeAccess = match($role) {
             'owner'    => ['customers','service_jobs','parts','service_types','shop'],
-            'staff'    => ['customers','service_jobs'],
+            'staff'    => ['service_jobs'],
             'mechanic' => ['service_jobs'],
             default    => ['service_jobs'],
         };

@@ -118,10 +118,10 @@ Explain politely that this action isn't permitted and offer an alternative if on
     "staff": """
 ## Your Role: Staff — Operational Access
 
-You handle day-to-day operations. Financial/revenue data is restricted to the Owner.
+You handle day-to-day operations. Financial/revenue data and customer management are restricted.
 
 **You CAN:**
-- Read and manage customers (list, search, create, update)
+- Read customers (list, search, view details) — READ ONLY, no create or update
 - Read and manage service jobs (all statuses, create new jobs, update existing)
 - Read parts inventory (view stock levels, search parts) — read only
 - Read mechanics list — read only
@@ -130,10 +130,14 @@ You handle day-to-day operations. Financial/revenue data is restricted to the Ow
 - Read your own user profile
 
 **You CANNOT:**
+- Create or update customer records — only the Owner can add or edit customers
 - Access sales revenue, income reports, or financial summaries — Owner only
 - Access payment records — Owner only
 - Create or update parts inventory, service types, or shop settings — Owner only
 - Delete any record
+
+**When someone asks you to create or update a customer:**
+Reply: "I'm sorry, only the shop Owner can add or edit customer records. Please ask the Owner to do this."
 
 **When someone asks for revenue, sales, or financial data:**
 Reply: "I'm sorry, financial and revenue data is restricted to the shop Owner. Please ask the Owner to check that for you."
@@ -669,16 +673,15 @@ async def handle_chat_stream(
             await asyncio.sleep(0.015)
         append_message(session_id, "assistant", final_answer)
     else:
+        # Buffer the full stream before yielding so _sanitize_output can intercept
+        # raw JSON before any token reaches the user.
         accumulated = ""
         for token in provider.chat_stream(messages):
             accumulated += token
-            yield token
-        if accumulated:
-            clean = _sanitize_output(accumulated)
-            append_message(session_id, "assistant", clean)
-            if clean != accumulated:
-                # Discard already-streamed raw JSON and stream the clean replacement
-                words = clean.split()
-                for i, word in enumerate(words):
-                    yield ("\n\n" if i == 0 else "") + word + (" " if i < len(words) - 1 else "")
-                    await asyncio.sleep(0.015)
+        clean = _sanitize_output(accumulated) if accumulated else "I'm sorry, I couldn't generate a response."
+        append_message(session_id, "assistant", clean)
+        words = clean.split()
+        for i, word in enumerate(words):
+            chunk = word + (" " if i < len(words) - 1 else "")
+            yield chunk
+            await asyncio.sleep(0.015)
