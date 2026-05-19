@@ -127,17 +127,18 @@ export default function MechanicDashboardPage() {
  const svgColors = useSvgBrandColors();
 
  useEffect(() => {
- const fetchStats = async () => {
+ const fetchStats = async (showLoader = false) => {
  try {
+ if (showLoader) setLoadingStats(true);
  const res = await apiGet<DashboardData>('/api/mechanic/dashboard');
  setData(res);
  } catch {
- toast.error('Failed to load dashboard');
+ if (showLoader) toast.error('Failed to load dashboard');
  } finally {
  setLoadingStats(false);
  }
  };
- void fetchStats();
+ void fetchStats(true);
  const intervalId = window.setInterval(() => void fetchStats(), 3000);
  return () => window.clearInterval(intervalId);
  }, []);

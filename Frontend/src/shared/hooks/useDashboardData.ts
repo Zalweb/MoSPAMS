@@ -31,14 +31,14 @@ export function useDashboardData(): DashboardData {
  const [loading, setLoading] = useState(true);
  const [error, setError] = useState<string | null>(null);
 
- const fetchDashboardData = async () => {
+ const fetchDashboardData = async (showLoader = false) => {
  if (!user) {
  setLoading(false);
  return;
  }
 
  try {
- setLoading(true);
+ if (showLoader) setLoading(true);
  setError(null);
 
  if (user.role === 'Owner' || user.role === 'Staff') {
@@ -234,7 +234,7 @@ export function useDashboardData(): DashboardData {
  };
 
  useEffect(() => {
- void fetchDashboardData();
+ void fetchDashboardData(true);
  const intervalId = window.setInterval(() => void fetchDashboardData(), 3000);
  return () => window.clearInterval(intervalId);
  }, [user?.role]);
