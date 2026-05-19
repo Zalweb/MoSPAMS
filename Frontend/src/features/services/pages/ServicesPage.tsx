@@ -17,7 +17,7 @@ import type { Part, ServiceRecord } from '@/shared/types';
 import { StartServiceModal } from '../components/StartServiceModal';
 import { CustomerSearchInput } from '../components/CustomerSearchInput';
 
-type StatusFilter = 'All' | 'Pending' | 'Confirmed' | 'Ongoing' | 'Work Done' | 'Completed' | 'Cancelled';
+type StatusFilter = 'All' | 'Pending' | 'Ongoing' | 'Completed' | 'Cancelled';
 
 interface Mechanic { id: string; name: string }
 
@@ -42,18 +42,22 @@ const fadeUp = (delay = 0) => ({
  transition: { delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
 });
 
-const STATUS_STYLES: Record<ServiceRecord['status'], { bg: string; text: string; border: string; icon: typeof Clock }> = {
+const STATUS_STYLES = {
  Pending: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20', icon: Clock },
- Confirmed: { bg: 'bg-violet-500/10', text: 'text-violet-400', border: 'border-violet-500/20', icon: CheckCircle2 },
  Ongoing: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20', icon: Wrench },
- 'In Progress': { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20', icon: Wrench },
- 'Work Done': { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20', icon: Wrench },
  Completed: { bg: 'bg-green-500/10', text: 'text-green-400', border: 'border-green-500/20', icon: CheckCircle2 },
  Cancelled: { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/20', icon: XCircle },
 };
 
-function getStatusStyle(status: ServiceRecord['status']) {
- return STATUS_STYLES[status] ?? STATUS_STYLES['Pending'];
+function getDisplayStatus(statusCode: string): keyof typeof STATUS_STYLES {
+ if (statusCode === 'pending' || statusCode === 'booked_confirmed') return 'Pending';
+ if (statusCode === 'in_progress' || statusCode === 'work_done') return 'Ongoing';
+ if (statusCode === 'completed') return 'Completed';
+ return 'Cancelled';
+}
+
+function getStatusStyle(statusCode: string) {
+ return STATUS_STYLES[getDisplayStatus(statusCode)];
 }
 
 export default function Services() {
@@ -117,17 +121,18 @@ export default function Services() {
 
  const filtered = useMemo(() => services.filter(s => {
  const q = search.toLowerCase();
- return (s.customerName.toLowerCase().includes(q) || s.motorcycleModel.toLowerCase().includes(q)) && (statusFilter === 'All' || s.status === statusFilter);
+ const matchSearch = s.customerName.toLowerCase().includes(q) || s.motorcycleModel.toLowerCase().includes(q);
+ if (!matchSearch) return false;
+ if (statusFilter === 'All') return true;
+ return getDisplayStatus(s.statusCode) === statusFilter;
  }), [services, search, statusFilter]);
 
  const statusCounts = useMemo(() => ({
  All: meta?.total ?? services.length,
- Pending: services.filter(s => s.status === 'Pending').length,
- Confirmed: services.filter(s => s.status === 'Confirmed').length,
- Ongoing: services.filter(s => s.status === 'Ongoing').length,
- 'Work Done': services.filter(s => s.status === 'Work Done').length,
- Completed: services.filter(s => s.status === 'Completed').length,
- Cancelled: services.filter(s => s.status === 'Cancelled').length,
+ Pending: services.filter(s => s.statusCode === 'pending' || s.statusCode === 'booked_confirmed').length,
+ Ongoing: services.filter(s => s.statusCode === 'in_progress' || s.statusCode === 'work_done').length,
+ Completed: services.filter(s => s.statusCode === 'completed').length,
+ Cancelled: services.filter(s => s.statusCode === 'cancelled').length,
  }), [services, meta]);
 
  const workDoneCount = useMemo(() => services.filter(s => s.statusCode === 'work_done').length, [services]);
@@ -317,7 +322,7 @@ export default function Services() {
  </motion.div>
 
  <motion.div {...fadeUp(0.1)} className="flex gap-2 flex-wrap">
- {(['All', 'Pending', 'Confirmed', 'Ongoing', 'Work Done', 'Completed', 'Cancelled'] as StatusFilter[]).map(s => (
+ {(['All', 'Pending', 'Ongoing', 'Completed', 'Cancelled'] as StatusFilter[]).map(s => (
  <button key={s} onClick={() => setStatusFilter(s)} className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${statusFilter === s ? 'shadow-lg' : 'bg-muted/50 text-muted-foreground border border-border hover:border-border dark:border-zinc-700 hover:text-foreground'}`} style={statusFilter === s ? { background: 'var(--brand-gradient)', color: 'var(--brand-text-on-primary)', boxShadow: 'var(--brand-glow)' } : undefined}>
  {s} <span className="opacity-50 ml-1">{statusCounts[s]}</span>
  </button>
@@ -340,7 +345,8 @@ export default function Services() {
  <div key={i} className="h-20 bg-muted/50 border border-border rounded-2xl animate-pulse" />
  ))
  ) : filtered.map(service => {
- const style = getStatusStyle(service.status);
+ const style = getStatusStyle(service.statusCode);
+ const displayStatus = getDisplayStatus(service.statusCode);
  const StatusIcon = style.icon;
  const pendingRequests = (service.partRequests ?? []).length;
  return (
@@ -418,7 +424,7 @@ export default function Services() {
  )}
  {(service.statusCode === 'completed' || service.statusCode === 'cancelled') && (
  <span className={`inline-flex h-8 items-center px-3 rounded-lg text-xs font-semibold border ${style.bg} ${style.text} ${style.border}`}>
- {service.status}
+ {displayStatus}
  </span>
  )}
  <button title="History" onClick={() => setHistoryCustomer({ name: service.customerName, model: service.motorcycleModel })} className="p-2 rounded-lg hover:bg-secondary dark:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors">

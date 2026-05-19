@@ -122,13 +122,13 @@ class MospamsController extends Controller
         $pendingServices = DB::table('service_jobs')
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
             ->where('service_jobs.shop_id_fk', $shopId)
-            ->where('service_job_statuses.status_code', 'pending')
+            ->whereIn('service_job_statuses.status_code', ['pending', 'booked_confirmed'])
             ->count();
 
         $ongoingServices = DB::table('service_jobs')
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
             ->where('service_jobs.shop_id_fk', $shopId)
-            ->where('service_job_statuses.status_code', 'in_progress')
+            ->whereIn('service_job_statuses.status_code', ['in_progress', 'work_done'])
             ->count();
 
         $activePipeline = $pendingServices + $ongoingServices;
@@ -1835,13 +1835,13 @@ class MospamsController extends Controller
         $pendingServices = DB::table('service_jobs')
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
             ->where('service_jobs.shop_id_fk', $shopId)
-            ->where('service_job_statuses.status_code', 'pending')
+            ->whereIn('service_job_statuses.status_code', ['pending', 'booked_confirmed'])
             ->count();
 
         $ongoingServices = DB::table('service_jobs')
             ->join('service_job_statuses', 'service_job_statuses.service_job_status_id', '=', 'service_jobs.service_job_status_id_fk')
             ->where('service_jobs.shop_id_fk', $shopId)
-            ->where('service_job_statuses.status_code', 'in_progress')
+            ->whereIn('service_job_statuses.status_code', ['in_progress', 'work_done'])
             ->count();
 
         $activePipeline = $pendingServices + $ongoingServices;

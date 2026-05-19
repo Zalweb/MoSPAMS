@@ -68,9 +68,9 @@ export default function CustomerDashboard() {
  }
  };
 
- const pending = services.filter(s => s.status === 'Pending').length;
- const ongoing = services.filter(s => s.status === 'Ongoing').length;
- const completed = services.filter(s => s.status === 'Completed').length;
+ const pending = services.filter(s => s.statusCode === 'pending' || s.statusCode === 'booked_confirmed').length;
+ const ongoing = services.filter(s => s.statusCode === 'in_progress' || s.statusCode === 'work_done').length;
+ const completed = services.filter(s => s.statusCode === 'completed').length;
 
  const recentServices = services.slice(0, 3);
 
@@ -201,7 +201,10 @@ export default function CustomerDashboard() {
  ) : (
  recentServices.map((service, i) => {
  type StatusKey = 'Pending' | 'Ongoing' | 'Completed' | 'Cancelled';
- const statusKey = (service.status as StatusKey) in STATUS_STYLES ? (service.status as StatusKey) : 'Pending';
+ const statusKey: StatusKey =
+ (service.statusCode === 'pending' || service.statusCode === 'booked_confirmed') ? 'Pending' :
+ (service.statusCode === 'in_progress' || service.statusCode === 'work_done') ? 'Ongoing' :
+ service.statusCode === 'completed' ? 'Completed' : 'Cancelled';
  const style = STATUS_STYLES[statusKey];
  const Icon = style.icon;
 
@@ -236,9 +239,9 @@ export default function CustomerDashboard() {
  
  <div className="text-right flex flex-col items-end gap-2">
  <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest ${style.bg} ${style.text} border ${style.border}`}>
- {service.status}
+ {statusKey}
  </span>
- {service.status === 'Pending' && (
+ {service.statusCode === 'pending' && (
  <button
  onClick={() => handleCancel(service.id)}
  disabled={cancellingId === service.id}

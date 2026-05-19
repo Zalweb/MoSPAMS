@@ -33,7 +33,7 @@ export interface ServiceRecord {
  motorcycleModel: string;
  serviceType: string;
  laborCost: number;
- status: 'Pending' | 'Confirmed' | 'Ongoing' | 'In Progress' | 'Work Done' | 'Completed' | 'Cancelled';
+ status: string;
  statusCode: string;
  partsUsed: { jobPartId: string; partId: string; name?: string; quantity: number; unitPrice?: number; status: string }[];
  partRequests: { jobPartId: string; partId: string; name: string; quantity: number; unitPrice: number; requestedBy: string; status: string }[];
