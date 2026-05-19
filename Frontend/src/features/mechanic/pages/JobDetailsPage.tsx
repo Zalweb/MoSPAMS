@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -138,7 +138,7 @@ export default function JobDetailsPage() {
  {(job.statusCode === 'booked_confirmed' || job.statusCode === 'in_progress') && (
  <button
  onClick={() => setShowStatusUpdate(true)}
- className="px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] text-foreground hover:opacity-90"
+ className="px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] text-primary-foreground hover:opacity-90"
  >
  {job.statusCode === 'booked_confirmed' ? 'Start Service' : 'Mark as Complete'}
  </button>
@@ -242,7 +242,7 @@ export default function JobDetailsPage() {
  {job.statusCode === 'in_progress' && (
  <button
  onClick={() => setShowAddPart(true)}
- className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] text-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
+ className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
  >
  <Plus className="w-4 h-4" />
  Request Parts

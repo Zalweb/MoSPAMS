@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { X, Search, Package, AlertTriangle } from 'lucide-react';
 import { apiGet, apiMutation } from '@/shared/lib/api';
 import { toast } from 'sonner';
@@ -225,7 +225,7 @@ export function AddPartDialog({ jobId, onClose, onSuccess }: AddPartDialogProps)
  <button
  onClick={handleSubmit}
  disabled={!selectedPart || submitting || quantity > selectedPart.stock}
- className="px-6 py-2 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] text-foreground text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+ className="px-6 py-2 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
  >
  {submitting ? 'Adding...' : 'Add Part'}
  </button>

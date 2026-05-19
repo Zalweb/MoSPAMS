@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from 'react';
+﻿import { useMemo, useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -261,7 +261,7 @@ export default function Inventory() {
  <Upload className="w-4 h-4" />
  {importing ? 'Importing…' : 'Import CSV'}
  </button>
- <Button onClick={openAdd} size="sm" className="h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold px-5 transition-opacity">
+ <Button onClick={openAdd} size="sm" className="h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-primary-foreground text-sm font-semibold px-5 transition-opacity">
  <Plus className="w-4 h-4 mr-2" /> Add Part
  </Button>
  </div>
@@ -527,7 +527,7 @@ export default function Inventory() {
  </div>
 
  <div className="flex gap-3 pt-2">
- <Button type="submit" disabled={imageUploading} className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold transition-opacity disabled:opacity-60">
+ <Button type="submit" disabled={imageUploading} className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-primary-foreground text-sm font-semibold transition-opacity disabled:opacity-60">
  {imageUploading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Uploading…</> : editing ? 'Save Changes' : 'Add Part'}
  </Button>
  <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-10 rounded-xl text-sm border-border dark:border-zinc-700 text-muted-foreground hover:bg-secondary dark:bg-zinc-800">Cancel</Button>
@@ -552,7 +552,7 @@ export default function Inventory() {
  <Input {...categoryForm.register('description')} className="mt-1.5 h-10 rounded-xl bg-secondary/50 dark:bg-secondary dark:bg-zinc-800/50 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground focus:border-border dark:border-zinc-600" placeholder="Brief description" />
  </div>
  <div className="flex gap-3 pt-2">
- <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold transition-opacity">Add Category</Button>
+ <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-primary-foreground text-sm font-semibold transition-opacity">Add Category</Button>
  <Button type="button" variant="outline" onClick={() => setCategoryModalOpen(false)} className="h-10 rounded-xl text-sm border-border dark:border-zinc-700 text-muted-foreground hover:bg-secondary dark:bg-zinc-800">Cancel</Button>
  </div>
  </form>
@@ -584,7 +584,7 @@ export default function Inventory() {
  {moveForm.formState.errors.reason && <p className="text-xs text-red-400 mt-1">{moveForm.formState.errors.reason.message}</p>}
  </div>
  <div className="flex gap-3 pt-1">
- <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold transition-opacity">Record</Button>
+ <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-primary-foreground text-sm font-semibold transition-opacity">Record</Button>
  <Button type="button" variant="outline" onClick={() => setStockMoveTarget(null)} className="h-10 rounded-xl text-sm border-border dark:border-zinc-700 text-muted-foreground">Cancel</Button>
  </div>
  </form>

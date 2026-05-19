@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from 'react';
+﻿import { useMemo, useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Plus, Trash2, Banknote, Smartphone, Receipt, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import InvoiceModal from '@/features/customers/components/InvoiceModal';
@@ -111,7 +111,7 @@ export default function Sales() {
  <h2 className="text-2xl font-bold text-foreground tracking-tight">Sales</h2>
  <p className="text-sm text-muted-foreground mt-1">{meta ? meta.total : transactions.length} transactions total</p>
  </div>
- <Button onClick={() => setModalOpen(true)} size="sm" className="h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold px-5 transition-opacity">
+ <Button onClick={() => setModalOpen(true)} size="sm" className="h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-primary-foreground text-sm font-semibold px-5 transition-opacity">
  <Plus className="w-4 h-4 mr-2" /> New Transaction
  </Button>
  </motion.div>
@@ -312,7 +312,7 @@ export default function Sales() {
  <span className="text-sm text-muted-foreground">Total</span>
  <span className="text-2xl font-bold text-foreground tracking-tight tabular-nums">₱{grandTotal.toLocaleString()}</span>
  </div>
- <Button onClick={handleCheckout} disabled={grandTotal === 0} className="w-full h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold disabled:opacity-40 transition-opacity">Complete Transaction</Button>
+ <Button onClick={handleCheckout} disabled={grandTotal === 0} className="w-full h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-primary-foreground text-sm font-semibold disabled:opacity-40 transition-opacity">Complete Transaction</Button>
  </div>
  </div>
  </div>

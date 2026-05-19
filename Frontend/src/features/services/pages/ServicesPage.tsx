@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+﻿import { useMemo, useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -315,7 +315,7 @@ export default function Services() {
  <Settings2 className="w-4 h-4 mr-2" /> Service Types
  </Button>
  )}
- <Button onClick={openAdd} size="sm" className="h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold px-5 transition-opacity">
+ <Button onClick={openAdd} size="sm" className="h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-primary-foreground text-sm font-semibold px-5 transition-opacity">
  <Plus className="w-4 h-4 mr-2" /> New Service
  </Button>
  </div>
@@ -609,7 +609,7 @@ export default function Services() {
  </div>
 
  <div className="flex gap-3 pt-2">
- <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold transition-opacity">{editing ? 'Save Changes' : 'Create Record'}</Button>
+ <Button type="submit" className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-primary-foreground text-sm font-semibold transition-opacity">{editing ? 'Save Changes' : 'Create Record'}</Button>
  <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="h-10 rounded-xl text-sm border-border dark:border-zinc-700 text-muted-foreground">Cancel</Button>
  </div>
  </form>
@@ -705,7 +705,7 @@ export default function Services() {
  <form onSubmit={stForm.handleSubmit(values => { addServiceType(values); stForm.reset({ name: '', defaultLaborCost: 0 }); })} className="flex gap-2 pt-4 mt-4 border-t border-border">
  <Input {...stForm.register('name')} placeholder="Type name" className="flex-1 h-10 rounded-xl bg-background dark:bg-zinc-900 border-border dark:border-zinc-700 text-sm text-foreground placeholder:text-muted-foreground" />
  <Input type="number" {...stForm.register('defaultLaborCost', { valueAsNumber: true })} placeholder="₱" className="w-24 h-10 rounded-xl bg-background dark:bg-zinc-900 border-border dark:border-zinc-700 text-sm text-foreground" />
- <Button type="submit" className="h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-foreground text-sm font-semibold px-5 transition-opacity">Add</Button>
+ <Button type="submit" className="h-10 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-rgb))] to-[rgb(var(--color-secondary-rgb))] hover:opacity-90 text-primary-foreground text-sm font-semibold px-5 transition-opacity">Add</Button>
  </form>
  </DialogContent>
  </Dialog>
