@@ -237,6 +237,42 @@ export function useDashboardData(): DashboardData {
  void fetchDashboardData(true);
  }, [user?.role]);
 
+ useEffect(() => {
+ if (user?.role !== 'Owner' && user?.role !== 'Staff') return;
+ const pollKpis = async () => {
+ try {
+ const res = await apiGet<{
+ summary: {
+ total_jobs_completed: number; total_customers: number; total_revenue: number;
+ total_parts: number; active_services: number; this_week_revenue: number;
+ last_week_revenue: number; weekly_revenue_change: number; today_revenue: number;
+ yesterday_revenue: number; daily_revenue_change: number; completion_rate: number;
+ active_pipeline: number; pending_services: number; ongoing_services: number;
+ inventory_health: number; inventory_value: number; low_stock_count: number;
+ avg_revenue_per_customer: number; avg_job_time: number; repeat_rate: number;
+ };
+ }>('/api/dashboard/stats');
+ const s = res.summary;
+ setMetrics(prev => prev ? {
+ ...prev,
+ totalRevenue: s.total_revenue, netIncome: s.total_revenue,
+ totalJobsCompleted: s.total_jobs_completed, totalCustomers: s.total_customers,
+ totalParts: s.total_parts, activeServices: s.active_services,
+ thisWeekRevenue: s.this_week_revenue, lastWeekRevenue: s.last_week_revenue,
+ weeklyRevenueChange: s.weekly_revenue_change, todayRevenue: s.today_revenue,
+ yesterdayRevenue: s.yesterday_revenue, dailyRevenueChange: s.daily_revenue_change,
+ completionRate: s.completion_rate, activePipeline: s.active_pipeline,
+ pendingServices: s.pending_services, ongoingServices: s.ongoing_services,
+ inventoryHealth: s.inventory_health, inventoryValue: s.inventory_value,
+ lowStockCount: s.low_stock_count, avgRevenuePerCustomer: s.avg_revenue_per_customer,
+ avgJobTime: s.avg_job_time, repeatRate: s.repeat_rate,
+ } : prev);
+ } catch { /* silent */ }
+ };
+ const iv = window.setInterval(() => void pollKpis(), 10000);
+ return () => window.clearInterval(iv);
+ }, [user?.role]);
+
  return {
  metrics,
  recentTransactions,
