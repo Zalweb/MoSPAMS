@@ -127,7 +127,7 @@ export default function MechanicDashboardPage() {
  const svgColors = useSvgBrandColors();
 
  useEffect(() => {
- void (async () => {
+ const fetchStats = async () => {
  try {
  const res = await apiGet<DashboardData>('/api/mechanic/dashboard');
  setData(res);
@@ -136,7 +136,10 @@ export default function MechanicDashboardPage() {
  } finally {
  setLoadingStats(false);
  }
- })();
+ };
+ void fetchStats();
+ const intervalId = window.setInterval(() => void fetchStats(), 3000);
+ return () => window.clearInterval(intervalId);
  }, []);
 
  const fetchLabor = useCallback(async (p: Period) => {

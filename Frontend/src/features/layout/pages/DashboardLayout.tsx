@@ -94,7 +94,7 @@ export default function DashboardLayout() {
  } catch { /* silent */ }
  };
  void fetch();
- const iv = setInterval(() => void fetch(), 30000);
+ const iv = setInterval(() => void fetch(), 3000);
  return () => clearInterval(iv);
  }, [role]);
 

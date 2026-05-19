@@ -39,11 +39,12 @@ def bg_fill(slide):
     fill.solid()
     fill.fore_color.rgb = BG
 
-def box(slide, x, y, w, h, fill_color=None, line_color=None, line_width=Pt(0.75), radius=None):
+def box(slide, x, y, w, h, fill_color=None, line_color=None, line_width=Pt(0.75), corner=0.08):
     shape = slide.shapes.add_shape(
-        1,  # MSO_SHAPE_TYPE.RECTANGLE
+        5,  # MSO_AUTO_SHAPE_TYPE.ROUNDED_RECTANGLE
         x, y, w, h
     )
+    shape.adjustments[0] = corner
     shape.line.width = line_width
     if fill_color:
         shape.fill.solid()
@@ -60,6 +61,10 @@ def txt(slide, text, x, y, w, h, size=18, bold=False, color=FG, align=PP_ALIGN.L
     txb = slide.shapes.add_textbox(x, y, w, h)
     tf  = txb.text_frame
     tf.word_wrap = True
+    tf.margin_left   = 0
+    tf.margin_right  = 0
+    tf.margin_top    = 0
+    tf.margin_bottom = 0
     p = tf.paragraphs[0]
     p.alignment = align
     run = p.add_run()
@@ -84,7 +89,7 @@ def divider(slide, y, left=Inches(0.5), right=Inches(12.83)):
     line.line.width = Pt(0.5)
 
 def pill(slide, text, x, y, bg=CARD2, fg=MUTED):
-    shape = box(slide, x, y, Inches(1.5), Inches(0.28), fill_color=bg, line_color=BORDER, line_width=Pt(0.5))
+    shape = box(slide, x, y, Inches(1.5), Inches(0.28), fill_color=bg, line_color=BORDER, line_width=Pt(0.5), corner=0.5)
     txt(slide, text, x + Inches(0.1), y + Inches(0.03), Inches(1.3), Inches(0.22), size=9, color=fg, align=PP_ALIGN.CENTER)
     return shape
 
@@ -228,8 +233,15 @@ for idx, (title, desc, tags) in enumerate(features):
     dot.fill.solid(); dot.fill.fore_color.rgb = CARD2; dot.line.color.rgb = BORDER; dot.line.width = Pt(0.5)
     txt(s, title, fx + Inches(0.18), fy + Inches(0.58), Inches(3.7), Inches(0.32), size=13, bold=True, color=FG)
     txt(s, desc,  fx + Inches(0.18), fy + Inches(0.92), Inches(3.7), Inches(0.65), size=10, color=MUTED)
+    # Tags: distribute evenly across inner card width (3.74") with small gaps
+    tag_count = len(tags)
+    tag_gap   = Inches(0.07)
+    tag_w     = (Inches(3.74) - tag_gap * (tag_count - 1)) / tag_count
     for ti, tag in enumerate(tags):
-        pill(s, tag, fx + Inches(0.18) + ti * Inches(1.3), fy + Inches(1.9), bg=CARD2, fg=MUTED)
+        tx = fx + Inches(0.18) + ti * (tag_w + tag_gap)
+        ty = fy + Inches(1.9)
+        box(s, tx, ty, tag_w, Inches(0.28), fill_color=CARD2, line_color=BORDER, line_width=Pt(0.5), corner=0.5)
+        txt(s, tag, tx + Inches(0.07), ty + Inches(0.03), tag_w - Inches(0.14), Inches(0.22), size=8, color=MUTED, align=PP_ALIGN.CENTER)
 
 txt(s, "MoSPAMS", Inches(0.3), Inches(7.0), Inches(2.0), Inches(0.35), size=10, color=MUTED2)
 txt(s, "mospams.shop", Inches(10.8), Inches(7.0), Inches(2.2), Inches(0.35), size=10, color=MUTED2, align=PP_ALIGN.RIGHT)
@@ -351,78 +363,7 @@ txt(s, "MoSPAMS", Inches(0.3), Inches(7.1), Inches(2.0), Inches(0.35), size=10, 
 txt(s, "mospams.shop", Inches(10.8), Inches(7.1), Inches(2.2), Inches(0.35), size=10, color=MUTED2, align=PP_ALIGN.RIGHT)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# SLIDE 6 — Pricing Plans
-# ══════════════════════════════════════════════════════════════════════════════
-s = add_slide()
-
-pill(s, "Simple Pricing", Inches(0.5), Inches(0.4), bg=CARD2, fg=MUTED)
-txt(s, "Choose your perfect plan",
-    Inches(0.5), Inches(0.88), Inches(12.3), Inches(0.5),
-    size=28, bold=True, color=FG, align=PP_ALIGN.CENTER)
-txt(s, "Flexible pricing for shops of all sizes. Start free, upgrade anytime.",
-    Inches(2.0), Inches(1.42), Inches(9.3), Inches(0.35),
-    size=13, color=MUTED, align=PP_ALIGN.CENTER)
-
-plans = [
-    ("Basic", "₱499/month", "Perfect for small shops",
-     ["Always know what parts you have in stock",
-      "Handle up to 50 service jobs per month",
-      "See your daily sales and earnings at a glance",
-      "Invite up to 2 staff to help run the shop",
-      "Get your own shop page on mospams.shop",
-      "Simple customer records and service tracking"], False),
-    ("Premium", "₱999/month", "Best for growing shops",
-     ["No limits on parts, jobs, or customers — ever",
-      "Assign mechanics and track every job in real time",
-      "Customers can book services and view history online",
-      "Know exactly what is selling and earning money",
-      "Get alerts before you run out of critical parts",
-      "Your brand, your colors, your logo on everything",
-      "Up to 10 staff accounts for your whole team",
-      "Full history of every action taken in your shop"], True),
-    ("Enterprise", "Custom Pricing", "Tailored for large operations",
-     ["All Premium features, no exceptions",
-      "Unlimited staff with role-based access",
-      "Dedicated support with guaranteed response time",
-      "Custom setup and onboarding assistance",
-      "Tailored integrations for your workflow",
-      "Pricing and terms built around your scale"], False),
-]
-
-for idx, (pname, price, desc, feats, featured) in enumerate(plans):
-    px = Inches(0.35) + idx * Inches(4.3)
-    py = Inches(1.95)
-    fill = CARD2 if featured else CARD
-    border = RGBColor(0x52,0x52,0x5B) if featured else BORDER
-    scale_y = Inches(0.0)
-    pcard = box(s, px, py - scale_y, Inches(4.1), Inches(5.0) + scale_y * 2, fill_color=fill, line_color=border, line_width=Pt(1.0 if featured else 0.5))
-
-    if featured:
-        pill(s, "Most Popular", px + Inches(2.3), py + Inches(0.08), bg=FG, fg=BG)
-
-    txt(s, pname, px + Inches(0.2), py + Inches(0.15), Inches(3.7), Inches(0.32), size=14, bold=False, color=MUTED)
-    txt(s, price, px + Inches(0.2), py + Inches(0.47), Inches(3.7), Inches(0.52), size=26, bold=True, color=FG)
-    txt(s, desc,  px + Inches(0.2), py + Inches(0.98), Inches(3.7), Inches(0.28), size=11, color=MUTED)
-
-    divider(s, py + Inches(1.35), left=px + Inches(0.2), right=px + Inches(3.9))
-
-    for fi, feat in enumerate(feats[:7]):
-        fy = py + Inches(1.5) + fi * Inches(0.42)
-        dot4 = s.shapes.add_shape(1, px + Inches(0.22), fy + Inches(0.1), Inches(0.1), Inches(0.1))
-        dot4.fill.solid(); dot4.fill.fore_color.rgb = MUTED2; dot4.line.fill.background()
-        txt(s, feat, px + Inches(0.4), fy, Inches(3.5), Inches(0.33), size=10, color=MUTED)
-
-    btn_bg = FG if featured else CARD2
-    btn_fg = BG if featured else FG
-    btn = box(s, px + Inches(0.2), py + Inches(4.45), Inches(3.7), Inches(0.38), fill_color=btn_bg, line_color=border, line_width=Pt(0.5))
-    label = "Contact the Team" if pname == "Enterprise" else "Get Started"
-    txt(s, label, px + Inches(0.2), py + Inches(4.47), Inches(3.7), Inches(0.33), size=12, bold=True, color=btn_fg, align=PP_ALIGN.CENTER)
-
-txt(s, "All plans include 14-day free trial  •  No credit card required  •  Cancel anytime",
-    Inches(1.5), Inches(7.07), Inches(10.3), Inches(0.3), size=10, color=MUTED2, align=PP_ALIGN.CENTER)
-
-# ══════════════════════════════════════════════════════════════════════════════
-# SLIDE 7 — Why MoSPAMS? (Benefits summary)
+# SLIDE 6 — Why MoSPAMS? (Benefits summary)
 # ══════════════════════════════════════════════════════════════════════════════
 s = add_slide()
 
@@ -466,7 +407,7 @@ txt(s, "MoSPAMS", Inches(0.3), Inches(7.1), Inches(2.0), Inches(0.35), size=10, 
 txt(s, "mospams.shop", Inches(10.8), Inches(7.1), Inches(2.2), Inches(0.35), size=10, color=MUTED2, align=PP_ALIGN.RIGHT)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# SLIDE 8 — Call to Action / Thank You
+# SLIDE 7 — Call to Action / Thank You
 # ══════════════════════════════════════════════════════════════════════════════
 s = add_slide()
 
@@ -480,11 +421,11 @@ txt(s, "MoSPAMS — Motorcycle Service and Parts Management System",
     size=14, color=MUTED, align=PP_ALIGN.CENTER)
 
 # CTA buttons (visual only)
-btn1 = box(s, Inches(3.8), Inches(4.2), Inches(2.6), Inches(0.5), fill_color=FG, line_color=None)
+btn1 = box(s, Inches(3.8), Inches(4.2), Inches(2.6), Inches(0.5), fill_color=FG, line_color=None, corner=0.2)
 txt(s, "Start free trial", Inches(3.8), Inches(4.25), Inches(2.6), Inches(0.4),
     size=13, bold=True, color=BG, align=PP_ALIGN.CENTER)
 
-btn2 = box(s, Inches(6.9), Inches(4.2), Inches(2.6), Inches(0.5), fill_color=CARD2, line_color=BORDER, line_width=Pt(0.5))
+btn2 = box(s, Inches(6.9), Inches(4.2), Inches(2.6), Inches(0.5), fill_color=CARD2, line_color=BORDER, line_width=Pt(0.5), corner=0.2)
 txt(s, "View Features", Inches(6.9), Inches(4.25), Inches(2.6), Inches(0.4),
     size=13, bold=True, color=FG, align=PP_ALIGN.CENTER)
 

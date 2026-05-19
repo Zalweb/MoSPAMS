@@ -235,6 +235,8 @@ export function useDashboardData(): DashboardData {
 
  useEffect(() => {
  void fetchDashboardData();
+ const intervalId = window.setInterval(() => void fetchDashboardData(), 3000);
+ return () => window.clearInterval(intervalId);
  }, [user?.role]);
 
  return {

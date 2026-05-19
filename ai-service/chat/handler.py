@@ -1,5 +1,6 @@
 import asyncio
 import json
+import re
 from datetime import date
 from typing import AsyncGenerator
 from llm.factory import get_llm_provider, get_fallback_provider
@@ -48,6 +49,12 @@ _DB_SCHEMA = """
 
 ### payments  (customer role only)
   Returns the customer's own payment/sales records.
+
+### job_parts
+  Parts used in a specific service job.
+  Fields: job_part_id, part_name, brand, quantity, unit_price, subtotal
+  Required filter: job_id (the numeric ID of the service job)
+  Example: action=list, entity=job_parts, filters={"job_id": 69}
 """
 
 # ─── ROLE PERMISSIONS ────────────────────────────────────────────────────────
@@ -55,20 +62,20 @@ _ROLE_PERMISSIONS = """
 ## Your Data Access by Role
 
 **Owner**  — full access
-  Read:  customers, service_jobs, parts, mechanics, sales, service_types, shop, user_profile
+  Read:  customers, service_jobs, job_parts, parts, mechanics, sales, service_types, shop, user_profile
   Write: customers, service_jobs, parts, service_types, shop
 
 **Staff**  — operational access (no financial data)
-  Read:  customers, service_jobs, parts, mechanics, service_types, shop, user_profile
+  Read:  customers, service_jobs, job_parts, parts, mechanics, service_types, shop, user_profile
   Write: customers, service_jobs
   Cannot access: sales revenue, financial reports
 
 **Mechanic**  — own jobs only
-  Read:  service_jobs (only assigned to you), user_profile
+  Read:  service_jobs (only assigned to you), job_parts, user_profile
   Write: service_jobs (update notes/status on your own jobs)
 
 **Customer**  — own data only
-  Read:  service_jobs (own), payments (own), service_types, shop, user_profile
+  Read:  service_jobs (own), job_parts (own jobs only), payments (own), service_types, shop, user_profile
   Write: service_jobs (book new service), vehicles (register motorcycle)
 """
 
@@ -81,37 +88,172 @@ Call this tool for EVERY data question — never guess or invent data.
 **Actions:**
 - list   → returns array of matching records
 - count  → returns {"count": N}
-- get    → returns one record by record_id
+- get    → returns one record by record_id (integer ID only, NOT a name)
 - create → inserts and returns new record
 - update → modifies record by record_id, returns updated record
 
 **Example calls:**
-- "What is my name?"            → action=list, entity=user_profile
-- "How many customers?"         → action=count, entity=customers
-- "List all customers"          → action=list, entity=customers
-- "Find customer named Frienzal"→ action=list, entity=customers, filters={"name":"Frienzal"}
-- "Completed jobs this month"   → action=list, entity=service_jobs, filters={"status":"completed","from_date":"2025-05-01"}
-- "How many pending jobs?"      → action=count, entity=service_jobs, filters={"status":"pending"}
-- "Show low-stock parts"        → action=list, entity=parts, filters={"low_stock":true}
-- "Revenue for May"             → action=list, entity=sales, filters={"from_date":"2025-05-01","to_date":"2025-05-31"}
-- "Who are my mechanics?"       → action=list, entity=mechanics
-- "Update notes on job 45"      → action=update, entity=service_jobs, record_id=45, data={"notes":"..."}
-- "Book service for motorcycle" → action=create, entity=service_jobs, data={...}
-- "Add a new customer"          → action=create, entity=customers, data={...}
+- "What is my name?"              → action=list, entity=user_profile
+- "How many customers?"           → action=count, entity=customers
+- "List all customers"            → action=list, entity=customers
+- "Is Lance Bayot a customer?"    → action=list, entity=customers, filters={"name":"Lance Bayot"}
+- "Find customer named Frienzal"  → action=list, entity=customers, filters={"name":"Frienzal"}
+- "Latest service job"            → action=list, entity=service_jobs, limit=1, order_by="job_id desc"
+- "Most recent job"               → action=list, entity=service_jobs, limit=1, order_by="job_date desc"
+- "Completed jobs this month"     → action=list, entity=service_jobs, filters={"status":"completed","from_date":"2025-05-01"}
+- "How many pending jobs?"        → action=count, entity=service_jobs, filters={"status":"pending"}
+- "Show low-stock parts"          → action=list, entity=parts, filters={"low_stock":true}
+- "Revenue for May"               → action=list, entity=sales, filters={"from_date":"2025-05-01","to_date":"2025-05-31"}
+- "Who are my mechanics?"         → action=list, entity=mechanics
+- "Parts used in job 69?"         → action=list, entity=job_parts, filters={"job_id":69}
+- "What parts were used in the latest job?" → first get the latest job_id, then action=list, entity=job_parts, filters={"job_id":<id>}
+- "Update notes on job 45"        → action=update, entity=service_jobs, record_id=45, data={"notes":"..."}
+- "Book/create a service job"     → action=create, entity=service_jobs, data={"motorcycle_model":"Honda Beat","job_date":"2026-05-19","customer_name":"Ana Mendoza","notes":"Oil change"}
+- "Add a new customer"            → action=create, entity=customers, data={"full_name":"...","phone":"...","email":"..."}
 
-**Rules:**
+**For create operations — collect required info first:**
+- service_jobs create requires: motorcycle_model, job_date. Optional: customer_name, notes.
+  If the user hasn't provided these, ASK before calling the tool.
+  WRONG data types: data="{\"key\":\"val\"}" (string) → RIGHT: data={"key":"val"} (object)
+  WRONG: record_id="null" → RIGHT: omit it or pass null
+  WRONG: service_type_id="Oil Change" (service_type_id is a number, not a service name)
+
+**Correct create service_jobs example:**
+  action=create, entity=service_jobs, data={"motorcycle_model":"Honda Beat 110","job_date":"2026-05-19","customer_name":"Ana Mendoza","notes":"Oil change requested"}
+
+**Critical Rules:**
 1. ALWAYS call the tool for any shop data question. Never invent names, numbers, or records.
-2. Delete is not permitted — you cannot delete anything.
-3. If the user asks for something outside your role permissions, explain politely.
-4. After receiving a tool result, EXTRACT and PRESENT the actual data values naturally.
+2. NEVER use record_id with a person's name. Names go in filters={"name":"..."}, NOT record_id.
+   - WRONG: action=get, entity=customers, record_id=lance bayot
+   - RIGHT:  action=list, entity=customers, filters={"name":"lance bayot"}
+3. For "latest", "most recent", or "newest" — ALWAYS use limit=1 with order_by="job_id desc" or "job_date desc".
+   NEVER return a list when the user says "latest one" or "just one".
+4. For "parts used in a job" — use entity=job_parts, filters={"job_id":<id>}.
+   If you don't know the job_id yet, call service_jobs first to get it.
+5. Delete is not permitted — you cannot delete anything.
+6. If the user asks for something outside your role permissions, explain politely.
+7. **NEVER fabricate data.** If a tool call returns an error, say:
+   "I had trouble retrieving that data — please try again."
+   Do NOT guess, invent, or hallucinate part names, customer names, amounts, or any values.
+   A wrong answer is far worse than admitting you couldn't fetch the data.
+8. After receiving a tool result, EXTRACT and PRESENT the actual data values naturally.
    - WRONG: "The output is a JSON that includes your name and email."
    - RIGHT: "Your name is Lonie Labisig and your email is lonie@example.com."
    - WRONG: "The result shows a count of 16."
    - RIGHT: "You have 16 customers."
    Never describe the JSON structure — always speak as if you know the answer directly.
-5. Use ₱ (Philippine Peso) for currency. Format: ₱12,500.
-6. For general questions (greetings, advice, motorcycle tips), answer naturally without the tool.
+9. Use ₱ (Philippine Peso) for currency. Format: ₱12,500.
 """
+
+# ─── CONVERSATIONAL HANDLING ─────────────────────────────────────────────────
+_CONVERSATIONAL_GUIDE = """
+## Handling Casual & Personal Questions
+
+Many messages are NOT shop data queries. For these, respond naturally WITHOUT calling execute_db_operation:
+
+**Respond naturally to:**
+- Questions about yourself: "Are you dumb?", "Are you smart?", "Who are you?", "What can you do?"
+- Greetings and small talk: "Hi", "Hello", "How are you?", "Good morning"
+- Jokes or light insults: "You're dumb", "You suck", "lol"
+- General advice: motorcycle tips, service recommendations, maintenance questions
+
+**Examples:**
+- "Are you dumb?" → "Not at all! I'm MoSPAMS Assistant, your AI helper for this shop. Ask me anything about jobs, parts, customers, or revenue!"
+- "You dumb?" → "Nope! Sharp and ready. What do you need help with?"
+- "Hi!" → "Hi there! How can I help you today?"
+
+**NEVER say "I cannot answer that" for casual conversation.** Always be friendly and offer to help with something.
+
+Only call execute_db_operation when the user is asking about actual shop data (customers, jobs, parts, sales, etc.).
+
+**ABSOLUTE RULE — Never output raw JSON in your text responses.**
+Tool calls happen silently through the system. Your response must ALWAYS be plain, natural language.
+- WRONG: 'Here is the JSON: {"name": "execute_db_operation", ...}'
+- WRONG: Showing any JSON, code blocks, or technical structures to the user
+- RIGHT: Just answer in plain language. The tool call happens invisibly.
+If a message is vague (like "In my garage"), ask a clarifying question in plain language. Never guess and generate a tool call for ambiguous input.
+"""
+
+
+def _fix_tool_args(args: dict) -> dict:
+    """Fix common type mistakes small LLMs make: string 'null' → None, stringified JSON → object."""
+    result = {}
+    for key, val in args.items():
+        if isinstance(val, str):
+            stripped = val.strip()
+            if stripped in ('null', 'None', 'undefined', ''):
+                result[key] = None
+            elif stripped.startswith(('{', '[')):
+                try:
+                    result[key] = json.loads(stripped)
+                except json.JSONDecodeError:
+                    result[key] = val
+            else:
+                result[key] = val
+        else:
+            result[key] = val
+    return result
+
+
+def _try_parse_text_tool_call(content: str | None) -> tuple[str, dict] | None:
+    """
+    Some small LLMs output tool call JSON as plain text instead of tool_calls.
+    Handles JSON embedded anywhere in prose, not just when the whole response is JSON.
+    Returns (tool_name, arguments_dict) or None.
+    """
+    if not content or "execute_db_operation" not in content:
+        return None
+
+    # Walk the text looking for {"name" and extract the balanced JSON object
+    text = content
+    start = 0
+    while True:
+        idx = text.find('"execute_db_operation"', start)
+        if idx == -1:
+            break
+        # Find the opening { before this position
+        open_idx = text.rfind('{', 0, idx)
+        if open_idx == -1:
+            start = idx + 1
+            continue
+        # Extract balanced JSON starting at open_idx
+        depth = 0
+        in_string = False
+        escape = False
+        end = open_idx
+        for i, ch in enumerate(text[open_idx:], open_idx):
+            if escape:
+                escape = False
+                continue
+            if ch == '\\' and in_string:
+                escape = True
+                continue
+            if ch == '"':
+                in_string = not in_string
+            if not in_string:
+                if ch == '{':
+                    depth += 1
+                elif ch == '}':
+                    depth -= 1
+                    if depth == 0:
+                        end = i + 1
+                        break
+        if end > open_idx:
+            candidate = text[open_idx:end]
+            # Try direct parse, then try fixing missing closing braces
+            for attempt in (candidate, candidate + '}' * max(0, candidate.count('{') - candidate.count('}'))):
+                try:
+                    data = json.loads(attempt)
+                    if isinstance(data, dict):
+                        name = data.get("name")
+                        args = data.get("parameters") or data.get("arguments")
+                        if name == "execute_db_operation" and isinstance(args, dict):
+                            return name, _fix_tool_args(args)
+                    break
+                except json.JSONDecodeError:
+                    continue
+        start = idx + 1
+    return None
 
 
 def _tools_for_role(role: str) -> list:
@@ -165,6 +307,7 @@ def _system_prompt(role: str, shop_id: int, rag_context: list[str]) -> str:
         _DB_SCHEMA,
         _ROLE_PERMISSIONS,
         _TOOL_GUIDE,
+        _CONVERSATIONAL_GUIDE,
         f"## Shop Knowledge Base (uploaded documents)\n{ctx}",
     ]
     return "\n\n".join(sections)
@@ -191,10 +334,26 @@ async def handle_chat(
     messages = _build_messages(session_id, system, message, provider)
     append_message(session_id, "user", message)
 
-    for _ in range(MAX_TOOL_ITERATIONS):
+    for iteration in range(MAX_TOOL_ITERATIONS):
         response = provider.chat(messages, tools=tools)
 
         if not response.tool_calls:
+            # Detect text-based tool calls from small LLMs that don't use the tool_calls API
+            parsed = _try_parse_text_tool_call(response.content)
+            if parsed:
+                tool_name, tool_args = parsed
+                fake_id = f"text_tc_{iteration}"
+                messages.append({
+                    "role": "assistant",
+                    "content": None,
+                    "tool_calls": [{"id": fake_id, "type": "function", "function": {
+                        "name": tool_name, "arguments": json.dumps(tool_args)
+                    }}],
+                })
+                result = execute_tool(name=tool_name, arguments=tool_args, shop_id=shop_id, user_id=user_id, role=role)
+                messages.append({"role": "tool", "tool_call_id": fake_id, "content": result})
+                continue
+
             answer = response.content or "I'm sorry, I couldn't generate a response."
             append_message(session_id, "assistant", answer)
             return answer
@@ -242,10 +401,26 @@ async def handle_chat_stream(
 
     final_answer = None
 
-    for _ in range(MAX_TOOL_ITERATIONS):
+    for iteration in range(MAX_TOOL_ITERATIONS):
         response = provider.chat(messages, tools=tools)
 
         if not response.tool_calls:
+            # Detect text-based tool calls from small LLMs that don't use the tool_calls API
+            parsed = _try_parse_text_tool_call(response.content)
+            if parsed:
+                tool_name, tool_args = parsed
+                fake_id = f"text_tc_{iteration}"
+                messages.append({
+                    "role": "assistant",
+                    "content": None,
+                    "tool_calls": [{"id": fake_id, "type": "function", "function": {
+                        "name": tool_name, "arguments": json.dumps(tool_args)
+                    }}],
+                })
+                result = execute_tool(name=tool_name, arguments=tool_args, shop_id=shop_id, user_id=user_id, role=role)
+                messages.append({"role": "tool", "tool_call_id": fake_id, "content": result})
+                continue
+
             final_answer = response.content or ""
             break
 

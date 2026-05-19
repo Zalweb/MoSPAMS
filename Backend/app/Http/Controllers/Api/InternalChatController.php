@@ -265,10 +265,10 @@ class InternalChatController extends Controller
         }
 
         $readAccess = match($role) {
-            'owner'    => ['customers','service_jobs','parts','mechanics','sales','service_types','shop','user_profile'],
-            'staff'    => ['customers','service_jobs','parts','mechanics','service_types','shop','user_profile'],
-            'mechanic' => ['service_jobs','user_profile'],
-            default    => ['service_jobs','service_types','shop','user_profile','payments'],
+            'owner'    => ['customers','service_jobs','parts','mechanics','sales','service_types','shop','user_profile','job_parts'],
+            'staff'    => ['customers','service_jobs','parts','mechanics','service_types','shop','user_profile','job_parts'],
+            'mechanic' => ['service_jobs','user_profile','job_parts'],
+            default    => ['service_jobs','service_types','shop','user_profile','payments','job_parts'],
         };
         $writeAccess = match($role) {
             'owner'    => ['customers','service_jobs','parts','service_types','shop'],
@@ -292,6 +292,7 @@ class InternalChatController extends Controller
             'shop'          => $this->opShop($action, $shopId, $role, $data),
             'user_profile'  => $this->opUserProfile($shopId, $userId),
             'payments'      => $this->opPayments($shopId, $userId, $filters, $limit),
+            'job_parts'     => $this->opJobParts($shopId, $filters, $recordId, $limit),
             default         => response()->json(['error' => "Unknown entity: {$entity}"], 400),
         };
     }
@@ -549,6 +550,35 @@ class InternalChatController extends Controller
             'email'     => $user->email,
             'role'      => $user->role?->role_name ?? '',
         ]);
+    }
+
+    private function opJobParts(int $shopId, array $f, $recordId, int $limit)
+    {
+        $jobId = $f['job_id'] ?? $recordId ?? null;
+        if (!$jobId) {
+            return response()->json(['error' => 'job_id filter is required. Example: filters={"job_id": 69}'], 400);
+        }
+        $exists = DB::table('service_jobs')
+            ->where('job_id', $jobId)
+            ->where('shop_id_fk', $shopId)
+            ->exists();
+        if (!$exists) {
+            return response()->json(['error' => "Service job {$jobId} not found in this shop."], 404);
+        }
+        $parts = DB::table('service_job_parts')
+            ->join('parts', 'service_job_parts.part_id_fk', '=', 'parts.part_id')
+            ->where('service_job_parts.job_id_fk', $jobId)
+            ->select(
+                'service_job_parts.job_part_id',
+                'parts.part_name',
+                'parts.brand',
+                'service_job_parts.quantity',
+                'service_job_parts.unit_price',
+                'service_job_parts.subtotal'
+            )
+            ->limit($limit)
+            ->get();
+        return response()->json(['job_id' => $jobId, 'parts' => $parts, 'count' => $parts->count()]);
     }
 
     private function opPayments(int $shopId, int $userId, array $f, int $limit)

@@ -46,7 +46,7 @@ export default function CustomerDashboard() {
  };
 
  void fetchServices(true);
- const intervalId = window.setInterval(() => void fetchServices(), 10000);
+ const intervalId = window.setInterval(() => void fetchServices(), 3000);
 
  return () => {
  active = false;

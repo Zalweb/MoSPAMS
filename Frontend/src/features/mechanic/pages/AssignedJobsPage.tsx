@@ -53,7 +53,7 @@ export default function AssignedJobsPage() {
  };
 
  void pollJobs(true);
- const intervalId = window.setInterval(() => void pollJobs(), 10000);
+ const intervalId = window.setInterval(() => void pollJobs(), 3000);
 
  return () => {
  active = false;

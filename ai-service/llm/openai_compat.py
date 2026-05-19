@@ -16,7 +16,7 @@ class OpenAICompatClient(LLMProvider):
         kwargs: dict = dict(
             model=self._model,
             messages=messages,
-            temperature=0.7,
+            temperature=0.3,
             max_tokens=1024,
         )
         if tools:
@@ -40,7 +40,7 @@ class OpenAICompatClient(LLMProvider):
         stream = self._client.chat.completions.create(
             model=self._model,
             messages=messages,
-            temperature=0.7,
+            temperature=0.3,
             max_tokens=1024,
             stream=True,
         )

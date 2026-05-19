@@ -90,7 +90,7 @@ export default function Services() {
  const [linkedCustomerId, setLinkedCustomerId] = useState<string | null>(null);
  const [newPartsSearch, setNewPartsSearch] = useState('');
 
- const { data: services, loading, meta, page, setPage, prependItem, updateItem, removeItem } = usePaginatedFetch<ServiceRecord>('/api/services', 25, {}, 10000);
+ const { data: services, loading, meta, page, setPage, prependItem, updateItem, removeItem } = usePaginatedFetch<ServiceRecord>('/api/services', 25, {}, 3000);
 
  useEffect(() => {
  if (!modalOpen) return;
