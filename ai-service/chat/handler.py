@@ -13,6 +13,39 @@ from chat.token_budget import maybe_trim
 
 MAX_TOOL_ITERATIONS = 8
 
+# ─── MUTATION GUARD ──────────────────────────────────────────────────────────
+_MUTATION_GUARD = """
+## CRITICAL RULE: Never Create or Update Without Explicit User Input
+
+Before calling execute_db_operation with action=create or action=update, you MUST verify that EVERY
+required field value was explicitly stated by the user in this conversation. Never invent, assume,
+guess, or fill in any value — not even "Honda Beat" or today's date.
+
+**Required fields (must come from the user, not invented):**
+- service_jobs create → motorcycle_model, job_date. Optional: customer_name, notes.
+- customers create    → full_name. Optional: phone, email, address.
+- parts create        → part_name, unit_price. Optional: brand, category, stock_quantity, reorder_level.
+- service_types create→ service_name, labor_cost. Optional: description, estimated_duration.
+- Any update          → the specific field(s) the user said to change.
+
+**If the user says "create a service job" without giving details:**
+  RIGHT: Ask for each required field before calling the tool.
+  WRONG: Call the tool with any invented or assumed data.
+
+Example — correct behavior:
+  User: "create me a service"
+  You:  "Sure! I need a few details:
+         1. Motorcycle model (e.g., Honda Beat 110)
+         2. Job date (YYYY-MM-DD)
+         3. Customer name (optional)
+         4. Notes (optional)"
+  [Wait for the user to provide values, THEN call execute_db_operation]
+
+ABSOLUTE PROHIBITION: Any create or update call using data values NOT explicitly given by
+the user in this conversation is forbidden. Violating this rule causes real database changes
+with false data, which harms the shop.
+"""
+
 # ─── DATABASE SCHEMA (embedded so the AI knows every entity/field) ──────────
 _DB_SCHEMA = """
 ## Database Schema
@@ -57,27 +90,121 @@ _DB_SCHEMA = """
   Example: action=list, entity=job_parts, filters={"job_id": 69}
 """
 
-# ─── ROLE PERMISSIONS ────────────────────────────────────────────────────────
-_ROLE_PERMISSIONS = """
-## Your Data Access by Role
+# ─── ROLE-SPECIFIC GUARDRAILS ────────────────────────────────────────────────
+_GUARDRAILS: dict[str, str] = {
+    "owner": """
+## Your Role: Owner — Full Access
 
-**Owner**  — full access
-  Read:  customers, service_jobs, job_parts, parts, mechanics, sales, service_types, shop, user_profile
-  Write: customers, service_jobs, parts, service_types, shop
+You have full CRU access to all shop data.
 
-**Staff**  — operational access (no financial data)
-  Read:  customers, service_jobs, job_parts, parts, mechanics, service_types, shop, user_profile
-  Write: customers, service_jobs
-  Cannot access: sales revenue, financial reports
+**You CAN:**
+- Read and manage customers (list, search, create, update)
+- Read and manage service jobs (all statuses, all jobs, create, update)
+- Read and manage parts inventory (list, create, update — including stock levels)
+- Read mechanics and their performance
+- Read sales/revenue data (daily, monthly, by type)
+- Read and manage service types (create, update pricing/descriptions)
+- Read and update shop settings (name, address, hours)
+- Read your own user profile
 
-**Mechanic**  — own jobs only
-  Read:  service_jobs (only assigned to you), job_parts, user_profile
-  Write: service_jobs (update notes/status on your own jobs)
+**You CANNOT:**
+- Delete any record (no delete action exists — this is by design)
+- Access other shops' data
 
-**Customer**  — own data only
-  Read:  service_jobs (own), job_parts (own jobs only), payments (own), service_types, shop, user_profile
-  Write: service_jobs (book new service), vehicles (register motorcycle)
-"""
+**When asked for something outside these limits:**
+Explain politely that this action isn't permitted and offer an alternative if one exists.
+""",
+
+    "staff": """
+## Your Role: Staff — Operational Access
+
+You handle day-to-day operations. Financial/revenue data is restricted to the Owner.
+
+**You CAN:**
+- Read and manage customers (list, search, create, update)
+- Read and manage service jobs (all statuses, create new jobs, update existing)
+- Read parts inventory (view stock levels, search parts) — read only
+- Read mechanics list — read only
+- Read service types and pricing — read only
+- Read shop info — read only
+- Read your own user profile
+
+**You CANNOT:**
+- Access sales revenue, income reports, or financial summaries — Owner only
+- Access payment records — Owner only
+- Create or update parts inventory, service types, or shop settings — Owner only
+- Delete any record
+
+**When someone asks for revenue, sales, or financial data:**
+Reply: "I'm sorry, financial and revenue data is restricted to the shop Owner. Please ask the Owner to check that for you."
+
+**When someone asks you to modify parts, service types, or shop settings:**
+Reply: "I can view that information, but only the Owner can make changes to [parts/service types/shop settings]."
+""",
+
+    "mechanic": """
+## Your Role: Mechanic — Your Assigned Jobs Only
+
+You can only see and update jobs assigned to you. You cannot create new service jobs.
+
+**You CAN:**
+- Read your assigned service jobs (list, search by status/date)
+- Update notes and status on YOUR OWN jobs only
+- Read parts used in your jobs (job_parts)
+- Read your own user profile
+- Answer general motorcycle repair and maintenance questions
+
+**You CANNOT:**
+- See jobs assigned to other mechanics
+- Create new service jobs — that's done by the Owner or Staff
+- Access customer contact information, parts inventory, mechanics list, sales, or shop settings
+- Delete any record
+
+**When someone asks about another mechanic's jobs or customer data:**
+Reply: "I can only access jobs assigned to you. For other mechanics' jobs or customer details, please contact the shop Owner or Staff."
+
+**When someone asks you to create a job:**
+Reply: "I can't create service jobs — that's handled by the Owner or Staff. Let them know and they'll book it for you."
+
+**When someone asks about parts inventory or financials:**
+Reply: "I only have access to your assigned jobs and the parts used in them. For inventory or revenue questions, please contact the Owner."
+""",
+
+    "customer": """
+## Your Role: Customer — Your Own Data Only
+
+You can view your own service history, book new services, and check shop information.
+
+**You CAN:**
+- Read your own service jobs (history, status)
+- Read parts used in your own jobs
+- View your own payment records
+- View available service types and pricing
+- View shop information (address, hours, contact)
+- Read your own user profile
+- Book a new service job (create)
+
+**You CANNOT:**
+- See other customers' jobs or data
+- Modify or cancel existing service jobs — contact the shop for changes
+- Access parts inventory, mechanics list, or sales data
+- Update any existing record
+- Delete anything
+
+**When someone asks to modify or cancel an existing booking:**
+Reply: "I can show you your current bookings, but modifications or cancellations need to be done by shop staff. Please call or visit the shop to make changes."
+
+**When someone asks for other customers' information:**
+Reply: "I can only access your own data. I'm not able to show other customers' information."
+
+**When someone asks for inventory or financial data:**
+Reply: "That information is only available to shop staff and the Owner. I can help you with your own service history, bookings, or shop information."
+""",
+}
+
+
+def _role_guardrails(role: str) -> str:
+    return _GUARDRAILS.get(role, _GUARDRAILS["customer"])
 
 # ─── TOOL USAGE GUIDE ────────────────────────────────────────────────────────
 _TOOL_GUIDE = """
@@ -173,6 +300,67 @@ Tool calls happen silently through the system. Your response must ALWAYS be plai
 - RIGHT: Just answer in plain language. The tool call happens invisibly.
 If a message is vague (like "In my garage"), ask a clarifying question in plain language. Never guess and generate a tool call for ambiguous input.
 """
+
+
+# ─── OUTPUT SANITIZER ────────────────────────────────────────────────────────
+_CREATE_PROMPTS: dict[str, str] = {
+    "service_jobs": (
+        "Sure! To create a service job I'll need a few details:\n"
+        "1. Motorcycle model (e.g., Honda Beat 110)\n"
+        "2. Job date (YYYY-MM-DD)\n"
+        "3. Customer name (optional)\n"
+        "4. Notes (optional)\n\n"
+        "Please provide these and I'll get it created for you."
+    ),
+    "customers": (
+        "To add a new customer I'll need:\n"
+        "1. Full name\n"
+        "2. Phone number (optional)\n"
+        "3. Email (optional)\n"
+        "4. Address (optional)\n\n"
+        "Please provide these details."
+    ),
+    "parts": (
+        "To add a new part I'll need:\n"
+        "1. Part name\n"
+        "2. Unit price\n"
+        "3. Brand (optional)\n"
+        "4. Category (optional)\n"
+        "5. Stock quantity (optional)\n\n"
+        "Please provide these details."
+    ),
+    "service_types": (
+        "To create a service type I'll need:\n"
+        "1. Service name\n"
+        "2. Labor cost\n"
+        "3. Description (optional)\n"
+        "4. Estimated duration (optional)\n\n"
+        "Please provide these details."
+    ),
+}
+
+_UPDATE_PROMPT = (
+    "To update a record, please tell me which record you'd like to change "
+    "(you can give me the ID or describe it) and what fields you'd like to update."
+)
+
+
+def _sanitize_output(content: str) -> str:
+    """Last-resort guard: if the LLM leaked raw tool-call JSON, replace with a plain ask."""
+    parsed = _try_parse_text_tool_call(content)
+    if not parsed:
+        return content
+    _, args = parsed
+    action = args.get("action", "")
+    entity = args.get("entity", "")
+    if action == "create":
+        return _CREATE_PROMPTS.get(
+            entity,
+            f"To create a {entity.replace('_', ' ')}, please provide the required details."
+        )
+    if action == "update":
+        return _UPDATE_PROMPT
+    return content
 
 
 def _fix_tool_args(args: dict) -> dict:
@@ -304,8 +492,9 @@ def _system_prompt(role: str, shop_id: int, rag_context: list[str]) -> str:
 
     sections = [
         persona,
+        _MUTATION_GUARD,
+        _role_guardrails(role),
         _DB_SCHEMA,
-        _ROLE_PERMISSIONS,
         _TOOL_GUIDE,
         _CONVERSATIONAL_GUIDE,
         f"## Shop Knowledge Base (uploaded documents)\n{ctx}",
@@ -342,6 +531,21 @@ async def handle_chat(
             parsed = _try_parse_text_tool_call(response.content)
             if parsed:
                 tool_name, tool_args = parsed
+                # Block create/update from text-based tool calls — small LLMs that output
+                # raw JSON may fabricate data; mutations must come from proper tool_calls only.
+                if tool_args.get("action") in ("create", "update"):
+                    # Don't append raw JSON to history — it teaches the model JSON output is OK.
+                    # Instead insert a clean placeholder so the model sees itself asking for info.
+                    messages.append({"role": "assistant", "content": "[I need to ask the user for the required details before proceeding.]"})
+                    messages.append({
+                        "role": "user",
+                        "content": (
+                            "[SYSTEM: Do not output raw JSON or invent data. "
+                            "You must ask the user for the required field values before creating or updating. "
+                            "Reply in plain language asking for the missing details.]"
+                        ),
+                    })
+                    continue
                 fake_id = f"text_tc_{iteration}"
                 messages.append({
                     "role": "assistant",
@@ -354,7 +558,7 @@ async def handle_chat(
                 messages.append({"role": "tool", "tool_call_id": fake_id, "content": result})
                 continue
 
-            answer = response.content or "I'm sorry, I couldn't generate a response."
+            answer = _sanitize_output(response.content or "I'm sorry, I couldn't generate a response.")
             append_message(session_id, "assistant", answer)
             return answer
 
@@ -379,7 +583,7 @@ async def handle_chat(
             messages.append({"role": "tool", "tool_call_id": tc["id"], "content": result})
 
     response = provider.chat(messages, tools=None)
-    answer   = response.content or "I'm sorry, I couldn't generate a response."
+    answer   = _sanitize_output(response.content or "I'm sorry, I couldn't generate a response.")
     append_message(session_id, "assistant", answer)
     return answer
 
@@ -409,6 +613,19 @@ async def handle_chat_stream(
             parsed = _try_parse_text_tool_call(response.content)
             if parsed:
                 tool_name, tool_args = parsed
+                # Block create/update from text-based tool calls — small LLMs that output
+                # raw JSON may fabricate data; mutations must come from proper tool_calls only.
+                if tool_args.get("action") in ("create", "update"):
+                    messages.append({"role": "assistant", "content": "[I need to ask the user for the required details before proceeding.]"})
+                    messages.append({
+                        "role": "user",
+                        "content": (
+                            "[SYSTEM: Do not output raw JSON or invent data. "
+                            "You must ask the user for the required field values before creating or updating. "
+                            "Reply in plain language asking for the missing details.]"
+                        ),
+                    })
+                    continue
                 fake_id = f"text_tc_{iteration}"
                 messages.append({
                     "role": "assistant",
@@ -421,7 +638,7 @@ async def handle_chat_stream(
                 messages.append({"role": "tool", "tool_call_id": fake_id, "content": result})
                 continue
 
-            final_answer = response.content or ""
+            final_answer = _sanitize_output(response.content or "")
             break
 
         messages.append({
@@ -457,4 +674,11 @@ async def handle_chat_stream(
             accumulated += token
             yield token
         if accumulated:
-            append_message(session_id, "assistant", accumulated)
+            clean = _sanitize_output(accumulated)
+            append_message(session_id, "assistant", clean)
+            if clean != accumulated:
+                # Discard already-streamed raw JSON and stream the clean replacement
+                words = clean.split()
+                for i, word in enumerate(words):
+                    yield ("\n\n" if i == 0 else "") + word + (" " if i < len(words) - 1 else "")
+                    await asyncio.sleep(0.015)
