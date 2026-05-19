@@ -82,39 +82,30 @@ export default function JobDetailsPage() {
  }
 
  const getStatusColor = (statusCode: string) => {
- switch (statusCode) {
- case 'pending':
+ if (statusCode === 'pending' || statusCode === 'booked_confirmed')
  return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
- case 'booked_confirmed':
- return 'bg-violet-500/10 text-violet-400 border-violet-500/20';
- case 'in_progress':
+ if (statusCode === 'in_progress' || statusCode === 'work_done')
  return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
- case 'work_done':
- return 'bg-orange-500/10 text-orange-400 border-orange-500/20';
- case 'completed':
+ if (statusCode === 'completed')
  return 'bg-green-500/10 text-green-400 border-green-500/20';
- case 'cancelled':
+ if (statusCode === 'cancelled')
  return 'bg-red-500/10 text-red-400 border-red-500/20';
- default:
  return 'bg-zinc-500/10 text-muted-foreground border-zinc-500/20';
- }
  };
 
  const getStatusIcon = (statusCode: string) => {
- switch (statusCode) {
- case 'pending':
- return Clock;
- case 'booked_confirmed':
- return Users;
- case 'in_progress':
- return Wrench;
- case 'work_done':
- return CheckCircle2;
- case 'completed':
- return CheckCircle2;
- default:
+ if (statusCode === 'pending' || statusCode === 'booked_confirmed') return Clock;
+ if (statusCode === 'in_progress' || statusCode === 'work_done') return Wrench;
+ if (statusCode === 'completed') return CheckCircle2;
  return AlertTriangle;
- }
+ };
+
+ const getStatusLabel = (statusCode: string): string => {
+ if (statusCode === 'pending' || statusCode === 'booked_confirmed') return 'Pending';
+ if (statusCode === 'in_progress' || statusCode === 'work_done') return 'Ongoing';
+ if (statusCode === 'completed') return 'Completed';
+ if (statusCode === 'cancelled') return 'Cancelled';
+ return statusCode;
  };
 
  if (loading || !job) {
@@ -162,7 +153,7 @@ export default function JobDetailsPage() {
  <div className="flex items-center gap-2">
  <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold border ${getStatusColor(job.statusCode)}`}>
  <StatusIcon className="w-4 h-4" />
- {job.status}
+ {getStatusLabel(job.statusCode)}
  </span>
  </div>
  </div>

@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import RatingDialog from '@/features/mechanic/components/RatingDialog';
 
-type StatusFilter = 'All' | 'Pending' | 'Confirmed' | 'Ongoing' | 'Work Done' | 'Completed' | 'Cancelled';
+type StatusFilter = 'All' | 'Pending' | 'Ongoing' | 'Completed' | 'Cancelled';
 
 const fadeUp = (delay = 0) => ({
  initial: { opacity: 0, y: 16 },
@@ -77,30 +77,34 @@ export default function ServiceHistory() {
  return seen;
  }, [services]);
 
+ const getDisplayStatus = (statusCode: string): StatusFilter => {
+ if (statusCode === 'pending' || statusCode === 'booked_confirmed') return 'Pending';
+ if (statusCode === 'in_progress' || statusCode === 'work_done') return 'Ongoing';
+ if (statusCode === 'completed') return 'Completed';
+ if (statusCode === 'cancelled') return 'Cancelled';
+ return 'Pending';
+ };
+
  const filtered = services.filter(s => {
  const q = search.toLowerCase();
  return (
  (s.motorcycleModel.toLowerCase().includes(q) || s.serviceType.toLowerCase().includes(q)) &&
- (statusFilter === 'All' || s.status === statusFilter) &&
+ (statusFilter === 'All' || getDisplayStatus(s.statusCode) === statusFilter) &&
  (vehicleFilter === 'all' || s.vehicleId === vehicleFilter)
  );
  });
 
  const statusCounts = {
  All: services.length,
- Pending: services.filter(s => s.status === 'Pending').length,
- Confirmed: services.filter(s => s.status === 'Confirmed').length,
- Ongoing: services.filter(s => s.status === 'Ongoing').length,
- 'Work Done': services.filter(s => s.status === 'Work Done').length,
- Completed: services.filter(s => s.status === 'Completed').length,
- Cancelled: services.filter(s => s.status === 'Cancelled').length,
+ Pending: services.filter(s => s.statusCode === 'pending' || s.statusCode === 'booked_confirmed').length,
+ Ongoing: services.filter(s => s.statusCode === 'in_progress' || s.statusCode === 'work_done').length,
+ Completed: services.filter(s => s.statusCode === 'completed').length,
+ Cancelled: services.filter(s => s.statusCode === 'cancelled').length,
  };
 
  const STATUS_STYLES = {
  Pending: { bg: 'bg-amber-500/10', text: 'text-amber-500', border: 'border-amber-500/20', icon: Clock },
- Confirmed: { bg: 'bg-violet-500/10', text: 'text-violet-400', border: 'border-violet-500/20', icon: CheckCircle2 },
  Ongoing: { bg: 'bg-blue-500/10', text: 'text-blue-500', border: 'border-blue-500/20', icon: Wrench },
- 'Work Done': { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20', icon: CheckCircle2 },
  Completed: { bg: 'bg-green-500/10', text: 'text-green-500', border: 'border-green-500/20', icon: CheckCircle2 },
  Cancelled: { bg: 'bg-zinc-500/10', text: 'text-zinc-400', border: 'border-zinc-500/20', icon: Ban },
  };
@@ -113,7 +117,7 @@ export default function ServiceHistory() {
  </motion.div>
 
  <motion.div {...fadeUp(0.1)} className="flex gap-2 mb-6 flex-wrap">
- {(['All', 'Pending', 'Confirmed', 'Ongoing', 'Work Done', 'Completed', 'Cancelled'] as StatusFilter[]).map(s => (
+ {(['All', 'Pending', 'Ongoing', 'Completed', 'Cancelled'] as StatusFilter[]).map(s => (
  <button
  key={s}
  onClick={() => setStatusFilter(s)}
@@ -165,8 +169,7 @@ export default function ServiceHistory() {
  </div>
  ) : (
  filtered.map((service, i) => {
- type StatusKey = 'Pending' | 'Confirmed' | 'Ongoing' | 'Work Done' | 'Completed' | 'Cancelled';
- const statusKey = (service.status as StatusKey) in STATUS_STYLES ? (service.status as StatusKey) : 'Pending';
+ const statusKey = getDisplayStatus(service.statusCode);
  const style = STATUS_STYLES[statusKey];
  const StatusIcon = style.icon;
  return (
@@ -215,7 +218,7 @@ export default function ServiceHistory() {
  </div>
  <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-3 shrink-0">
  <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest ${style.bg} ${style.text} border ${style.border}`}>
- {service.status}
+ {statusKey}
  </span>
  <div className="text-right">
  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center justify-end gap-1.5">

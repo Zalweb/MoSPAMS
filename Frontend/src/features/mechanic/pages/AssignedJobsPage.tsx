@@ -79,61 +79,50 @@ export default function AssignedJobsPage() {
  };
 
  const filteredJobs = jobs.filter(job => {
- const matchesSearch = 
+ const matchesSearch =
  job.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
  job.motorcycleModel.toLowerCase().includes(searchQuery.toLowerCase()) ||
  job.serviceType.toLowerCase().includes(searchQuery.toLowerCase());
- 
- const matchesStatus = statusFilter === 'all' || job.statusCode === statusFilter;
- 
+
+ let matchesStatus = statusFilter === 'all';
+ if (!matchesStatus) {
+ if (statusFilter === 'pending') matchesStatus = job.statusCode === 'booked_confirmed' || job.statusCode === 'pending';
+ else if (statusFilter === 'ongoing') matchesStatus = job.statusCode === 'in_progress' || job.statusCode === 'work_done';
+ else matchesStatus = job.statusCode === statusFilter;
+ }
+
  return matchesSearch && matchesStatus;
  });
 
  const getStatusColor = (statusCode: string) => {
- switch (statusCode) {
- case 'booked_confirmed':
- return 'bg-violet-500/10 text-violet-400 border-violet-500/20';
- case 'in_progress':
- return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
- case 'work_done':
+ if (statusCode === 'pending' || statusCode === 'booked_confirmed')
  return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
- case 'completed':
+ if (statusCode === 'in_progress' || statusCode === 'work_done')
+ return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+ if (statusCode === 'completed')
  return 'bg-green-500/10 text-green-400 border-green-500/20';
- default:
  return 'bg-zinc-500/10 text-muted-foreground border-zinc-500/20';
- }
  };
 
  const getStatusIcon = (statusCode: string) => {
- switch (statusCode) {
- case 'booked_confirmed':
- return Users;
- case 'in_progress':
- return Wrench;
- case 'work_done':
- return CheckCircle2;
- case 'completed':
- return CheckCircle2;
- default:
+ if (statusCode === 'pending' || statusCode === 'booked_confirmed') return AlertCircle;
+ if (statusCode === 'in_progress' || statusCode === 'work_done') return Wrench;
+ if (statusCode === 'completed') return CheckCircle2;
  return AlertCircle;
- }
  };
 
  const getStatusLabel = (statusCode: string): string => {
- switch (statusCode) {
- case 'booked_confirmed': return 'Confirmed';
- case 'in_progress': return 'In Progress';
- case 'work_done': return 'Work Done';
- case 'completed': return 'Completed';
- default: return statusCode;
- }
+ if (statusCode === 'pending' || statusCode === 'booked_confirmed') return 'Pending';
+ if (statusCode === 'in_progress' || statusCode === 'work_done') return 'Ongoing';
+ if (statusCode === 'completed') return 'Completed';
+ return statusCode;
  };
 
  const stats = {
  total: jobs.length,
- confirmed: jobs.filter(j => j.statusCode === 'booked_confirmed').length,
- inProgress: jobs.filter(j => j.statusCode === 'in_progress').length,
- workDone: jobs.filter(j => j.statusCode === 'work_done').length,
+ pending: jobs.filter(j => j.statusCode === 'booked_confirmed' || j.statusCode === 'pending').length,
+ ongoing: jobs.filter(j => j.statusCode === 'in_progress' || j.statusCode === 'work_done').length,
+ completed: jobs.filter(j => j.statusCode === 'completed').length,
  };
 
  if (loading) {
@@ -153,9 +142,9 @@ export default function AssignedJobsPage() {
  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
  {[
  { label: 'Total Jobs', value: stats.total, icon: Wrench },
- { label: 'Confirmed', value: stats.confirmed, icon: Users },
- { label: 'In Progress', value: stats.inProgress, icon: Wrench },
- { label: 'Work Done', value: stats.workDone, icon: CheckCircle2 },
+ { label: 'Pending', value: stats.pending, icon: AlertCircle },
+ { label: 'Ongoing', value: stats.ongoing, icon: Wrench },
+ { label: 'Completed', value: stats.completed, icon: CheckCircle2 },
  ].map((stat) => (
  <div
  key={stat.label}
@@ -192,9 +181,9 @@ export default function AssignedJobsPage() {
  className="px-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-zinc-700"
  >
  <option value="all">All Status</option>
- <option value="booked_confirmed">{getStatusLabel('booked_confirmed')}</option>
- <option value="in_progress">{getStatusLabel('in_progress')}</option>
- <option value="work_done">{getStatusLabel('work_done')}</option>
+ <option value="pending">Pending</option>
+ <option value="ongoing">Ongoing</option>
+ <option value="completed">Completed</option>
  </select>
  </div>
 
