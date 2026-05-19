@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
  LayoutDashboard, Package, Wrench, ShoppingCart, BarChart3, Shield, LogOut,
  Home, Calendar, CreditCard, ScrollText, Settings, Bike, Bell, Sun, Moon,
- ChevronLeft, CheckCircle2,
+ ChevronLeft, CheckCircle2, Loader2,
 } from 'lucide-react';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { useTenantBranding, hexToHsl } from '@/shared/contexts/TenantBrandingContext';
@@ -80,21 +80,24 @@ export default function DashboardLayout() {
  }
  const [notifications, setNotifications] = useState<Notification[]>([]);
  const [unreadCount, setUnreadCount] = useState(0);
+ const [notifLoading, setNotifLoading] = useState(false);
 
  const role = normalizeRole(user?.role);
 
  useEffect(() => {
- if (role !== 'Customer' && role !== 'Owner') return;
- const fetch = async () => {
+ if (role !== 'Customer' && role !== 'Owner' && role !== 'Staff' && role !== 'Mechanic') return;
+ const fetchNotifs = async () => {
+ setNotifLoading(true);
  try {
  const ep = role === 'Customer' ? '/api/customer/notifications' : '/api/notifications';
  const data = await apiGet<{ data: Notification[]; unread_count: number }>(ep);
  setNotifications(data.data);
  setUnreadCount(data.unread_count);
  } catch { /* silent */ }
+ finally { setNotifLoading(false); }
  };
- void fetch();
- const iv = setInterval(() => void fetch(), 30000);
+ void fetchNotifs();
+ const iv = setInterval(() => void fetchNotifs(), 10000);
  return () => clearInterval(iv);
  }, [role]);
 
@@ -351,14 +354,16 @@ export default function DashboardLayout() {
  </button>
 
  {/* Notification bell */}
- {(role === 'Customer' || role === 'Owner') && (
+ {(role === 'Customer' || role === 'Owner' || role === 'Staff' || role === 'Mechanic') && (
  <div className="relative">
  <button
  onClick={() => { setNotifOpen(o => !o); setProfileOpen(false); }}
  className="relative p-2 rounded-xl hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
  >
- <Bell className="w-5 h-5" />
- {unreadCount > 0 && (
+ {notifLoading
+ ? <Loader2 className="w-5 h-5 animate-spin" />
+ : <Bell className="w-5 h-5" />}
+ {!notifLoading && unreadCount > 0 && (
  <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
  {unreadCount > 9 ? '9+' : unreadCount}
  </span>
