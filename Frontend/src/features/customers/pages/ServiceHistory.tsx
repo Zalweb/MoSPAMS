@@ -77,7 +77,7 @@ export default function ServiceHistory() {
  return seen;
  }, [services]);
 
- const getDisplayStatus = (statusCode: string): StatusFilter => {
+ const getDisplayStatus = (statusCode: string): Exclude<StatusFilter, 'All'> => {
  if (statusCode === 'pending' || statusCode === 'booked_confirmed') return 'Pending';
  if (statusCode === 'in_progress' || statusCode === 'work_done') return 'Ongoing';
  if (statusCode === 'completed') return 'Completed';
