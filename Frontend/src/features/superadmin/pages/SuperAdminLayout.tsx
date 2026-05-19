@@ -181,7 +181,7 @@ export default function SuperAdminLayout() {
  </div>
 
  {/* Nav items */}
- <nav className="flex-1 py-3 -mr-5 pr-5">
+ <nav className="flex-1 py-3 -mr-5 pr-5 overflow-y-auto no-scrollbar">
  {NAV_SECTIONS.map((group, idx) => (
  <div key={idx} className={idx > 0 ? 'mt-1' : ''}>
  {idx > 0 && (
