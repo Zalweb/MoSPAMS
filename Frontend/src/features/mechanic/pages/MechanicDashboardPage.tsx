@@ -139,7 +139,7 @@ export default function MechanicDashboardPage() {
  }
  };
  void fetchStats(true);
- const intervalId = window.setInterval(() => void fetchStats(), 3000);
+ const intervalId = window.setInterval(() => void fetchStats(), 30000);
  return () => window.clearInterval(intervalId);
  }, []);
 
